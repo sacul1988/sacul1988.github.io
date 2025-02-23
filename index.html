@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namen Verwaltung</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+        }
+
+        .list-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 1rem;
+            flex-grow: 1;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            line-height: 1.2;
+            height: 36px;
+        }
+
+        button:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .rename-btn {
+            background: #6c757d;
+        }
+
+        .rename-btn:hover {
+            background: #5a6268;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin: 0 0 1rem 0;
+        }
+
+        #currentDate {
+            color: #7f8c8d;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        li:hover {
+            transform: translateX(3px);
+            background: #f1f3f5;
+        }
+
+        .counter {
+            margin-left: auto;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            min-width: 140px;
+            text-align: right;
+            margin-right: 16px;
+        }
+
+        .deleteBtn {
+            background: #dc3545;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+
+        .deleteBtn:hover {
+            background: #c82333;
+        }
+
+        .increaseBtn, 
+        .decreaseBtn {
+            padding: 4px 10px;
+            font-size: 0.85rem;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        .entryBtn,
+        .overview-btn {
+            padding: 4px 8px;
+            font-size: 0.85rem;
+        }
+
+        .increaseBtn { background: #28a745; }
+        .decreaseBtn { background: #ffc107; color: black; }
+        .entryBtn { background: #17a2b8; }
+
+        .menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            padding: 16px;
+            z-index: 100;
+            display: none;
+            min-width: 250px;
+        }
+
+        .menu button {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin: 8px 0;
+            padding: 8px;
+            background: none;
+            color: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        .menu button:hover {
+            background: #f8f9fa;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 99;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+        }
+
+        .overview-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            z-index: 1001;
+            width: 90%;
+            max-width: 500px;
+            display: none;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .overview-window h3 {
+            margin: 0 0 1.5rem 0;
+            color: #2c3e50;
+            padding-right: 30px;
+        }
+
+        .overview-window .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 8px;
+            background: #dc3545;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overview-window .close-btn:hover {
+            background: #c82333;
+        }
+
+        .overview-window h4 {
+            color: #007bff;
+            margin: 1.5rem 0 0.5rem 0;
+            font-size: 0.95rem;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        #overviewList {
+            overflow: visible;
+        }
+
+        #overviewList li {
+            background: none;
+            padding: 8px 0;
+            margin: 0;
+            border-radius: 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        #overviewList li:last-child {
+            border-bottom: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1002;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            z-index: 1003;
+            text-align: center;
+            display: none;
+        }
+
+        .modal button {
+            margin: 10px;
+            min-width: 80px;
+        }
+
+        .confirm { background: #28a745; }
+        .cancel { background: #6c757d; }
+
+        .marked {
+            background: #fff3cd !important;
+            border-left: 4px solid #ffc107;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+                border-radius: 0;
+            }
+            
+            button {
+                width: 100%;
+                padding: 12px;
+            }
+            
+            .list-selector {
+                flex-direction: column;
+            }
+            
+            .overview-window {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="list-selector">
+            <select id="listSelector" onchange="switchList()"></select>
+            <button onclick="addNewList()">Neue Liste</button>
+            <button class="rename-btn" onclick="renameCurrentList()">Liste umbenennen</button>
+        </div>
+        <h2 id="listTitle">Namen eintragen und löschen</h2>
+        <p id="currentDate"></p>
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="Name eingeben">
+            <button onclick="addName()">Hinzufügen</button>
+        </div>
+        <ul id="nameList"></ul>
+    </div>
+
+    <!-- Overlay für das Übersichtsfenster -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Übersichtsfenster -->
+    <div class="overview-window" id="overviewWindow">
+        <button class="close-btn" onclick="closeOverview()">X</button>
+        <h3>Übersicht</h3>
+        <ul id="overviewList"></ul>
+    </div>
+
+    <!-- Benutzerdefiniertes Modal für Bestätigungen -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="modal">
+        <p id="modalMessage"></p>
+        <button class="confirm" onclick="handleConfirm(true)">Bestätigen</button>
+        <button class="cancel" onclick="handleConfirm(false)">Abbrechen</button>
+    </div>
+
+    <script>
+        let currentListId = "list1"; // Aktuelle Liste
+        let lists = {}; // Speichert alle Listen
+
+        // Initialisiere die erste Liste
+        lists["list1"] = {
+            name: "Liste 1", // Standardname für die erste Liste
+            nameOrder: JSON.parse(localStorage.getItem("list1_nameOrder")) || [],
+            data: {}
+        };
+        updateListSelector();
+        updateListTitle(); // Titel der Liste aktualisieren
+
+        // Funktion zum Aktualisieren des Listen-Auswahlmenüs
+        function updateListSelector() {
+            let selector = document.getElementById("listSelector");
+            selector.innerHTML = "";
+            for (let listId in lists) {
+                let option = document.createElement("option");
+                option.value = listId;
+                option.textContent = lists[listId].name; // Zeige den individuellen Namen der Liste an
+                if (listId === currentListId) option.selected = true;
+                selector.appendChild(option);
+            }
+        }
+
+        // Funktion zum Aktualisieren des Listentitels
+        function updateListTitle() {
+            document.getElementById("listTitle").textContent = lists[currentListId].name;
+        }
+
+        // Funktion zum Wechseln der Liste
+        function switchList() {
+            let selector = document.getElementById("listSelector");
+            currentListId = selector.value;
+            loadSavedData();
+            updateListTitle(); // Titel der Liste aktualisieren
+        }
+
+        // Funktion zum Hinzufügen einer neuen Liste
+        function addNewList() {
+            let newListId = `list${Object.keys(lists).length + 1}`;
+            lists[newListId] = {
+                name: `Liste ${Object.keys(lists).length + 1}`, // Standardname für neue Listen
+                nameOrder: [],
+                data: {}
+            };
+            currentListId = newListId;
+            updateListSelector();
+            updateListTitle(); // Titel der Liste aktualisieren
+            loadSavedData();
+        }
+
+        // Funktion zum Umbenennen der aktuellen Liste
+        function renameCurrentList() {
+            let newName = prompt("Geben Sie einen neuen Namen für die Liste ein:", lists[currentListId].name);
+            if (newName !== null && newName.trim() !== "") {
+                lists[currentListId].name = newName.trim();
+                updateListSelector();
+                updateListTitle(); // Titel der Liste aktualisieren
+                saveListData();
+            }
+        }
+
+        // Funktion zum Aktualisieren des Datums
+        function updateDate() {
+            let today = new Date();
+            let dateString = today.toLocaleDateString("de-DE", {
+                weekday: "long", year: "numeric", month: "long", day: "numeric"
+            });
+            document.getElementById("currentDate").textContent = "Heute ist " + dateString;
+            return today.toLocaleDateString();
+        }
+
+        // Funktion zum Hinzufügen eines Namens
+        function addName() {
+            let nameInput = document.getElementById("nameInput");
+            let name = nameInput.value.trim();
+            if (name === "") return;
+
+            // Überprüfen, ob der Name bereits existiert
+            if (lists[currentListId].data[name]) {
+                alert("Dieser Name existiert bereits!");
+                return;
+            }
+
+            // Zähler-Objekte für den Namen erstellen
+            let counters = {
+                hausaufgaben: 0,
+                material: 0,
+                lastUpdated: "",
+                dates: [],
+                previousHausaufgaben: 0
+            };
+
+            // Name und Zähler in der aktuellen Liste speichern
+            lists[currentListId].data[name] = counters;
+            lists[currentListId].nameOrder.push(name);
+
+            // Name zur Liste hinzufügen
+            createListItem(name, counters);
+            nameInput.value = "";
+
+            // Daten im localStorage speichern
+            saveListData();
+        }
+
+        // Funktion zum Erstellen eines Listenelements
+        function createListItem(name, counters) {
+            let li = document.createElement("li");
+            li.textContent = name;
+
+            // Zähler anzeigen
+            let counterDisplay = document.createElement("span");
+            counterDisplay.classList.add("counter");
+            updateCounterDisplay(counterDisplay, counters);
+            li.appendChild(counterDisplay);
+
+            // Löschen-Button
+            let deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "X";
+            deleteBtn.classList.add("deleteBtn");
+            deleteBtn.onclick = function (event) {
+                event.stopPropagation();
+                showModal("Soll der Name wirklich gelöscht werden?", () => {
+                    delete lists[currentListId].data[name]; // Eintrag aus der Liste entfernen
+                    lists[currentListId].nameOrder = lists[currentListId].nameOrder.filter(n => n !== name);
+                    li.remove();
+                    saveListData();
+                });
+            };
+
+            // Erhöhen-Button
+            let increaseBtn = document.createElement("button");
+            increaseBtn.textContent = "+";
+            increaseBtn.classList.add("increaseBtn");
+            increaseBtn.onclick = function (event) {
+                event.stopPropagation();
+                toggleMenu(increaseMenu);
+            };
+
+            // Verringern-Button
+            let decreaseBtn = document.createElement("button");
+            decreaseBtn.textContent = "-";
+            decreaseBtn.classList.add("decreaseBtn");
+            decreaseBtn.onclick = function (event) {
+                event.stopPropagation();
+                toggleMenu(decreaseMenu);
+            };
+
+            // Eintrag-Button
+            let entryBtn = document.createElement("button");
+            entryBtn.textContent = "Eintrag";
+            entryBtn.classList.add("entryBtn");
+            entryBtn.onclick = function (event) {
+                event.stopPropagation();
+                toggleMenu(entryMenu);
+            };
+
+            // Übersicht-Button
+            let overviewBtn = document.createElement("button");
+            overviewBtn.textContent = "Übersicht";
+            overviewBtn.classList.add("overview-btn");
+            overviewBtn.onclick = function (event) {
+                event.stopPropagation();
+                showOverview(name, counters);
+            };
+
+            // Menü zum Erhöhen
+            let increaseMenu = document.createElement("div");
+            increaseMenu.classList.add("menu");
+            let increaseOptions = ["Hausaufgaben vergessen (+1)", "Hausaufgaben teilweise vergessen (+0.5)", "Materialien vergessen (+1)"];
+            increaseOptions.forEach(option => {
+                let btn = document.createElement("button");
+                btn.textContent = option;
+                btn.onclick = function (event) {
+                    event.stopPropagation();
+                    counters.previousHausaufgaben = counters.hausaufgaben;
+
+                    if (option.includes("Hausaufgaben vergessen")) {
+                        counters.hausaufgaben += 1;
+                    } else if (option.includes("Hausaufgaben teilweise vergessen")) {
+                        counters.hausaufgaben += 0.5;
+                    } else if (option.includes("Materialien vergessen")) {
+                        counters.material += 1;
+                    }
+
+                    let currentDate = updateDate();
+                    counters.lastUpdated = currentDate;
+                    counters.dates.push({ type: option, date: currentDate });
+
+                    lists[currentListId].data[name] = counters;
+                    updateCounterDisplay(counterDisplay, counters);
+                    increaseMenu.style.display = "none";
+                    saveListData();
+
+                    // Farbliche Markierung hinzufügen, wenn der Zähler erhöht wird
+                    if (counters.hausaufgaben > counters.previousHausaufgaben) {
+                        li.classList.add("marked");
+                    }
+                };
+                increaseMenu.appendChild(btn);
+            });
+
+            // Menü zum Verringern
+            let decreaseMenu = document.createElement("div");
+            decreaseMenu.classList.add("menu");
+            let decreaseOptions = ["Hausaufgaben vergessen (-1)", "Hausaufgaben teilweise vergessen (-0.5)", "Materialien vergessen (-1)"];
+            decreaseOptions.forEach(option => {
+                let btn = document.createElement("button");
+                btn.textContent = option;
+                btn.onclick = function (event) {
+                    event.stopPropagation();
+                    showModal("Möchten Sie den Zähler wirklich verringern?", () => {
+                        if (option.includes("Hausaufgaben vergessen")) {
+                            counters.hausaufgaben = Math.max(0, counters.hausaufgaben - 1);
+                        } else if (option.includes("Hausaufgaben teilweise vergessen")) {
+                            counters.hausaufgaben = Math.max(0, counters.hausaufgaben - 0.5);
+                        } else if (option.includes("Materialien vergessen")) {
+                            counters.material = Math.max(0, counters.material - 1);
+                        }
+
+                        let currentDate = updateDate();
+                        counters.lastUpdated = currentDate;
+                        counters.dates = counters.dates.filter(entry => entry.type !== option.replace("(-", "(+").replace("(-0.5)", "(+0.5)")); // Entferne den entsprechenden Eintrag
+                        lists[currentListId].data[name] = counters;
+                        updateCounterDisplay(counterDisplay, counters);
+                        saveListData();
+
+                        // Farbliche Markierung entfernen, wenn der Zähler zurückgesetzt wird
+                        if (counters.hausaufgaben === counters.previousHausaufgaben) {
+                            li.classList.remove("marked");
+                        }
+                    });
+                };
+                decreaseMenu.appendChild(btn);
+            });
+
+            // Menü für Einträge
+            let entryMenu = document.createElement("div");
+            entryMenu.classList.add("menu");
+            let entryOptions = ["Schulplaner: Hausaufgaben", "Schulplaner: Material"];
+            entryOptions.forEach(option => {
+                let btn = document.createElement("button");
+                btn.textContent = option;
+                btn.onclick = function (event) {
+                    event.stopPropagation();
+                    let eventType = option.split(": ")[1]; // Extrahiere den Ereignistyp (z. B. "Hausaufgaben" oder "Material")
+                    createEntry(name, counters, eventType);
+                    entryMenu.style.display = "none";
+                };
+                entryMenu.appendChild(btn);
+            });
+
+            li.appendChild(increaseBtn);
+            li.appendChild(decreaseBtn);
+            li.appendChild(entryBtn);
+            li.appendChild(overviewBtn);
+            li.appendChild(deleteBtn);
+            li.appendChild(increaseMenu);
+            li.appendChild(decreaseMenu);
+            li.appendChild(entryMenu);
+            document.getElementById("nameList").appendChild(li);
+
+            updateMarking(li, counters);
+        }
+
+        // Funktion zum Erstellen eines Eintrags
+        function createEntry(name, counters, eventType) {
+            let currentDate = updateDate();
+            let entryText = `Schulplaner: ${eventType}: ${currentDate}`;
+            counters.dates.push({ type: "Eintrag", eventType: eventType, date: currentDate, text: entryText });
+            lists[currentListId].data[name] = counters;
+            saveListData();
+        }
+
+        // Funktion zur Aktualisierung der Zähler-Anzeige
+        function updateCounterDisplay(counterDisplay, counters) {
+            counterDisplay.textContent = `Hausaufgaben: ${counters.hausaufgaben}x, Material: ${counters.material}x`;
+        }
+
+        // Funktion zur Aktualisierung der farblichen Markierung
+        function updateMarking(li, counters) {
+            let currentDate = updateDate();
+            if (counters.lastUpdated === currentDate && counters.hausaufgaben > 0) {
+                li.classList.add("marked");
+            } else {
+                li.classList.remove("marked");
+            }
+        }
+
+        // Funktion zum Anzeigen/Verstecken eines Menüs
+        function toggleMenu(menu) {
+            let allMenus = document.querySelectorAll(".menu");
+            allMenus.forEach(m => { if (m !== menu) m.style.display = "none"; });
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        // Funktion zum Anzeigen der Übersicht
+        function showOverview(name, counters) {
+            let overviewList = document.getElementById("overviewList");
+            overviewList.innerHTML = "";
+
+            // Gruppiere Einträge nach ihren Kategorien
+            let groupedEntries = {
+                Hausaufgaben: [],
+                Material: [],
+                Schulplaner: []
+            };
+
+            counters.dates.forEach(entry => {
+                if (entry.type.includes("Hausaufgaben vergessen")) {
+                    groupedEntries.Hausaufgaben.push(entry);
+                } else if (entry.type.includes("Hausaufgaben teilweise vergessen")) {
+                    groupedEntries.Hausaufgaben.push(entry);
+                } else if (entry.type.includes("Materialien vergessen")) {
+                    groupedEntries.Material.push(entry);
+                } else if (entry.eventType === "Hausaufgaben") {
+                    groupedEntries.Schulplaner.push(entry);
+                } else if (entry.eventType === "Material") {
+                    groupedEntries.Schulplaner.push(entry);
+                }
+            });
+
+            // Zeige die gruppierten Einträge an
+            for (let category in groupedEntries) {
+                if (groupedEntries[category].length > 0) {
+                    let heading = document.createElement("h4");
+                    heading.textContent = category;
+                    overviewList.appendChild(heading);
+
+                    groupedEntries[category].forEach(entry => {
+                        let li = document.createElement("li");
+                        li.textContent = entry.text || `${entry.type} am ${entry.date}`;
+
+                        // Füge einen Lösch-Button nur für Schulplaner-Einträge hinzu
+                        if (category === "Schulplaner") {
+                            let deleteBtn = document.createElement("button");
+                            deleteBtn.textContent = "X";
+                            deleteBtn.classList.add("deleteBtn");
+                            deleteBtn.onclick = function (event) {
+                                event.stopPropagation();
+                                showModal("Soll der Eintrag wirklich gelöscht werden?", () => {
+                                    counters.dates = counters.dates.filter(e => e !== entry); // Eintrag entfernen
+                                    lists[currentListId].data[name] = counters;
+                                    saveListData();
+                                    showOverview(name, counters); // Übersicht aktualisieren
+                                });
+                            };
+                            li.appendChild(deleteBtn);
+                        }
+
+                        overviewList.appendChild(li);
+                    });
+                }
+            }
+
+            document.getElementById("overviewWindow").style.display = "block";
+            document.getElementById("overlay").style.display = "block";
+        }
+
+        // Funktion zum Schließen der Übersicht
+        function closeOverview() {
+            document.getElementById("overviewWindow").style.display = "none";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        // Funktion zum Anzeigen des benutzerdefinierten Modals
+        function showModal(message, callback) {
+            document.getElementById("modalMessage").textContent = message;
+            document.getElementById("modalOverlay").style.display = "block";
+            document.getElementById("modal").style.display = "block";
+
+            modalCallback = callback;
+        }
+
+        // Funktion zum Schließen des Modals
+        function closeModal() {
+            document.getElementById("modalOverlay").style.display = "none";
+            document.getElementById("modal").style.display = "none";
+        }
+
+        // Funktion zur Behandlung der Bestätigung
+        let modalCallback = null;
+        function handleConfirm(confirmed) {
+            closeModal();
+            if (confirmed && modalCallback) {
+                modalCallback();
+            }
+        }
+
+        // Funktion zum Laden der gespeicherten Daten
+        function loadSavedData() {
+            let nameList = document.getElementById("nameList");
+            nameList.innerHTML = "";
+
+            lists[currentListId].nameOrder.forEach(name => {
+                let counters = lists[currentListId].data[name];
+                if (counters) {
+                    createListItem(name, counters);
+                }
+            });
+        }
+
+        // Funktion zum Speichern der Listen-Daten im localStorage
+        function saveListData() {
+            localStorage.setItem(`${currentListId}_name`, lists[currentListId].name); // Speichere den Listennamen
+            localStorage.setItem(`${currentListId}_nameOrder`, JSON.stringify(lists[currentListId].nameOrder));
+            localStorage.setItem(`${currentListId}_data`, JSON.stringify(lists[currentListId].data));
+        }
+
+        // Beim Laden der Seite das Datum aktualisieren und gespeicherte Daten laden
+        updateDate();
+        loadSavedData();
+
+        // Menüs schließen, wenn außerhalb geklickt wird
+        document.addEventListener("click", function(event) {
+            document.querySelectorAll(".menu").forEach(menu => {
+                if (!menu.parentElement.contains(event.target)) {
+                    menu.style.display = "none";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
