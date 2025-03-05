@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>19</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Realschule Lage</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chalkboard-teacher"></i> Realschule Lage</h1>
+        </header>
+        
+        <!-- Pfadnavigation -->
+        <div class="breadcrumb">
+            <a href="#" onclick="showPage('home')"><i class="fas fa-home"></i> Startseite</a>
+            <span class="breadcrumb-active" id="breadcrumb-active"></span>
+        </div>
+        
+        <!-- Seitencontainer -->
+        <div id="pages-container">
+            <!-- Startseite -->
+            <div id="home-page" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Klassen</h2>
+                        <button class="btn btn-primary btn-icon" onclick="showModal('add-class-modal')">
+                            <i class="fas fa-plus"></i> Klasse hinzufügen
+                        </button>
+                    </div>
+                    
+                    <div id="classes-grid" class="classes-grid">
+                        <!-- Hier werden die Klassen dynamisch eingefügt -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Klassendetail-Seite -->
+            <div id="class-page" class="page" style="display: none;">
+                <!-- Modulnavigation -->
+                <div class="module-nav" id="module-nav">
+                    <div class="module-nav-item" data-module="schueler">
+                        <button class="btn btn-light" onclick="showModule('schueler')">
+                            <i class="fas fa-user-graduate"></i>
+                        </button>
+                    </div>
+                    <div class="module-nav-item" data-module="hausaufgaben">
+                        <button class="btn btn-light" onclick="showModule('hausaufgaben')">
+                            <i class="fas fa-book"></i>
+                        </button>
+                    </div>
+                    <div class="module-nav-item" data-module="noten">
+                        <button class="btn btn-light" onclick="showModule('noten')">
+                            <i class="fas fa-chart-line"></i>
+                        </button>
+                    </div>
+                    <div class="module-nav-item" data-module="uebersicht">
+                        <button class="btn btn-light" onclick="showModule('uebersicht')">
+                            <i class="fas fa-clipboard-list"></i>
+                        </button>
+                    </div>
+                    <div class="module-nav-item" data-module="sitzplan">
+                        <button class="btn btn-light" onclick="showModule('sitzplan')">
+                            <i class="fas fa-th"></i>
+                        </button>
+                    </div>
+                    <div class="module-nav-item" data-module="listen">
+                        <button class="btn btn-light" onclick="showModule('listen')">
+                            <i class="fas fa-tasks"></i>
+                        </button>
+                    </div>
+                    <div class="module-nav-item" data-module="zaehlen">
+                        <button class="btn btn-light" onclick="showModule('zaehlen')">
+                            <i class="fas fa-user-check"></i>
+                        </button>
+                    </div>
+                    <div class="module-nav-item" data-module="klassennotizen">
+                        <button class="btn btn-light" onclick="showModule('klassennotizen')">
+                            <i class="fas fa-sticky-note"></i>
+                        </button>
+                    </div>
+                    <div class="module-nav-item" data-module="punkteverteilung">
+                        <button class="btn btn-light" onclick="showModule('punkteverteilung')">
+                            <i class="fas fa-calculator"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Container für Module -->
+                <div id="modules-container">
+                    <!-- Schüler Modul -->
+                    <div id="schueler-module" class="module">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Schülerliste</h2>
+                            </div>
+                            
+                            <div class="student-list-container">
+                                <table class="student-list-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">Nr.</th>
+                                            <th>Name</th>
+                                            <th style="width: 100px; text-align: right;">Aktionen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="students-list-table">
+                                        <!-- Hier werden die Schüler dynamisch eingefügt -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Massenimport -->
+                            <div class="card" style="margin-top: 20px;">
+                                <div class="card-header">
+                                    <h2>Schüler hinzufügen</h2>
+                                </div>
+                                <div class="import-container">
+                                    <p>Füge Namen ein (einen Namen pro Zeile):</p>
+                                    <textarea id="import-names" class="form-control" rows="5" placeholder="Max Mustermann&#10;Erika Musterfrau&#10;..."></textarea>
+                                    <button class="btn btn-primary btn-icon" style="margin-top: 10px;" onclick="importStudents()">
+                                        <i class="fas fa-file-import"></i> Hinzufügen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hausaufgaben und Material Modul -->
+                    <div id="hausaufgaben-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Hausaufgaben und Material</h2>
+                                <div>
+                                    <button class="btn btn-secondary btn-icon" id="sort-hw-btn" onclick="toggleSortHomework()">
+                                        <i class="fas fa-sort-alpha-down"></i> Alphabetisch sortieren
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <ul class="hw-list" id="hw-list">
+                                <!-- Hier werden die Schüler-Zähler dynamisch eingefügt -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Noten Modul -->
+                    <div id="noten-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Notenverwaltung</h2>
+                                <button class="btn btn-secondary btn-icon" onclick="toggleGradeTable()">
+                                    <i class="fas fa-table"></i> Notentabelle
+                                </button>
+                            </div>
+                            
+                            <!-- Notenumrechnungstabelle -->
+                            <table class="grade-table" id="gradeTable">
+                                <thead>
+                                    <tr>
+                                        <th>Note</th>
+                                        <th>Dezimalwert</th>
+                                        <th>Bedeutung</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1</td><td>1.0</td><td>Sehr gut</td></tr>
+                                    <tr><td>1-</td><td>1.33</td><td>Sehr gut minus</td></tr>
+                                    <tr><td>2+</td><td>1.66</td><td>Gut plus</td></tr>
+                                    <tr><td>2</td><td>2.0</td><td>Gut</td></tr>
+                                    <tr><td>2-</td><td>2.33</td><td>Gut minus</td></tr>
+                                    <tr><td>3+</td><td>2.66</td><td>Befriedigend plus</td></tr>
+                                    <tr><td>3</td><td>3.0</td><td>Befriedigend</td></tr>
+                                    <tr><td>3-</td><td>3.33</td><td>Befriedigend minus</td></tr>
+                                    <tr><td>4+</td><td>3.66</td><td>Ausreichend plus</td></tr>
+                                    <tr><td>4</td><td>4.0</td><td>Ausreichend</td></tr>
+                                    <tr><td>4-</td><td>4.33</td><td>Ausreichend minus</td></tr>
+                                    <tr><td>5+</td><td>4.66</td><td>Mangelhaft plus</td></tr>
+                                    <tr><td>5</td><td>5.0</td><td>Mangelhaft</td></tr>
+                                    <tr><td>5-</td><td>5.33</td><td>Mangelhaft minus</td></tr>
+                                    <tr><td>6+</td><td>5.66</td><td>Ungenügend plus</td></tr>
+                                    <tr><td>6</td><td>6.0</td><td>Ungenügend</td></tr>
+                                </tbody>
+                            </table>
+
+                            <div class="form-group">
+                                <label>Gewichtung mündlich: <span id="oralWeightValue">50</span>%</label>
+                                <div class="weight-buttons">
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(0)">0%</button>
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(10)">10%</button>
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(20)">20%</button>
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(30)">30%</button>
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(40)">40%</button>
+                                    <button class="btn btn-sm weight-btn active-weight" onclick="setWeight(50)">50%</button>
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(60)">60%</button>
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(70)">70%</button>
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(80)">80%</button>
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(90)">90%</button>
+                                    <button class="btn btn-sm weight-btn" onclick="setWeight(100)">100%</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Umgeordnete Sektion: Zuerst Schülerliste, dann Projekt-Statistiken -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-list"></i> Schülerliste</h2>
+                                <button class="btn btn-sm btn-secondary btn-icon" id="sort-students-btn">
+                                    <i class="fas fa-sort-alpha-down"></i> Alphabetisch sortieren
+                                </button>
+                            </div>
+                            <div class="student-list" id="students-list">
+                                <!-- Hier werden die Schüler dynamisch eingefügt -->
+                            </div>
+                        </div>
+                        
+                        <!-- Projekt-Statistiken Card -->
+                        <div class="card" id="project-statistics-card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-chart-bar"></i> Projekt-Statistiken</h2>
+                                <div>
+                                    <select id="project-number-select" class="form-control" onchange="updateProjectStatistics()">
+                                        <option value="">Alle Projekte</option>
+                                        <!-- Projekt-Optionen werden dynamisch hinzugefügt -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="project-statistics-content">
+                                <div class="project-average">
+                                    <h3>Durchschnittsnote: <span id="project-average-value">-</span></h3>
+                                </div>
+                                <div class="project-distribution">
+                                    <h3>Notenverteilung:</h3>
+                                    <div id="project-distribution-graph" class="distribution-graph"></div>
+                                </div>
+                                <div id="project-stats-empty" class="empty-state" style="display: none;">
+                                    <i class="fas fa-chart-line"></i>
+                                    <p>Keine Noten für dieses Projekt vorhanden</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Übersicht Modul -->
+                    <div id="uebersicht-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Klassenübersicht</h2>
+                                <div>
+                                    <button class="btn btn-secondary btn-icon" id="sort-overview-btn" onclick="toggleSortOverview()">
+                                        <i class="fas fa-sort-alpha-down"></i> Alphabetisch sortieren
+                                    </button>
+                                    <button class="btn btn-primary btn-icon" onclick="exportOverviewAsText()">
+                                        <i class="fas fa-file-alt"></i> Exportieren als Text
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="overview-table" id="overview-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Schüler</th>
+                                            <th>Mündlich</th>
+                                            <th data-column="projekte">Projekte</th>
+                                            <th>Berechnete Note</th>
+                                            <th>Hausaufgaben</th>
+                                            <th>Material</th>
+                                            <th>Individuelle Note</th>
+                                            <th>Aktionen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="overview-table-body">
+                                        <!-- Hier werden die Übersichtsdaten dynamisch eingefügt -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div id="overview-empty-state" class="empty-state" style="display: none;">
+                                <i class="fas fa-user-graduate"></i>
+                                <p>Keine Schüler in dieser Klasse</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sitzplan Modul -->
+                    <div id="sitzplan-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Sitzplan</h2>
+                                <button class="btn btn-primary btn-icon" onclick="document.getElementById('seating-chart-file').click()">
+                                    <i class="fas fa-image"></i> Foto von Sitzplan hinzufügen
+                                </button>
+                            </div>
+                            
+                            <input type="file" id="seating-chart-file" accept="image/*" style="display: none;" onchange="uploadSeatingChart(event)">
+                            
+                            <div class="seating-chart" id="seating-chart">
+                                <!-- Hier wird der Sitzplan angezeigt -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Listen Modul -->
+                    <div id="listen-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Listen</h2>
+                                <div>
+                                    <button class="btn btn-secondary btn-icon" id="sort-lists-btn" onclick="toggleSortLists()">
+                                        <i class="fas fa-sort-alpha-down"></i> Alphabetisch sortieren
+                                    </button>
+                                    <button class="btn btn-primary btn-icon" onclick="showModal('add-list-modal')">
+                                        <i class="fas fa-plus"></i> Neue Liste
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="tab-nav" id="lists-tab-nav">
+                                <!-- Hier werden die Listenreiter dynamisch eingefügt -->
+                            </div>
+                            
+                            <div id="lists-container">
+                                <!-- Hier werden die Listen dynamisch eingefügt -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Zählen Modul -->
+                    <div id="zaehlen-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Anwesenheit zählen</h2>
+                                <div>
+                                    <button class="btn btn-secondary btn-icon" id="sort-attendance-btn" onclick="toggleSortAttendance()">
+                                        <i class="fas fa-sort-alpha-down"></i> Alphabetisch sortieren
+                                    </button>
+                                    <button class="btn btn-warning btn-icon" onclick="quickResetAttendance()">
+                                        <i class="fas fa-redo"></i> Schnelles Zurücksetzen
+                                    </button>
+                                    <button class="btn btn-danger btn-icon" onclick="fullResetAttendance()">
+                                        <i class="fas fa-redo-alt"></i> Vollständiges Zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="counter-info">
+                                <p>Anwesend: <strong id="present-count">0</strong> von <strong id="total-count">0</strong> Schülern</p>
+                            </div>
+                            
+                            <ul class="attendance-list" id="attendance-list">
+                                <!-- Hier wird die Anwesenheitsliste dynamisch eingefügt -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Klassennotizen Modul -->
+                    <div id="klassennotizen-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Klassennotizen</h2>
+                                <button class="btn btn-primary btn-icon" onclick="addClassNote()">
+                                    <i class="fas fa-plus"></i> Notiz hinzufügen
+                                </button>
+                            </div>
+                            
+                            <div id="class-notes-container">
+                                <!-- Klassennotizen werden hier dynamisch eingefügt -->
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-header">
+                                <h2>Bilder & Dokumente</h2>
+                                <button class="btn btn-primary btn-icon" onclick="document.getElementById('class-attachment-file').click()">
+                                    <i class="fas fa-image"></i> Bild hochladen
+                                </button>
+                            </div>
+                            
+                            <input type="file" id="class-attachment-file" accept="image/*" style="display: none;" onchange="uploadClassAttachment(event)">
+                            
+                            <div id="class-attachments-container" class="attachments-container">
+                                <!-- Hier werden die hochgeladenen Bilder angezeigt -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Punkteverteilung Modul -->
+                    <div id="punkteverteilung-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-calculator"></i> Punkteverteilung für Klassenarbeiten</h2>
+                            </div>
+                            
+                            <div class="templates-section" id="templatesContainer">
+                                <h2>Gespeicherte Vorlagen</h2>
+                                <!-- Hier werden die gespeicherten Vorlagen dynamisch angezeigt -->
+                            </div>
+                            
+                            <div class="main-container">
+                                <div class="input-section">
+                                    <div class="input-group">
+                                        <label for="totalPoints">Gesamtpunktzahl:</label>
+                                        <input type="number" id="totalPoints" min="1" value="100" class="form-control">
+                                    </div>
+                                    
+                                    <div class="button-group">
+                                        <button 
+                                            id="btnStandard" 
+                                            class="btn btn-primary" 
+                                            onclick="selectPreset('standard')">
+                                            Standard
+                                        </button>
+                                        <button 
+                                            id="btnCustom" 
+                                            class="btn btn-secondary" 
+                                            onclick="selectPreset('custom')">
+                                            Benutzerdefiniert
+                                        </button>
+                                    </div>
+                                    
+                                    <h3>Prozentränge für Notengrenzen:</h3>
+                                    
+                                    <div id="gradeThresholdInputs">
+                                        <!-- Grade threshold inputs will be dynamically generated -->
+                                    </div>
+                                    
+                                    <div class="input-group">
+                                        <label for="templateName">Vorlage speichern als:</label>
+                                        <input type="text" id="templateName" placeholder="Name der Vorlage" class="form-control">
+                                    </div>
+                                    
+                                    <div class="button-group">
+                                        <button class="btn btn-primary" onclick="calculate()">Berechnen</button>
+                                        <button class="btn btn-secondary" onclick="saveTemplate()">Speichern</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="result-section">
+                                    <h2>Punkteverteilung</h2>
+                                    <div id="resultTable"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modals -->
+        <div id="modal-container" style="display: none;">
+            <!-- Klasse hinzufügen Modal -->
+            <div id="add-class-modal" class="modal" style="display: none;">
+                <h2>Neue Klasse hinzufügen</h2>
+                <div class="form-group">
+                    <label for="new-class-name">Klassenname</label>
+                    <input type="text" id="new-class-name" class="form-control" placeholder="z.B. 9a, 10b, Englisch GK12">
+                </div>
+                <div class="form-group">
+                    <label for="new-class-subject">Fach (optional)</label>
+                    <input type="text" id="new-class-subject" class="form-control" placeholder="z.B. Mathematik, Englisch">
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
+                    <button class="btn btn-primary" onclick="createClass()">Erstellen</button>
+                </div>
+            </div>
+            
+            <!-- Liste hinzufügen Modal -->
+            <div id="add-list-modal" class="modal" style="display: none;">
+                <h2>Neue Liste erstellen</h2>
+                <div class="form-group">
+                    <label for="new-list-name">Listenname</label>
+                    <input type="text" id="new-list-name" class="form-control" placeholder="z.B. Unterschriften Mathearbeit, Elternabend">
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
+                    <button class="btn btn-primary" onclick="createList()">Erstellen</button>
+                </div>
+            </div>
+            
+            <!-- Klassennotiz hinzufügen Modal -->
+            <div id="add-class-note-modal" class="modal" style="display: none;">
+                <h2>Neue Klassennotiz hinzufügen</h2>
+                <div class="form-group">
+                    <label for="new-class-note-title">Titel</label>
+                    <input type="text" id="new-class-note-title" class="form-control" placeholder="Titel der Notiz">
+                </div>
+                <div class="form-group">
+                    <label for="new-class-note-content">Inhalt</label>
+                    <textarea id="new-class-note-content" class="form-control" rows="5" placeholder="Inhalt der Notiz..."></textarea>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
+                    <button class="btn btn-primary" onclick="saveClassNote()">Speichern</button>
+                </div>
+            </div>
+            
+            <!-- Individuelle Note eintragen Modal -->
+            <div id="individual-grade-modal" class="modal" style="display: none;">
+                <h2>Individuelle Note eintragen</h2>
+                <p id="individual-grade-student-name">Schüler: </p>
+                <div class="form-group">
+                    <label for="individual-grade-select">Note</label>
+                    <select id="individual-grade-select" class="form-control">
+                        <option value="">Keine individuelle Note</option>
+                        <option value="1">1 (Sehr gut)</option>
+                        <option value="1-">1- (Sehr gut minus)</option>
+                        <option value="2+">2+ (Gut plus)</option>
+                        <option value="2">2 (Gut)</option>
+                        <option value="2-">2- (Gut minus)</option>
+                        <option value="3+">3+ (Befriedigend plus)</option>
+                        <option value="3">3 (Befriedigend)</option>
+                        <option value="3-">3- (Befriedigend minus)</option>
+                        <option value="4+">4+ (Ausreichend plus)</option>
+                        <option value="4">4 (Ausreichend)</option>
+                        <option value="4-">4- (Ausreichend minus)</option>
+                        <option value="5+">5+ (Mangelhaft plus)</option>
+                        <option value="5">5 (Mangelhaft)</option>
+                        <option value="5-">5- (Mangelhaft minus)</option>
+                        <option value="6+">6+ (Ungenügend plus)</option>
+                        <option value="6">6 (Ungenügend)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="individual-grade-comment">Begründung (optional)</label>
+                    <textarea id="individual-grade-comment" class="form-control" rows="3" placeholder="Begründung für die individuelle Note..."></textarea>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
+                    <button class="btn btn-primary" onclick="saveIndividualGrade()">Speichern</button>
+                </div>
+            </div>
+            
+            <!-- Klasse klonen Modal -->
+            <div id="clone-class-modal" class="modal" style="display: none;">
+                <h2>Klasse klonen</h2>
+                <p id="clone-class-name">Klasse: </p>
+                <div class="form-group">
+                    <label for="clone-class-new-name">Neuer Klassenname</label>
+                    <input type="text" id="clone-class-new-name" class="form-control" placeholder="z.B. 9a Kopie, 10b_2">
+                </div>
+                
+                <div class="form-group">
+                    <label>Zu übernehmende Tabs</label>
+                    <div class="clone-options">
+                        <div class="clone-option">
+                            <input type="checkbox" id="clone-schueler" checked>
+                            <label for="clone-schueler">Schüler</label>
+                        </div>
+                        <div class="clone-option">
+                            <input type="checkbox" id="clone-hausaufgaben">
+                            <label for="clone-hausaufgaben">Hausaufgaben</label>
+                        </div>
+                        <div class="clone-option">
+                            <input type="checkbox" id="clone-noten">
+                            <label for="clone-noten">Noten</label>
+                        </div>
+                        <div class="clone-option">
+                            <input type="checkbox" id="clone-sitzplan">
+                            <label for="clone-sitzplan">Sitzplan</label>
+                        </div>
+                        <div class="clone-option">
+                            <input type="checkbox" id="clone-listen">
+                            <label for="clone-listen">Listen</label>
+                        </div>
+                        <div class="clone-option">
+                            <input type="checkbox" id="clone-klassennotizen">
+                            <label for="clone-klassennotizen">Notizen</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
+                    <button class="btn btn-primary" onclick="cloneClass()">Klonen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SweetAlert für bessere Dialoge -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
