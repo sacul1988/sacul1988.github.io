@@ -5727,3 +5727,300 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// 1. Neue Funktion, um alle Checkboxen in einer Liste zu markieren
+function markAllCompleted() {
+    if (!classes[activeClassId] || !classes[activeClassId].lists || activeListId === null) return;
+    
+    const list = classes[activeClassId].lists[activeListId];
+    if (!list) return;
+    
+    // Sicherstellen, dass das checked-Objekt existiert
+    if (!list.checked) {
+        list.checked = {};
+    }
+    
+    // Alle Schüler in der Klasse als erledigt markieren
+    classes[activeClassId].students.forEach(student => {
+        list.checked[student.name] = true;
+    });
+    
+    // Daten speichern
+    saveData();
+    
+    // Liste neu rendern
+    renderListsModule();
+    
+    // Erfolgsmeldung anzeigen
+    swal("Erfolg", "Alle Einträge wurden als erledigt markiert", "success");
+}
+
+// 2. Modifizierte Toggle-Funktion mit Bestätigung beim Entfernen eines Hakens
+function toggleChecklistItem(listName, studentName, checked) {
+    if (!classes[activeClassId] || !classes[activeClassId].lists) return;
+    
+    const listIndex = classes[activeClassId].lists.findIndex(list => list.name === listName);
+    
+    if (listIndex === -1) return;
+    
+    // Sicherstellen, dass das checked-Objekt existiert
+    if (!classes[activeClassId].lists[listIndex].checked) {
+        classes[activeClassId].lists[listIndex].checked = {};
+    }
+    
+    // Aktuellen Status abrufen
+    const currentlyChecked = classes[activeClassId].lists[listIndex].checked[studentName] || false;
+    
+    // Wenn wir einen Haken entfernen wollen, Bestätigung anfordern
+    if (currentlyChecked && !checked) {
+        swal({
+            title: "Haken entfernen?",
+            text: `Möchtest du den Haken für "${studentName}" wirklich entfernen?`,
+            icon: "warning",
+            buttons: ["Abbrechen", "Entfernen"],
+            dangerMode: true,
+        })
+        .then((willUncheck) => {
+            if (willUncheck) {
+                // Haken entfernen, wenn bestätigt
+                classes[activeClassId].lists[listIndex].checked[studentName] = false;
+                saveData();
+                
+                // UI aktualisieren
+                updateChecklistItemUI(listName, studentName, false);
+            } else {
+                // Wenn abgebrochen, Checkbox wieder ankreuzen
+                resetCheckboxState(listName, studentName, true);
+            }
+        });
+    } else {
+        // Beim Setzen eines Hakens keine Bestätigung nötig
+        classes[activeClassId].lists[listIndex].checked[studentName] = checked;
+        saveData();
+        
+        // UI aktualisieren
+        updateChecklistItemUI(listName, studentName, checked);
+    }
+}
+
+// CSS für die Liste hinzufügen
+const listActionStyles = document.createElement('style');
+listActionStyles.textContent = `
+    .list-actions {
+        display: flex;
+        justify-content: flex-end !important;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .list-action-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .btn-all-completed {
+        min-width: 140px !important;
+        height: 40px !important;
+        white-space: nowrap !important;
+        font-weight: 500 !important;
+    }
+`;
+document.head.appendChild(listActionStyles);
+
+// Hilfsfunktion zum Aktualisieren des UI ohne vollständiges Neurendern
+function updateChecklistItemUI(listName, studentName, checked) {
+    try {
+        // Finde den passenden Index in der sortierten Liste
+        const sortedLists = getSortedLists();
+        const sortedIndex = sortedLists.findIndex(list => list.name === listName);
+        
+        if (sortedIndex !== -1) {
+            // Finde das Element im DOM
+            const listContentElement = safeGetElement(`list-${sortedIndex}`);
+            if (listContentElement) {
+                // Suche alle li-Elemente, die den studentName enthalten
+                const items = listContentElement.querySelectorAll('.checklist-item');
+                
+                if (items) {
+                    for (const item of items) {
+                        const label = item.querySelector('label');
+                        if (label && label.textContent.trim() === studentName) {
+                            // Klasse aktualisieren
+                            if (checked) {
+                                item.classList.add('checked');
+                            } else {
+                                item.classList.remove('checked');
+                            }
+                            
+                            // Checkbox-Status aktualisieren
+                            const checkbox = item.querySelector('input[type="checkbox"]');
+                            if (checkbox) {
+                                checkbox.checked = checked;
+                            }
+                            
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Fehler beim UI-Update:", error);
+        // Fallback: Vollständig neu rendern
+        renderListsModule();
+    }
+}
+
+// Hilfsfunktion zum Zurücksetzen des Checkbox-Status im UI ohne Neurendern
+function resetCheckboxState(listName, studentName, state) {
+    try {
+        // Finde den passenden Index in der sortierten Liste
+        const sortedLists = getSortedLists();
+        const sortedIndex = sortedLists.findIndex(list => list.name === listName);
+        
+        if (sortedIndex !== -1) {
+            // Finde das Element im DOM
+            const listContentElement = safeGetElement(`list-${sortedIndex}`);
+            if (listContentElement) {
+                // Suche alle li-Elemente, die den studentName enthalten
+                const items = listContentElement.querySelectorAll('.checklist-item');
+                
+                if (items) {
+                    for (const item of items) {
+                        const label = item.querySelector('label');
+                        if (label && label.textContent.trim() === studentName) {
+                            // Nur Checkbox-Status zurücksetzen, ohne Klasse zu ändern
+                            const checkbox = item.querySelector('input[type="checkbox"]');
+                            if (checkbox) {
+                                checkbox.checked = state;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Fehler beim Zurücksetzen der Checkbox:", error);
+    }
+}
+
+// 3. Änderung der renderListsModule Funktion, um den "Alle erledigt" Button hinzuzufügen
+function renderListsModule() {
+    if (!classes[activeClassId]) return;
+    
+    const cls = classes[activeClassId];
+    const listsTabNav = safeGetElement('lists-tab-nav');
+    const listsContainer = safeGetElement('lists-container');
+    
+    if (!listsTabNav || !listsContainer) return;
+    
+    // Sort-Button aktualisieren
+    const sortBtn = safeGetElement('sort-lists-btn');
+    if (sortBtn) {
+        sortBtn.innerHTML = `
+            <i class="fas fa-sort-alpha-down"></i> ${cls.listsSorted ? 'Sortierung aufheben' : 'Alphabetisch sortieren'}
+        `;
+        // Farbklasse hinzufügen oder entfernen je nach Zustand
+        if (cls.listsSorted) {
+            sortBtn.classList.add('active-sort');
+        } else {
+            sortBtn.classList.remove('active-sort');
+        }
+    }
+    
+    listsTabNav.innerHTML = '';
+    listsContainer.innerHTML = '';
+    
+    // Sicherstellen, dass Listen existieren
+    if (!cls.lists) {
+        cls.lists = [];
+    }
+    
+    if (cls.lists.length === 0) {
+        listsContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-tasks"></i>
+                <p>Keine Listen vorhanden</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Sortierte oder unsortierte Listen
+    const listsToRender = getSortedLists();
+    
+    // Tabs für jede Liste erstellen
+    listsToRender.forEach((list, listIndex) => {
+        const tabLink = document.createElement('a');
+        tabLink.href = 'javascript:void(0)';
+        tabLink.className = `tab-link ${activeListId === listIndex ? 'active' : ''}`;
+        tabLink.textContent = list.name;
+        tabLink.onclick = () => showList(listIndex);
+        
+        listsTabNav.appendChild(tabLink);
+        
+        // Listen-Content erstellen
+        const listContent = document.createElement('div');
+        listContent.id = `list-${listIndex}`;
+        listContent.className = `tab-content ${activeListId === listIndex ? 'active' : ''}`;
+        
+        let listHtml = `
+            <div class="list-actions">
+                <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
+                    <button class="btn btn-success btn-icon" style="min-width: 140px; height: 40px; white-space: nowrap;" onclick="markAllCompleted()">
+                        <i class="fas fa-check-double"></i> Alle erledigt
+                    </button>
+                    <button class="btn btn-primary btn-icon btn-square" onclick="editList(${listIndex})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-icon btn-square" onclick="deleteList(${listIndex})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Checkliste erstellen
+        listHtml += `<ul class="checklist">`;
+        
+        if (!cls.students || cls.students.length === 0) {
+            listHtml += `
+                <li class="empty-state" style="padding: 20px 0;">
+                    <p>Keine Schüler in dieser Klasse</p>
+                </li>
+            `;
+        } else {
+            // Sortierte oder unsortierte Schülerliste für den Listeninhalt
+            const studentsToRender = getSortedListStudents();
+            
+            studentsToRender.forEach((student) => {
+                const checked = list.checked && list.checked[student.name];
+                
+                listHtml += `
+                    <li class="checklist-item ${checked ? 'checked' : ''}">
+                        <label>
+                            <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleChecklistItem('${list.name}', '${student.name}', this.checked)">
+                            ${student.name}
+                        </label>
+                    </li>
+                `;
+            });
+        }
+        
+        listHtml += `</ul>`;
+        
+        listContent.innerHTML = listHtml;
+        listsContainer.appendChild(listContent);
+    });
+    
+    // Falls keine aktive Liste, die erste anzeigen
+    if (activeListId === null || !cls.lists[activeListId]) {
+        if (cls.lists.length > 0) {
+            showList(0);
+        } else {
+            activeListId = null;
+        }
+    }
+}
