@@ -1,0 +1,3655 @@
+:root {
+    --primary-color: #4361ee;
+    --primary-light: #4895ef;
+    --secondary-color: #3f37c9;
+    --accent-color: #f72585;
+    --success-color: #4cc9f0;
+    --soft-green-color: #4CAF50;
+    --warning-color: #f9c74f;
+    --danger-color: #f94144;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --grey-color: #6c757d;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-color);
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+}
+
+/* Layout containers */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    text-align: center;
+}
+
+header h1 {
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 1.8rem;
+}
+
+/* Breadcrumb navigation */
+.breadcrumb {
+    background-color: white;
+    padding: 10px 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+    padding: 5px 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb .separator {
+    margin: 0 10px;
+    color: var(--grey-color);
+}
+
+/* Card components */
+.card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    overflow: visible;
+}
+
+#sitzplan-module .card-header {
+    margin-bottom: 0px;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1;
+}
+
+#noten-module .card-header > div {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    overflow: visible;
+}
+
+/* Übersicht Module - Scrollable button area */
+#uebersicht-module .card-header > div {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    overflow: visible;
+}
+
+/* Listen Module - Scrollable button area */
+#listen-module .card-header > div {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    overflow: visible;
+}
+
+/* Zählen Module - Scrollable button area */
+#zaehlen-module .card-header > div {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    overflow: visible;
+}
+
+/* Hausaufgaben Module - Scrollable button area */
+#hausaufgaben-module .card-header > div {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    overflow: visible;
+}
+
+/* removed custom scrollbars for hausaufgaben header */
+
+/* Card header actions - scrollable for small screens */
+.card-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+/* Ensure all buttons inside card headers use the same font and sizing */
+.card-header .btn {
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.5;
+    min-height: 40px;
+    padding: 0.4rem 0.75rem;
+}
+
+/* Make Sitzplan header buttons match Schüler module export button */
+#sitzplan-module .card-header > div .btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    min-height: 40px;
+    line-height: 1.5;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Backup header styling */
+.backup-header-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.backup-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Text alignment utilities */
+.text-left {
+    text-align: left !important;
+}
+
+.text-right {
+    text-align: right !important;
+    margin-left: auto;
+}
+
+/* Collapsible header styles */
+.collapsible-header {
+    cursor: pointer !important;
+    transition: var(--transition);
+}
+
+.collapsible-header:hover {
+    background-color: #f8f9fa;
+}
+
+.collapse-icon {
+    transition: transform 0.3s ease;
+}
+
+.collapse-icon.active i {
+    transform: rotate(180deg);
+}
+
+.collapse-content {
+    padding-top: 10px;
+    animation: fadeIn 0.3s;
+    overflow: hidden;
+}
+
+/* Home page - Class grid */
+.classes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.class-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.class-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.class-card-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.class-card-header .badge {
+    color: white !important;
+}
+
+.class-card-body {
+    padding: 12px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.class-stats {
+    display: flex;
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+
+.class-stat {
+    flex: 1;
+    text-align: center;
+    padding: 5px;
+}
+
+.class-stat .number {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: white !important;
+}
+
+.class-stat .label {
+    font-size: 0.8rem;
+    color: var(--grey-color);
+}
+
+.module-buttons {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: auto;
+}
+
+/* Class card action buttons */
+.class-card-actions {
+    display: flex;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.class-card-actions button {
+    flex: 1;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+/* Buttons */
+.btn-block {
+    width: 100%;
+}
+
+.btn-icon-only {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    border: 1px solid transparent;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    margin: 2px;
+    text-decoration: none;
+    min-height: 40px;
+    white-space: nowrap;
+}
+
+/* Template buttons for notes */
+.btn-template {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    color: var(--dark-color);
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: #e9ecef;
+    border: 1px solid transparent;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    margin: 2px;
+    text-decoration: none;
+    min-height: 42px;
+    white-space: nowrap;
+}
+
+.btn-template:hover {
+    background-color: #dee2e6;
+}
+
+/* Square buttons */
+.btn-square {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: none !important;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Button variations */
+.btn-primary {
+    background-color: #4361ee;
+    border-color: #4361ee;
+}
+
+.btn-primary:hover {
+    background-color: #3a56d6;
+    border-color: #3a56d6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+.btn-secondary {
+    background-color: #4361ee;
+    border-color: #4361ee;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #3a56d6;
+    border-color: #3348c7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+.btn-inactive {
+    background-color: #adb5bd;
+    border-color: #adb5bd;
+    color: white;
+}
+
+.btn-inactive:hover {
+    background-color: #9ca3af;
+    border-color: #8e9297;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(173, 181, 189, 0.3);
+}
+
+.attendance-btn-inactive {
+    background-color: #adb5bd;
+    border-color: #adb5bd;
+    color: white;
+}
+
+.attendance-btn-inactive:hover {
+    background-color: #9ca3af;
+    border-color: #8e9297;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(173, 181, 189, 0.3);
+}
+
+.attendance-btn-present-inactive {
+    background-color: #a8d5a8 !important;
+    border-color: #90c690 !important;
+    color: #155724 !important;
+}
+
+.attendance-btn-present-inactive:hover {
+    background-color: #90c690 !important;
+    border-color: #78b878 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.attendance-btn-absent-inactive {
+    background-color: #f4a4a4 !important;
+    border-color: #e89090 !important;
+    color: #721c24 !important;
+}
+
+.attendance-btn-absent-inactive:hover {
+    background-color: #e89090 !important;
+    border-color: #dc7c7c !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.btn-success {
+    background-color: #4CAF50 !important;
+    border-color: green !important;
+}
+
+.btn-success:hover {
+    background-color: #3bb8e0;
+    border-color: #3bb8e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 201, 240, 0.3);
+}
+
+.btn-green {
+    background-color: #495057;
+    border-color: #495057;
+    color: #fff;
+}
+
+.btn-green:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+.btn-green.btn-block {
+    min-height: 120px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.btn-warning {
+    background-color: #f9c74f;
+    color: #212529;
+    border-color: #f9c74f;
+}
+
+.btn-warning:hover {
+    background-color: #f5b935;
+    border-color: #f5b935;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(249, 199, 79, 0.3);
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: #fff;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+}
+
+.btn-orange {
+    background-color: orange;
+    border-color: orange;
+    color: #fff;
+}
+
+.btn-orange:hover {
+    background-color: darkorange;
+    border-color: darkorange;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 165, 0, 0.3);
+}
+
+.btn-purple {
+    background-color: purple;
+    border-color: purple;
+    color: #fff;
+}
+
+.btn-purple:hover {
+    background-color: #800080;
+    border-color: #800080;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(128, 0, 128, 0.3);
+}
+
+.btn-danger {
+    background-color: red !important;
+    border-color: red !important;
+}
+
+.btn-danger:hover {
+    background-color: #e63946;
+    border-color: #e63946;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(249, 65, 68, 0.3);
+}
+
+.btn-light {
+    background-color: #e9ecef;
+    color: #212529;
+    border-color: #e9ecef;
+}
+
+.btn-light:hover {
+    background-color: #dee2e6;
+    border-color: #dee2e6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(233, 236, 239, 0.3);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid currentColor;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background-color: white;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    min-height: 32px;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon i {
+    margin-right: 5px;
+    font-size: 16px;
+}
+
+/* Ensure icon color matches button text */
+.card-header .btn i {
+    color: inherit;
+}
+
+/* SVG icons inside buttons */
+.btn-svg-icon {
+    width: 1em;
+    height: 1em;
+    margin-right: 0.5rem;
+    vertical-align: -0.125em;
+    display: inline-block;
+    color: inherit;
+}
+
+.btn-svg-icon path { /* ensure stroke uses currentColor */
+    stroke: currentColor;
+}
+
+/* Ensure export buttons in these modules use identical font and sizing */
+#schueler-module .card-header .btn,
+#sitzplan-module .card-header .btn,
+#zeugnis-module .card-header .btn {
+    font-size: 0.9rem; /* same as .btn */
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.5;
+    min-height: 40px; /* match .btn default */
+}
+
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--dark-color);
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    min-height: 42px;
+}
+
+.form-control:focus {
+    color: var(--dark-color);
+    background-color: #fff;
+    border-color: var(--primary-light);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -5px;
+    margin-left: -5px;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.form-row > div {
+    padding-right: 5px;
+    padding-left: 5px;
+    flex: 1;
+    min-width: 120px;
+}
+
+select.form-control {
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6"><path d="M0 0l6 6 6-6z" fill="%23666"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 50rem;
+    transition: var(--transition);
+    color: black !important;
+}
+
+/* Badges in der Übersicht gleich groß machen */
+.overview-table .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-size: 0.7rem;
+    padding: 0;
+}
+
+.badge-primary {
+    color: black;
+    background-color: var(--primary-color);
+}
+
+.badge-success {
+    color: black;
+    background-color: var(--success-color);
+}
+
+.badge-warning {
+    color: black;
+    background-color: var(--warning-color);
+}
+
+.badge-orange {
+    color: white !important;
+    background-color: #ff9500;
+}
+
+.badge-info {
+    color: black;
+    background-color: #17a2b8;
+}
+
+.badge-schulplaner {
+    color: white !important;
+    background-color: #3498db;
+}
+
+.badge-danger {
+    color: black;
+    background-color: var(--danger-color);
+}
+
+.badge-secondary {
+    color: black;
+    background-color: var(--grey-color);
+}
+
+.badge-light {
+    color: black;
+    background-color: var(--light-color);
+}
+
+.badge-purple {
+    color: white !important;
+    background-color: #6f42c1;
+}
+
+/* Grade weighting buttons */
+.weight-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.weight-btn {
+    flex: 1 0 auto;
+    min-width: 40px;
+    background-color: #f0f0f0;
+    color: var(--dark-color);
+    border: 1px solid #ced4da;
+    min-height: 36px;
+}
+
+.weight-btn:hover {
+    background-color: var(--primary-light);
+    color: white;
+}
+
+.active-weight {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Module navigation */
+.module-nav {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin-bottom: 15px;
+    padding: 12px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.module-nav::-webkit-scrollbar {
+    height: 0;
+    display: none;
+}
+
+.module-nav-item {
+    flex: 1;
+    min-width: 80px;
+}
+
+.module-nav-item .btn {
+    width: 100%;
+    height: 65px;
+    padding: 8px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.module-nav-item .btn i {
+    font-size: 2rem;
+}
+
+.module-nav-item .btn span {
+    display: none;
+}
+
+.module-nav-item .btn:hover {
+    background-color: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.module-nav-item .btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.module-nav-item .btn-light {
+    background-color: #f8f9fa;
+    color: var(--dark-color);
+}
+
+/* Student cards */
+.student-card {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: var(--transition);
+    border-left: 4px solid var(--primary-color);
+}
+
+.student-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#zeugnis-module .student-card {
+    background-color: #f5f5f5;
+}
+
+.grades-list div {
+    margin-bottom: 10px;
+}
+
+.stats div {
+    margin-bottom: 10px;
+}
+
+.student-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    cursor: pointer;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.student-header.muendliche-student-header {
+    padding-bottom: 0px;
+    position: relative;
+    gap: 0;
+    min-height: 30px;
+}
+
+.overview-projects-cell {
+    margin-left: auto;
+    white-space: nowrap;
+    display: flex;
+    flex-wrap: nowrap;
+    height: 28px;
+    align-items: center;
+}
+
+.student-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.student-grade {
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.student-details {
+    display: none;
+    padding-top: 12px;
+    border-top: 1px solid #e9ecef;
+    margin-top: 8px;
+}
+
+.student-details.show {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+/* Project items */
+.project-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    background-color: #f8f9fa;
+    transition: var(--transition);
+}
+
+.project-item:hover {
+    background-color: #e9ecef;
+}
+
+.project-item .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0 -5px;
+    gap: 8px;
+}
+
+.project-item .form-row > div {
+    padding: 0 5px;
+    margin-bottom: 5px;
+    min-width: 120px;
+}
+
+.project-item .form-row > div:nth-child(1) {
+    flex: 2;
+}
+
+.project-item .form-row > div:nth-child(2) {
+    flex: 1;
+}
+
+.project-item .form-row > div:last-child,
+.project-item .form-row > div:nth-child(3) {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+    justify-content: flex-end !important;
+    display: flex !important;
+}
+
+.project-item .form-row .btn-danger.btn-icon {
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+}
+
+.project-item .form-row .btn-danger.btn-icon i {
+    margin: 0 !important;
+}
+
+/* Grade badges */
+.grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    aspect-ratio: 1;
+    text-align: center;
+    border-radius: 50%;
+    color: white !important;
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin-right: 8px;
+}
+
+/* In der Übersicht des Mündliche Noten-Moduls keinen rechten Rand, da Trenner verwendet werden */
+.overview-projects-cell .grade-badge {
+    margin-right: 0;
+}
+
+.grade-excellent {
+    background-color: #007bff;
+    color: white !important;
+}
+
+.grade-good {
+    background-color: #28a745;
+    color: white !important;
+}
+
+.grade-average {
+    background-color: #ffc107;
+    color: white !important;
+}
+
+.grade-poor {
+    background-color: #fd7e14;
+    color: white !important;
+}
+
+.grade-bad {
+    background-color: #dc143c;
+    color: white !important;
+}
+
+.grade-very-bad {
+    background-color: #6c757d;
+    color: white !important;
+}
+
+/* Calculation display */
+.calculation {
+    margin-top: 10px;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: var(--border-radius);
+    font-family: monospace;
+    white-space: pre-wrap;
+    display: none;
+    font-size: 0.9rem;
+    overflow-x: auto;
+}
+
+/* Grade table */
+.grade-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    display: none;
+    font-size: 0.9rem;
+}
+
+.grade-table th, .grade-table td {
+    padding: 10px 12px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.grade-table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.grade-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.grade-table tr:hover {
+    background-color: #e9ecef;
+}
+
+/* Toggle icon */
+.toggle-icon {
+    transition: transform 0.3s;
+    margin-left: auto;
+    pointer-events: none;
+}
+
+.toggle-icon.rotate {
+    transform: rotate(180deg);
+}
+
+/* Homework and Material module */
+.hw-list {
+    list-style: none;
+    padding: 0;
+}
+
+.hw-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e9ecef;
+    transition: var(--transition);
+}
+
+.hw-item.has-entry-today .hw-name {
+    color: var(--dark-color);
+    font-weight: 700;
+}
+
+.hw-item.has-entry-today .hw-status {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* Studenten ohne Einträge haben normale Farben */
+.hw-item:not(.has-entry-today) .hw-name {
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+.hw-item:not(.has-entry-today) .hw-status {
+    color: var(--dark-color);
+    font-weight: 400;
+}
+
+.hw-header {
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 5px 0;
+    background-color: transparent;
+}
+
+.hw-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hw-status {
+    color: var(--grey-color);
+    margin-bottom: 5px;
+    font-style: italic;
+}
+
+.hw-details {
+    display: none;
+    padding-top: 10px;
+    margin-top: 5px;
+    border-top: 1px solid #e9ecef;
+}
+
+.hw-details.show {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+.hw-counters-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.hw-counter-values {
+    display: flex;
+    gap: 15px;
+}
+
+.hw-counter-values span {
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.hw-counter-values strong {
+    font-weight: bold;
+}
+
+.hw-counter-values strong.warning {
+    color: var(--danger-color);
+}
+
+.hw-counter-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.hw-counter-buttons .btn {
+    width: 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: none !important;
+    font-size: 1rem;
+}
+
+/* Radio options in modal */
+.radio-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.radio-option input[type="radio"] {
+    margin-right: 10px;
+    min-width: 18px;
+    min-height: 18px;
+}
+
+.radio-option label {
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+/* Overview module */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.overview-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    table-layout: auto;
+}
+
+.overview-table th, .overview-table td {
+    padding: 10px 12px;
+    text-align: center;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.overview-table th {
+    background-color: var(--primary-color);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.overview-table th:first-child {
+    text-align: left;
+    width: fit-content;
+    min-width: 150px;
+    white-space: nowrap;
+}
+
+.overview-table td:first-child {
+    text-align: left;
+    white-space: nowrap;
+}
+
+.overview-table td:last-child .btn {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto;
+}
+
+.overview-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.overview-table tbody tr:nth-child(even) {
+    background-color: #e8e8e8;
+}
+
+/* Button for calculation path in overview table */
+.btn-calc-path {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    margin: 0 auto;
+}
+
+.btn-calc-path:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+/* Lists module */
+.checklist {
+    list-style: none;
+    padding: 0;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.checklist-item:last-child {
+    border-bottom: none;
+}
+
+.checklist-item input[type="checkbox"] {
+    margin-right: 16px;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+.checklist-item label {
+    flex: 1;
+    cursor: pointer;
+    padding: 2px 0;
+}
+
+.checklist-item.checked {
+    color: var(--grey-color);
+    text-decoration: line-through;
+}
+
+.list-actions {
+    display: flex;
+    justify-content: flex-end !important;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.list-actions .btn {
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.list-actions .btn i {
+    margin-right: 0;
+}
+
+/* Attendance module */
+.attendance-list {
+    list-style: none;
+    padding: 0;
+}
+
+.attendance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+    transition: var(--transition);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.attendance-item:hover {
+    background-color: #f8f9fa;
+}
+
+.attendance-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.attendance-actions .btn {
+    background-color: #adb5bd !important;
+    border-color: #adb5bd !important;
+    color: white !important;
+}
+
+.attendance-actions .btn:hover {
+    background-color: #868e96;
+    border-color: #868e96;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(173, 181, 189, 0.3);
+}
+
+.attendance-actions .btn-danger {
+    background-color: #FF6B6B !important;
+    border-color: #FF6B6B !important;
+}
+
+.attendance-actions .btn-danger:hover {
+    background-color: #E63946;
+    border-color: #E63946;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3);
+}
+
+.attendance-actions .btn-success {
+    background-color: #218838 !important;
+    border-color: #218838 !important;
+}
+
+.attendance-actions .btn-success:hover {
+    background-color: #1e7e34;
+    border-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(33, 136, 56, 0.3);
+}
+
+.attendance-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: var(--grey-color);
+    color: white;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.present .attendance-badge {
+    background-color: green;
+}
+
+.absent .attendance-badge {
+    background-color: #FF6B6B !important;
+}
+
+/* Project statistics */
+.project-statistics-content {
+    padding: 12px 0;
+}
+
+.project-average {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+}
+
+.project-distribution-container {
+    margin-top: 20px;
+}
+
+.distribution-graph {
+    display: flex;
+    align-items: flex-end;
+    height: 300px;
+    gap: 30px;
+    margin-top: 25px;
+    padding: 0 10px 30px 10px;
+    justify-content: center;
+}
+
+.distribution-bar {
+    flex: 1;
+    background-color: var(--primary-color);
+    min-width: 25px;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    transition: height 0.3s ease;
+}
+
+.distribution-bar-label {
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+}
+
+.distribution-bar-value {
+    position: absolute;
+    top: -25px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.8rem;
+}
+
+/* Student list styles */
+.student-list-container {
+    margin-top: 15px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.student-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+.student-list-table th, .student-list-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.student-list-table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.student-list-table th:last-child, 
+.student-list-table td:last-child {
+    text-align: right;
+}
+
+.student-list-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.student-list-table .student-actions {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+}
+
+.student-list-table .student-actions .btn {
+    padding: 8px 12px !important;
+}
+
+.import-container {
+    padding: 12px 0;
+}
+
+.import-container p {
+    margin-bottom: 8px;
+}
+
+.import-container .text-muted {
+    color: var(--grey-color);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* Project tools */
+.project-tools {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.project-tools .btn {
+    margin-left: 0;
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.project-tools .btn:hover {
+    background-color: var(--primary-light) !important;
+    border-color: var(--primary-light) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+/* Clone modal styles */
+.clone-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.clone-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.clone-option input[type="checkbox"] {
+    margin-right: 8px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.clone-option label {
+    cursor: pointer;
+}
+
+/* Counter info */
+.counter-info {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.student-list-wrapper {
+    width: 100%;
+}
+
+.student-list {
+    width: 100%;
+}
+
+/* Backup management styles */
+.backup-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.backup-settings {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+}
+
+.backup-settings label {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.backup-settings input[type="checkbox"] {
+    margin-right: 8px;
+    min-width: 18px;
+    min-height: 18px;
+}
+
+.backup-info {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: var(--grey-color);
+    margin-left: 26px;
+}
+
+.backup-section-title {
+    margin-top: 20px;
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 8px;
+}
+
+.backup-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.backup-item {
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: var(--transition);
+    border-left: 4px solid var(--primary-color);
+}
+
+.backup-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.backup-item.auto {
+    border-left-color: var(--success-color);
+}
+
+.backup-item.manual {
+    border-left-color: var(--primary-color);
+}
+
+.backup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.backup-title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.backup-title i {
+    color: var(--primary-color);
+}
+
+.backup-item.auto .backup-title i {
+    color: var(--success-color);
+}
+
+.backup-meta {
+    font-size: 0.85rem;
+    color: var(--grey-color);
+    margin-bottom: 15px;
+}
+
+/* Warning box */
+.warning-box {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 10px 15px;
+    border-radius: var(--border-radius);
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.warning-box i {
+    font-size: 1.5rem;
+    color: var(--warning-color);
+}
+
+.warning-box p {
+    margin: 0;
+}
+
+/* Student notes styles */
+.student-notes-form {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 15px;
+}
+
+.student-notes-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center;
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.template-buttons {
+    display: flex;
+    gap: 5px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+}
+
+.student-notes-list-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+    border-radius: var(--border-radius);
+}
+
+.student-notes-list-container h3 {
+    margin-bottom: 10px;
+}
+
+.student-notes-list {
+    list-style: none;
+    padding: 0;
+}
+
+.student-note-item {
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 12px;
+    margin-bottom: 10px;
+    position: relative;
+    border-left: 3px solid var(--secondary-color);
+}
+
+.student-note-item.important {
+    border-left-color: var(--accent-color);
+    background-color: #fff9f9;
+    order: -1;
+}
+
+.student-note-content {
+    margin-bottom: 5px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.student-note-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--grey-color);
+    margin-top: 8px;
+    padding-top: 5px;
+    border-top: 1px dashed #e9ecef;
+}
+
+.student-note-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.student-note-actions .btn-sm.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.important-star {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--warning-color);
+    color: var(--dark-color);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    height: 36px;
+}
+
+.important-star:hover {
+    background-color: #ffca2b;
+    transform: translateY(-1px);
+}
+
+.student-note-item.important .important-star {
+    background-color: #ffb700;
+}
+
+/* Notes button */
+.notes-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    gap: 5px;
+    height: 42px;
+    margin-top: 2px;
+    width: 90px;
+}
+
+.notes-btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.notes-btn i {
+    font-size: 1rem;
+}
+
+.form-row-with-notes {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+}
+
+.form-row-with-notes::-webkit-scrollbar {
+    height: 4px;
+}
+
+.form-row-with-notes::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.form-row-with-notes::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}
+
+.form-row-with-notes::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+.form-row-with-notes > div:first-child {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+.form-row-with-notes > div:first-child select.form-control {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.form-row-with-notes > div:last-child {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    margin-left: 10px !important;
+}
+
+/* Overview projects cell */
+.overview-projects-cell {
+    text-align: center !important;
+    white-space: normal !important;
+    max-width: 250px;
+    padding: 10px 5px !important;
+    vertical-align: middle !important;
+}
+
+.project-grade-item {
+    text-align: center !important;
+    margin: 0 auto 5px auto !important; 
+    width: 100% !important;
+    display: block !important;
+}
+
+.overview-projects-cell .project-grade-item {
+    position: relative !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    display: inline-block !important;
+}
+
+.project-grade-item .badge,
+.project-grade-item span {
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+.notes-overview-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    margin: 0 auto;
+}
+
+.notes-overview-btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.notes-overview-btn.has-notes {
+    background-color: orange;
+}
+
+.notes-overview-btn.has-notes:hover {
+    background-color: darkorange;
+}
+
+/* Homework history */
+.hw-history-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    gap: 5px;
+    height: 42px;
+    margin-right: 10px;
+    width: 90px;
+}
+
+.hw-history-button:hover {
+    background-color: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.hw-history-button i {
+    font-size: 1rem;
+}
+
+.hw-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.hw-action-buttons .btn {
+    font-size: 14px !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-weight: 500 !important;
+}
+
+/* Prevent buttons from becoming dim after clicking */
+.hw-action-buttons .btn:active,
+.hw-action-buttons .btn:focus,
+.hw-action-buttons .btn:visited,
+.hw-action-buttons .btn:focus:active,
+.hw-action-buttons .btn:active:focus {
+    opacity: 1 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    transform: none !important;
+}
+
+.hw-history-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.hw-history-list {
+    list-style: none;
+    padding: 0;
+}
+
+.hw-history-item {
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 3px solid var(--primary-color);
+}
+
+.hw-history-item.homework {
+    border-left-color: #6f42c1;
+}
+
+.hw-history-item.partial {
+    border-left-color: var(--warning-color);
+}
+
+.hw-history-item.materials {
+    border-left-color: #fd7e14;
+}
+
+.hw-history-item.schulplaner {
+    border-left-color: #17a2b8;
+}
+
+.hw-history-item.eintrag {
+    border-left-color: var(--danger-color);
+}
+
+/* Drag and Drop für Schülerliste */
+
+.hw-history-item.nachgereicht {
+    opacity: 0.5;
+    background-color: #f5f5f5;
+}
+
+.hw-history-item.nachgereicht {
+    opacity: 0.5;
+    background-color: #f5f5f5;
+}
+
+.hw-history-content {
+    flex: 1;
+}
+
+.hw-history-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.hw-history-date {
+    color: var(--grey-color);
+    font-size: 0.9rem;
+    margin-right: 10px;
+}
+
+.hw-history-delete {
+    background-color: transparent;
+    color: var(--danger-color);
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 5px;
+    border-radius: 50%;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+}
+
+.hw-history-delete:hover {
+    background-color: rgba(249, 65, 68, 0.1);
+    color: #d00;
+}
+
+.sitzplan-controls {
+    margin-top: 0px;
+}
+
+.hw-history-nachgereicht {
+    background-color: transparent;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px 8px;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.hw-history-nachgereicht:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #218838;
+}
+
+.hw-history-nachgereicht {
+    background-color: transparent;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px 8px;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.hw-history-nachgereicht:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #218838;
+}
+
+/* Homework counters row with buttons */
+.hw-counters-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+    flex-wrap: nowrap;
+}
+
+.hw-counters-row::-webkit-scrollbar {
+    height: 4px;
+}
+
+.hw-counters-row::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.hw-counters-row::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}
+
+.hw-counters-row::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Tabs */
+.tab-nav {
+    display: flex;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 15px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.tab-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-link {
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    color: var(--dark-color);
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-link:hover {
+    background-color: #f8f9fa;
+}
+
+.tab-link.active {
+    border-bottom-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 30px 0;
+    color: var(--grey-color);
+    margin: 0 auto;
+    max-width: 400px;
+}
+
+.empty-state i {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    color: var(--grey-color);
+}
+
+#classes-grid .empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.student-list-table .empty-state {
+    position: static;
+    margin: 0 auto;
+    padding: 30px 0;
+    width: 100%;
+    text-align: center;
+}
+
+.student-list-table td[colspan="3"] {
+    height: 150px;
+    vertical-align: middle;
+}
+
+/* Modal styles */
+#modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    cursor: pointer;
+}
+
+.modal {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    cursor: default;
+}
+
+/* Spezifische Breite für das Evaluationsmodal im Sitzplan */
+#evaluation-modal {
+    max-width: 700px !important;
+}
+
+/* Spezifische Breite für das Rechenweg-Modal */
+#calculation-path-modal {
+    max-width: 700px !important;
+}
+
+.modal h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+/* Improved SweetAlert styling - angepasst an Website-Modals */
+.swal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    cursor: pointer;
+}
+
+.swal-modal {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    cursor: default;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border: none;
+}
+
+.swal-title {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    font-weight: 600;
+    padding: 0;
+    margin: 0 0 15px 0;
+}
+
+.swal-text {
+    color: var(--dark-color);
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    text-align: center !important;
+}
+
+.swal-footer {
+    text-align: center;
+    padding: 15px 0 0 0;
+    margin-top: 20px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.swal-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    border: 1px solid transparent;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    margin: 0;
+    text-decoration: none;
+    min-height: 40px;
+    white-space: nowrap;
+    border: none;
+    font-weight: 500;
+}
+
+.swal-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.swal-button--cancel {
+    background-color: #e9ecef !important;
+    color: var(--dark-color) !important;
+    border: 1px solid #ced4da !important;
+}
+
+.swal-button--cancel:hover {
+    background-color: #dee2e6 !important;
+    border-color: #adb5bd !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.swal-button--danger {
+    background-color: var(--danger-color) !important;
+    color: white !important;
+    border: none;
+}
+
+.swal-button--danger:hover {
+    background-color: #e03131 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(249, 65, 68, 0.3);
+}
+
+.swal-button--confirm {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border: none;
+}
+
+.swal-button--confirm:hover {
+    background-color: var(--primary-light) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+.swal-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+}
+
+.swal-icon {
+    margin: 10px auto 20px auto;
+}
+
+.swal-icon--warning {
+    border-color: var(--warning-color);
+}
+
+.swal-icon--warning__body,
+.swal-icon--warning__dot {
+    background-color: var(--warning-color);
+}
+
+.swal-icon--error {
+    border-color: var(--danger-color);
+}
+
+.swal-icon--error__line {
+    background-color: var(--danger-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+/* Hide minus button in Hausaufgaben tab */
+.hw-counter-buttons button[onclick*="showCounterDecreaseModal"],
+.hw-counter-buttons .btn-warning,
+.hw-counter-buttons button:has(i.fa-minus),
+#hw-list .hw-counter-buttons button:nth-child(2) {
+    display: none !important;
+}
+
+/* ===== SITZPLAN EDITOR STYLES ===== */
+
+#sitzplan-module * {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#sitzplan-module .sitzplan-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+}
+
+#sitzplan-module .main-content {
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+}
+
+@media (min-width: 992px) {
+    #sitzplan-module .main-content {
+        flex-direction: row;
+    }
+}
+
+#sitzplan-module .sidebar {
+    width: 100%;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+@media (min-width: 992px) {
+    #sitzplan-module .sidebar {
+        width: 300px;
+    }
+}
+
+#sitzplan-module .workspace {
+    flex: 1;
+    min-height: 500px;
+    height: 60vh;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    position: relative;
+    background: #fafafa;
+    overflow-x: auto; /* Horizontales Scrollen aktivieren */
+    overflow-y: auto; /* Vertikales Scrollen aktivieren */
+    touch-action: pan-x pan-y; /* Aktiviert Touch-Scrolling für horizontale und vertikale Bewegung */
+    -webkit-overflow-scrolling: touch; /* Glatteres Scrolling auf iOS */
+    cursor: grab; /* Visueller Hinweis, dass der Bereich scrollbar ist */
+    scroll-behavior: smooth; /* Sanftes Scrollen */
+}
+
+/* Zusätzliche Scrollbar-Stile für bessere Sichtbarkeit */
+#sitzplan-module .workspace::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+#sitzplan-module .workspace::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 6px;
+}
+
+#sitzplan-module .workspace::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 6px;
+    border: 2px solid #f1f1f1;
+}
+
+#sitzplan-module .workspace::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+#sitzplan-module .workspace::-webkit-scrollbar-corner {
+    background: #f1f1f1;
+}
+
+/* Button-Leiste über dem Sitzplan */
+#sitzplan-module .sitzplan-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+    flex-wrap: nowrap;
+}
+
+#sitzplan-module .sitzplan-controls::-webkit-scrollbar {
+    height: 4px;
+}
+
+#sitzplan-module .sitzplan-controls::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#sitzplan-module .sitzplan-controls::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}
+
+#sitzplan-module .sitzplan-controls::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+#sitzplan-module .sitzplan-controls .btn {
+    flex: 1;
+    margin: 0;
+}
+
+/* Aktive Button-Farben für Sitzplan-Modi */
+#sitzplan-module .sitzplan-controls .btn.active {
+    background: orange;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
+}
+
+#sitzplan-module .sitzplan-controls #edit-mode-btn.active {
+    background: orange;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
+}
+
+#sitzplan-module .sitzplan-controls #evaluation-mode-btn.active {
+    background: orange;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
+}
+
+#sitzplan-module .form-group {
+    margin-bottom: 12px;
+}
+
+#sitzplan-module label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+#sitzplan-module input, #sitzplan-module button, #sitzplan-module select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+#sitzplan-module button {
+    background: #4361ee;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 5px;
+    transition: background 0.3s;
+    min-height: 44px;
+}
+
+#sitzplan-module button:hover, #sitzplan-module button:active {
+    background: #3a56d6;
+}
+
+#sitzplan-module .action-buttons {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#sitzplan-module .menu-container {
+    position: relative;
+    margin-top: 15px;
+}
+
+#sitzplan-module #sitzplan-menuContent {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 100;
+    border-radius: 6px;
+    flex-direction: column;
+    gap: 0;
+}
+
+#sitzplan-module #sitzplan-menuContent button {
+    margin-top: 0;
+    border-radius: 0;
+    border-bottom: 1px solid #ddd;
+}
+#sitzplan-module #sitzplan-menuContent button:first-child {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+#sitzplan-module #sitzplan-menuContent button:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+#sitzplan-module .mode-toggle {
+    display: flex;
+    margin-bottom: 15px;
+    background: #eee;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+#sitzplan-module .mode-toggle button {
+    flex: 1;
+    margin: 0;
+    border-radius: 0;
+    background: #ccc;
+    color: #333;
+    min-height: 44px;
+}
+
+#sitzplan-module .mode-toggle button.active {
+    background: orange;
+    color: #fff;
+}
+
+#sitzplan-module .desk {
+    width: 90px;
+    height: 60px;
+    background: #fff;
+    border: 2px solid #4CAF50;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    cursor: move;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    user-select: none;
+    touch-action: none;
+}
+
+#sitzplan-module .evaluation-mode .desk {
+    cursor: pointer;
+}
+
+#sitzplan-module .desk.selected {
+    border: 3px solid #2196F3;
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+}
+
+#sitzplan-module .desk-label {
+    font-weight: bold;
+    text-align: center;
+    font-size: 14px;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+
+#sitzplan-module .student-list {
+    margin-top: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 10px;
+    -webkit-overflow-scrolling: touch;
+}
+
+#sitzplan-module .student-item {
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #fff;
+    border-radius: 6px;
+    border-left: 3px solid #4CAF50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    transition: all 0.2s;
+    min-height: 44px;
+}
+
+#sitzplan-module .student-item:hover, #sitzplan-module .student-item:active {
+    background: #f0f0f0;
+}
+
+#sitzplan-module .student-item.assigned {
+    border-left-color: #ccc;
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+#sitzplan-module .desk.highlight {
+    border: 2px dashed #2196F3;
+    background-color: #e3f2fd;
+}
+
+#sitzplan-module .student-item.dragging {
+    opacity: 0.5;
+    border: 2px dashed #4CAF50;
+}
+
+#sitzplan-module .grid-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1500px; /* Kleinere Breite für kompakteres Feld */
+    height: 1200px; /* Kleinere Höhe für kompakteres Feld */
+    pointer-events: none;
+    background-image: 
+        linear-gradient(to right, #eee 1px, transparent 1px),
+        linear-gradient(to bottom, #eee 1px, transparent 1px);
+    background-size: 50px 50px;
+}
+
+/* Evaluation Modal Styles */
+#evaluation-modal .evaluation-item {
+    margin-bottom: 12px;
+}
+
+#evaluation-modal .evaluation-item h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+#evaluation-modal .participation-controls {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+#evaluation-modal .homework-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+#evaluation-modal .participation-btn, #evaluation-modal .homework-btn {
+    flex: 1;
+    min-height: 44px;
+}
+
+#evaluation-modal .participation-btn i, #evaluation-modal .homework-btn i {
+    margin-right: 8px;
+}
+
+#evaluation-modal .positive {
+    background: #4CAF50;
+}
+
+#evaluation-modal .positive:hover, #evaluation-modal .positive:active {
+    background: #45a049;
+}
+
+#evaluation-modal .negative {
+    background: #f44336;
+}
+
+#evaluation-modal .negative:hover, #evaluation-modal .negative:active {
+    background: #d32f2f;
+}
+
+/* Homework buttons - individual colors */
+#evaluation-modal .homework-btn.btn-primary {
+    background: #4361ee;
+    border-color: #4361ee;
+}
+
+#evaluation-modal .homework-btn.btn-primary:hover {
+    background: #3a56d6;
+    border-color: #3a56d6;
+    transform: translateY(-1px);
+}
+
+#evaluation-modal .homework-btn.btn-warning {
+    background: #f9c74f;
+    border-color: #f9c74f;
+    color: #212529;
+}
+
+#evaluation-modal .homework-btn.btn-warning:hover {
+    background: #f5b935;
+    border-color: #f5b935;
+    transform: translateY(-1px);
+}
+
+#evaluation-modal .homework-btn.btn-orange {
+    background: #ff9500;
+    border-color: #ff9500;
+    color: white;
+}
+
+#evaluation-modal .homework-btn.btn-orange:hover {
+    background: #e8890b;
+    border-color: #e8890b;
+    transform: translateY(-1px);
+}
+
+#evaluation-modal .homework-btn.btn-info {
+    background: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+}
+
+#evaluation-modal .homework-btn.btn-info:hover {
+    background: #138496;
+    border-color: #138496;
+    transform: translateY(-1px);
+}
+
+#evaluation-modal .homework-btn.btn-purple {
+    background: #6f42c1 !important;
+    border-color: #6f42c1 !important;
+}
+
+#evaluation-modal .homework-btn.btn-purple:hover {
+    background: #5a359a !important;
+    border-color: #5a359a !important;
+    transform: translateY(-1px);
+}
+
+#evaluation-modal .student-stats {
+    margin-top: 5px !important;
+}
+
+#evaluation-modal .student-stats h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+#evaluation-modal .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 10px;
+}
+
+#evaluation-modal .stat-item {
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    text-align: center;
+}
+
+#evaluation-modal .stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2196F3;
+}
+
+#evaluation-modal .stat-item-primary {
+    background: rgba(255, 107, 107, 0.2) !important;
+    border: 1px solid rgba(255, 107, 107, 0.4) !important;
+    border-radius: 4px;
+}
+
+#evaluation-modal .stat-item-orange {
+    background: rgba(255, 149, 0, 0.2) !important;
+    border: 1px solid rgba(255, 149, 0, 0.4) !important;
+    border-radius: 4px;
+}
+
+#evaluation-modal .stat-item-info {
+    background: rgba(93, 173, 226, 0.2) !important;
+    border: 1px solid rgba(93, 173, 226, 0.4) !important;
+    border-radius: 4px;
+}
+
+#evaluation-modal .stat-item-purple {
+    background: rgba(111, 66, 193, 0.2) !important;
+    border: 1px solid rgba(111, 66, 193, 0.4) !important;
+    border-radius: 4px;
+}
+
+#sitzplan-module .touch-hint {
+    display: none;
+    text-align: center;
+    padding: 8px;
+    background: #fff3cd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #856404;
+    border-left: 4px solid #ffeeba;
+}
+
+@media (max-width: 991px) {
+    #sitzplan-module .touch-hint {
+        display: block;
+    }
+    
+    #sitzplan-module .workspace {
+        width: 100%;
+    }
+}
+
+/* Hinweis für Maus-Scrolling auf Desktop - entfernt */
+@media (min-width: 992px) {
+    /* Desktop-Hinweis wurde entfernt */
+}
+
+@media (max-width: 768px) {
+    #sitzplan-module .sitzplan-container {
+        padding: 10px;
+    }
+    
+    #sitzplan-module .main-content {
+        gap: 10px;
+    }
+    
+    #sitzplan-module .sidebar {
+        padding: 10px;
+    }
+    
+    #sitzplan-module .participation-controls {
+        flex-direction: column;
+    }
+}
+
+/* Hide the final/average grade display for each student in the Noten tab */
+#noten-module .student-header .student-grade {
+    display: none !important;
+}
+
+/* Hide the Notes button in the Noten tab */
+#noten-module .form-row-with-notes .notes-btn {
+    display: none !important;
+}
+
+/* Hide the oral grade input field in the Noten tab */
+#noten-module .form-row-with-notes > div:first-child {
+    display: none !important;
+}
+
+/* Adjust the layout since one of the flex elements is now hidden */
+#noten-module .form-row-with-notes {
+    justify-content: flex-end !important;
+}
+
+.modal-header-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.corner-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+/* CSS zum Ausblenden des "Alphabetisch sortieren"-Buttons in der Klassenübersicht */
+#sort-overview-btn {
+    display: none !important;
+}
+
+/* Abstand zwischen Icon und Text in Hausaufgaben-Buttons */
+.hw-action-buttons .btn i {
+    margin-right: 8px;
+}
+
+/* Ausblenden aller Sortier-Buttons in allen Modulen */
+#sort-classes-btn,
+#sort-hw-btn,
+#sort-students-btn,
+#sort-muendlich-btn,
+#sort-overview-btn,
+#sort-lists-btn,
+#sort-attendance-btn {
+    display: none !important;
+}
+
+/* Klassen-Sortier-Modus */
+.class-card[draggable="true"] {
+    transition: all 0.2s ease;
+}
+
+.class-card[draggable="true"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.class-card[draggable="true"].dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+/* Drag-Over Effekt */
+.class-card[draggable="true"][style*="border-top"] {
+    border-top: 2px solid #4361ee !important;
+    margin-top: 10px;
+}
+
+/* Lila Punkt für wichtige Notizen */
+.attention-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: var(--danger-color);
+    border-radius: 50%;
+    margin-left: 8px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* Blauer Punkt für Schulplaner */
+.schulplaner-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #17a2b8;
+    border-radius: 50%;
+    margin-left: 8px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* Visuelle Rückmeldung für Mündlich-Modus */
+.feedback-positive {
+    background-color: #66BB6A !important;
+    border-color: #66BB6A !important;
+    color: white !important;
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+}
+
+.feedback-negative {
+    background-color: #f44336 !important;
+    border-color: #f44336 !important;
+    color: white !important;
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+}
+
+/* Oral-Modus Styles */
+#sitzplan-module .oral-mode .desk {
+    cursor: pointer;
+}
+
+#sitzplan-module .oral-mode .desk:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Tische mit hoher negativer Beteiligung (3 oder mehr negative Punkte) */
+#sitzplan-module .desk.high-negatives {
+    background: #ffcccc !important;
+    border-color: #ff4444 !important;
+    box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+}
+
+/* Spezielle Stile für Projekt-Löschen SweetAlert */
+.swal-button--deleteOne {
+    background-color: var(--warning-color) !important;
+    color: var(--dark-color) !important;
+    border: none;
+    font-weight: 600;
+    min-width: 100px;
+    flex: 1;
+}
+
+.swal-button--deleteOne:hover {
+    background-color: #f5b935 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(249, 199, 79, 0.3);
+}
+
+.swal-button--deleteAll {
+    background-color: var(--danger-color) !important;
+    color: white !important;
+    border: none;
+    font-weight: 600;
+    min-width: 100px;
+    flex: 1;
+}
+
+.swal-button--deleteAll:hover {
+    background-color: #e03131 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(249, 65, 68, 0.3);
+}
+
+/* Verbesserte Button-Anordnung für Projekt-Löschen Modal */
+.swal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.swal-footer .swal-button {
+    flex: 1;
+    min-width: 80px;
+    max-width: 140px;
+}
+
+/* Responsive Anpassungen für kleine Bildschirme */
+@media (max-width: 480px) {
+    .swal-modal {
+        width: 95% !important;
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .swal-footer {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .swal-footer .swal-button {
+        min-width: 100%;
+        max-width: none;
+    }
+    
+    .swal-button--deleteOne,
+    .swal-button--deleteAll {
+        min-width: 100% !important;
+    }
+}
+
+/* Projektlösch-Modal Styles */
+.project-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: var(--border-radius);
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.project-delete-item {
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #e9ecef;
+    border-radius: var(--border-radius);
+    background-color: #f8f9fa;
+}
+
+.project-delete-item:last-child {
+    margin-bottom: 0;
+}
+
+.project-delete-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+}
+
+.project-delete-checkbox {
+    margin-right: 10px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.project-delete-info {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+.project-delete-info strong {
+    display: block;
+    color: var(--dark-color);
+}
+
+.project-delete-info span {
+    color: var(--grey-color);
+}
+
+/* Strafe-Listen Styles */
+.strafe-list {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    background-color: #f9f9f9;
+}
+
+.strafe-list h3 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.strafe-checklist {
+    list-style: none;
+    padding: 0;
+}
+
+.strafe-checklist li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.strafe-checklist li:last-child {
+    border-bottom: none;
+}
+
+.strafe-checklist label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.strafe-checklist input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+.strafe-checklist input[type="checkbox"]:checked + span {
+    text-decoration: line-through;
+    color: var(--grey-color);
+}
+
+/* Strafe-Button Styles */
+.btn.has-open-strafe {
+    background-color: #ff6b6b !important; /* Hellrot */
+    border-color: #ff6b6b !important;
+}
+
+/* Hausaufgaben buttons in modals and modules */
+.hausaufgaben-btn {
+    background-color: #6f42c1 !important;
+    border-color: #6f42c1 !important;
+    color: #fff !important;
+    font-size: 0.9rem !important;
+}
+
+.hausaufgaben-btn:hover {
+    background-color: #5a359a !important;
+    border-color: #5a359a !important;
+}
+
+/* Material buttons in modals and modules */
+.material-btn {
+    background-color: #ff9500 !important;
+    border-color: #ff9500 !important;
+    color: #000 !important;
+    font-size: 0.9rem !important;
+}
+
+.material-btn:hover {
+    background-color: #e8890b !important;
+    border-color: #e8890b !important;
+}
+
+/* Schulplaner buttons in modals and modules */
+.schulplaner-btn {
+    background-color: #3498db !important;
+    border-color: #3498db !important;
+    color: #000 !important;
+    font-size: 0.9rem !important;
+}
+
+.schulplaner-btn:hover {
+    background-color: #2980b9 !important;
+    border-color: #2980b9 !important;
+}
+
+/* Larger font size for buttons in evaluation modal */
+#evaluation-modal .hausaufgaben-btn,
+#evaluation-modal .material-btn,
+#evaluation-modal .schulplaner-btn {
+    font-size: 1rem !important;
+}
+
+/* Bold font weight for specific buttons in evaluation modal */
+#evaluation-modal .hausaufgaben-btn,
+#evaluation-modal .material-btn,
+#evaluation-modal .notizen-btn,
+#evaluation-modal .schulplaner-btn,
+#evaluation-modal .verlauf-btn,
+#evaluation-modal .eintrag-btn {
+    font-weight: normal !important;
+}
+
+/* Notizen, Verlauf, Eintrag buttons */
+#evaluation-modal .notizen-btn {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: #fff !important;
+    font-size: 0.9rem !important;
+}
+
+#evaluation-modal .notizen-btn:hover {
+    background-color: #0056b3 !important;
+    border-color: #004085 !important;
+}
+
+#evaluation-modal .verlauf-btn {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: #fff !important;
+    font-size: 0.9rem !important;
+}
+
+#evaluation-modal .verlauf-btn:hover {
+    background-color: #0056b3 !important;
+    border-color: #004085 !important;
+}
+
+#evaluation-modal .eintrag-btn {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: #fff !important;
+    font-size: 0.9rem !important;
+}
+
+#evaluation-modal .eintrag-btn:hover {
+    background-color: #0056b3 !important;
+    border-color: #004085 !important;
+}
+
+/* Hausaufgaben-Modul: Notizen, Verlauf, Eintrag buttons */
+#hausaufgaben-module .notes-btn {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: #fff !important;
+    font-size: 0.9rem !important;
+}
+
+#hausaufgaben-module .notes-btn:hover {
+    background-color: #0056b3 !important;
+    border-color: #004085 !important;
+}
+
+#hausaufgaben-module .verlauf-btn {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: #fff !important;
+    font-size: 0.9rem !important;
+}
+
+#hausaufgaben-module .verlauf-btn:hover {
+    background-color: #0056b3 !important;
+    border-color: #004085 !important;
+}
+
+#hausaufgaben-module .eintrag-btn {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: #fff !important;
+    font-size: 0.9rem !important;
+}
+
+#hausaufgaben-module .eintrag-btn:hover {
+    background-color: #0056b3 !important;
+    border-color: #004085 !important;
+}
+
+/* Weiße Schriftfarbe für Buttons im Evaluation Modal */
+#evaluation-modal .btn {
+    color: white !important;
+}
+
+/* Weiße Schriftfarbe für Buttons im Hausaufgaben-Modul */
+#hausaufgaben-module .btn {
+    color: white !important;
+}
+
+/* Weiße Schriftfarbe für Buttons im Noten-Modul */
+#noten-module .btn {
+    color: white !important;
+}
+
+/* Rote Farbe für den Vollständig zurücksetzen Button im Zählen-Modul */
+#zaehlen-module .btn-danger {
+    background-color: red !important;
+    border-color: red !important;
+}
+
+/* Spezifische rote Farbe für Abwesend Button im Zählen-Modul */
+#zaehlen-module .attendance-actions .btn-danger {
+    background-color: #FF6B6B !important;
+    border-color: #FF6B6B !important;
+}
+
+/* Weiße Schriftfarbe für Buttons im Zählen-Modul */
+#zaehlen-module .btn {
+    color: white !important;
+}
+
+/* Dunkleres Grau für Anwesend und Abwesend Buttons in der Schülerliste */
+#zaehlen-module .student-actions button {
+    background-color: #343a40 !important;
+    border-color: #343a40 !important;
+}
+
+/* Grüner Active-Zustand für Anwesend Button */
+#zaehlen-module .student-actions .btn-success:active {
+    background-color: #66BB6A !important;
+    border-color: #66BB6A !important;
+}
+
+/* Learning support styling */
+.learning-support {
+    color: blue !important;
+}
+
+/* Keep toggle icons black for learning support students */
+.learning-support .toggle-icon {
+    color: black !important;
+}
+
+/* Bold student names in all lists */
+.student-list-table td:nth-child(2),
+.overview-table td:first-child,
+.student-name,
+.desk-label,
+.checklist-item label,
+.attendance-item .name {
+    font-weight: bold !important;
+    font-size: 0.95rem !important;
+}
+
+/* ===== SUCHFUNKTION STYLES ===== */
+
+.search-container {
+    margin: 15px 0;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.search-suggestions li {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s ease;
+}
+
+.search-suggestions li:hover,
+.search-suggestions li.highlighted {
+    background-color: #f8f9fa;
+}
+
+.search-suggestions li:last-child {
+    border-bottom: none;
+}
+
+.search-suggestions .no-results {
+    color: #6c757d;
+    font-style: italic;
+    cursor: default;
+}
+
+.search-suggestions .no-results:hover {
+    background-color: transparent;
+}
+
+/* Zeugnis notes container */
+.zeugnis-notes-container {
+    display: flex;
+    gap: 20px;
+}
+
+.zeugnis-notes-left,
+.zeugnis-notes-right {
+    flex: 1;
+}
+
+/* Summary section spacing */
+.summary-section {
+    margin-top: 20px;
+}
+
