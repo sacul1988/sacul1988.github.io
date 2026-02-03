@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noten-Trainer Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/1.2.93/vexflow-min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; }
+        .container { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 950px; }
+        #output { width: 100%; max-width: 550px; height: 250px; margin: auto; cursor: crosshair; background: #fff; border: 1px solid #eee; border-radius: 10px; touch-action: none; overflow: hidden; }
+        .btn-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 25px; width: 100%; }
+        button { padding: 12px 18px; flex: 1; min-width: 70px; font-size: 1.3rem; border: none; border-radius: 12px; background: #4a90e2; color: white; cursor: pointer; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
+        button:active { transform: scale(0.95); }
+        button:hover { background: #357abd; }
+        button:disabled { background: #ccc !important; cursor: not-allowed !important; opacity: 0.6 !important; }
+        #feedback { margin-top: 25px; font-weight: bold; height: 30px; font-size: 1.2rem; }
+        .score-board { font-size: 1.1rem; color: #666; margin-bottom: 20px; }
+        .lvl-btns { margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        .lvl-btns button { padding: 10px 18px; font-size: 1rem; flex: none; min-width: auto; }
+        .lvl-locked { background: #95a5a6 !important; opacity: 0.6; cursor: not-allowed !important; }
+
+        /* Keyboard Styles for Level 5 */
+        .piano-container { display: flex; justify-content: center; margin: 25px auto; user-select: none; max-width: 100%; }
+        .piano-key { width: 42px; height: 130px; border: 1px solid #000; background: white; border-radius: 0 0 6px 6px; cursor: pointer; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; font-weight: bold; position: relative; z-index: 1; margin-right: -1px; transition: background 0.1s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .piano-key:active { background: #ddd; transform: translateY(2px); box-shadow: 0 2px 3px rgba(0,0,0,0.1); }
+        .piano-key.black { width: 28px; height: 78px; background: black; color: white; margin-left: -14px; margin-right: -14px; z-index: 2; border-radius: 0 0 4px 4px; cursor: default; box-shadow: 0 3px 5px rgba(0,0,0,0.3); }
+
+        /* Große Klaviatur für Level 7 */
+        .piano-container.large { flex-wrap: wrap; max-width: 900px; justify-content: center; }
+        .piano-container.large .piano-key { width: 40px; height: 140px; font-size: 0.8rem; }
+        .piano-container.large .piano-key.black { width: 28px; height: 85px; margin-left: -14px; margin-right: -14px; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background-color: white; padding: 2.5rem; border-radius: 25px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-width: 90%; width: 400px; }
+        .modal-content h3 { margin-top: 0; color: #4a90e2; font-size: 1.5rem; }
+        .grade-badge { font-size: 4rem; font-weight: bold; margin: 1rem 0; color: #2ecc71; }
+        .result-stats { font-size: 1.3rem; margin-bottom: 2rem; color: #666; }
+        .modal-btn { background: #4a90e2; padding: 15px 35px; border-radius: 12px; color: white; border: none; cursor: pointer; font-size: 1.2rem; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div id="resultModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Ergebnis</h3>
+        <div id="modalGrade" class="grade-badge">1</div>
+        <div id="modalStats" class="result-stats">20/20 (100%)</div>
+        <div id="modalText" style="margin-bottom: 1.5rem;">Super! Weiter zum nächsten Level.</div>
+        <button class="modal-btn" onclick="closeModal()">Weiter</button>
+    </div>
+</div>
+
+<div id="lockModal" class="modal">
+    <div class="modal-content">
+        <h3 style="color: #e74c3c;">Level gesperrt! 🔒</h3>
+        <div style="font-size: 4rem; margin: 1rem 0;">🚫</div>
+        <div class="result-stats">Noch nicht freigeschaltet</div>
+        <div style="margin-bottom: 1.5rem;">Du musst erst das vorherige Level mit mindestens <b>Note 3</b> bestehen, um hier fortzufahren.</div>
+        <button class="modal-btn" onclick="document.getElementById('lockModal').style.display='none'">Verstanden</button>
+    </div>
+</div>
+
+<div id="unlockModal" class="modal">
+    <div class="modal-content">
+        <h3 id="unlockTitle" style="color: #f1c40f;">Freischaltung 🔑</h3>
+        <div id="unlockIcon" style="font-size: 3rem; margin: 0.5rem 0;">👨‍🏫</div>
+        <p id="unlockText">Gib das Passwort ein:</p>
+        <div id="passwordContainer">
+            <input type="password" id="unlockPassword" style="width: 80%; padding: 12px; margin-bottom: 1.5rem; border: 2px solid #eee; border-radius: 10px; font-size: 1.1rem; text-align: center;" onkeyup="if(event.key==='Enter') checkUnlockPassword()">
+        </div>
+        <div id="unlockActionBtns" style="display: flex; gap: 10px;">
+            <button id="unlockCancelBtn" class="modal-btn" style="background: #95a5a6;" onclick="document.getElementById('unlockModal').style.display='none'">Abbrechen</button>
+            <button id="unlockOkBtn" class="modal-btn" style="background: #f1c40f; color: #000;" onclick="checkUnlockPassword()">OK</button>
+        </div>
+        <button id="unlockCloseBtn" class="modal-btn" style="background: #4a90e2; display: none;" onclick="document.getElementById('unlockModal').style.display='none'">Verstanden</button>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Noten</h2>
+    <div class="score-board">
+        Richtig: <span id="score">0</span>
+        <div class="lvl-btns">
+            <button id="btn-lvl4" onclick="setLevel(4)">Level 1</button>
+            <button id="btn-lvl1" onclick="setLevel(1)">Level 2</button>
+            <button id="btn-lvl2" onclick="setLevel(2)">Level 3</button>
+            <button id="btn-lvl3" onclick="setLevel(3)">Level 4</button>
+            <button id="btn-lvl5" onclick="setLevel(5)">Level 5</button>
+            <button id="btn-lvl6" onclick="setLevel(6)">Level 6</button>
+            <button id="btn-lvl7" onclick="setLevel(7)">Level 7</button>
+            <button id="btn-lvl8" onclick="setLevel(8)">Level 8</button>
+            <button id="btn-lvl9" onclick="setLevel(9)">Level 9</button>
+            <button onclick="unlockAllLevels()" style="background: #f1c40f; color: #000; padding: 5px 12px; font-size: 1rem; border-radius: 8px;" title="Alle Level freischalten">🔓</button>
+            <button id="btn-cancel" onclick="cancelLevel()" style="background: #e74c3c; color: white; display: none; padding: 5px 12px; font-size: 1rem; border-radius: 8px; margin-left: 25px; border: 2px solid white;">Level abbrechen</button>
+        </div>
+    </div>
+    
+    <div id="timer-display" style="font-size: 1.5rem; font-weight: bold; color: #e74c3c; margin-bottom: 10px; display: none;">Zeit: 20s</div>
+    <div id="output"></div>
+    <div id="error-display" style="color: red; font-size: 0.8rem; margin: 5px; display: none;">Fehler beim Laden der Notengrafik. Bitte Seite neu laden.</div>
+
+    <div id="feedback">Welche Note ist das?</div>
+    <div id="round-info" style="font-size: 0.8rem; color: #888; margin-top: 5px;">Runde: 1 / 20</div>
+
+    <div id="input-buttons" class="btn-grid">
+        <button onclick="checkAnswer('C')">C</button>
+        <button onclick="checkAnswer('D')">D</button>
+        <button onclick="checkAnswer('E')">E</button>
+        <button onclick="checkAnswer('F')">F</button>
+        <button onclick="checkAnswer('G')">G</button>
+        <button onclick="checkAnswer('A')">A</button>
+        <button onclick="checkAnswer('H')">H</button>
+    </div>
+    <div id="duration-buttons" class="btn-grid" style="display: none;">
+        <button onclick="checkDuration('w')">Ganze</button>
+        <button onclick="checkDuration('h')">Halbe</button>
+        <button onclick="checkDuration('q')">Viertel</button>
+        <button onclick="checkDuration('8')">Achtel</button>
+        <button onclick="checkDuration('16')">16.tel</button>
+    </div>
+    <div id="placement-buttons" class="btn-grid" style="display: none;">
+        <button onclick="moveNote(-1)" style="background: #e67e22;">↓ Tiefer</button>
+        <button id="btn-confirm" onclick="confirmPlacement()" style="background: #4a90e2; display: none;">Bestätigen</button>
+        <button onclick="moveNote(1)" style="background: #27ae60;">↑ Höher</button>
+    </div>
+    <div id="octave-buttons" class="btn-grid" style="display: none;">
+    </div>
+
+    <!-- Keyboard for Level 5 -->
+    <div id="piano-keyboard" class="piano-container" style="display: none;">
+        <div class="piano-key" data-note="C" onclick="checkPianoKey('C', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" data-note="D" onclick="checkPianoKey('D', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" data-note="E" onclick="checkPianoKey('E', this)"></div>
+        <div class="piano-key" data-note="F" onclick="checkPianoKey('F', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" data-note="G" onclick="checkPianoKey('G', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" data-note="A" onclick="checkPianoKey('A', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" data-note="H" onclick="checkPianoKey('H', this)"></div>
+    </div>
+
+    <!-- Große Klaviatur für Level 7 -->
+    <div id="piano-keyboard-large" class="piano-container large" style="display: none;">
+        <!-- Oktave 4 -->
+        <div class="piano-key" onclick="checkPianoKey('c/4', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('d/4', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('e/4', this)"></div>
+        <div class="piano-key" onclick="checkPianoKey('f/4', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('g/4', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('a/4', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('b/4', this)"></div>
+        
+        <!-- Oktave 5 -->
+        <div class="piano-key" onclick="checkPianoKey('c/5', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('d/5', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('e/5', this)"></div>
+        <div class="piano-key" onclick="checkPianoKey('f/5', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('g/5', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('a/5', this)"></div>
+        <div class="piano-key black"></div>
+        <div class="piano-key" onclick="checkPianoKey('b/5', this)"></div>
+
+        <!-- C6 Abschluss -->
+        <div class="piano-key" onclick="checkPianoKey('c/6', this)"></div>
+    </div>
+</div>
+
+<script>
+    const div = document.getElementById("output");
+    let currentNoteKey = "";
+    let currentNoteDuration = "q";
+    let targetNoteLetter = "";
+    let placedNoteKey = "c/5";
+    let currentNoteIndex = 7; 
+    let isNoteLocked = false;
+    let score = 0;
+    let roundCount = 0;
+    let currentLevel = 4;
+    let maxUnlockedLevel = 0; // LocalStorage entfernt
+    let lastNoteOctave = "";
+    let recentNotes = [];
+    let timerInterval = null;
+    let timerValue = 0;
+    let currentTaskLevel = 4;
+    let subLevelIndex = 0;
+    let totalRoundsForCurrentLevel = 20;
+    const durations = ["w", "h", "q", "8", "16"];
+
+    function startTimer(seconds) {
+        clearInterval(timerInterval);
+        timerValue = seconds;
+        const display = document.getElementById("timer-display");
+        if (display) {
+            display.style.display = "block";
+            display.innerText = `Zeit: ${timerValue}s`;
+        }
+        
+        timerInterval = setInterval(() => {
+            timerValue--;
+            if (display) display.innerText = `Zeit: ${timerValue}s`;
+            if (timerValue <= 0) {
+                clearInterval(timerInterval);
+                if (display) display.style.display = "none";
+                const feedback = document.getElementById("feedback");
+                if (feedback) {
+                    feedback.innerText = "Zeit abgelaufen! ⏱️";
+                    feedback.style.color = "#e74c3c";
+                }
+                setTimeout(() => {
+                    setLevel(currentLevel);
+                }, 1000);
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        const display = document.getElementById("timer-display");
+        if (display) display.style.display = "none";
+    }
+
+    const notesToPractice = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5", "c/6"];
+
+    function moveNote(dir) {
+        let activeLv = currentLevel;
+        if (currentLevel === 8 || currentLevel === 9) {
+            const levels = [4, 1, 2, 3, 5, 6, 7];
+            activeLv = levels[subLevelIndex];
+        }
+        if (activeLv !== 3 || isNoteLocked) return;
+        let newIndex = currentNoteIndex + dir;
+        if (newIndex >= 0 && newIndex < notesToPractice.length) {
+            currentNoteIndex = newIndex;
+            placedNoteKey = notesToPractice[currentNoteIndex];
+            drawNote(placedNoteKey, "q");
+            document.getElementById("btn-confirm").disabled = false;
+            document.getElementById("btn-confirm").innerText = "Bestätigen";
+        }
+    }
+
+    function drawNote(noteKey, duration = "q", xPos = 150) {
+        let VF;
+        if (typeof Vex !== "undefined" && Vex.Flow) {
+            VF = Vex.Flow;
+        } else if (typeof VexFlow !== "undefined") {
+            VF = VexFlow;
+        } else {
+            return;
+        }
+        
+        const errDisp = document.getElementById("error-display");
+        if (errDisp) errDisp.style.display = "none";
+        
+        div.innerHTML = ""; 
+        try {
+            // Renderer initialisieren
+            let rendererType = VF.Renderer.Backends.SVG;
+            if (typeof rendererType === "undefined") rendererType = 1;
+
+            const renderer = new VF.Renderer(div, rendererType);
+            renderer.resize(550, 250); 
+            const context = renderer.getContext();
+            context.scale(1.7, 1.7); 
+            
+            const stave = new VF.Stave(25, 10, 275); // Deutlich weniger Abstand nach oben (Y=10)
+            stave.addClef("treble").setContext(context);
+            stave.draw();
+
+            if (noteKey) {
+                const note = new VF.StaveNote({ keys: [noteKey], duration: duration });
+                
+                // Halsrichtung anpassen: Ab h/4 (Mittellinie) nach unten
+                const octave = parseInt(noteKey.split('/')[1]);
+                const noteName = noteKey.split('/')[0];
+                if (octave > 4 || (octave === 4 && (noteName === 'b' || noteName === 'h'))) {
+                    note.setStemDirection(-1);
+                } else {
+                    note.setStemDirection(1);
+                }
+
+                const voice = new VF.Voice({num_beats: 4,  beat_value: 4});
+                voice.setStrict(false);
+                voice.addTickables([note]);
+                
+                new VF.Formatter().joinVoices([voice]).format([voice], 200);
+                
+                // Mitte des Systems
+                let noteX = 135; 
+                let activeLv = currentLevel;
+                if (currentLevel === 8 || currentLevel === 9) {
+                    const levels = [4, 1, 2, 3, 5, 6, 7];
+                    activeLv = levels[subLevelIndex];
+                }
+                if (activeLv === 3) {
+                    noteX = Math.max(30, Math.min(xPos, 250));
+                }
+                stave.setNoteStartX(noteX);
+                
+                voice.draw(context, stave);
+            }
+        } catch (err) {
+            console.error("VexFlow Draw Error:", err);
+            if (errDisp) {
+                errDisp.innerText = "Zeichenfehler: " + err.message;
+                errDisp.style.display = "block";
+            }
+        }
+    }
+
+    function nextRound() {
+        if (roundCount >= totalRoundsForCurrentLevel) {
+            stopTimer();
+            showFinalResult();
+            return;
+        }
+
+        isNoteLocked = false;
+        
+        let activeLevel = currentLevel;
+        if (currentLevel === 8 || currentLevel === 9) {
+            const levelSequence = [4, 1, 2, 3, 5, 6, 7];
+            activeLevel = levelSequence[subLevelIndex];
+            currentTaskLevel = activeLevel;
+            if (currentLevel === 8) startTimer(20);
+            else startTimer(10);
+        } else {
+            stopTimer();
+        }
+
+        const confirmBtn = document.getElementById("btn-confirm");
+        const inputBtns = document.getElementById("input-buttons");
+        const durationBtns = document.getElementById("duration-buttons");
+        const placementBtns = document.getElementById("placement-buttons");
+        const pianoKeyboard = document.getElementById("piano-keyboard");
+        
+        document.getElementById("round-info").innerText = `Runde: ${roundCount + 1} / ${totalRoundsForCurrentLevel}`;
+
+        if (activeLevel === 3) {
+            confirmBtn.style.display = "none"; // In der Button-Reihe versteckt, aber hier ID-Steuerung
+            inputBtns.style.display = "none";
+            durationBtns.style.display = "none";
+            placementBtns.style.display = "flex";
+            const pianoLarge = document.getElementById("piano-keyboard-large");
+            if (pianoLarge) pianoLarge.style.display = "none";
+            pianoKeyboard.style.display = "none";
+            
+            // Den Bestätigen-Button innerhalb der Reihe einblenden
+            const rowConfirmBtn = document.getElementById("btn-confirm");
+            if (rowConfirmBtn) rowConfirmBtn.style.display = "block";
+            
+            let filteredNotes = notesToPractice.filter(n => !recentNotes.includes(n));
+            if (lastNoteOctave !== "") {
+                const alternateNotes = filteredNotes.filter(n => n.split('/')[1] !== lastNoteOctave);
+                if (alternateNotes.length > 0) filteredNotes = alternateNotes;
+            }
+            targetNoteLetter = filteredNotes[Math.floor(Math.random() * filteredNotes.length)];
+            recentNotes.push(targetNoteLetter);
+            if (recentNotes.length > 3) recentNotes.shift();
+            lastNoteOctave = targetNoteLetter.split('/')[1];
+            
+            let noteLabel = targetNoteLetter.split('/')[0];
+            let octave = targetNoteLetter.split('/')[1];
+            let name = noteLabel === 'b' ? 'H' : noteLabel.toUpperCase();
+            let displayTarget = "";
+
+            if (name === "C") {
+                if (octave === "4") displayTarget = `"Tiefes" C`;
+                else if (octave === "5") displayTarget = `"Mittleres" C`;
+                else displayTarget = `"Hohes" C`;
+            } else {
+                if (octave === "4") displayTarget = `"Tiefes" ${name}`;
+                else displayTarget = `"Hohes" ${name}`;
+            }
+
+            const feedback = document.getElementById("feedback");
+            feedback.innerText = `Platziere: ${displayTarget}`;
+            feedback.style.color = "#4a90e2";
+            
+            currentNoteIndex = 7; 
+            placedNoteKey = notesToPractice[currentNoteIndex];
+            drawNote(placedNoteKey, "q");
+        } else if (activeLevel === 5) {
+            // Level 5: Notenname -> Klaviertaste
+            confirmBtn.style.display = "none";
+            placementBtns.style.display = "none";
+            inputBtns.style.display = "none";
+            durationBtns.style.display = "none";
+            const pianoLarge = document.getElementById("piano-keyboard-large");
+            if (pianoLarge) pianoLarge.style.display = "none";
+            pianoKeyboard.style.display = "flex";
+            
+            const filteredNotes = notesToPractice.filter(n => !recentNotes.includes(n));
+            const rawNote = filteredNotes[Math.floor(Math.random() * filteredNotes.length)];
+            recentNotes.push(rawNote);
+            if (recentNotes.length > 3) recentNotes.shift();
+            const noteChar = rawNote.split('/')[0];
+            targetNoteLetter = noteChar === "b" ? "H" : noteChar.toUpperCase();
+            
+            document.getElementById("feedback").innerText = `Suche die Taste für: ${targetNoteLetter}`;
+            document.getElementById("feedback").style.color = "#4a90e2";
+            
+            // Tastenfarbe zurücksetzen
+            const keys = document.querySelectorAll('.piano-key');
+            keys.forEach(k => { k.style.background = k.classList.contains('black') ? '#333' : 'white'; });
+            
+            drawNote(null); // Kein Notensystem nötig oder leer? Lass es leer.
+        } else if (activeLevel === 6) {
+            // Level 6: Note im System -> Klaviertaste
+            confirmBtn.style.display = "none";
+            placementBtns.style.display = "none";
+            inputBtns.style.display = "none";
+            durationBtns.style.display = "none";
+            const pianoLarge = document.getElementById("piano-keyboard-large");
+            if (pianoLarge) pianoLarge.style.display = "none";
+            pianoKeyboard.style.display = "flex";
+            
+            const filteredNotes = notesToPractice.filter(n => !recentNotes.includes(n));
+            currentNoteKey = filteredNotes[Math.floor(Math.random() * filteredNotes.length)];
+            recentNotes.push(currentNoteKey);
+            if (recentNotes.length > 3) recentNotes.shift();
+            const noteChar = currentNoteKey.split('/')[0];
+            targetNoteLetter = noteChar === "b" ? "H" : noteChar.toUpperCase();
+            
+            document.getElementById("feedback").innerText = "Drücke die entsprechende Taste";
+            document.getElementById("feedback").style.color = "#4a90e2";
+            
+            // Tastenfarbe zurücksetzen
+            const keys = document.querySelectorAll('.piano-key');
+            keys.forEach(k => { k.style.background = k.classList.contains('black') ? '#333' : 'white'; });
+            
+            drawNote(currentNoteKey, "q");
+        } else if (activeLevel === 7) {
+            // Level 7: Note im System -> Spezifische Klaviertaste (Oktave zählt!)
+            confirmBtn.style.display = "none";
+            placementBtns.style.display = "none";
+            inputBtns.style.display = "none";
+            durationBtns.style.display = "none";
+            
+            const pianoNormal = document.getElementById("piano-keyboard");
+            const pianoLarge = document.getElementById("piano-keyboard-large");
+            pianoNormal.style.display = "none";
+            pianoLarge.style.display = "flex";
+            
+            const filteredNotes = notesToPractice.filter(n => !recentNotes.includes(n));
+            currentNoteKey = filteredNotes[Math.floor(Math.random() * filteredNotes.length)];
+            recentNotes.push(currentNoteKey);
+            if (recentNotes.length > 3) recentNotes.shift();
+            
+            document.getElementById("feedback").innerText = "Drücke die exakte Taste (auf die Oktave achten!)";
+            document.getElementById("feedback").style.color = "#4a90e2";
+            
+            // Tastenfarbe zurücksetzen (alle Klaviaturen)
+            const keys = document.querySelectorAll('.piano-key');
+            keys.forEach(k => { k.style.background = k.classList.contains('black') ? '#333' : 'white'; });
+            
+            drawNote(currentNoteKey, "q");
+        } else if (activeLevel === 4) {
+            confirmBtn.style.display = "none";
+            placementBtns.style.display = "none";
+            inputBtns.style.display = "none";
+            durationBtns.style.display = "flex";
+            const pianoLarge = document.getElementById("piano-keyboard-large");
+            if (pianoLarge) pianoLarge.style.display = "none";
+            pianoKeyboard.style.display = "none";
+            
+            const filteredNotes = notesToPractice.filter(n => !recentNotes.includes(n));
+            currentNoteKey = filteredNotes[Math.floor(Math.random() * filteredNotes.length)];
+            recentNotes.push(currentNoteKey);
+            if (recentNotes.length > 3) recentNotes.shift();
+            currentNoteDuration = durations[Math.floor(Math.random() * durations.length)];
+            
+            document.getElementById("feedback").innerText = "Welcher Notenwert ist das?";
+            document.getElementById("feedback").style.color = "#000";
+            drawNote(currentNoteKey, currentNoteDuration);
+        } else {
+            confirmBtn.style.display = "none";
+            placementBtns.style.display = "none";
+            inputBtns.style.display = "flex";
+            durationBtns.style.display = "none";
+            const pianoLarge = document.getElementById("piano-keyboard-large");
+            if (pianoLarge) pianoLarge.style.display = "none";
+            pianoKeyboard.style.display = "none";
+            
+            const filteredNotes = notesToPractice.filter(n => !recentNotes.includes(n));
+            currentNoteKey = filteredNotes[Math.floor(Math.random() * filteredNotes.length)];
+            recentNotes.push(currentNoteKey);
+            if (recentNotes.length > 3) recentNotes.shift();
+            document.getElementById("feedback").innerText = "Welche Note ist das?";
+            document.getElementById("feedback").style.color = "#000";
+
+            let duration = "q";
+            if (activeLevel === 2) {
+                duration = durations[Math.floor(Math.random() * durations.length)];
+            }
+            drawNote(currentNoteKey, duration);
+        }
+        
+        // Output display handling
+        const output = document.getElementById("output");
+        if (output) {
+            output.style.display = (activeLevel === 5) ? "none" : "block";
+        }
+    }
+
+    function handleInput(clientX, clientY, isFinal) {
+        // Maus-Interaktion deaktiviert
+        return;
+    }
+
+    div.addEventListener("mousemove", function(e) { handleInput(e.clientX, e.clientY, false); });
+    div.addEventListener("click", function(e) { handleInput(e.clientX, e.clientY, true); });
+
+    // Touch-Support für Tablets
+    div.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        handleInput(touch.clientX, touch.clientY, false);
+    }, {passive: false});
+
+    div.addEventListener("touchmove", function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        handleInput(touch.clientX, touch.clientY, false);
+    }, {passive: false});
+
+    div.addEventListener("touchend", function(e) {
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        handleInput(touch.clientX, touch.clientY, true);
+    }, {passive: false});
+
+    function confirmPlacement() {
+        let activeLv = currentLevel;
+        if (currentLevel === 8 || currentLevel === 9) {
+            activeLv = currentTaskLevel;
+            if (activeLv !== 3) return;
+            stopTimer();
+        } else {
+            if (activeLv !== 3) return;
+        }
+        if (!placedNoteKey) return;
+        
+        // Prüfe ob der gesetzte Notenname dem gesuchten entspricht
+        if (placedNoteKey === targetNoteLetter) {
+            handleCorrect();
+        } else {
+            handleWrong();
+        }
+    }
+
+    function handleCorrect() {
+        const feedback = document.getElementById("feedback");
+        feedback.innerText = "Korrekt! 🌟";
+        feedback.style.color = "#2ecc71";
+        score++;
+        roundCount++;
+        document.getElementById("score").innerText = score;
+        setTimeout(nextRound, 800);
+    }
+
+    function handleWrong() {
+        const feedback = document.getElementById("feedback");
+        feedback.innerText = "Falsch! ❌";
+        feedback.style.color = "#e74c3c";
+        
+        // Tastenfarbe bei Fehler nach kurzer Zeit zurücksetzen
+        setTimeout(() => {
+            const keys = document.querySelectorAll('.piano-key');
+            keys.forEach(k => { k.style.background = k.classList.contains('black') ? '#333' : 'white'; });
+        }, 300);
+
+        roundCount++;
+        setTimeout(nextRound, 800);
+    }
+
+    function showFinalResult() {
+        const percentage = (score / totalRoundsForCurrentLevel) * 100;
+        let grade = 6;
+        if (percentage >= 92) grade = 1;
+        else if (percentage >= 80) grade = 2;
+        else if (percentage >= 65) grade = 3;
+        else if (percentage >= 50) grade = 4;
+        else if (percentage >= 20) grade = 5;
+
+        const isSpecLevel = (currentLevel === 8 || currentLevel === 9);
+        const passed = isSpecLevel ? grade <= 2 : grade <= 3;
+        const modal = document.getElementById("resultModal");
+        modal.style.display = "flex";
+
+        document.getElementById("modalGrade").innerText = grade;
+        document.getElementById("modalStats").innerText = `${score} / ${totalRoundsForCurrentLevel} (${Math.round(percentage)}%)`;
+        
+        if (passed) {
+            document.getElementById("modalTitle").innerText = "Level Geschafft! 🎉";
+            document.getElementById("modalGrade").style.color = "#2ecc71";
+            
+            if (isSpecLevel) {
+                if (subLevelIndex < 6) {
+                    subLevelIndex++;
+                    document.getElementById("modalText").innerText = `Hervorragend! Weiter zur nächsten Stufe von Level ${currentLevel}.`;
+                    modal.dataset.nextAction = "next_stage";
+                } else {
+                    subLevelIndex = 0;
+                    if (currentLevel === 8) {
+                        if (maxUnlockedLevel < 9) maxUnlockedLevel = 9;
+                        document.getElementById("modalText").innerText = "Grandios! Du hast den Level 8 Marathon abgeschlossen. Level 9 ist nun bereit.";
+                        modal.dataset.nextAction = "next";
+                    } else {
+                        document.getElementById("modalText").innerText = "Ultimativ! Du hast den Level 9 Marathon gemeistert!";
+                        modal.dataset.nextAction = "complete_all";
+                    }
+                }
+            } else {
+                // Logik für Freischaltung (Speicherung entfernt)
+                if (currentLevel === 4) { // Level 1 -> schaltet Level 2 (ID 1) frei
+                    if (maxUnlockedLevel < 1) maxUnlockedLevel = 1;
+                    document.getElementById("modalText").innerText = "Hervorragend! Level 2 ist nun freigeschaltet.";
+                    modal.dataset.nextAction = "next_special";
+                } else if (currentLevel === 1) { // Level 2 -> schaltet Level 3 (ID 2) frei
+                    if (maxUnlockedLevel < 2) maxUnlockedLevel = 2;
+                    document.getElementById("modalText").innerText = "Hervorragend! Level 3 ist nun freigeschaltet.";
+                    modal.dataset.nextAction = "next";
+                } else if (currentLevel === 2) { // Level 3 -> schaltet Level 4 (ID 3) frei
+                    if (maxUnlockedLevel < 3) maxUnlockedLevel = 3;
+                    document.getElementById("modalText").innerText = "Hervorragend! Level 4 ist nun freigeschaltet.";
+                    modal.dataset.nextAction = "next";
+                } else if (currentLevel === 7) { 
+                    if (maxUnlockedLevel < 8) maxUnlockedLevel = 8;
+                    document.getElementById("modalText").innerText = "Hervorragend! Level 8 ist nun freigeschaltet.";
+                    modal.dataset.nextAction = "next";
+                } else if (currentLevel < 7) { 
+                    if (maxUnlockedLevel <= currentLevel) {
+                        if (currentLevel === 3) maxUnlockedLevel = 5; // Level 4 -> Level 5
+                        else maxUnlockedLevel = currentLevel + 1;
+                    }
+                    document.getElementById("modalText").innerText = "Hervorragend! Das nächste Level ist freigeschaltet.";
+                    modal.dataset.nextAction = "next";
+                }
+            }
+        } else {
+            document.getElementById("modalTitle").innerText = "Nicht bestanden 😕";
+            document.getElementById("modalGrade").style.color = "#e74c3c";
+            
+            let req = isSpecLevel ? "Note 2" : "Note 3";
+            document.getElementById("modalText").innerText = `Wiederhole das Level für eine bessere Note (mind. ${req}).`;
+            modal.dataset.nextAction = "repeat";
+        }
+    }
+
+    function closeModal() {
+        document.getElementById("resultModal").style.display = "none";
+        const action = document.getElementById("resultModal").dataset.nextAction;
+        if (action === "next") {
+            if (currentLevel === 5) setLevel(6);
+            else if (currentLevel === 6) setLevel(7);
+            else if (currentLevel === 7) setLevel(8);
+            else if (currentLevel === 8) setLevel(9);
+            else setLevel(currentLevel + 1);
+        }
+        else if (action === "next_special") setLevel(1); 
+        else if (action === "next_to_5") setLevel(5);
+        else if (action === "next_stage") setLevel(currentLevel); 
+        else if (action === "repeat") setLevel(currentLevel);    
+        else if (action === "complete_all") setLevel(4); 
+        else setLevel(4); 
+    }
+
+    function checkAnswer(guess) {
+        if (currentLevel === 3 || currentLevel === 4) return;
+        if (currentLevel === 8 || currentLevel === 9) {
+            if (currentTaskLevel === 3 || currentTaskLevel === 4) return;
+            stopTimer();
+        }
+        let noteLetter = currentNoteKey.split('/')[0];
+        let expected = noteLetter === 'b' ? 'H' : noteLetter.toUpperCase();
+        if (guess === expected) handleCorrect();
+        else handleWrong();
+    }
+
+    function checkDuration(guess) {
+        if (currentLevel === 8 || currentLevel === 9) {
+            if (currentTaskLevel !== 4) return;
+            stopTimer();
+        } else {
+            if (currentLevel !== 4) return;
+        }
+        if (guess === currentNoteDuration) handleCorrect();
+        else handleWrong();
+    }
+
+    function checkPianoKey(guess, element) {
+        let activeLv = currentLevel;
+        if (currentLevel === 8 || currentLevel === 9) {
+            activeLv = currentTaskLevel;
+            if (activeLv !== 5 && activeLv !== 6 && activeLv !== 7) return;
+            stopTimer();
+        } else {
+            if (activeLv !== 5 && activeLv !== 6 && activeLv !== 7) return;
+        }
+        
+        let isCorrect = false;
+        if (activeLv === 7) {
+            isCorrect = (guess === currentNoteKey);
+        } else {
+            isCorrect = (guess === targetNoteLetter);
+        }
+
+        if (isCorrect) {
+            element.style.background = "#2ecc71"; // Grün bei Erfolg
+            handleCorrect();
+        } else {
+            element.style.background = "#e74c3c"; // Rot bei Fehler
+            handleWrong();
+        }
+    }
+
+    function cancelLevel() {
+        subLevelIndex = 0;
+        setLevel(4);
+    }
+
+    function setLevel(lvl) {
+        // Sicherstellen, dass das Level existiert und valide ist
+        if (lvl === undefined || lvl === null) lvl = 4;
+        
+        // Spezialfall: Level 1 (ID 4) ist immer frei
+        const isInitialLevel = (lvl === 4);
+        
+        if (!isInitialLevel && lvl > maxUnlockedLevel) {
+            document.getElementById("lockModal").style.display = "flex";
+            return;
+        }
+        
+        currentLevel = lvl;
+        stopTimer();
+        
+        // Buttons für Platzierung (Level 4, ID 3) nur dann anzeigen
+        const placementBtns = document.getElementById("placement-buttons");
+        if (placementBtns) {
+            placementBtns.style.display = (lvl === 3) ? "flex" : "none";
+        }
+
+        totalRoundsForCurrentLevel = (lvl === 8 || lvl === 9) ? 10 : 20;
+
+        // Klaviaturen
+        const pianoNormal = document.getElementById("piano-keyboard");
+        const pianoLarge = document.getElementById("piano-keyboard-large");
+
+        // Aktives Level bestimmen (Marathon oder Normal)
+        const levels = [4, 1, 2, 3, 5, 6, 7];
+        let activeLv = lvl;
+        if (lvl === 8 || lvl === 9) {
+            activeLv = levels[subLevelIndex];
+        }
+
+        if (pianoNormal) pianoNormal.style.display = (activeLv === 5 || activeLv === 6) ? "flex" : "none";
+        if (pianoLarge) pianoLarge.style.display = (activeLv === 7) ? "flex" : "none";
+
+        // Notenausgabe ausblenden für Level 5
+        const output = document.getElementById("output");
+        if (output) {
+            output.style.display = (activeLv === 5) ? "none" : "block";
+        }
+
+        // Buttons stylen (Highlighting)
+        const isMarathon = (lvl === 8 || lvl === 9);
+        const cancelBtn = document.getElementById("btn-cancel");
+        if (cancelBtn) cancelBtn.style.display = isMarathon ? "inline-block" : "none";
+
+        for (let i of [4, 1, 2, 3, 5, 6, 7, 8, 9]) {
+            const btn = document.getElementById(`btn-lvl${i}`);
+            if (btn) {
+                const isLocked = (i !== 4 && i > maxUnlockedLevel);
+                btn.className = isLocked ? "lvl-locked" : "";
+                btn.style.background = (i === currentLevel) ? "#2ecc71" : (isLocked ? "#95a5a6" : "#4a90e2");
+                
+                // Während Marathon andere Buttons sperren
+                if (isMarathon && i !== lvl) {
+                    btn.disabled = true;
+                    btn.style.opacity = "0.5";
+                    btn.style.cursor = "not-allowed";
+                } else {
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.style.cursor = "pointer";
+                }
+            }
+        }
+        
+        score = 0;
+        roundCount = 0;
+        recentNotes = [];
+        document.getElementById("score").innerText = "0";
+        nextRound();
+    }
+
+    function unlockAllLevels() {
+        document.getElementById("unlockTitle").innerText = "Freischaltung 🔑";
+        document.getElementById("unlockTitle").style.color = "#f1c40f";
+        document.getElementById("unlockIcon").innerText = "👨‍🏫";
+        document.getElementById("unlockText").innerText = "Gib das Passwort ein:";
+        document.getElementById("passwordContainer").style.display = "block";
+        document.getElementById("unlockActionBtns").style.display = "flex";
+        document.getElementById("unlockCloseBtn").style.display = "none";
+        document.getElementById("unlockPassword").value = "";
+        document.getElementById("unlockModal").style.display = "flex";
+        setTimeout(() => document.getElementById("unlockPassword").focus(), 100);
+    }
+
+    function checkUnlockPassword() {
+        const pw = document.getElementById("unlockPassword").value;
+        if (pw === "Musikunterricht") {
+            maxUnlockedLevel = 9;
+            setLevel(currentLevel);
+            showUnlockSuccess("Alle Level wurden freigeschaltet!");
+        } else if (pw === "Klaviatur") {
+            maxUnlockedLevel = 5;
+            setLevel(currentLevel);
+            showUnlockSuccess("Level 1 bis 5 wurden freigeschaltet!");
+        } else {
+            document.getElementById("unlockTitle").innerText = "Falsches Passwort! ❌";
+            document.getElementById("unlockTitle").style.color = "#e74c3c";
+            document.getElementById("unlockIcon").innerText = "🚫";
+            document.getElementById("unlockText").innerText = "Bitte versuche es erneut.";
+            document.getElementById("unlockPassword").value = "";
+            document.getElementById("unlockPassword").focus();
+        }
+    }
+
+    function showUnlockSuccess(message) {
+        document.getElementById("unlockTitle").innerText = "Erfolg! 🎉";
+        document.getElementById("unlockTitle").style.color = "#2ecc71";
+        document.getElementById("unlockIcon").innerText = "🔓";
+        document.getElementById("unlockText").innerText = message;
+        document.getElementById("passwordContainer").style.display = "none";
+        document.getElementById("unlockActionBtns").style.display = "none";
+        document.getElementById("unlockCloseBtn").style.display = "block";
+    }
+
+    // Starten, sobald alles geladen ist
+    window.addEventListener('load', function() {
+        let attempts = 0;
+        const checkVex = setInterval(() => {
+            attempts++;
+            const hasVex = (typeof Vex !== 'undefined') || (typeof VexFlow !== 'undefined');
+            if (hasVex || attempts > 30) {
+                clearInterval(checkVex);
+                if (!hasVex) {
+                    document.getElementById("error-display").style.display = "block";
+                    document.getElementById("error-display").innerText = "Bibliothek konnte nicht geladen werden (Timeout).";
+                }
+                setLevel(4); // Startet mit dem neuen Level 1 (ehemals ID 4)
+            }
+        }, 100);
+    });
+</script>
+
+</body>
+</html>
