@@ -925,10 +925,23 @@ function renderClassesGrid() {
         // Statistiken berechnen
         const studentCount = cls.students.length;
         const hwCount = cls.students.reduce((sum, student) => {
-            const homework = student.homework || 0;
-            return sum + homework;
+            let hwVal = 0;
+            if (typeof student.homework === 'number') {
+                hwVal = student.homework;
+            } else if (student.homework && typeof student.homework.forgotten === 'number') {
+                hwVal = student.homework.forgotten;
+            }
+            return sum + hwVal;
         }, 0);
-        const materialsCount = cls.students.reduce((sum, student) => sum + (student.materials || 0), 0);
+        const materialsCount = cls.students.reduce((sum, student) => {
+            let matVal = 0;
+            if (typeof student.materials === 'number') {
+                matVal = student.materials;
+            } else if (student.homework && typeof student.homework.materials === 'number') {
+                matVal = student.homework.materials;
+            }
+            return sum + matVal;
+        }, 0);
         
         const classCard = document.createElement('div');
         classCard.className = 'class-card';
