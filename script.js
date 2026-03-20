@@ -563,6 +563,10 @@ function showPage(page, classId = null) {
 
 // Modul wechseln
 function showModule(module) {
+    // Vor dem Modulwechsel offene Zeugnis-Eingaben sichern.
+    flushPendingZeugnisAutosaves();
+    saveFocusedZeugnisTextarea();
+
     // Turbo-Sync: Bei jedem Tab-Wechsel sicherstellen, dass wir die aktuellsten Daten haben/teilen
     if (typeof window.saveDataToCloud === 'function') {
         window.saveDataToCloud();
@@ -597,6 +601,46 @@ function showModule(module) {
     activeModule = module;
     localStorage.setItem('activeModule', module);
     renderModuleContent();
+}
+
+function isZeugnisNotesTextarea(element) {
+    return !!(element &&
+        element.tagName === 'TEXTAREA' &&
+        element.id &&
+        (element.id.startsWith('notes-left-') ||
+         element.id.startsWith('notes-right-') ||
+         element.id.startsWith('notes-summary-')));
+}
+
+function getStudentIndexFromZeugnisTextareaId(textareaId) {
+    if (!textareaId) return -1;
+    const rawIndex = textareaId.split('-').pop();
+    const parsed = parseInt(rawIndex, 10);
+    return Number.isNaN(parsed) ? -1 : parsed;
+}
+
+function saveFocusedZeugnisTextarea() {
+    const activeElement = document.activeElement;
+    if (!isZeugnisNotesTextarea(activeElement)) return;
+
+    const studentIndex = getStudentIndexFromZeugnisTextareaId(activeElement.id);
+    if (studentIndex >= 0) {
+        saveStudentNotes(studentIndex);
+    }
+}
+
+function flushPendingZeugnisAutosaves() {
+    const timers = window._zeugnisAutosaveTimers;
+    if (!timers) return;
+
+    Object.keys(timers).forEach(key => {
+        clearTimeout(timers[key]);
+        const studentIndex = parseInt(key, 10);
+        if (!Number.isNaN(studentIndex)) {
+            saveStudentNotes(studentIndex);
+        }
+        delete timers[key];
+    });
 }
 
 // Diese Funktion dient als Verzweigung zu den verschiedenen Modulen
@@ -9668,10 +9712,15 @@ function renderZeugnisModule() {
         container.appendChild(card);
     });
 
-    // Entferne alte Event-Listener, bevor wir einen neuen hinzufügen
-    const oldListener = container._zeugnisListener;
-    if (oldListener) {
-        container.removeEventListener('keydown', oldListener);
+    // Entferne alte Event-Listener, bevor wir neue hinzufügen
+    const oldListeners = container._zeugnisListeners;
+    if (oldListeners) {
+        if (oldListeners.keydown) {
+            container.removeEventListener('keydown', oldListeners.keydown);
+        }
+        if (oldListeners.input) {
+            container.removeEventListener('input', oldListeners.input);
+        }
     }
     
     // Neuer Event-Listener für automatische Aufzählungszeichen (Enter-Taste)
@@ -9679,7 +9728,8 @@ function renderZeugnisModule() {
         if (event.target.matches('textarea[id^="notes-left-"], textarea[id^="notes-right-"], textarea[id^="notes-summary-"]')) {
             if (event.key === 'Enter') {
                 const textarea = event.target;
-                const studentIndex = parseInt(textarea.id.split('-').pop());
+                const studentIndex = getStudentIndexFromZeugnisTextareaId(textarea.id);
+                if (studentIndex < 0) return;
 
                 // Nur für linke/rechte Notizen Aufzählungszeichen hinzufügen
                 if (textarea.id.includes('notes-left-') || textarea.id.includes('notes-right-')) {
@@ -9702,9 +9752,35 @@ function renderZeugnisModule() {
             }
         }
     };
+
+    // Während der Eingabe regelmäßig speichern, damit Tab-Wechsel oder Re-Render nichts verlieren.
+    const zeugnisInputListener = function(event) {
+        if (!isZeugnisNotesTextarea(event.target)) return;
+
+        const studentIndex = getStudentIndexFromZeugnisTextareaId(event.target.id);
+        if (studentIndex < 0) return;
+
+        if (!window._zeugnisAutosaveTimers) {
+            window._zeugnisAutosaveTimers = {};
+        }
+
+        const existingTimer = window._zeugnisAutosaveTimers[studentIndex];
+        if (existingTimer) {
+            clearTimeout(existingTimer);
+        }
+
+        window._zeugnisAutosaveTimers[studentIndex] = setTimeout(() => {
+            saveStudentNotes(studentIndex);
+            delete window._zeugnisAutosaveTimers[studentIndex];
+        }, 350);
+    };
     
     container.addEventListener('keydown', zeugnisListener);
-    container._zeugnisListener = zeugnisListener;
+    container.addEventListener('input', zeugnisInputListener);
+    container._zeugnisListeners = {
+        keydown: zeugnisListener,
+        input: zeugnisInputListener
+    };
 }
 
 // Notizen speichern
