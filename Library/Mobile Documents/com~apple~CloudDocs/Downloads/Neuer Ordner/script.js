@@ -7138,7 +7138,7 @@ function importBackupFile(event) {
             });
         } catch (error) {
             console.error("Fehler beim Importieren der Daten:", error);
-            swal("Fehler", "Die Datei enthält keine gültigen Daten.", "error");
+            swal("Import-Fehler", "Fehler Details: " + error.message, "error");
         }
     };
     
