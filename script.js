@@ -9224,11 +9224,26 @@ function toggleSearch(module) {
             // Fokus auf Input setzen
             const input = searchContainer.querySelector('.search-input');
             if (input) {
+                input.onkeydown = (event) => handleSearchInputKeydown(module, event);
                 input.focus();
                 input.value = '';
                 filterStudents(module); // Leere Liste anzeigen
             }
         }
+    }
+}
+
+function handleSearchInputKeydown(module, event) {
+    if (event.key !== 'Enter') return;
+
+    event.preventDefault();
+
+    const suggestions = document.getElementById(`search-suggestions-${module}`);
+    if (!suggestions) return;
+
+    const firstMatch = suggestions.querySelector('li:not(.no-results)');
+    if (firstMatch) {
+        firstMatch.click();
     }
 }
 
@@ -9279,6 +9294,7 @@ function filterStudents(module) {
         filteredStudents.forEach(student => {
             const li = document.createElement('li');
             li.textContent = student.name;
+            li.dataset.studentIndex = String(student.index);
             li.onclick = () => selectStudent(module, student.index);
             suggestions.appendChild(li);
         });
