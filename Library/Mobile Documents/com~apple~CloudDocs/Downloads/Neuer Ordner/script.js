@@ -2591,6 +2591,11 @@ function deleteHWHistoryEntry(studentIndex, entryId) {
                 renderHWHistory(studentIndex);
                 renderHomeworkModule();
                 
+                // Sitzplan-Visualisierung (Blau-Färbung) aktualisieren
+                if (activeModule === 'sitzplan') {
+                    updateSchulplanerDotsForStudent(studentIndex);
+                }
+                
                 // Modal-Statistiken aktualisieren (auch wenn das Modal ausgeblendet ist)
                 const statsHomework = safeGetElement(`stats-homework-${studentIndex}`);
                 const statsMaterials = safeGetElement(`stats-materials-${studentIndex}`);
@@ -3108,19 +3113,28 @@ function updateSchulplanerDotsForStudent(studentIndex) {
     const activeSchulplanerCount = student.hwHistory ? student.hwHistory.filter(entry => 
         entry.type === 'schulplaner' && entry.active !== false
     ).length : 0;
+
+    // Anzahl der aktiven Abschreibtext-Einträge zählen
+    const activeAbschreibtextCount = student.hwHistory ? student.hwHistory.filter(entry => 
+        entry.type === 'abschreibtext' && entry.active !== false
+    ).length : 0;
     
     // Nur im Sitzplan-Modul aktualisieren
     if (activeModule === 'sitzplan') {
-        // Alle Tische durchgehen und den passenden aktualisieren
         const desks = document.querySelectorAll('#sitzplan-module .desk');
         desks.forEach(deskElement => {
             const deskLabel = deskElement.querySelector('.desk-label');
             if (deskLabel && deskLabel.textContent.trim() === student.name) {
-                // Tisch hellblau einfärben
-                if (activeSchulplanerCount > 0) {
+                // Klassen entfernen
+                deskElement.classList.remove('has-schulplaner-entry', 'has-abschreibtext-entry', 'has-both-entries');
+
+                // Neu setzen
+                if (activeSchulplanerCount > 0 && activeAbschreibtextCount > 0) {
+                    deskElement.classList.add('has-both-entries');
+                } else if (activeSchulplanerCount > 0) {
                     deskElement.classList.add('has-schulplaner-entry');
-                } else {
-                    deskElement.classList.remove('has-schulplaner-entry');
+                } else if (activeAbschreibtextCount > 0) {
+                    deskElement.classList.add('has-abschreibtext-entry');
                 }
             }
         });
@@ -8371,8 +8385,8 @@ function renderDesk(desk) {
             entry.type === 'abschreibtext' && entry.active !== false
         ).length : 0;
         
-        // Tisch einfärben - nur im Bewertungsmodus
-        if (cls.sitzplan.currentMode === 'evaluation') {
+        // Tisch einfärben - nur im Bewertungs- und Mündlich-Modus
+        if (cls.sitzplan.currentMode === 'evaluation' || cls.sitzplan.currentMode === 'oral') {
             if (activeSchulplanerCount > 0 && activeAbschreibtextCount > 0) {
                 deskElement.classList.add('has-both-entries');
             } else if (activeSchulplanerCount > 0) {
