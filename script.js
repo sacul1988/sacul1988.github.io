@@ -3537,6 +3537,9 @@ function updateGradeLocally(studentIndex, projectIndex, grade) {
     // Projektnoten in der Kopfzeile aktualisieren
     showProjectGradesInCollapsedView();
     
+    // Sicherstellen, dass die globale Referenz für Cloud-Sync aktuell ist
+    window.classes = classes;
+    
     // Daten speichern
     saveData();
 }
