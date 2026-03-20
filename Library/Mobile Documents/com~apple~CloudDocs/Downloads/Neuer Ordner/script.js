@@ -7098,45 +7098,16 @@ function importBackupFile(event) {
             })
             .then((willImport) => {
                 if (willImport) {
-                    // Daten übernehmen
-                    classes = importedClasses;
-                    
-                    // In localStorage speichern
-                    localStorage.setItem('classes', JSON.stringify(classes));
+                    // Daten in localStorage speichern
+                    localStorage.setItem('classes', JSON.stringify(importedClasses));
                     
                     // Mündliche Gewichtung übernehmen, falls vorhanden
                     if (importData.oralWeight) {
-                        const oralWeightElement = safeGetElement('oralWeightValue');
-                        if (oralWeightElement) {
-                            oralWeightElement.innerText = importData.oralWeight;
-                            
-                            // Aktiven Button markieren
-                            const weightButtons = document.querySelectorAll('.weight-btn');
-                            if (weightButtons) {
-                                weightButtons.forEach(btn => {
-                                    btn.classList.remove('active-weight');
-                                });
-                                
-                                const weightButton = document.querySelector(`.weight-btn[onclick="setWeight(${importData.oralWeight})"]`);
-                                if (weightButton) {
-                                    weightButton.classList.add('active-weight');
-                                }
-                            }
-                            
-                            localStorage.setItem('oralWeight', importData.oralWeight);
-                        }
+                        localStorage.setItem('oralWeight', importData.oralWeight);
                     }
                     
-                    // Adressen-Daten übernehmen, falls vorhanden
-                    
-                    // Startseite anzeigen und UI aktualisieren
-                    if (typeof triggerCloudSync === 'function') {
-                        triggerCloudSync();
-                    }
-                    if (typeof renderClassesGrid === 'function') {
-                        renderClassesGrid();
-                    }
-                    showPage('home');
+                    // Seite neu laden, um alle Zustände sauber zu initialisieren
+                    location.reload();
                 }
             });
         } catch (error) {
