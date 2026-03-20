@@ -9772,7 +9772,7 @@ function renderZeugnisModule() {
         window._zeugnisAutosaveTimers[studentIndex] = setTimeout(() => {
             saveStudentNotes(studentIndex);
             delete window._zeugnisAutosaveTimers[studentIndex];
-        }, 350);
+        }, 1200);
     };
     
     container.addEventListener('keydown', zeugnisListener);
@@ -9797,6 +9797,11 @@ function saveStudentNotes(studentIndex) {
     const summaryNotesText = summaryTextarea.value;
     
     const student = classes[activeClassId].students[studentIndex];
+
+    const hasChanges = student.leftNotes !== leftNotesText ||
+                       student.rightNotes !== rightNotesText ||
+                       student.summaryNotes !== summaryNotesText;
+    if (!hasChanges) return;
     
     student.leftNotes = leftNotesText;
     student.rightNotes = rightNotesText;
