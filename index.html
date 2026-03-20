@@ -1065,10 +1065,27 @@
             }
         };
 
+        window.triggerCloudSyncDebounced = (delayMs = 2500, specificStudentIndex = null) => {
+            if (!auth.currentUser) return;
+
+            if (window._cloudSyncDebounceTimer) {
+                clearTimeout(window._cloudSyncDebounceTimer);
+            }
+
+            window._cloudSyncDebounceTimer = setTimeout(() => {
+                window._cloudSyncDebounceTimer = null;
+                window.saveDataToCloud(specificStudentIndex);
+            }, delayMs);
+        };
+
         // Sofort-Sync-Wächter: Reagiert auf JEDE lokale Speicherung
         window.addEventListener('storage', (e) => {
             if (e.key === 'classes') {
-                window.saveDataToCloud();
+                if (typeof window.triggerCloudSyncDebounced === 'function') {
+                    window.triggerCloudSyncDebounced(2500);
+                } else {
+                    window.saveDataToCloud();
+                }
             }
         });
 

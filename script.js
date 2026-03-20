@@ -491,6 +491,14 @@ function getStudentsWithoutHomeworkEntryToday() {
 
 // Seitennavigation
 function showPage(page, classId = null) {
+    const previousClassId = activeClassId;
+
+    // Vor Seiten-/Klassenwechsel offene Zeugnis-Änderungen der aktuellen Klasse sichern.
+    if (previousClassId !== null && (page !== 'class' || classId !== previousClassId)) {
+        flushPendingZeugnisAutosaves({ classId: previousClassId, persist: true });
+        saveFocusedZeugnisTextarea(previousClassId);
+    }
+
     // Sortier-Modus deaktivieren und Button immer zurücksetzen
     if (page === 'class') {
         isClassSortingMode = false;
@@ -553,8 +561,10 @@ function showPage(page, classId = null) {
     if (page === 'home') {
         renderClassesGrid();
     } else if (page === 'class') {
-        // Beim Wechsel in eine Klasse einmalig einen Cloud-Check erzwingen
-        if (typeof window.saveDataToCloud === 'function') {
+        // Cloud-Sync beim Klassenwechsel nur gedrosselt anstoßen.
+        if (typeof window.triggerCloudSyncDebounced === 'function') {
+            window.triggerCloudSyncDebounced(2000);
+        } else if (typeof window.saveDataToCloud === 'function') {
             window.saveDataToCloud();
         }
         renderModuleContent();
@@ -564,11 +574,13 @@ function showPage(page, classId = null) {
 // Modul wechseln
 function showModule(module) {
     // Vor dem Modulwechsel offene Zeugnis-Eingaben sichern.
-    flushPendingZeugnisAutosaves();
+    flushPendingZeugnisAutosaves({ persist: true });
     saveFocusedZeugnisTextarea();
 
-    // Turbo-Sync: Bei jedem Tab-Wechsel sicherstellen, dass wir die aktuellsten Daten haben/teilen
-    if (typeof window.saveDataToCloud === 'function') {
+    // Bei Tab-Wechsel Cloud-Sync nur gedrosselt planen.
+    if (typeof window.triggerCloudSyncDebounced === 'function') {
+        window.triggerCloudSyncDebounced(2000);
+    } else if (typeof window.saveDataToCloud === 'function') {
         window.saveDataToCloud();
     }
     
@@ -619,9 +631,10 @@ function getStudentIndexFromZeugnisTextareaId(textareaId) {
     return Number.isNaN(parsed) ? -1 : parsed;
 }
 
-function saveFocusedZeugnisTextarea() {
+function saveFocusedZeugnisTextarea(expectedClassId = null) {
     const activeElement = document.activeElement;
     if (!isZeugnisNotesTextarea(activeElement)) return;
+    if (expectedClassId !== null && expectedClassId !== activeClassId) return;
 
     const studentIndex = getStudentIndexFromZeugnisTextareaId(activeElement.id);
     if (studentIndex >= 0) {
@@ -629,15 +642,23 @@ function saveFocusedZeugnisTextarea() {
     }
 }
 
-function flushPendingZeugnisAutosaves() {
+function flushPendingZeugnisAutosaves(options = {}) {
+    const persist = options.persist === true;
+    const targetClassId = options.classId;
     const timers = window._zeugnisAutosaveTimers;
     if (!timers) return;
 
     Object.keys(timers).forEach(key => {
-        clearTimeout(timers[key]);
-        const studentIndex = parseInt(key, 10);
-        if (!Number.isNaN(studentIndex)) {
-            saveStudentNotes(studentIndex);
+        const timerEntry = timers[key];
+        if (!timerEntry) return;
+
+        if (targetClassId !== undefined && timerEntry.classId !== targetClassId) {
+            return;
+        }
+
+        clearTimeout(timerEntry.timerId);
+        if (persist && timerEntry.classId === activeClassId) {
+            saveStudentNotes(timerEntry.studentIndex);
         }
         delete timers[key];
     });
@@ -780,7 +801,9 @@ function saveData(specificStudentIndex = null) {
 
         // Cloud-Sync (wenn eingeloggt)
         console.log('Rufe Cloud-Sync auf...');
-        if (typeof window.saveDataToCloud === 'function' && window.firebaseAuth && window.firebaseAuth.currentUser) {
+        if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.triggerCloudSyncDebounced === 'function') {
+            window.triggerCloudSyncDebounced(2500, specificStudentIndex);
+        } else if (typeof window.saveDataToCloud === 'function' && window.firebaseAuth && window.firebaseAuth.currentUser) {
             window.saveDataToCloud(specificStudentIndex);
         } else if (typeof window.triggerCloudSync === 'function') {
             window.triggerCloudSync();
@@ -9764,15 +9787,24 @@ function renderZeugnisModule() {
             window._zeugnisAutosaveTimers = {};
         }
 
-        const existingTimer = window._zeugnisAutosaveTimers[studentIndex];
-        if (existingTimer) {
-            clearTimeout(existingTimer);
+        const currentClassId = activeClassId;
+        const timerKey = `${currentClassId}:${studentIndex}`;
+
+        const existingTimer = window._zeugnisAutosaveTimers[timerKey];
+        if (existingTimer && existingTimer.timerId) {
+            clearTimeout(existingTimer.timerId);
         }
 
-        window._zeugnisAutosaveTimers[studentIndex] = setTimeout(() => {
+        const timerId = setTimeout(() => {
             saveStudentNotes(studentIndex);
-            delete window._zeugnisAutosaveTimers[studentIndex];
+            delete window._zeugnisAutosaveTimers[timerKey];
         }, 1200);
+
+        window._zeugnisAutosaveTimers[timerKey] = {
+            timerId,
+            classId: currentClassId,
+            studentIndex
+        };
     };
     
     container.addEventListener('keydown', zeugnisListener);
