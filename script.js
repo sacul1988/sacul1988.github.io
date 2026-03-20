@@ -495,7 +495,6 @@ function showPage(page, classId = null) {
 
     // Vor Seiten-/Klassenwechsel offene Zeugnis-Änderungen der aktuellen Klasse sichern.
     if (previousClassId !== null && (page !== 'class' || classId !== previousClassId)) {
-        flushPendingZeugnisAutosaves({ classId: previousClassId, persist: true });
         saveFocusedZeugnisTextarea(previousClassId);
     }
 
@@ -574,7 +573,6 @@ function showPage(page, classId = null) {
 // Modul wechseln
 function showModule(module) {
     // Vor dem Modulwechsel offene Zeugnis-Eingaben sichern.
-    flushPendingZeugnisAutosaves({ persist: true });
     saveFocusedZeugnisTextarea();
 
     // Bei Tab-Wechsel Cloud-Sync nur gedrosselt planen.
@@ -640,28 +638,6 @@ function saveFocusedZeugnisTextarea(expectedClassId = null) {
     if (studentIndex >= 0) {
         saveStudentNotes(studentIndex);
     }
-}
-
-function flushPendingZeugnisAutosaves(options = {}) {
-    const persist = options.persist === true;
-    const targetClassId = options.classId;
-    const timers = window._zeugnisAutosaveTimers;
-    if (!timers) return;
-
-    Object.keys(timers).forEach(key => {
-        const timerEntry = timers[key];
-        if (!timerEntry) return;
-
-        if (targetClassId !== undefined && timerEntry.classId !== targetClassId) {
-            return;
-        }
-
-        clearTimeout(timerEntry.timerId);
-        if (persist && timerEntry.classId === activeClassId) {
-            saveStudentNotes(timerEntry.studentIndex);
-        }
-        delete timers[key];
-    });
 }
 
 // Diese Funktion dient als Verzweigung zu den verschiedenen Modulen
@@ -9741,9 +9717,6 @@ function renderZeugnisModule() {
         if (oldListeners.keydown) {
             container.removeEventListener('keydown', oldListeners.keydown);
         }
-        if (oldListeners.input) {
-            container.removeEventListener('input', oldListeners.input);
-        }
     }
     
     // Neuer Event-Listener für automatische Aufzählungszeichen (Enter-Taste)
@@ -9768,50 +9741,21 @@ function renderZeugnisModule() {
                     
                     const newPos = start + insertText.length;
                     textarea.selectionStart = textarea.selectionEnd = newPos;
-                }
 
-                // Bei Enter in jedem Fall speichern
-                saveStudentNotes(studentIndex);
+                    // Linke/rechte Notizen speichern wir direkt nach dem manuellen Zeilenumbruch.
+                    saveStudentNotes(studentIndex);
+                } else {
+                    // In der Zusammenfassung die neue Zeile zuerst vom Browser einfügen lassen,
+                    // dann den aktualisierten Text speichern.
+                    setTimeout(() => saveStudentNotes(studentIndex), 0);
+                }
             }
         }
     };
-
-    // Während der Eingabe regelmäßig speichern, damit Tab-Wechsel oder Re-Render nichts verlieren.
-    const zeugnisInputListener = function(event) {
-        if (!isZeugnisNotesTextarea(event.target)) return;
-
-        const studentIndex = getStudentIndexFromZeugnisTextareaId(event.target.id);
-        if (studentIndex < 0) return;
-
-        if (!window._zeugnisAutosaveTimers) {
-            window._zeugnisAutosaveTimers = {};
-        }
-
-        const currentClassId = activeClassId;
-        const timerKey = `${currentClassId}:${studentIndex}`;
-
-        const existingTimer = window._zeugnisAutosaveTimers[timerKey];
-        if (existingTimer && existingTimer.timerId) {
-            clearTimeout(existingTimer.timerId);
-        }
-
-        const timerId = setTimeout(() => {
-            saveStudentNotes(studentIndex);
-            delete window._zeugnisAutosaveTimers[timerKey];
-        }, 1200);
-
-        window._zeugnisAutosaveTimers[timerKey] = {
-            timerId,
-            classId: currentClassId,
-            studentIndex
-        };
-    };
     
     container.addEventListener('keydown', zeugnisListener);
-    container.addEventListener('input', zeugnisInputListener);
     container._zeugnisListeners = {
-        keydown: zeugnisListener,
-        input: zeugnisInputListener
+        keydown: zeugnisListener
     };
 }
 
