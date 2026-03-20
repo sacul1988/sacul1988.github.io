@@ -2558,18 +2558,23 @@ function deleteHWHistoryEntry(studentIndex, entryId) {
         })
         .then((willDelete) => {
             if (willDelete) {
+                // Eintrag erneut suchen, da sich das Array durch Mehrfachklicks verschoben haben könnte
+                const currentIndex = student.hwHistory.findIndex(e => e.id === entryId);
+                if (currentIndex === -1) return;
+
+                const entry = student.hwHistory[currentIndex];
+                const entryType = entry.type;
+
                 // Spezielle Behandlung für aktive Markierungen
-                const entry = student.hwHistory[entryIndex];
                 if (entryType === 'schulplaner' && entry.active !== false) {
                     // Schulplaner Markierung deaktivieren
-                    // (wird automatisch durch Entfernung des Eintrags geschehen)
                 } else if (entryType === 'abschreibtext' && entry.active !== false) {
                     // Abschreibtext Markierung deaktivieren
                     student.abschreibtextActive = false;
                 }
                 
                 // Eintrag entfernen
-                student.hwHistory.splice(entryIndex, 1);
+                student.hwHistory.splice(currentIndex, 1);
                 
                 // Entsprechenden Zähler reduzieren
                 if (entryType === 'homework') {
