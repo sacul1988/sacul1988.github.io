@@ -8503,6 +8503,9 @@ function renderDesk(desk) {
                 classes[activeClassId].sitzplan.desks[deskIndex].x = desk.x;
                 classes[activeClassId].sitzplan.desks[deskIndex].y = desk.y;
                 saveData();
+                if (typeof window.flushCloudSyncNow === 'function') {
+                    window.flushCloudSyncNow();
+                }
             }
         }
 
@@ -8526,6 +8529,9 @@ function renderDesk(desk) {
                 classes[activeClassId].sitzplan.desks[deskIndex].x = desk.x;
                 classes[activeClassId].sitzplan.desks[deskIndex].y = desk.y;
                 saveData();
+                if (typeof window.flushCloudSyncNow === 'function') {
+                    window.flushCloudSyncNow();
+                }
             }
         }
 

@@ -1087,6 +1087,17 @@
             }, delayMs);
         };
 
+        window.flushCloudSyncNow = (specificStudentIndex = null) => {
+            if (!auth.currentUser) return;
+
+            if (window._cloudSyncDebounceTimer) {
+                clearTimeout(window._cloudSyncDebounceTimer);
+                window._cloudSyncDebounceTimer = null;
+            }
+
+            window.saveDataToCloud(specificStudentIndex);
+        };
+
         // Sofort-Sync-Wächter: Reagiert auf JEDE lokale Speicherung
         window.addEventListener('storage', (e) => {
             if (e.key === 'classes') {
