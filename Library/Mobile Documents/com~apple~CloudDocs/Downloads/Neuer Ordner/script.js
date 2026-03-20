@@ -769,6 +769,7 @@ function loadData() {
             if (Array.isArray(parsedClasses)) {
                 classes = parsedClasses;
                 AppState.classes = classes; // AppState synchron halten
+                window.classes = classes; // Explizit für andere Skripte verfügbar machen
 
                 // Stelle sicher, dass alle erforderlichen Eigenschaften vorhanden sind
                 classes.forEach(cls => {
