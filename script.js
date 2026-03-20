@@ -8425,6 +8425,7 @@ function renderDesk(desk) {
         
         isDragging = true;
         window.isDraggingDesk = true; // Globaler Flag für Sync-Sperre
+        window._lastDeskMoveTime = Date.now();
         startX = e.clientX;
         startY = e.clientY;
         startLeft = desk.x;
@@ -8440,6 +8441,7 @@ function renderDesk(desk) {
         
         isDragging = true;
         window.isDraggingDesk = true; // Globaler Flag für Sync-Sperre
+        window._lastDeskMoveTime = Date.now();
         const touch = e.touches[0];
         startX = touch.clientX;
         startY = touch.clientY;
@@ -8493,11 +8495,7 @@ function renderDesk(desk) {
     // Mouse Up
     document.addEventListener('mouseup', () => {
         if (!isDragging) return;
-        
-        isDragging = false;
-        window.isDraggingDesk = false; // Sync-Sperre aufheben
-        deskElement.style.cursor = 'grab';
-        
+
         // Speichere die neue Position in der Sitzplan-Datenstruktur
         if (classes[activeClassId] && classes[activeClassId].sitzplan && classes[activeClassId].sitzplan.desks) {
             const deskIndex = classes[activeClassId].sitzplan.desks.findIndex(d => d.id === desk.id);
@@ -8507,15 +8505,20 @@ function renderDesk(desk) {
                 saveData();
             }
         }
+
+        // Erst nach dem Speichern Drag-Status freigeben, damit Realtime-Updates nicht dazwischenfunken.
+        isDragging = false;
+        deskElement.style.cursor = 'grab';
+        window._lastDeskMoveTime = Date.now();
+        setTimeout(() => {
+            window.isDraggingDesk = false; // Sync-Sperre leicht verzögert aufheben
+        }, 300);
     });
     
     // Touch End
     document.addEventListener('touchend', () => {
         if (!isDragging) return;
-        
-        isDragging = false;
-        window.isDraggingDesk = false; // Sync-Sperre aufheben
-        
+
         // Speichere die neue Position in der Sitzplan-Datenstruktur
         if (classes[activeClassId] && classes[activeClassId].sitzplan && classes[activeClassId].sitzplan.desks) {
             const deskIndex = classes[activeClassId].sitzplan.desks.findIndex(d => d.id === desk.id);
@@ -8525,6 +8528,13 @@ function renderDesk(desk) {
                 saveData();
             }
         }
+
+        // Erst nach dem Speichern Drag-Status freigeben, damit Realtime-Updates nicht dazwischenfunken.
+        isDragging = false;
+        window._lastDeskMoveTime = Date.now();
+        setTimeout(() => {
+            window.isDraggingDesk = false; // Sync-Sperre leicht verzögert aufheben
+        }, 300);
     });
     
     // Klick-Event für Auswahl im Bewertungsmodus

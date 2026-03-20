@@ -976,6 +976,15 @@
                                     return true;
                                 }
 
+                                // Kurz nach einem Sitzplan-Drag keine Realtime-UI-Updates erzwingen,
+                                // damit ein gerade verschobener Tisch nicht zurückspringt.
+                                const lastDeskMove = window._lastDeskMoveTime || 0;
+                                if (now - lastDeskMove < 2000) {
+                                    console.log("Realtime Update: Kurz nach Sitzplan-Drag. UI-Refresh unterdrückt.");
+                                    if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Synchronisiert (Sitzplan)';
+                                    return true;
+                                }
+
                                 // Spezialbehandlung für Zeugnis-Modul: Wenn der Nutzer gerade schreibt, NICHT das UI neu rendern
                                 // Wir prüfen das global, bevor wir irgendwelche Render-Funktionen aufrufen
                                 const activeElement = document.activeElement;
