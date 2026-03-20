@@ -1045,20 +1045,15 @@
                 
                 // Wir nutzen merge: true, um nur Teile des Dokuments zu aktualisieren
                 let data = {
-                    lastUpdate: timestamp
+                    lastUpdate: timestamp,
+                    // Wichtig: Immer das komplette classes-Array senden.
+                    // Teilupdates per "classes.<index>" sind bei Arrays in Firestore unzuverlässig
+                    // und führten dazu, dass Zeugnis-Notizen nicht konsistent gespeichert wurden.
+                    classes: window.classes || (window.AppState ? window.AppState.classes : [])
                 };
 
-                // Wenn ein spezifischer Student (und damit implizit eine aktive Klasse) angegeben ist
-                if (specificStudentIndex !== null && typeof activeClassId !== 'undefined' && activeClassId !== null) {
-                    const student = window.classes[activeClassId].students[specificStudentIndex];
-                    // Wir aktualisieren gezielt nur diesen einen Studenten im Array
-                    // Firestore unterstützt leider kein direktes Update eines Array-Index per Key-Path wie "classes.0.students.5"
-                    // Daher schicken wir das komplette Objekt der aktuellen Klasse, aber sparen uns andere Klassen
-                    data[`classes.${activeClassId}`] = window.classes[activeClassId];
-                    console.log(`Cloud Sync: Optimiere Upload für Student ${specificStudentIndex} in Klasse ${activeClassId}`);
-                } else {
-                    // Fallback: Alles speichern (z.B. neue Klasse angelegt)
-                    data.classes = window.classes || (window.AppState ? window.AppState.classes : []);
+                if (specificStudentIndex !== null) {
+                    console.log(`Cloud Sync: Vollständiger Upload (Student-Hinweis: ${specificStudentIndex})`);
                 }
 
                 await setDoc(userDocRef, data, { merge: true });

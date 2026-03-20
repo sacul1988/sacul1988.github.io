@@ -9789,6 +9789,7 @@ function saveStudentNotes(studentIndex) {
     const rightTextarea = safeGetElement(`notes-right-${studentIndex}`);
     const summaryTextarea = safeGetElement(`notes-summary-${studentIndex}`);
     if (!leftTextarea || !rightTextarea || !summaryTextarea) return;
+    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
     
     // KEIN .trim() beim Speichern, sonst werden Zeilenumbrüche am Ende (Enter) gelöscht
     const leftNotesText = leftTextarea.value;
@@ -9801,7 +9802,8 @@ function saveStudentNotes(studentIndex) {
     student.rightNotes = rightNotesText;
     student.summaryNotes = summaryNotesText;
     
-    saveData(studentIndex);
+    // Volles Speichern ist robuster für lokale Persistenz + Cloud-Sync.
+    saveData();
 }
 
 // Schüler-Karteikarte exportieren
