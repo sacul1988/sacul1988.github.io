@@ -7143,6 +7143,8 @@ function importBackupFile(event) {
                 if (willImport) {
                     // Daten übernehmen
                     classes = importData.classes;
+                    AppState.classes = importData.classes;
+                    window.classes = importData.classes;
                     
                     // In localStorage speichern
                     localStorage.setItem('classes', JSON.stringify(classes));
@@ -7172,10 +7174,14 @@ function importBackupFile(event) {
                     
                     // Adressen-Daten übernehmen, falls vorhanden
                     
-                    // Startseite anzeigen und UI aktualisieren
+                    // UI aktualisieren und Cloud-Sync triggern
+                    renderClassesGrid();
+                    
                     if (typeof triggerCloudSync === 'function') {
                         triggerCloudSync();
                     }
+                    
+                    swal("Erfolg", "Daten wurden erfolgreich importiert!", "success");
                     showPage('home');
                 }
             });
