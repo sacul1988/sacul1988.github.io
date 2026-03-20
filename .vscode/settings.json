@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^git add \\. && git commit -m \"Auto-sync data on login/logout and clear local cache after logout\" && git push$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

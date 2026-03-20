@@ -903,9 +903,32 @@
 
         window.handleLogout = async () => {
             try {
+                const status = document.getElementById('login-status');
+                if (status) {
+                    status.textContent = 'Sichere Daten und melde ab...';
+                    status.style.display = 'block';
+                    status.className = 'text-info';
+                }
+
+                // 1. Letzte Änderungen noch einmal explizit in die Cloud pushen
+                if (typeof window.saveDataToCloud === 'function') {
+                    console.log("Logout: Letzte Synchronisation vor Abmeldung...");
+                    await window.saveDataToCloud();
+                }
+
+                // 2. Abmelden
                 await signOut(auth);
+                
+                // 3. Lokalen Speicher leeren (Sicherheit & Sauberer Neustart)
+                localStorage.removeItem('classes');
+                localStorage.removeItem('lastUpdate');
+                localStorage.removeItem('activeClassId');
+                localStorage.removeItem('activeModule');
+                localStorage.removeItem('currentPage');
+                
                 location.reload();
             } catch (e) {
+                console.error("Logout Fehler:", e);
                 location.reload();
             }
         };
@@ -917,6 +940,41 @@
                 
                 // Realtime Sync initialisieren
                 setupRealtimeSync(user.uid);
+                
+                // Neu: Sofort beim Login einen vollen Daten-Refresh aus der Cloud erzwingen (Initialladung)
+                const statusText = document.querySelector('#cloud-status-bar span');
+                if (statusText) statusText.innerHTML = '<i class="fas fa-sync fa-spin"></i> Initialisiere Cloud-Daten...';
+                
+                try {
+                    const userDocRef = doc(db, "userData", user.uid);
+                    const docSnap = await getDoc(userDocRef);
+                    
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data();
+                        console.log("Login-Initialisierung: Lade Cloud-Stand in lokalen Speicher.");
+                        
+                        localStorage.setItem('classes', JSON.stringify(cloudData.classes));
+                        localStorage.setItem('lastUpdate', cloudData.lastUpdate || "0");
+                        
+                        // Brücke zu script.js
+                        if (typeof window.setClasses === 'function') {
+                            window.setClasses(cloudData.classes);
+                        }
+                        
+                        // Hauptansicht neu rendern
+                        if (typeof window.renderClassesGrid === 'function') {
+                            window.renderClassesGrid();
+                        }
+                        
+                        if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Daten geladen (Init)';
+                    } else {
+                        console.log("Login-Initialisierung: Keine Cloud-Daten gefunden (Neues Konto?)");
+                        if (statusText) statusText.innerHTML = '<i class="fas fa-check-double text-success"></i> Bereit';
+                    }
+                } catch (error) {
+                    console.error("Login-Sync Fehler:", error);
+                    if (statusText) statusText.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i> Sync-Fehler bei Initialisierung';
+                }
             } else {
                 document.getElementById('login-container').style.display = 'flex';
                 document.getElementById('cloud-status-bar').style.display = 'none';
