@@ -233,20 +233,6 @@ header h1 {
     margin-left: auto;
 }
 
-.student-name-cell {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.student-name-text {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 /* Collapsible header styles */
 .collapsible-header {
     cursor: pointer !important;

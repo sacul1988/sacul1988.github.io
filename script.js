@@ -1619,10 +1619,7 @@ function renderStudentsModule() {
         
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td class="student-name-cell ${student.learningSupport ? 'learning-support' : ''}">
-                <span class="student-name-text">${student.name}</span>
-                <button class="btn btn-sm btn-light" onclick="scrollToTopOfStudentList()">Zurück</button>
-            </td>
+            <td class="${student.learningSupport ? 'learning-support' : ''}">${student.name}</td>
             <td style="text-align: center;">
                 <input type="checkbox" ${student.learningSupport ? 'checked' : ''} onclick="toggleLearningSupport(${index}, this)">
             </td>
@@ -1650,13 +1647,6 @@ function renderStudentsModule() {
     // Inhalt auf einmal austauschen
     studentsTable.innerHTML = '';
     studentsTable.appendChild(fragment);
-}
-
-function scrollToTopOfStudentList() {
-    const container = document.querySelector('#schueler-module .student-list-container');
-    if (container) {
-        container.scrollTo({ top: 0, behavior: 'smooth' });
-    }
 }
 
 // Schüler hinzufügen
