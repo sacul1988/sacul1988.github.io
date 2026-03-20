@@ -7133,6 +7133,9 @@ function importBackupFile(event) {
                     if (typeof triggerCloudSync === 'function') {
                         triggerCloudSync();
                     }
+                    if (typeof renderClassesGrid === 'function') {
+                        renderClassesGrid();
+                    }
                     showPage('home');
                 }
             });
