@@ -2252,19 +2252,19 @@ function increaseHomeworkCounter(studentIndex, counterType) {
     // Entsprechenden Zähler erhöhen
     let newValue;
     if (counterType === 'homework') {
-        if (classes[activeClassId].students[originalIndex].homework === undefined) {
+        if (typeof classes[activeClassId].students[originalIndex].homework !== 'number') {
             classes[activeClassId].students[originalIndex].homework = 0;
         }
         classes[activeClassId].students[originalIndex].homework++;
         newValue = classes[activeClassId].students[originalIndex].homework;
     } else if (counterType === 'materials') {
-        if (classes[activeClassId].students[originalIndex].materials === undefined) {
+        if (typeof classes[activeClassId].students[originalIndex].materials !== 'number') {
             classes[activeClassId].students[originalIndex].materials = 0;
         }
         classes[activeClassId].students[originalIndex].materials++;
         newValue = classes[activeClassId].students[originalIndex].materials;
     } else if (counterType === 'schulplaner') {
-        if (classes[activeClassId].students[originalIndex].schulplaner === undefined) {
+        if (typeof classes[activeClassId].students[originalIndex].schulplaner !== 'number') {
             classes[activeClassId].students[originalIndex].schulplaner = 0;
         }
         classes[activeClassId].students[originalIndex].schulplaner++;
@@ -8699,12 +8699,12 @@ function showEvaluationPanel(desk) {
                 <div class="stats-grid">
                     <div class="stat-item stat-item-purple">
                         <button class="invisible-history-btn" onclick="showHWHistoryModal(currentEvaluationStudentIndex)"></button>
-                        <div class="stat-value" id="stats-homework-${desk.studentIndex}">${student.homework || 0}</div>
+                        <div class="stat-value" id="stats-homework-${desk.studentIndex}">${typeof student.homework === 'number' ? student.homework : 0}</div>
                         <div>Hausaufgaben</div>
                     </div>
                     <div class="stat-item stat-item-orange">
                         <button class="invisible-history-btn" onclick="showHWHistoryModal(currentEvaluationStudentIndex)"></button>
-                        <div class="stat-value" id="stats-materials-${desk.studentIndex}">${student.materials || 0}</div>
+                        <div class="stat-value" id="stats-materials-${desk.studentIndex}">${typeof student.materials === 'number' ? student.materials : 0}</div>
                         <div>Material</div>
                     </div>
                 </div>
