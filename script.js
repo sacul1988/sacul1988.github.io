@@ -9713,11 +9713,11 @@ function renderZeugnisModule() {
         }
         
         // Zähler
-        const homework = student.homework || 0;
-        const materials = student.materials || 0;
-        const schulplaner = student.schulplaner || 0;
-        const positive = student.participation ? student.participation.positive || 0 : 0;
-        const negative = student.participation ? student.participation.negative || 0 : 0;
+        const homework = typeof student.homework === 'number' ? student.homework : 0;
+        const materials = typeof student.materials === 'number' ? student.materials : 0;
+        const schulplaner = typeof student.schulplaner === 'number' ? student.schulplaner : 0;
+        const positive = student.participation ? (typeof student.participation.positive === 'number' ? student.participation.positive : 0) : 0;
+        const negative = student.participation ? (typeof student.participation.negative === 'number' ? student.participation.negative : 0) : 0;
         
         // Abschreibtext und Nachsitzen zählen
         const abschreibtextCount = student.hwHistory ? student.hwHistory.filter(entry => entry.type === 'abschreibtext').length : 0;
