@@ -783,8 +783,11 @@ function saveData(specificStudentIndex = null) {
 
         // Cloud-Sync (wenn eingeloggt)
         console.log('Rufe Cloud-Sync auf...');
-        if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.triggerCloudSyncDebounced === 'function') {
-            window.triggerCloudSyncDebounced(2500, specificStudentIndex);
+        if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.flushCloudSyncNow === 'function') {
+            // Sofortige Synchronisation ohne Verzögerung (0.1s wäre 100ms, flushCloudSyncNow ist 0ms)
+            window.flushCloudSyncNow(specificStudentIndex);
+        } else if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.triggerCloudSyncDebounced === 'function') {
+            window.triggerCloudSyncDebounced(100, specificStudentIndex);
         } else if (typeof window.saveDataToCloud === 'function' && window.firebaseAuth && window.firebaseAuth.currentUser) {
             window.saveDataToCloud(specificStudentIndex);
         } else if (typeof window.triggerCloudSync === 'function') {
