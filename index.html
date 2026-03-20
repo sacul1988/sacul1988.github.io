@@ -1098,7 +1098,8 @@
             window.saveDataToCloud(specificStudentIndex);
         };
 
-        // Sofort-Sync-Wächter: Reagiert auf JEDE lokale Speicherung
+        // Sofort-Sync-Wächter entfernt (war für autom. Sync nach 2.5s verantwortlich)
+        /*
         window.addEventListener('storage', (e) => {
             if (e.key === 'classes') {
                 if (typeof window.triggerCloudSyncDebounced === 'function') {
@@ -1108,6 +1109,7 @@
                 }
             }
         });
+        */
 
         // Zusätzlicher globaler Trigger für Skripte
         window.triggerCloudSync = () => {
