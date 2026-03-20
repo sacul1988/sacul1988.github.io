@@ -7081,10 +7081,22 @@ function importBackupFile(event) {
                 if (c.students && Array.isArray(c.students)) {
                     c.students.forEach(s => {
                         // Fehlende Felder initialisieren
-                        if (!s.attendance) s.attendance = [];
+                        if (!s.attendance) s.attendance = (s.attendance === "none") ? [] : [];
                         if (!s.projects) s.projects = [];
                         if (!s.oralGrades) s.oralGrades = [];
-                        if (!s.homework) s.homework = { forgotten: 0, partial: 0, materials: 0, history: [] };
+                        
+                        // Wenn homework eine Zahl ist (altes Format), in Objekt umwandeln
+                        if (typeof s.homework === 'number') {
+                            const val = s.homework;
+                            s.homework = { 
+                                forgotten: val, 
+                                partial: 0, 
+                                materials: typeof s.materials === 'number' ? s.materials : 0, 
+                                history: [] 
+                            };
+                        } else if (!s.homework) {
+                            s.homework = { forgotten: 0, partial: 0, materials: 0, history: [] };
+                        }
                     });
                 }
             });
