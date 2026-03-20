@@ -960,6 +960,11 @@
                             // 3. Lokale Variablen in script.js über die Brücken-Funktion aktualisieren
                             if (typeof window.setClasses === 'function') {
                                 window.setClasses(cloudData.classes);
+                            } else {
+                                // Fallback falls script.js geladen ist aber window.setClasses noch nicht (selten)
+                                if (window.classes) {
+                                    console.log("Realtime Update: Nutze window.classes Fallback.");
+                                }
                             }
                             
                             // UI-Update
@@ -1001,6 +1006,12 @@
                                 if (isUserTypingInZeugnis || isDraggingSitzplan) {
                                     console.log("Realtime Update: Nutzer interagiert gerade (Tippen/Drag). UI-Refresh unterdrückt.");
                                     if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Synchronisiert (Hintergrund)';
+                                    
+                                    // WICHTIG: Auch wenn wir NICHT rendern, müssen wir sicherstellen, dass die Daten 
+                                    // zumindest im Hintergrund für script.js aktuell sind für das nächste Save-Event.
+                                    if (typeof window.setClasses === 'function') {
+                                        window.setClasses(cloudData.classes);
+                                    }
                                     return true;
                                 }
 
@@ -1096,6 +1107,46 @@
             }
 
             window.saveDataToCloud(specificStudentIndex);
+        };
+
+        // Neu: Erzwungener Abgleich mit der Cloud (für Tab-Wechsel)
+        window.forceRefreshFromCloud = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            const statusText = document.querySelector('#cloud-status-bar span');
+            if (statusText) statusText.innerHTML = '<i class="fas fa-sync fa-spin"></i> Lade aktuelle Daten...';
+            
+            try {
+                const userDocRef = doc(db, "userData", user.uid);
+                const docSnap = await getDoc(userDocRef);
+                
+                if (docSnap.exists()) {
+                    const cloudData = docSnap.data();
+                    const localTimestamp = localStorage.getItem('lastUpdate') || "0";
+                    const cloudTimestamp = cloudData.lastUpdate || "0";
+
+                    // Wir aktualisieren hier IMMER die lokalen Daten, um sicher zu gehen,
+                    // dass der Laptop beim Betreten des Zeugnis-Tabs den Stand vom Tablet hat.
+                    console.log("Force Refresh: Cloud-Stand wird geladen...");
+                    
+                    localStorage.setItem('classes', JSON.stringify(cloudData.classes));
+                    localStorage.setItem('lastUpdate', cloudTimestamp);
+                    window.classes = cloudData.classes;
+                    if (window.AppState) window.AppState.classes = cloudData.classes;
+                    
+                    if (typeof window.setClasses === 'function') {
+                        window.setClasses(cloudData.classes);
+                    }
+                    
+                    if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Daten aktuell';
+                    return true;
+                }
+            } catch (error) {
+                console.error("Force Refresh Fehler:", error);
+                if (statusText) statusText.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i> Sync-Fehler';
+            }
+            return false;
         };
 
         // Sofort-Sync-Wächter entfernt (war für autom. Sync nach 2.5s verantwortlich)

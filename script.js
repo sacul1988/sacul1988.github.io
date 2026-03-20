@@ -11,8 +11,15 @@ const AppState = {
     tempOralGrades: [],
     selectedSingleOralGrade: null,
     selectedSingleStudentIndex: null,
-    zeugnisViewMode: 'individual' // 'individual' or 'average'
+    zeugnisViewMode: 'individual', // 'individual' or 'average'
+    isInitialSyncComplete: false // Neu: Sperre für Cloud-Sync beim Start
 };
+
+// Start-Sperre setzen (3 Sekunden), damit Cloud-Daten Zeit zum Laden haben
+setTimeout(() => {
+    AppState.isInitialSyncComplete = true;
+    console.log("App: Initial-Sync-Sperre aufgehoben.");
+}, 3500);
 
 // ===== GLOBALE VARIABLEN (deprecated, use AppState) =====
 // Für Abwärtskompatibilität, aber bevorzuge AppState
@@ -578,6 +585,21 @@ function showModule(module) {
     // Vor dem Modulwechsel offene Zeugnis-Eingaben sichern.
     saveFocusedZeugnisTextarea();
 
+    // Neu: Wenn zum Zeugnis-Tab gewechselt wird, IMMER erst einmal die neuesten Daten aus der Cloud erzwingen
+    if (module === 'zeugnis') {
+        if (typeof window.forceRefreshFromCloud === 'function') {
+            console.log("showModule: Zeugnis-Tab aktiviert. Erzwungener Cloud-Sync gestartet.");
+            
+            window.forceRefreshFromCloud().then(() => {
+                // Modul erst rendern wenn Daten (hoffentlich) da sind
+                console.log("showModule: Refresh beendet, Ansicht wird aktualisiert.");
+                if (typeof renderModuleContent === 'function') {
+                    renderModuleContent();
+                }
+            });
+        }
+    }
+
     // Bei Tab-Wechsel KEIN automatischer Cloud-Sync mehr.
     // Cloud-Sync erfolgt nur bei tatsächlichen Datenänderungen (saveData).
     /* 
@@ -762,6 +784,32 @@ function returnToEvaluationModal() {
 // Daten im localStorage speichern
 function saveData(specificStudentIndex = null) {
     try {
+        // SICHERHEITS-CHECK VOR DEM SPEICHERN:
+        // Prüfen, ob im localStorage zwischenzeitlich (z.B. von index.html Sync) neuere Daten gelandet sind
+        const lastLocalTimestamp = localStorage.getItem('lastUpdate');
+        if (lastLocalTimestamp) {
+            const savedClassesRaw = localStorage.getItem('classes');
+            if (savedClassesRaw) {
+                const savedClasses = JSON.parse(savedClassesRaw);
+                // Wenn wir nicht gerade selbst gespeichert haben, aktualisieren wir unsere lokale Variable
+                // falls die Daten im Storage eine andere Länge oder Schlüsselstruktur haben.
+                // Das verhindert das Überschreiben von Cloud-Updates beim Tab-Wechsel.
+                const now = Date.now();
+                if (now - (window._lastLocalSaveTime || 0) > 3000) {
+                     console.log("saveData: Prüfe auf Hintergrund-Updates...");
+                     // window.classes wurde in index.html bereits aktualisiert, wir ziehen hier nach
+                     if (window.classes) {
+                         const hasCloudChanges = JSON.stringify(window.classes) !== JSON.stringify(classes);
+                         if (hasCloudChanges) {
+                             console.log("saveData: Cloud-Daten im Hintergrund gefunden. Synchronisiere lokal vor Speicherung...");
+                             classes = window.classes;
+                             AppState.classes = classes;
+                         }
+                     }
+                }
+            }
+        }
+
         // Zeitstempel für Synchronisation aktualisieren
         const timestamp = new Date().toISOString();
         localStorage.setItem('lastUpdate', timestamp);
@@ -782,6 +830,12 @@ function saveData(specificStudentIndex = null) {
         }
 
         // Cloud-Sync (wenn eingeloggt)
+        // VERHINDERUNG VON FRÜH-SPEICHERN: Nur synchronisieren wenn Initial-Sync fertig
+        if (!AppState.isInitialSyncComplete) {
+            console.log('App: Blockiere Cloud-Sync während Initialisierungsphase (3.5s).');
+            return;
+        }
+
         console.log('Rufe Cloud-Sync auf...');
         if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.flushCloudSyncNow === 'function') {
             // Sofortige Synchronisation ohne Verzögerung (0.1s wäre 100ms, flushCloudSyncNow ist 0ms)
@@ -9763,16 +9817,16 @@ function renderZeugnisModule() {
                     <h4>Notizen für ${student.name}</h4>
                     <div class="zeugnis-notes-container">
                         <div class="zeugnis-notes-left">
-                            <textarea class="form-control notes-textarea" id="notes-left-${index}" rows="13" placeholder="Linke Notizen..." onblur="saveStudentNotes(${index})">${leftNotes}</textarea>
+                            <textarea class="form-control notes-textarea" id="notes-left-${index}" rows="13" placeholder="Linke Notizen..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</textarea>
                         </div>
                         <div class="zeugnis-notes-right">
-                            <textarea class="form-control notes-textarea" id="notes-right-${index}" rows="13" placeholder="Rechte Notizen..." onblur="saveStudentNotes(${index})">${rightNotes}</textarea>
+                            <textarea class="form-control notes-textarea" id="notes-right-${index}" rows="13" placeholder="Rechte Notizen..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${rightNotes}</textarea>
                         </div>
                     </div>
                 </div>
                 <div class="zeugnis-section summary-section">
                     <h4>Zusammenfassung und Zeugnisnote</h4>
-                    <textarea class="form-control notes-textarea" id="notes-summary-${index}" rows="4" placeholder="Zusammenfassung und Zeugnisnote..." onblur="saveStudentNotes(${index})">${summaryNotes}</textarea>
+                    <textarea class="form-control notes-textarea" id="notes-summary-${index}" rows="4" placeholder="Zusammenfassung und Zeugnisnote..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${summaryNotes}</textarea>
                 </div>
             </div>
         `;
@@ -9841,7 +9895,7 @@ function scrollToTopOfZeugnisModule() {
 }
 
 // Notizen speichern
-function saveStudentNotes(studentIndex) {
+function saveStudentNotes(studentIndex, isDebounced = false) {
     const leftTextarea = safeGetElement(`notes-left-${studentIndex}`);
     const rightTextarea = safeGetElement(`notes-right-${studentIndex}`);
     const summaryTextarea = safeGetElement(`notes-summary-${studentIndex}`);
@@ -9864,8 +9918,21 @@ function saveStudentNotes(studentIndex) {
     student.rightNotes = rightNotesText;
     student.summaryNotes = summaryNotesText;
     
-    // Volles Speichern ist robuster für lokale Persistenz + Cloud-Sync.
-    saveData();
+    // Wenn es ein Live-Update (oninput) ist, nutzen wir einen SEHR KURZEN debounced Sync (500ms)
+    // Das verhält sich dann fast so "stark" wie bei den Noten, schont aber den Cursor beim Tippen.
+    if (isDebounced) {
+        // Lokale Persistenz (localStorage) sofort aktualisieren
+        window.classes = classes;
+        localStorage.setItem('classes', JSON.stringify(classes));
+        
+        // Cloud-Sync SEHR SCHNELL anstoßen (500ms statt 2000ms)
+        if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.triggerCloudSyncDebounced === 'function') {
+            window.triggerCloudSyncDebounced(500, studentIndex);
+        }
+    } else {
+        // Bei onblur oder manuellem Enter: Sofortiges ERZWUNGENES Speichern (exakt wie bei Noten)
+        saveData(studentIndex);
+    }
 }
 
 // Schüler-Karteikarte exportieren
