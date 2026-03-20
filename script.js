@@ -9938,7 +9938,6 @@ function exportStudentCard(studentIndex) {
                 <ul>
                     <li>Hausaufgaben vergessen: ${homework}</li>
                     <li>Material vergessen: ${materials}</li>
-                    <li>Einträge in den Schulplaner: ${schulplaner}</li>
                     <li>Positive Beteiligung: ${positive}</li>
                     <li>Negative Beteiligung: ${negative}</li>
                 </ul>
@@ -10044,7 +10043,6 @@ function exportAllStudentCards() {
                     <ul>
                         <li>Hausaufgaben vergessen: ${homework}</li>
                         <li>Material vergessen: ${materials}</li>
-                        <li>Einträge in den Schulplaner: ${schulplaner}</li>
                         <li>Positive Beteiligung: ${positive}</li>
                         <li>Negative Beteiligung: ${negative}</li>
                     </ul>
