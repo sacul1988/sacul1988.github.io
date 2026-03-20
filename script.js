@@ -9754,8 +9754,8 @@ function renderZeugnisModule() {
                             <div>Material vergessen: ${materials}</div>
                             <div>Positive Beteiligung: ${positive}</div>
                             <div>Negative Beteiligung: ${negative}</div>
-                            <div>Abschreibtext: ${abschreibtextCount}</div>
-                            <div>Nachsitzen: ${nachsitzenCount}</div>
+                            ${abschreibtextCount > 0 ? `<div>Abschreibtext: ${abschreibtextCount}</div>` : ''}
+                            ${nachsitzenCount > 0 ? `<div>Nachsitzen: ${nachsitzenCount}</div>` : ''}
                         </div>
                     </div>
                 </div>
