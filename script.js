@@ -7151,28 +7151,18 @@ function importBackupFile(event) {
                     
                     // Mündliche Gewichtung übernehmen, falls vorhanden
                     if (importData.oralWeight) {
-                        const oralWeightElement = safeGetElement('oralWeightValue');
-                        if (oralWeightElement) {
-                            oralWeightElement.innerText = importData.oralWeight;
-                            
-                            // Aktiven Button markieren
-                            const weightButtons = document.querySelectorAll('.weight-btn');
-                            if (weightButtons) {
-                                weightButtons.forEach(btn => {
-                                    btn.classList.remove('active-weight');
-                                });
-                                
-                                const weightButton = document.querySelector(`.weight-btn[onclick="setWeight(${importData.oralWeight})"]`);
-                                if (weightButton) {
-                                    weightButton.classList.add('active-weight');
-                                }
+                        if (typeof setWeight === 'function') {
+                            setWeight(importData.oralWeight);
+                        } else if (typeof setWeightFromModal === 'function') {
+                            setWeightFromModal(importData.oralWeight);
+                        } else {
+                            const oralWeightElement = safeGetElement('oralWeightValue');
+                            if (oralWeightElement) {
+                                oralWeightElement.innerText = importData.oralWeight;
+                                localStorage.setItem('oralWeight', importData.oralWeight);
                             }
-                            
-                            localStorage.setItem('oralWeight', importData.oralWeight);
                         }
                     }
-                    
-                    // Adressen-Daten übernehmen, falls vorhanden
                     
                     // UI aktualisieren und Cloud-Sync triggern
                     renderClassesGrid();
