@@ -9713,6 +9713,7 @@ function renderZeugnisModule() {
         card.innerHTML = `
             <div class="card-header">
                 <h3>${student.name}</h3>
+                <button class="btn btn-sm btn-light" onclick="scrollToTopOfZeugnisModule()">Zurück</button>
             </div>
             <div class="card-body">
                 <div class="zeugnis-top">
@@ -9799,6 +9800,18 @@ function renderZeugnisModule() {
     container._zeugnisListeners = {
         keydown: zeugnisListener
     };
+}
+
+function scrollToTopOfZeugnisModule() {
+    const zeugnisModule = document.getElementById('zeugnis-module');
+    if (zeugnisModule) {
+        zeugnisModule.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    const zeugnisContainer = document.getElementById('zeugnis-container');
+    if (zeugnisContainer) {
+        zeugnisContainer.scrollTop = 0;
+    }
 }
 
 // Notizen speichern
