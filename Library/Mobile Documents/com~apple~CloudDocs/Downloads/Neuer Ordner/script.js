@@ -491,6 +491,13 @@ function getStudentsWithoutHomeworkEntryToday() {
 
 // Seitennavigation
 function showPage(page, classId = null) {
+    const previousClassId = activeClassId;
+
+    // Vor Seiten-/Klassenwechsel offene Zeugnis-Änderungen der aktuellen Klasse sichern.
+    if (previousClassId !== null && (page !== 'class' || classId !== previousClassId)) {
+        saveFocusedZeugnisTextarea(previousClassId);
+    }
+
     // Sortier-Modus deaktivieren und Button immer zurücksetzen
     if (page === 'class') {
         isClassSortingMode = false;
@@ -553,8 +560,10 @@ function showPage(page, classId = null) {
     if (page === 'home') {
         renderClassesGrid();
     } else if (page === 'class') {
-        // Beim Wechsel in eine Klasse einmalig einen Cloud-Check erzwingen
-        if (typeof window.saveDataToCloud === 'function') {
+        // Cloud-Sync beim Klassenwechsel nur gedrosselt anstoßen.
+        if (typeof window.triggerCloudSyncDebounced === 'function') {
+            window.triggerCloudSyncDebounced(2000);
+        } else if (typeof window.saveDataToCloud === 'function') {
             window.saveDataToCloud();
         }
         renderModuleContent();
@@ -563,8 +572,13 @@ function showPage(page, classId = null) {
 
 // Modul wechseln
 function showModule(module) {
-    // Turbo-Sync: Bei jedem Tab-Wechsel sicherstellen, dass wir die aktuellsten Daten haben/teilen
-    if (typeof window.saveDataToCloud === 'function') {
+    // Vor dem Modulwechsel offene Zeugnis-Eingaben sichern.
+    saveFocusedZeugnisTextarea();
+
+    // Bei Tab-Wechsel Cloud-Sync nur gedrosselt planen.
+    if (typeof window.triggerCloudSyncDebounced === 'function') {
+        window.triggerCloudSyncDebounced(2000);
+    } else if (typeof window.saveDataToCloud === 'function') {
         window.saveDataToCloud();
     }
     
@@ -597,6 +611,33 @@ function showModule(module) {
     activeModule = module;
     localStorage.setItem('activeModule', module);
     renderModuleContent();
+}
+
+function isZeugnisNotesTextarea(element) {
+    return !!(element &&
+        element.tagName === 'TEXTAREA' &&
+        element.id &&
+        (element.id.startsWith('notes-left-') ||
+         element.id.startsWith('notes-right-') ||
+         element.id.startsWith('notes-summary-')));
+}
+
+function getStudentIndexFromZeugnisTextareaId(textareaId) {
+    if (!textareaId) return -1;
+    const rawIndex = textareaId.split('-').pop();
+    const parsed = parseInt(rawIndex, 10);
+    return Number.isNaN(parsed) ? -1 : parsed;
+}
+
+function saveFocusedZeugnisTextarea(expectedClassId = null) {
+    const activeElement = document.activeElement;
+    if (!isZeugnisNotesTextarea(activeElement)) return;
+    if (expectedClassId !== null && expectedClassId !== activeClassId) return;
+
+    const studentIndex = getStudentIndexFromZeugnisTextareaId(activeElement.id);
+    if (studentIndex >= 0) {
+        saveStudentNotes(studentIndex);
+    }
 }
 
 // Diese Funktion dient als Verzweigung zu den verschiedenen Modulen
@@ -736,7 +777,9 @@ function saveData(specificStudentIndex = null) {
 
         // Cloud-Sync (wenn eingeloggt)
         console.log('Rufe Cloud-Sync auf...');
-        if (typeof window.saveDataToCloud === 'function' && window.firebaseAuth && window.firebaseAuth.currentUser) {
+        if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.triggerCloudSyncDebounced === 'function') {
+            window.triggerCloudSyncDebounced(2500, specificStudentIndex);
+        } else if (typeof window.saveDataToCloud === 'function' && window.firebaseAuth && window.firebaseAuth.currentUser) {
             window.saveDataToCloud(specificStudentIndex);
         } else if (typeof window.triggerCloudSync === 'function') {
             window.triggerCloudSync();
@@ -769,7 +812,6 @@ function loadData() {
             if (Array.isArray(parsedClasses)) {
                 classes = parsedClasses;
                 AppState.classes = classes; // AppState synchron halten
-                window.classes = classes; // Explizit für andere Skripte verfügbar machen
 
                 // Stelle sicher, dass alle erforderlichen Eigenschaften vorhanden sind
                 classes.forEach(cls => {
@@ -925,23 +967,10 @@ function renderClassesGrid() {
         // Statistiken berechnen
         const studentCount = cls.students.length;
         const hwCount = cls.students.reduce((sum, student) => {
-            let hwVal = 0;
-            if (typeof student.homework === 'number') {
-                hwVal = student.homework;
-            } else if (student.homework && typeof student.homework.forgotten === 'number') {
-                hwVal = student.homework.forgotten;
-            }
-            return sum + hwVal;
+            const homework = student.homework || 0;
+            return sum + homework;
         }, 0);
-        const materialsCount = cls.students.reduce((sum, student) => {
-            let matVal = 0;
-            if (typeof student.materials === 'number') {
-                matVal = student.materials;
-            } else if (student.homework && typeof student.homework.materials === 'number') {
-                matVal = student.homework.materials;
-            }
-            return sum + matVal;
-        }, 0);
+        const materialsCount = cls.students.reduce((sum, student) => sum + (student.materials || 0), 0);
         
         const classCard = document.createElement('div');
         classCard.className = 'class-card';
@@ -7069,50 +7098,10 @@ function importBackupFile(event) {
             // Inhalt als JSON parsen
             const importData = JSON.parse(e.target.result);
             
-            // --- NEU: Robustere Validierung für alte Backups ---
-            let importedClasses = [];
-            
-            // Fall 1: Standard-Export (Objekt mit .classes)
-            if (importData.classes && Array.isArray(importData.classes)) {
-                importedClasses = importData.classes;
-            } 
-            // Fall 2: Sehr altes Backup (Direktes Array)
-            else if (Array.isArray(importData)) {
-                importedClasses = importData;
-            }
-            // Fall 3: Einzelelement (Objekt ohne classes)
-            else if (typeof importData === 'object' && importData !== null) {
-                // Wir nehmen an, dass es sich um eine einzelne Klasse oder ein korruptes Backup handelt
-                swal("Hinweis", "Das Format dieser Datei ist ungewöhnlich. Ich versuche sie dennoch zu interpretieren.", "info");
-                importedClasses = [importData]; 
-            } else {
+            // Validieren, dass es sich um gültige Daten handelt
+            if (!importData.version || !importData.classes || !Array.isArray(importData.classes)) {
                 throw new Error("Ungültiges Datenformat");
             }
-
-            // Sicherstellen, dass die Datenstruktur für moderne Funktionen passt (z.B. Abwesenheiten)
-            importedClasses.forEach(c => {
-                if (c.students && Array.isArray(c.students)) {
-                    c.students.forEach(s => {
-                        // Fehlende Felder initialisieren
-                        if (!s.attendance) s.attendance = (s.attendance === "none") ? [] : [];
-                        if (!s.projects) s.projects = [];
-                        if (!s.oralGrades) s.oralGrades = [];
-                        
-                        // Wenn homework eine Zahl ist (altes Format), in Objekt umwandeln
-                        if (typeof s.homework === 'number') {
-                            const val = s.homework;
-                            s.homework = { 
-                                forgotten: val, 
-                                partial: 0, 
-                                materials: typeof s.materials === 'number' ? s.materials : 0, 
-                                history: [] 
-                            };
-                        } else if (!s.homework) {
-                            s.homework = { forgotten: 0, partial: 0, materials: 0, history: [] };
-                        }
-                    });
-                }
-            });
             
             // Bestätigung anfordern
             swal({
@@ -7124,21 +7113,47 @@ function importBackupFile(event) {
             })
             .then((willImport) => {
                 if (willImport) {
-                    // Daten in localStorage speichern
-                    localStorage.setItem('classes', JSON.stringify(importedClasses));
+                    // Daten übernehmen
+                    classes = importData.classes;
+                    
+                    // In localStorage speichern
+                    localStorage.setItem('classes', JSON.stringify(classes));
                     
                     // Mündliche Gewichtung übernehmen, falls vorhanden
                     if (importData.oralWeight) {
-                        localStorage.setItem('oralWeight', importData.oralWeight);
+                        const oralWeightElement = safeGetElement('oralWeightValue');
+                        if (oralWeightElement) {
+                            oralWeightElement.innerText = importData.oralWeight;
+                            
+                            // Aktiven Button markieren
+                            const weightButtons = document.querySelectorAll('.weight-btn');
+                            if (weightButtons) {
+                                weightButtons.forEach(btn => {
+                                    btn.classList.remove('active-weight');
+                                });
+                                
+                                const weightButton = document.querySelector(`.weight-btn[onclick="setWeight(${importData.oralWeight})"]`);
+                                if (weightButton) {
+                                    weightButton.classList.add('active-weight');
+                                }
+                            }
+                            
+                            localStorage.setItem('oralWeight', importData.oralWeight);
+                        }
                     }
                     
-                    // Seite neu laden, um alle Zustände sauber zu initialisieren
-                    location.reload();
+                    // Adressen-Daten übernehmen, falls vorhanden
+                    
+                    // Startseite anzeigen und UI aktualisieren
+                    if (typeof triggerCloudSync === 'function') {
+                        triggerCloudSync();
+                    }
+                    showPage('home');
                 }
             });
         } catch (error) {
             console.error("Fehler beim Importieren der Daten:", error);
-            swal("Import-Fehler", "Fehler Details: " + error.message, "error");
+            swal("Fehler", "Die Datei enthält keine gültigen Daten.", "error");
         }
     };
     
@@ -8410,6 +8425,7 @@ function renderDesk(desk) {
         
         isDragging = true;
         window.isDraggingDesk = true; // Globaler Flag für Sync-Sperre
+        window._lastDeskMoveTime = Date.now();
         startX = e.clientX;
         startY = e.clientY;
         startLeft = desk.x;
@@ -8425,6 +8441,7 @@ function renderDesk(desk) {
         
         isDragging = true;
         window.isDraggingDesk = true; // Globaler Flag für Sync-Sperre
+        window._lastDeskMoveTime = Date.now();
         const touch = e.touches[0];
         startX = touch.clientX;
         startY = touch.clientY;
@@ -8478,11 +8495,7 @@ function renderDesk(desk) {
     // Mouse Up
     document.addEventListener('mouseup', () => {
         if (!isDragging) return;
-        
-        isDragging = false;
-        window.isDraggingDesk = false; // Sync-Sperre aufheben
-        deskElement.style.cursor = 'grab';
-        
+
         // Speichere die neue Position in der Sitzplan-Datenstruktur
         if (classes[activeClassId] && classes[activeClassId].sitzplan && classes[activeClassId].sitzplan.desks) {
             const deskIndex = classes[activeClassId].sitzplan.desks.findIndex(d => d.id === desk.id);
@@ -8490,17 +8503,25 @@ function renderDesk(desk) {
                 classes[activeClassId].sitzplan.desks[deskIndex].x = desk.x;
                 classes[activeClassId].sitzplan.desks[deskIndex].y = desk.y;
                 saveData();
+                if (typeof window.flushCloudSyncNow === 'function') {
+                    window.flushCloudSyncNow();
+                }
             }
         }
+
+        // Erst nach dem Speichern Drag-Status freigeben, damit Realtime-Updates nicht dazwischenfunken.
+        isDragging = false;
+        deskElement.style.cursor = 'grab';
+        window._lastDeskMoveTime = Date.now();
+        setTimeout(() => {
+            window.isDraggingDesk = false; // Sync-Sperre leicht verzögert aufheben
+        }, 300);
     });
     
     // Touch End
     document.addEventListener('touchend', () => {
         if (!isDragging) return;
-        
-        isDragging = false;
-        window.isDraggingDesk = false; // Sync-Sperre aufheben
-        
+
         // Speichere die neue Position in der Sitzplan-Datenstruktur
         if (classes[activeClassId] && classes[activeClassId].sitzplan && classes[activeClassId].sitzplan.desks) {
             const deskIndex = classes[activeClassId].sitzplan.desks.findIndex(d => d.id === desk.id);
@@ -8508,8 +8529,18 @@ function renderDesk(desk) {
                 classes[activeClassId].sitzplan.desks[deskIndex].x = desk.x;
                 classes[activeClassId].sitzplan.desks[deskIndex].y = desk.y;
                 saveData();
+                if (typeof window.flushCloudSyncNow === 'function') {
+                    window.flushCloudSyncNow();
+                }
             }
         }
+
+        // Erst nach dem Speichern Drag-Status freigeben, damit Realtime-Updates nicht dazwischenfunken.
+        isDragging = false;
+        window._lastDeskMoveTime = Date.now();
+        setTimeout(() => {
+            window.isDraggingDesk = false; // Sync-Sperre leicht verzögert aufheben
+        }, 300);
     });
     
     // Klick-Event für Auswahl im Bewertungsmodus
@@ -9193,11 +9224,26 @@ function toggleSearch(module) {
             // Fokus auf Input setzen
             const input = searchContainer.querySelector('.search-input');
             if (input) {
+                input.onkeydown = (event) => handleSearchInputKeydown(module, event);
                 input.focus();
                 input.value = '';
                 filterStudents(module); // Leere Liste anzeigen
             }
         }
+    }
+}
+
+function handleSearchInputKeydown(module, event) {
+    if (event.key !== 'Enter') return;
+
+    event.preventDefault();
+
+    const suggestions = document.getElementById(`search-suggestions-${module}`);
+    if (!suggestions) return;
+
+    const firstMatch = suggestions.querySelector('li:not(.no-results)');
+    if (firstMatch) {
+        firstMatch.click();
     }
 }
 
@@ -9248,6 +9294,7 @@ function filterStudents(module) {
         filteredStudents.forEach(student => {
             const li = document.createElement('li');
             li.textContent = student.name;
+            li.dataset.studentIndex = String(student.index);
             li.onclick = () => selectStudent(module, student.index);
             suggestions.appendChild(li);
         });
@@ -9656,6 +9703,7 @@ function renderZeugnisModule() {
         card.innerHTML = `
             <div class="card-header">
                 <h3>${student.name}</h3>
+                <button class="btn btn-sm btn-light" onclick="scrollToTopOfZeugnisModule()">Zurück</button>
             </div>
             <div class="card-body">
                 <div class="zeugnis-top">
@@ -9696,10 +9744,12 @@ function renderZeugnisModule() {
         container.appendChild(card);
     });
 
-    // Entferne alte Event-Listener, bevor wir einen neuen hinzufügen
-    const oldListener = container._zeugnisListener;
-    if (oldListener) {
-        container.removeEventListener('keydown', oldListener);
+    // Entferne alte Event-Listener, bevor wir neue hinzufügen
+    const oldListeners = container._zeugnisListeners;
+    if (oldListeners) {
+        if (oldListeners.keydown) {
+            container.removeEventListener('keydown', oldListeners.keydown);
+        }
     }
     
     // Neuer Event-Listener für automatische Aufzählungszeichen (Enter-Taste)
@@ -9707,7 +9757,8 @@ function renderZeugnisModule() {
         if (event.target.matches('textarea[id^="notes-left-"], textarea[id^="notes-right-"], textarea[id^="notes-summary-"]')) {
             if (event.key === 'Enter') {
                 const textarea = event.target;
-                const studentIndex = parseInt(textarea.id.split('-').pop());
+                const studentIndex = getStudentIndexFromZeugnisTextareaId(textarea.id);
+                if (studentIndex < 0) return;
 
                 // Nur für linke/rechte Notizen Aufzählungszeichen hinzufügen
                 if (textarea.id.includes('notes-left-') || textarea.id.includes('notes-right-')) {
@@ -9723,16 +9774,34 @@ function renderZeugnisModule() {
                     
                     const newPos = start + insertText.length;
                     textarea.selectionStart = textarea.selectionEnd = newPos;
-                }
 
-                // Bei Enter in jedem Fall speichern
-                saveStudentNotes(studentIndex);
+                    // Linke/rechte Notizen speichern wir direkt nach dem manuellen Zeilenumbruch.
+                    saveStudentNotes(studentIndex);
+                } else {
+                    // In der Zusammenfassung die neue Zeile zuerst vom Browser einfügen lassen,
+                    // dann den aktualisierten Text speichern.
+                    setTimeout(() => saveStudentNotes(studentIndex), 0);
+                }
             }
         }
     };
     
     container.addEventListener('keydown', zeugnisListener);
-    container._zeugnisListener = zeugnisListener;
+    container._zeugnisListeners = {
+        keydown: zeugnisListener
+    };
+}
+
+function scrollToTopOfZeugnisModule() {
+    const zeugnisModule = document.getElementById('zeugnis-module');
+    if (zeugnisModule) {
+        zeugnisModule.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    const zeugnisContainer = document.getElementById('zeugnis-container');
+    if (zeugnisContainer) {
+        zeugnisContainer.scrollTop = 0;
+    }
 }
 
 // Notizen speichern
@@ -9741,6 +9810,7 @@ function saveStudentNotes(studentIndex) {
     const rightTextarea = safeGetElement(`notes-right-${studentIndex}`);
     const summaryTextarea = safeGetElement(`notes-summary-${studentIndex}`);
     if (!leftTextarea || !rightTextarea || !summaryTextarea) return;
+    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
     
     // KEIN .trim() beim Speichern, sonst werden Zeilenumbrüche am Ende (Enter) gelöscht
     const leftNotesText = leftTextarea.value;
@@ -9748,12 +9818,18 @@ function saveStudentNotes(studentIndex) {
     const summaryNotesText = summaryTextarea.value;
     
     const student = classes[activeClassId].students[studentIndex];
+
+    const hasChanges = student.leftNotes !== leftNotesText ||
+                       student.rightNotes !== rightNotesText ||
+                       student.summaryNotes !== summaryNotesText;
+    if (!hasChanges) return;
     
     student.leftNotes = leftNotesText;
     student.rightNotes = rightNotesText;
     student.summaryNotes = summaryNotesText;
     
-    saveData(studentIndex);
+    // Volles Speichern ist robuster für lokale Persistenz + Cloud-Sync.
+    saveData();
 }
 
 // Schüler-Karteikarte exportieren
