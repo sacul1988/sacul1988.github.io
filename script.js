@@ -560,12 +560,15 @@ function showPage(page, classId = null) {
     if (page === 'home') {
         renderClassesGrid();
     } else if (page === 'class') {
-        // Cloud-Sync beim Klassenwechsel nur gedrosselt anstoßen.
+        // Cloud-Sync beim Klassenwechsel entfernt.
+        // Synchronisierung erfolgt nur bei Änderungen.
+        /*
         if (typeof window.triggerCloudSyncDebounced === 'function') {
             window.triggerCloudSyncDebounced(2000);
         } else if (typeof window.saveDataToCloud === 'function') {
             window.saveDataToCloud();
         }
+        */
         renderModuleContent();
     }
 }
@@ -575,12 +578,15 @@ function showModule(module) {
     // Vor dem Modulwechsel offene Zeugnis-Eingaben sichern.
     saveFocusedZeugnisTextarea();
 
-    // Bei Tab-Wechsel Cloud-Sync nur gedrosselt planen.
+    // Bei Tab-Wechsel KEIN automatischer Cloud-Sync mehr.
+    // Cloud-Sync erfolgt nur bei tatsächlichen Datenänderungen (saveData).
+    /* 
     if (typeof window.triggerCloudSyncDebounced === 'function') {
         window.triggerCloudSyncDebounced(2000);
     } else if (typeof window.saveDataToCloud === 'function') {
         window.saveDataToCloud();
     }
+    */
     
     // Alle Module ausblenden
     const modules = document.querySelectorAll('.module');
