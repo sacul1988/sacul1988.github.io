@@ -2505,7 +2505,12 @@ function renderHWHistory(studentIndex) {
 }
 
 // Funktion zum Löschen eines Verlaufseintrags
+// Variable zur Vermeidung von Mehrfach-Löschvorgängen (Lösch-Sperre)
+let isDeletingEntry = false;
+
 function deleteHWHistoryEntry(studentIndex, entryId) {
+    if (isDeletingEntry) return; // Verhindert Doppelklicks
+    
     if (!classes[activeClassId] || !classes[activeClassId].students || 
         studentIndex < 0 || studentIndex >= classes[activeClassId].students.length) return;
     
@@ -2517,6 +2522,7 @@ function deleteHWHistoryEntry(studentIndex, entryId) {
         if (student.notes && student.notes[noteIndex]) {
             const note = student.notes[noteIndex];
             if (note.content === "Eintrag in den Schulplaner") {
+                isDeletingEntry = true;
                 swal({
                     title: "Eintrag löschen?",
                     text: "Möchtest du diesen Verlaufseintrag wirklich löschen?",
@@ -2525,6 +2531,7 @@ function deleteHWHistoryEntry(studentIndex, entryId) {
                     dangerMode: true,
                 })
                 .then((willDelete) => {
+                    isDeletingEntry = false;
                     if (willDelete) {
                         student.notes.splice(noteIndex, 1);
                         saveData();
@@ -2546,9 +2553,7 @@ function deleteHWHistoryEntry(studentIndex, entryId) {
         
         if (entryIndex === -1) return;
         
-        // Typ des Eintrags merken, bevor er gelöscht wird
-        const entryType = student.hwHistory[entryIndex].type;
-        
+        isDeletingEntry = true;
         swal({
             title: "Eintrag löschen?",
             text: "Möchtest du diesen Verlaufseintrag wirklich löschen?",
@@ -2560,7 +2565,10 @@ function deleteHWHistoryEntry(studentIndex, entryId) {
             if (willDelete) {
                 // Eintrag erneut suchen, da sich das Array durch Mehrfachklicks verschoben haben könnte
                 const currentIndex = student.hwHistory.findIndex(e => e.id === entryId);
-                if (currentIndex === -1) return;
+                if (currentIndex === -1) {
+                    isDeletingEntry = false;
+                    return;
+                }
 
                 const entry = student.hwHistory[currentIndex];
                 const entryType = entry.type;
@@ -2627,6 +2635,7 @@ function deleteHWHistoryEntry(studentIndex, entryId) {
                     renderSitzplanModule();
                 }
             }
+            isDeletingEntry = false;
         });
     }
 }
