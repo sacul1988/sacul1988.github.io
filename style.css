@@ -3252,13 +3252,20 @@ select.form-control {
     transition: all 0.2s ease;
 }
 
-/* Oral-Modus Styles */
+/* Oral-Modus Styles (Mündlich) */
 #sitzplan-module .oral-mode .desk {
     cursor: pointer;
-    background: linear-gradient(to right, rgba(255, 0, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 50%);
+    background-color: rgba(0, 255, 0, 0.15); /* Dezentes Grün für positive Mitarbeit */
 }
 
-#sitzplan-module .oral-mode .desk:hover {
+/* Arbeitsphase Styles */
+#sitzplan-module .work-mode .desk {
+    cursor: pointer;
+    background-color: rgba(255, 0, 0, 0.15); /* Dezentes Rot für Arbeitsphase */
+}
+
+#sitzplan-module .oral-mode .desk:hover,
+#sitzplan-module .work-mode .desk:hover {
     transform: scale(1.02);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

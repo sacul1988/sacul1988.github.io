@@ -3,6 +3,10 @@
         "/^git add \\. && git commit -m \"Auto-sync data on login/logout and clear local cache after logout\" && git push$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "/^git add \\. && git commit -m \"Hardened sync logic \\(start-up lock, Zeugnis auto-refresh, oninput sync\\) and split Sitzplan into Oral \\(\\+\\) and Work \\(-\\) modes with renaming 'Bewerten' to 'Material'\" && git push$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }

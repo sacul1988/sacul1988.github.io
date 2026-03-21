@@ -8227,6 +8227,7 @@ function renderSitzplanModule() {
     const editBtn = safeGetElement('edit-mode-btn');
     const evaluationBtn = safeGetElement('evaluation-mode-btn');
     const oralBtn = safeGetElement('oral-mode-btn');
+    const workBtn = safeGetElement('work-mode-btn');
     
     const currentMode = cls.sitzplan.currentMode || 'evaluation';
     
@@ -8234,12 +8235,19 @@ function renderSitzplanModule() {
         if (currentMode === 'edit') {
             workspace.classList.remove('evaluation-mode');
             workspace.classList.remove('oral-mode');
+            workspace.classList.remove('work-mode');
         } else if (currentMode === 'evaluation') {
             workspace.classList.add('evaluation-mode');
             workspace.classList.remove('oral-mode');
+            workspace.classList.remove('work-mode');
         } else if (currentMode === 'oral') {
             workspace.classList.remove('evaluation-mode');
             workspace.classList.add('oral-mode');
+            workspace.classList.remove('work-mode');
+        } else if (currentMode === 'work') {
+            workspace.classList.remove('evaluation-mode');
+            workspace.classList.remove('oral-mode');
+            workspace.classList.add('work-mode');
         }
     }
     
@@ -8253,6 +8261,10 @@ function renderSitzplanModule() {
     
     if (oralBtn) {
         oralBtn.classList.toggle('active', currentMode === 'oral');
+    }
+
+    if (workBtn) {
+        workBtn.classList.toggle('active', currentMode === 'work');
     }
 }
 
@@ -8372,17 +8384,25 @@ function setMode(mode) {
     const editBtn = safeGetElement('edit-mode-btn');
     const evaluationBtn = safeGetElement('evaluation-mode-btn');
     const oralBtn = safeGetElement('oral-mode-btn');
+    const workBtn = safeGetElement('work-mode-btn');
     
     if (workspace) {
         if (mode === 'edit') {
             workspace.classList.remove('evaluation-mode');
             workspace.classList.remove('oral-mode');
+            workspace.classList.remove('work-mode');
         } else if (mode === 'evaluation') {
             workspace.classList.add('evaluation-mode');
             workspace.classList.remove('oral-mode');
+            workspace.classList.remove('work-mode');
         } else if (mode === 'oral') {
             workspace.classList.remove('evaluation-mode');
             workspace.classList.add('oral-mode');
+            workspace.classList.remove('work-mode');
+        } else if (mode === 'work') {
+            workspace.classList.remove('evaluation-mode');
+            workspace.classList.remove('oral-mode');
+            workspace.classList.add('work-mode');
         }
     }
     
@@ -8396,6 +8416,10 @@ function setMode(mode) {
     
     if (oralBtn) {
         oralBtn.classList.toggle('active', mode === 'oral');
+    }
+
+    if (workBtn) {
+        workBtn.classList.toggle('active', mode === 'work');
     }
     
     // Tische neu rendern, um Punkte basierend auf Modus anzuzeigen
@@ -8485,16 +8509,23 @@ function renderDesk(desk) {
             // Blaue Punkte für vergessene Schulplaner entfernt - Tische werden blau eingefärbt
         }
         
-        // Im Mündlich-Modus tägliche Beteiligung anzeigen
+        // Im Mündlich- oder Arbeitsphase-Modus tägliche Beteiligung anzeigen
         let participationHtml = '';
-        if (cls.sitzplan && cls.sitzplan.currentMode === 'oral') {
+        if (cls.sitzplan && (cls.sitzplan.currentMode === 'oral' || cls.sitzplan.currentMode === 'work')) {
             const today = new Date().toISOString().split('T')[0];
             if (!student.dailyParticipation || student.dailyParticipation.date !== today) {
                 student.dailyParticipation = { date: today, positive: 0, negative: 0 };
             }
             const dailyPositive = student.dailyParticipation.positive || 0;
             const dailyNegative = student.dailyParticipation.negative || 0;
-            participationHtml = `<br><span style="font-size: 14px; color: red; font-weight: bold;">${dailyNegative}</span> <span style="font-size: 14px; color: green; font-weight: bold;">${dailyPositive}</span>`;
+            
+            if (cls.sitzplan.currentMode === 'oral') {
+                // Nur Positive anzeigen oder beide? Der Wunsch war Trennung. 
+                // Für bessere Übersicht zeigen wir im jeweiligen Modus den relevanten Wert groß an.
+                participationHtml = `<br><span style="font-size: 16px; color: green; font-weight: bold;">+ ${dailyPositive}</span>`;
+            } else if (cls.sitzplan.currentMode === 'work') {
+                participationHtml = `<br><span style="font-size: 16px; color: red; font-weight: bold;">- ${dailyNegative}</span>`;
+            }
         }
         
         deskContent = `<div class="desk-label ${student.learningSupport ? 'learning-support' : ''} ${highNegatives ? 'high-negatives-name' : ''}">${student.name}${dotsHtml}${participationHtml}</div>`;
@@ -8642,43 +8673,39 @@ function renderDesk(desk) {
         }
     });
     
-    // Klick für Mündlich-Modus: Linke Hälfte für -, rechte Hälfte für +
+    // Klick für Mündlich-Modus (nur +) oder Arbeitsphase (nur -)
     deskElement.addEventListener('click', (e) => {
         if (isDragging) return; // Verhindere Klick während Drag
         
-        if (classes[activeClassId] && classes[activeClassId].sitzplan && classes[activeClassId].sitzplan.currentMode === 'oral') {
-            const rect = deskElement.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const type = clickX < rect.width / 2 ? 'negative' : 'positive';
-            const now = Date.now();
-            
-            if (desk.studentIndex !== null) {
-                if (deskClickHistory[desk.id].lastClickType && now - deskClickHistory[desk.id].lastClickTime < 10000) {
-                    if (deskClickHistory[desk.id].lastClickType === type) {
-                        // Gleicher Typ innerhalb 10 Sekunden: Verringere
-                        updateParticipation(desk.studentIndex, type, -1);
-                        deskClickHistory[desk.id].lastClickType = null; // Reset
-                    } else {
-                        // Anderer Typ innerhalb 10 Sekunden: Verringere den falschen, erhöhe den richtigen
-                        updateParticipation(desk.studentIndex, deskClickHistory[desk.id].lastClickType, -1);
-                        updateParticipation(desk.studentIndex, type, 1);
-                        deskClickHistory[desk.id].lastClickType = null; // Reset
-                    }
-                } else {
-                    // Normal hinzufügen
-                    updateParticipation(desk.studentIndex, type);
-                    deskClickHistory[desk.id].lastClickType = type;
-                    deskClickHistory[desk.id].lastClickTime = now;
+        const currentMode = classes[activeClassId]?.sitzplan?.currentMode;
+        if (currentMode !== 'oral' && currentMode !== 'work') return;
+        
+        // Kein Split mehr nötig, da der Modus den Typ bestimmt
+        const type = currentMode === 'oral' ? 'positive' : 'negative';
+        const now = Date.now();
+        
+        if (desk.studentIndex !== null) {
+            if (deskClickHistory[desk.id].lastClickType && now - deskClickHistory[desk.id].lastClickTime < 5000) {
+                if (deskClickHistory[desk.id].lastClickType === type) {
+                    // Gleicher Typ innerhalb 5 Sekunden: Verringere (Undo-Funktion durch Doppelklick)
+                    updateParticipation(desk.studentIndex, type, -1);
+                    deskClickHistory[desk.id].lastClickType = null; // Reset
                 }
+            } else {
+                // Normal hinzufügen
+                updateParticipation(desk.studentIndex, type);
+                deskClickHistory[desk.id].lastClickType = type;
+                deskClickHistory[desk.id].lastClickTime = now;
             }
         }
     });
     
-    // Long-Press für Undo-Modal
+    // Long-Press für Undo-Modal (in beiden Modi)
     let longPressTimer;
     
     deskElement.addEventListener('mousedown', (e) => {
-        if (classes[activeClassId] && classes[activeClassId].sitzplan && classes[activeClassId].sitzplan.currentMode === 'oral' && desk.studentIndex !== null) {
+        const mode = classes[activeClassId]?.sitzplan?.currentMode;
+        if ((mode === 'oral' || mode === 'work') && desk.studentIndex !== null) {
             longPressTimer = setTimeout(() => {
                 openUndoModal(desk);
             }, 1000); // 1 Sekunde
