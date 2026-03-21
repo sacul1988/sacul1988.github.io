@@ -9953,15 +9953,7 @@ function renderZeugnisModule() {
 }
 
 function scrollToTopOfZeugnisModule() {
-    const zeugnisModule = document.getElementById('zeugnis-module');
-    if (zeugnisModule) {
-        zeugnisModule.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    const zeugnisContainer = document.getElementById('zeugnis-container');
-    if (zeugnisContainer) {
-        zeugnisContainer.scrollTop = 0;
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Notizen speichern
