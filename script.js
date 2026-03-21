@@ -977,24 +977,9 @@ function loadData() {
         }
     }
 
-    // Gespeicherten Zustand wiederherstellen
-    const savedPage = localStorage.getItem('currentPage');
-    const savedClassId = localStorage.getItem('activeClassId');
-    const savedModule = localStorage.getItem('activeModule');
-
-    if (savedPage === 'class' && savedClassId !== null) {
-        const classIdx = parseInt(savedClassId);
-        if (classes[classIdx]) {
-            showPage('class', classIdx);
-            if (savedModule) {
-                showModule(savedModule);
-            }
-        } else {
-            showPage('home');
-        }
-    } else {
-        showPage('home');
-    }
+    // Zustands-Wiederherstellung entfernt für bessere Synchronisations-Stabilität beim Start
+    // Wir starten bei jedem Neuladen immer auf der Startseite
+    showPage('home');
 }
 
 // Startseite: Klassen-Grid rendern
