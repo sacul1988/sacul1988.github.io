@@ -1682,7 +1682,10 @@ function renderStudentsModule() {
         
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td class="${student.learningSupport ? 'learning-support' : ''}">${student.name}</td>
+            <td class="${student.learningSupport ? 'learning-support' : ''} ${student.eseSupport ? 'ese-support' : ''}">${student.name}</td>
+            <td style="text-align: center;">
+                <input type="checkbox" ${student.eseSupport ? 'checked' : ''} onclick="toggleEseSupport(${index}, this)">
+            </td>
             <td style="text-align: center;">
                 <input type="checkbox" ${student.learningSupport ? 'checked' : ''} onclick="toggleLearningSupport(${index}, this)">
             </td>
@@ -1947,6 +1950,25 @@ function getSortedStudents() {
     }
     
     return cls.students;
+}
+
+// Funktion zum Umschalten des Förderschwerpunkts ESE
+function toggleEseSupport(studentIndex, checkbox) {
+    if (!classes[activeClassId] || !classes[activeClassId].students) return;
+    
+    // Wir arbeiten oft mit getSortedStudents im Notenmodul, 
+    // aber im Schülermodul ist es die direkte Reihenfolge aus dem Array
+    const student = classes[activeClassId].students[studentIndex];
+    if (!student) return;
+    
+    // Status umschalten
+    student.eseSupport = checkbox.checked;
+    
+    // Daten speichern
+    saveData();
+    
+    // UI sofort aktualisieren
+    renderStudentsModule();
 }
 
 // Funktion zum Umschalten des Förderschwerpunkts Lernen
@@ -3469,7 +3491,7 @@ function renderGradesModule() {
         
         let studentHeader = `
             <div class="student-header" onclick="toggleStudentDetails('noten', ${studentIndex})">
-                <div class="student-name ${student.learningSupport ? 'learning-support' : ''}">
+                <div class="student-name ${student.learningSupport ? 'learning-support' : ''} ${student.eseSupport ? 'ese-support' : ''}">
                     <i class="fas fa-user"></i> ${student.name}
                     <i id="notentoggleIcon-${studentIndex}" class="fas fa-chevron-down toggle-icon ${student.notenExpanded ? 'rotate' : ''}"></i>
                 </div>
@@ -8528,7 +8550,7 @@ function renderDesk(desk) {
             }
         }
         
-        deskContent = `<div class="desk-label ${student.learningSupport ? 'learning-support' : ''} ${highNegatives ? 'high-negatives-name' : ''}">${student.name}${dotsHtml}${participationHtml}</div>`;
+        deskContent = `<div class="desk-label ${student.learningSupport ? 'learning-support' : ''} ${student.eseSupport ? 'ese-support' : ''} ${highNegatives ? 'high-negatives-name' : ''}">${student.name}${dotsHtml}${participationHtml}</div>`;
     } else {
         // Leerer Tisch
         deskContent = `<div class="desk-label">Leer</div>`;

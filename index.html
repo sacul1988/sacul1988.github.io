@@ -123,11 +123,6 @@
                             <i class="fas fa-graduation-cap"></i>
                         </button>
                     </div>
-                    <div class="module-nav-item" data-module="listen">
-                        <button class="btn btn-light" onclick="showModule('listen')">
-                            <i class="fas fa-tasks"></i>
-                        </button>
-                    </div>
                 </div>
                 
                 <!-- Container für Module -->
@@ -153,6 +148,7 @@
                                         <tr>
                                             <th style="width: 50px;">Nr.</th>
                                             <th>Name</th>
+                                            <th style="width: 80px; text-align: center;">ESE</th>
                                             <th style="width: 80px; text-align: center;">Lernen</th>
                                             <th style="width: 100px; text-align: right;">Aktionen</th>
                                         </tr>
@@ -348,44 +344,6 @@
                         </div>
                     </div>
                     
-                    <!-- Listen Modul -->
-                    <div id="listen-module" class="module" style="display: none;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2>Listen</h2>
-                                <div>
-                                    <button class="btn btn-secondary btn-icon" id="sort-lists-btn" onclick="toggleSortLists()">
-                                        <i class="fas fa-sort-alpha-down"></i> Sortieren
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="showModal('add-list-modal')">
-                                        <i class="fas fa-plus"></i> Neue Liste
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="showEditListModal()">
-                                        <i class="fas fa-edit"></i> Liste bearbeiten
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="showDeleteListModal()">
-                                        <i class="fas fa-trash"></i> Liste löschen
-                                    </button>
-                                    <button class="btn btn-info btn-icon" onclick="toggleSearch('listen')">
-                                        <i class="fas fa-search"></i> Suchen
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="search-container" id="search-container-listen" style="display: none;">
-                                <input type="text" class="form-control search-input" id="search-input-listen" placeholder="Schüler suchen..." oninput="filterStudents('listen')">
-                                <ul class="search-suggestions" id="search-suggestions-listen"></ul>
-                            </div>
-                            
-                            <div class="tab-nav" id="lists-tab-nav">
-                                <!-- Hier werden die Listenreiter dynamisch eingefügt -->
-                            </div>
-                            
-                            <div id="lists-container">
-                                <!-- Hier werden die Listen dynamisch eingefügt -->
-                            </div>
-                        </div>
-                    </div>
-                    
                     <!-- Zeugnis Modul -->
                     <div id="zeugnis-module" class="module" style="display: none;">
                         <div class="card">
@@ -447,18 +405,6 @@
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="createClass()">Erstellen</button>
-                </div>
-            </div>
-            
-            <!-- Liste hinzufügen Modal -->
-            <div id="add-list-modal" class="modal" style="display: none;">
-                <h2>Neue Liste erstellen</h2>
-                <div class="form-group">
-                    <input type="text" id="new-list-name" class="form-control" placeholder="z.B. Unterschriften Mathearbeit, Elternabend">
-                </div>
-                <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
-                    <button class="btn btn-primary" onclick="createList()">Erstellen</button>
                 </div>
             </div>
             
@@ -749,46 +695,6 @@
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-danger" onclick="deleteProjectForAll()">Löschen</button>
-                </div>
-            </div>
-            
-            <!-- Modal für Liste bearbeiten -->
-            <div id="edit-list-modal" class="modal" style="display: none;">
-                <h2>Liste bearbeiten</h2>
-                <div class="form-group">
-                    <select id="edit-list-select" class="form-control">
-                        <!-- Optionen werden dynamisch eingefügt -->
-                    </select>
-                </div>
-                <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
-                    <button class="btn btn-primary" onclick="editSelectedList()">Bearbeiten</button>
-                </div>
-            </div>
-            
-            <!-- Modal für Liste löschen -->
-            <div id="delete-list-modal" class="modal" style="display: none;">
-                <h2>Liste löschen</h2>
-                <div class="form-group">
-                    <select id="delete-list-select" class="form-control">
-                        <!-- Optionen werden dynamisch eingefügt -->
-                    </select>
-                </div>
-                <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
-                    <button class="btn btn-danger" onclick="deleteSelectedList()">Löschen</button>
-                </div>
-            </div>
-            
-            <!-- Modal für Liste umbenennen -->
-            <div id="rename-list-modal" class="modal" style="display: none;">
-                <h2>Liste umbenennen</h2>
-                <div class="form-group">
-                    <input type="text" id="rename-list-input" class="form-control" placeholder="Listenname">
-                </div>
-                <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
-                    <button class="btn btn-primary" onclick="renameList()">Speichern</button>
                 </div>
             </div>
             

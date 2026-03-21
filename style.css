@@ -3646,6 +3646,10 @@ select.form-control {
     color: blue !important;
 }
 
+.ese-support {
+    color: purple !important;
+}
+
 /* Keep toggle icons black for learning support students */
 .learning-support .toggle-icon {
     color: black !important;
