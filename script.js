@@ -10095,6 +10095,19 @@ function exportAllStudentCards() {
         <head>
             <title>Zeugnisse - Alle Schüler</title>
             <style>
+                @media print {
+                    @page { 
+                        margin: 0;
+                    }
+                    body { 
+                        margin: 0; 
+                        padding: 0;
+                    }
+                    .student-page {
+                        padding: 1.5cm;
+                        page-break-after: always;
+                    }
+                }
                 body { font-family: Arial, sans-serif; margin: 20px; }
                 .student-page { page-break-after: always; margin-bottom: 40px; }
                 h1 { text-align: left; margin-bottom: 10px; }
@@ -10103,6 +10116,8 @@ function exportAllStudentCards() {
                 h3 { margin-top: 5px; margin-bottom: 5px; }
                 ul { list-style-type: none; padding: 0; }
                 .notes { white-space: pre-wrap; }
+                .grade-badge { font-weight: bold; }
+                .grade-text { font-weight: bold; }
             </style>
         </head>
         <body>
@@ -10120,7 +10135,7 @@ function exportAllStudentCards() {
                     const gradeClass = getGradeColorClass(gradeValue);
                     return `<li>${project.name}: <span class="grade-badge ${gradeClass}">${grade}</span></li>`;
                 } else {
-                    return `<li>${project.name}: ${grade}</li>`;
+                    return `<li>${project.name}: <span class="grade-text">${grade}</span></li>`;
                 }
             }).join('');
             
@@ -10128,7 +10143,7 @@ function exportAllStudentCards() {
             if (AppState.zeugnisViewMode === 'average') {
                 const average = calculateProjectAverage(student.projects);
                 if (average) {
-                    averageText = `<li><strong>Durchschnittsnote: ${average.rounded} (${average.exact})</strong></li>`;
+                    averageText = `<li><strong>Durchschnittsnote: <span class="grade-text">${average.rounded} (${average.exact})</span></strong></li>`;
                 }
             }
         } else {
