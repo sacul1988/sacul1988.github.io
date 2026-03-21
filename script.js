@@ -9770,11 +9770,11 @@ function toggleZeugnisView() {
     const btn = safeGetElement('zeugnis-view-toggle');
     if (btn) {
         if (AppState.zeugnisViewMode === 'average') {
-            btn.classList.remove('btn-light');
+            btn.classList.remove('btn-primary');
             btn.classList.add('btn-purple');
         } else {
             btn.classList.remove('btn-purple');
-            btn.classList.add('btn-light');
+            btn.classList.add('btn-primary');
         }
     }
     
