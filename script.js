@@ -1956,18 +1956,39 @@ function getSortedStudents() {
 function toggleEseSupport(studentIndex, checkbox) {
     if (!classes[activeClassId] || !classes[activeClassId].students) return;
     
-    // Wir arbeiten oft mit getSortedStudents im Notenmodul, 
-    // aber im Schülermodul ist es die direkte Reihenfolge aus dem Array
+    // Im Schülermodul ist es die direkte Reihenfolge aus dem Array
     const student = classes[activeClassId].students[studentIndex];
     if (!student) return;
     
-    // Status umschalten
-    student.eseSupport = checkbox.checked;
+    // Prüfen, ob der Förderschwerpunkt deaktiviert werden soll
+    if (student.eseSupport) {
+        // Checkbox zunächst visuell auf "checked" lassen
+        checkbox.checked = true;
+        
+        // Bestätigung anfordern
+        swal({
+            title: "Förderschwerpunkt deaktivieren?",
+            text: `Möchtest du den Förderschwerpunkt "ESE" für ${student.name} wirklich deaktivieren?`,
+            icon: "warning",
+            buttons: ["Abbrechen", "Deaktivieren"],
+            dangerMode: true,
+        })
+        .then((willDisable) => {
+            if (willDisable) {
+                student.eseSupport = false;
+                checkbox.checked = false;
+                saveData();
+                renderStudentsModule();
+            } else {
+                checkbox.checked = true;
+            }
+        });
+        return;
+    }
     
-    // Daten speichern
+    // Wenn aktiviert wird (von false auf true)
+    student.eseSupport = true;
     saveData();
-    
-    // UI sofort aktualisieren
     renderStudentsModule();
 }
 
