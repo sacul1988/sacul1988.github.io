@@ -64,7 +64,7 @@
 
         <!-- Pfadnavigation -->
         <div class="breadcrumb">
-            <a href="#" id="home-link"><i class="fas fa-home"></i> Startseite</a>
+            <a href="#" id="home-link" onclick="handleHomeClick(event)"><i class="fas fa-home"></i> Startseite</a>
             <span class="breadcrumb-active" id="breadcrumb-active"></span>
         </div>
         
@@ -480,24 +480,6 @@
         <button class="btn btn-light" onclick="hideModal()">Schließen</button>
     </div>
 </div>
-            
-            <!-- Modal für Verlauf in der Hausaufgaben-Ansicht -->
-            <div id="hw-history-modal" class="modal" style="display: none;">
-                <h2>Verlauf</h2>
-                <p id="hw-history-student-name">Schüler: </p>
-                <div class="hw-history-container">
-                    <div id="hw-history-list" class="hw-history-list">
-                        <!-- Verlaufseinträge werden dynamisch eingefügt -->
-                    </div>
-                    <div id="hw-history-empty" class="empty-state" style="display: none;">
-                        <i class="fas fa-history"></i>
-                        <p>Keine Einträge im Verlauf vorhanden</p>
-                    </div>
-                </div>
-                <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Zurück</button>
-                </div>
-            </div>
             
             <!-- Modal für mündliche Note für alle hinzufügen -->
             <div id="add-oral-grade-all-modal" class="modal" style="display: none;">
