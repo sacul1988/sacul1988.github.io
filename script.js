@@ -1051,7 +1051,7 @@ function renderClassesGrid() {
                         <button class="btn btn-secondary btn-icon-only" onclick="showCloneModal(${index})">
                             <i class="fas fa-copy"></i>
                         </button>
-                        <button class="btn btn-danger btn-icon-only" onclick="deleteClass(${index})">
+                        <button class="btn btn-icon-only" onclick="deleteClass(${index})" style="background-color: #6c757d; border-color: #6c757d; color: white;">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
