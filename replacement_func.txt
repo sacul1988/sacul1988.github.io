@@ -1,0 +1,17 @@
+function calculateFinalGrade(projects) {
+    if (!projects || !Array.isArray(projects)) {
+        return { rounded: "Keine Noten", exact: "Keine Noten", numeric: 0 };
+    }
+    const writtenGrades = projects
+        .map(project => typeof convertGrade === "function" ? convertGrade(project.grade) : 0)
+        .filter(grade => grade > 0);
+    if (writtenGrades.length === 0) {
+        return { rounded: "Keine Noten", exact: "Keine Noten", numeric: 0 };
+    }
+    const writtenAverage = writtenGrades.reduce((sum, grade) => sum + grade, 0) / writtenGrades.length;
+    return {
+        rounded: typeof roundGrade === "function" ? roundGrade(writtenAverage) : "-",
+        exact: writtenAverage.toFixed(3),
+        numeric: writtenAverage
+    };
+}

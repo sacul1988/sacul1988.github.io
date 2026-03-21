@@ -2287,32 +2287,18 @@ function deleteStudentNote(studentIndex, noteIndex) {
 
 // Endnote berechnen
 function calculateFinalGrade(projects) {
-    if (!projects || projects.length === 0) {
-        return {
-            rounded: 'Keine Note',
-            exact: 'Keine Note',
-            numeric: 0
-        };
+    if (!projects || !Array.isArray(projects)) {
+        return { rounded: "Keine Noten", exact: "Keine Noten", numeric: 0 };
     }
-        
-    // Präzise Kommanoten für schriftliche Noten verwenden
     const writtenGrades = projects
-        .map(project => convertGrade(project.grade))
+        .map(project => typeof convertGrade === "function" ? convertGrade(project.grade) : 0)
         .filter(grade => grade > 0);
-
-    // Wenn es gar keine gültigen Noten in den Projekten gibt
     if (writtenGrades.length === 0) {
-        return {
-            rounded: 'Keine Note',
-            exact: 'Keine Note',
-            numeric: 0
-        };
+        return { rounded: "Keine Noten", exact: "Keine Noten", numeric: 0 };
     }
-
-    // Die Endnote ist der einfache Durchschnitt der Projektnoten
     const writtenAverage = writtenGrades.reduce((sum, grade) => sum + grade, 0) / writtenGrades.length;
     return {
-        rounded: roundGrade(writtenAverage),
+        rounded: typeof roundGrade === "function" ? roundGrade(writtenAverage) : "-",
         exact: writtenAverage.toFixed(3),
         numeric: writtenAverage
     };
@@ -2986,50 +2972,15 @@ function collapseAllStudents() {
 }
 
 // Funktion zum Setzen der Gewichtung
+// Funktion zum Setzen der Gewichtung - Nur UI-Update
 function setWeight(weight) {
-    // Aktuelle Scrollposition speichern
-    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-    
-    // Alte aktive Klasse entfernen
-    const weightButtons = document.querySelectorAll('.weight-btn');
+    const weightButtons = document.querySelectorAll(".weight-btn");
     if (weightButtons) {
-        weightButtons.forEach(btn => {
-            btn.classList.remove('active-weight');
-        });
+        weightButtons.forEach(btn => btn.classList.remove("active-weight"));
     }
-    
-    // Neue aktive Klasse setzen
-    const weightButton = document.querySelector(`.weight-btn[onclick="setWeight(${weight})"]`);
-    if (weightButton) {
-        weightButton.classList.add('active-weight');
-    }
-    
-    // Wert aktualisieren
-    const originalDisplay = document.getElementById('oralWeightValue');
-    const clonedDisplay = document.getElementById('oralWeightValueClone');
-    
+    const originalDisplay = document.getElementById("oralWeightValue");
     if (originalDisplay) originalDisplay.innerText = weight;
-    if (clonedDisplay) clonedDisplay.innerText = weight;
-    
-    // Speichern
-    localStorage.setItem('oralWeight', weight);
-
-    // Synchronisation triggern
-    if (typeof triggerCloudSync === 'function') {
-        triggerCloudSync();
-    }
-    
-    // UI aktualisieren, falls nötig
-    if (activeModule === 'noten') {
-        renderGradesModule();
-        updateProjectStatistics();
-    }
-    
-    // Scrollposition wiederherstellen für andere Module
-    // Timeout erhöht für besseres Timing
-    requestAnimationFrame(() => {
-        window.scrollTo(0, scrollPosition);
-    });
+    localStorage.setItem("oralWeight", weight);
 }
 
 // Funktion zum Ein- und Ausblenden der Notentabelle
@@ -3784,7 +3735,7 @@ function updateStudentFinalGradeDisplay(studentIndex) {
     const oralWeight = oralWeightElement ? parseInt(oralWeightElement.innerText) : 50;
     
     // Endnote berechnen
-    const finalGrade = calculateFinalGrade(student.projects, student.oralGrade, oralWeight);
+    const finalGrade = calculateFinalGrade(student.projects);
     
     // Studenten-Card finden
     const studentCard = document.querySelector(`#${activeModule}studentDetails-${studentIndex}`).closest('.student-card');
@@ -4179,7 +4130,7 @@ function updateOralGrade(studentIndex, value) {
     const oralWeight = oralWeightElement ? parseInt(oralWeightElement.innerText) : 50;
     
     // Calculate the new final grade
-    const finalGrade = calculateFinalGrade(student.projects, value, oralWeight);
+    const finalGrade = calculateFinalGrade(student.projects);
     
     // Update only the affected student card grade display
     const studentCard = document.querySelector(`#studentDetails-${studentIndex}`).closest('.student-card');

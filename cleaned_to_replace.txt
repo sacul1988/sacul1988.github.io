@@ -1,0 +1,95 @@
+function calculateFinalGrade(projects, oralGrade, oralWeight) {
+    if (!projects) projects = [];
+
+    const weightValue = isNaN(parseInt(oralWeight)) ? 50 : parseInt(oralWeight);
+
+    let oralGradeConverted = 0;
+    let hasOral = false;
+
+    if (oralGrade && oralGrade !== '') {
+        if (typeof oralGrade === 'number') {
+            oralGradeConverted = oralGrade;
+            hasOral = true;
+        } else {
+            oralGradeConverted = convertGrade(oralGrade);
+            hasOral = oralGradeConverted > 0;
+        }
+    }
+
+    // Präzise Kommanoten für schriftliche Noten verwenden
+    const writtenGrades = projects
+        .map(project => convertGrade(project.grade))
+        .filter(grade => grade > 0);
+
+    if (hasOral) {
+        // Wenn keine Projektnoten vorhanden sind, nimm die mündliche Note als Endnote
+        if (writtenGrades.length === 0) {
+            return {
+                rounded: roundGrade(oralGradeConverted),
+                exact: oralGradeConverted.toFixed(3),
+                numeric: oralGradeConverted
+            };
+        }
+
+        // Wenn Projektnoten vorhanden sind, berechne den Durchschnitt
+        const writtenAverage = writtenGrades.reduce((sum, grade) => sum + grade, 0) / writtenGrades.length;
+        const finalGrade = (writtenAverage * (100 - weightValue) + oralGradeConverted * weightValue) / 100;
+        return {
+            rounded: roundGrade(finalGrade),
+            exact: finalGrade.toFixed(3),
+            numeric: finalGrade
+        };
+    }
+
+    // Wenn es gar keine Noten gibt (weder mündlich noch schriftlich)
+    if (writtenGrades.length === 0) {
+        return {
+            rounded: 'Keine Noten',
+            exact: 'Keine Noten',
+            numeric: 0
+        };
+    }
+
+    // Wenn es nur schriftliche Noten gibt, aber keine mündliche Note
+    const writtenAverage = writtenGrades.reduce((sum, grade) => sum + grade, 0) / writtenGrades.length;
+    return {
+        rounded: roundGrade(writtenAverage),
+        exact: writtenAverage.toFixed(3),
+        numeric: writtenAverage
+    };
+}
+
+// Noten Modul rendern
+function renderGradesModule() {
+    const studentsList = safeGetElement('students-list');
+    if (!studentsList) return;
+
+    // Bestehenden Inhalt in ein temporäres DIV sichern (für flackerfreies Update)
+function setWeight(weight) {
+    // Aktuelle Scrollposition speichern
+    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Alte aktive Klasse entfernen
+    const weightButtons = document.querySelectorAll('.weight-btn');
+    if (weightButtons) {
+        weightButtons.forEach(btn => {
+            btn.classList.remove('active-weight');
+        });
+    }
+
+    // Neue aktive Klasse setzen
+    const weightButton = document.querySelector(`.weight-btn[onclick="setWeight(${weight})"]`);
+    if (weightButton) {
+        weightButton.classList.add('active-weight');
+    }
+
+    // Wert aktualisieren
+    const originalDisplay = document.getElementById('oralWeightValue');
+    const clonedDisplay = document.getElementById('oralWeightValueClone');
+
+    if (originalDisplay) originalDisplay.innerText = weight;
+    if (clonedDisplay) clonedDisplay.innerText = weight;
+
+    // Speichern
+    localStorage.setItem('oralWeight', weight);
+

@@ -1,0 +1,10 @@
+// Funktion zum Setzen der Gewichtung - Nur UI-Update
+function setWeight(weight) {
+    const weightButtons = document.querySelectorAll(".weight-btn");
+    if (weightButtons) {
+        weightButtons.forEach(btn => btn.classList.remove("active-weight"));
+    }
+    const originalDisplay = document.getElementById("oralWeightValue");
+    if (originalDisplay) originalDisplay.innerText = weight;
+    localStorage.setItem("oralWeight", weight);
+}
