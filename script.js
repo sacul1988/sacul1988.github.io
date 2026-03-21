@@ -9130,7 +9130,7 @@ function exportSitzplanAsJPEG() {
     // Hintergrundfarben der Tische temporär entfernen für sauberen Export
     const originalBackgrounds = [];
     const removedClasses = [];
-    const classesToRemove = ['has-schulplaner-entry', 'learning-support', 'has-abschreibtext-entry', 'high-negatives-name'];
+    const classesToRemove = ['has-schulplaner-entry', 'learning-support', 'ese-support', 'has-abschreibtext-entry', 'high-negatives-name'];
     desks.forEach(desk => {
         originalBackgrounds.push({ element: desk, background: desk.style.backgroundColor });
         desk.style.backgroundColor = 'white';
