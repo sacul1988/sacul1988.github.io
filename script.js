@@ -9953,7 +9953,10 @@ function renderZeugnisModule() {
 }
 
 function scrollToTopOfZeugnisModule() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    console.log("Scroll to top called");
+    document.documentElement.scrollTop = 0; // Für Chrome, Firefox, IE und Opera
+    document.body.scrollTop = 0; // Für Safari
+    window.scrollTo({ top: 0, behavior: 'auto' }); 
 }
 
 // Notizen speichern
