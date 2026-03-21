@@ -2286,22 +2286,13 @@ function deleteStudentNote(studentIndex, noteIndex) {
 // ===== NOTENBERECHNUNG UND FUNKTIONEN =====
 
 // Endnote berechnen
-function calculateFinalGrade(projects, oralGrade, oralWeight) {
-    if (!projects) projects = [];
-    
-    const weightValue = isNaN(parseInt(oralWeight)) ? 50 : parseInt(oralWeight);
-    
-    let oralGradeConverted = 0;
-    let hasOral = false;
-    
-    if (oralGrade && oralGrade !== '') {
-        if (typeof oralGrade === 'number') {
-            oralGradeConverted = oralGrade;
-            hasOral = true;
-        } else {
-            oralGradeConverted = convertGrade(oralGrade);
-            hasOral = oralGradeConverted > 0;
-        }
+function calculateFinalGrade(projects) {
+    if (!projects || projects.length === 0) {
+        return {
+            rounded: 'Keine Note',
+            exact: 'Keine Note',
+            numeric: 0
+        };
     }
         
     // Präzise Kommanoten für schriftliche Noten verwenden
@@ -2309,36 +2300,16 @@ function calculateFinalGrade(projects, oralGrade, oralWeight) {
         .map(project => convertGrade(project.grade))
         .filter(grade => grade > 0);
 
-    if (hasOral) {
-        // Wenn keine Projektnoten vorhanden sind, nimm die mündliche Note als Endnote
-        if (writtenGrades.length === 0) {
-            return {
-                rounded: roundGrade(oralGradeConverted),
-                exact: oralGradeConverted.toFixed(3),
-                numeric: oralGradeConverted
-            };
-        }
-
-        // Wenn Projektnoten vorhanden sind, berechne den Durchschnitt
-        const writtenAverage = writtenGrades.reduce((sum, grade) => sum + grade, 0) / writtenGrades.length;
-        const finalGrade = (writtenAverage * (100 - weightValue) + oralGradeConverted * weightValue) / 100;
-        return {
-            rounded: roundGrade(finalGrade),
-            exact: finalGrade.toFixed(3),
-            numeric: finalGrade
-        };
-    }
-    
-    // Wenn es gar keine Noten gibt (weder mündlich noch schriftlich)
+    // Wenn es gar keine gültigen Noten in den Projekten gibt
     if (writtenGrades.length === 0) {
         return {
-            rounded: 'Keine Noten',
-            exact: 'Keine Noten',
+            rounded: 'Keine Note',
+            exact: 'Keine Note',
             numeric: 0
         };
     }
 
-    // Wenn es nur schriftliche Noten gibt, aber keine mündliche Note
+    // Die Endnote ist der einfache Durchschnitt der Projektnoten
     const writtenAverage = writtenGrades.reduce((sum, grade) => sum + grade, 0) / writtenGrades.length;
     return {
         rounded: roundGrade(writtenAverage),
@@ -2395,7 +2366,7 @@ function renderGradesModule() {
         const studentCard = document.createElement('div');
         studentCard.className = 'student-card'; // Kein fade-in Klasse mehr, um Flackern zu verhindern
         
-        const finalGrade = calculateFinalGrade(student.projects, student.oralGrade, oralWeight);
+        const finalGrade = calculateFinalGrade(student.projects);
         
         let studentHeader = `
             <div class="student-header" onclick="toggleStudentDetails('noten', ${studentIndex})">
@@ -2501,7 +2472,7 @@ function updateGradeLocally(studentIndex, projectIndex, grade) {
     const oralWeight = oralWeightElement ? parseInt(oralWeightElement.innerText) : 50;
     
     // Endnote neu berechnen
-    const finalGrade = calculateFinalGrade(student.projects, student.oralGrade, oralWeight);
+    const finalGrade = calculateFinalGrade(student.projects);
     
     // HTML für die Endnote
     let gradeHtml;
