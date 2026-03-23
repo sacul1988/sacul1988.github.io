@@ -1497,6 +1497,14 @@ select.form-control {
 }
 
 /* Aktive Button-Farben für Sitzplan-Modi */
+#sitzplan-module .sitzplan-controls .btn:focus,
+#sitzplan-module .sitzplan-controls .btn:active,
+#sitzplan-module .sitzplan-controls .btn.active {
+    outline: none;
+    box-shadow: none;
+    border-color: transparent;
+}
+
 #sitzplan-module .sitzplan-controls .btn.active {
     background: orange;
     color: #fff;
