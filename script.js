@@ -1676,9 +1676,9 @@ function renderHWHistory(studentIndex) {
         } else if (entry.type === 'eintrag') {
             typeText = 'Eintrag';
         } else if (entry.type === 'abschreibtext') {
-            typeText = 'Abschreibtext';
+            typeText = 'Konsequenz';
         } else if (entry.type === 'nachsitzen') {
-            typeText = 'Nachsitzen';
+            typeText = 'Konsequenz';
         }
         
         const historyItem = document.createElement('div');
@@ -3720,8 +3720,8 @@ function showAbschreibtextModal(studentIndex) {
     
     // Verwende SweetAlert statt HTML-Modal
     swal({
-        title: "Abschreibtext Störungen",
-        text: `Möchten Sie ${student.name} einen Abschreibtext heben?`,
+        title: "Störungen",
+        text: `Möchten Sie ${student.name} eine Konsequenz geben?`,
         icon: "question",
         buttons: ["Nein", "Ja"],
         dangerMode: false,
@@ -3742,8 +3742,8 @@ function showNachsitzenModal(studentIndex) {
     
     // Verwende SweetAlert
     swal({
-        title: "Nachsitzen",
-        text: `Möchten Sie ${student.name} zum Nachsitzen eintragen?`,
+        title: "Störungen",
+        text: `Möchten Sie ${student.name} eine Konsequenz geben?`,
         icon: "question",
         buttons: ["Nein", "Ja"],
         dangerMode: false,
@@ -4524,9 +4524,8 @@ function renderZeugnisModule() {
         const positive = student.participation ? (typeof student.participation.positive === 'number' ? student.participation.positive : 0) : 0;
         const negative = student.participation ? (typeof student.participation.negative === 'number' ? student.participation.negative : 0) : 0;
         
-        // Abschreibtext und Nachsitzen zählen
-        const abschreibtextCount = student.hwHistory ? student.hwHistory.filter(entry => entry.type === 'abschreibtext').length : 0;
-        const nachsitzenCount = student.hwHistory ? student.hwHistory.filter(entry => entry.type === 'nachsitzen').length : 0;
+        // Konsequenz zählen (ehemals Abschreibtext + Nachsitzen)
+        const konsequenzCount = student.hwHistory ? student.hwHistory.filter(entry => entry.type === 'abschreibtext' || entry.type === 'nachsitzen').length : 0;
         
         // Notizen
         const leftNotes = student.leftNotes || '- ';
@@ -4549,10 +4548,8 @@ function renderZeugnisModule() {
                         <div class="stats">
                             <div>Hausaufgaben vergessen: ${homework}</div>
                             <div>Material vergessen: ${materials}</div>
-                            <div>Positive Beteiligung: ${positive}</div>
                             <div>Negative Beteiligung: ${negative}</div>
-                            ${abschreibtextCount > 0 ? `<div>Abschreibtext: ${abschreibtextCount}</div>` : ''}
-                            ${nachsitzenCount > 0 ? `<div>Nachsitzen: ${nachsitzenCount}</div>` : ''}
+                            ${konsequenzCount > 0 ? `<div>Konsequenz: ${konsequenzCount}</div>` : ''}
                         </div>
                     </div>
                 </div>
@@ -4745,6 +4742,7 @@ function exportAllStudentCards() {
         const materials = student.materials || 0;
         const positive = student.participation ? student.participation.positive || 0 : 0;
         const negative = student.participation ? student.participation.negative || 0 : 0;
+        const printKonsequenzCount = student.hwHistory ? student.hwHistory.filter(entry => entry.type === 'abschreibtext' || entry.type === 'nachsitzen').length : 0;
         
         const leftNotes = student.leftNotes || '';
         const rightNotes = student.rightNotes || '';
@@ -4762,8 +4760,8 @@ function exportAllStudentCards() {
                     <ul>
                         <li>Hausaufgaben vergessen: ${homework}</li>
                         <li>Material vergessen: ${materials}</li>
-                        <li>Positive Beteiligung: ${positive}</li>
                         <li>Negative Beteiligung: ${negative}</li>
+                        ${printKonsequenzCount > 0 ? `<li>Konsequenz: ${printKonsequenzCount}</li>` : ''}
                     </ul>
                 </div>
                 <div class="section">
