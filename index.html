@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Realschule Lage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,11 +28,12 @@
 
     <div class="container">
         <!-- Cloud Status Bar -->
-        <div id="cloud-status-bar" style="display: none; background: #e8f5e9; padding: 5px 15px; border-radius: 8px; margin-bottom: 10px; font-size: 0.8em; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span><i class="fas fa-cloud-check text-success"></i> Cloud-Synchronisierung aktiv</span>
+        <div id="cloud-status-bar" class="cloud-status-bar" style="display: none;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-circle-check" style="color: var(--success-color);"></i>
+                <span>Cloud-Synchronisierung aktiv</span>
             </div>
-            <button class="btn btn-sm btn-light" onclick="handleLogout()" style="padding: 2px 8px;">Abmelden</button>
+            <button class="btn btn-sm btn-light" onclick="handleLogout()">Abmelden</button>
         </div>
 
         <!-- Pfadnavigation -->
@@ -89,6 +92,11 @@
                     <div class="module-nav-item" data-module="zeugnis">
                         <button class="btn btn-light" onclick="showModule('zeugnis')">
                             <i class="fas fa-graduation-cap"></i>
+                        </button>
+                    </div>
+                    <div class="module-nav-item" data-module="planung">
+                        <button class="btn btn-light" onclick="showModule('planung')">
+                            <i class="fas fa-clipboard-list"></i>
                         </button>
                     </div>
                 </div>
@@ -251,6 +259,53 @@
                         </div>
                     </div>
                     
+                    <!-- Planung Modul -->
+                    <div id="planung-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Planung</h2>
+                                <div>
+                                    <button class="btn btn-primary btn-icon" onclick="deletePlanungTable()">
+                                        <i class="fas fa-trash"></i> Tabelle löschen
+                                    </button>
+                                    <button class="btn btn-primary btn-icon" onclick="exportPlanungTable()">
+                                        <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                            <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                        </svg>
+                                        Tabelle exportieren
+                                    </button>
+                                    <button class="btn btn-secondary btn-icon" onclick="showTermineModal()">
+                                        <i class="fas fa-calendar-alt"></i> Termine
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="planung-setup">
+                                <div class="planung-setup-group">
+                                    <span class="planung-setup-label">Zeitraum</span>
+                                    <div class="planung-date-range">
+                                        <span class="planung-range-text">Von</span>
+                                        <input type="date" id="planung-start-date" class="form-control planung-date-input">
+                                        <span class="planung-range-text">Bis</span>
+                                        <input type="date" id="planung-end-date" class="form-control planung-date-input">
+                                    </div>
+                                </div>
+                                <div class="planung-setup-group">
+                                    <span class="planung-setup-label">Unterrichtstage</span>
+                                    <div class="planung-days-row">
+                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="1"><span>Mo</span></label>
+                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="2"><span>Di</span></label>
+                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="3"><span>Mi</span></label>
+                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="4"><span>Do</span></label>
+                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="5"><span>Fr</span></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="planung-table-container"></div>
+                        </div>
+                    </div>
+
                     <!-- Zeugnis Modul -->
                     <div id="zeugnis-module" class="module" style="display: none;">
                         <div class="card">
@@ -297,17 +352,6 @@
                 <div class="form-group">
                     <label for="new-class-subject">Fach (optional)</label>
                     <input type="text" id="new-class-subject" class="form-control" placeholder="z.B. Mathematik, Englisch">
-                </div>
-                <div class="form-group">
-                    <label for="new-class-color">Klassenfarbe</label>
-                    <select id="new-class-color" class="form-control">
-                        <option value="#6c757d">Grau</option>
-                        <option value="#007bff">Blau</option>
-                        <option value="#28a745">Grün</option>
-                        <option value="#dc3545">Rot</option>
-                        <option value="#ffc107">Gelb</option>
-                        <option value="#6f42c1">Lila</option>
-                    </select>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
@@ -418,17 +462,6 @@
                 <div class="form-group">
                     <input type="text" id="edit-class-input" class="form-control" placeholder="Klassenname">
                 </div>
-                <div class="form-group">
-                    <label for="edit-class-color">Klassenfarbe:</label>
-                    <select id="edit-class-color" class="form-control">
-                        <option value="#6c757d">Grau</option>
-                        <option value="#007bff">Blau</option>
-                        <option value="#28a745">Grün</option>
-                        <option value="#dc3545">Rot</option>
-                        <option value="#ffc107">Gelb</option>
-                        <option value="#6f42c1">Lila</option>
-                    </select>
-                </div>
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="saveEditedClass()">Speichern</button>
@@ -447,6 +480,27 @@
                 </div>
             </div>
             
+            <!-- Termine Modal -->
+            <div id="termine-modal" class="modal termine-modal" style="display: none;">
+                <div class="termin-modal-header">
+                    <div class="termin-modal-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Termine</span>
+                    </div>
+                    <button class="termin-modal-close" onclick="hideModal()"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div class="termin-add-form">
+                    <input type="text" id="termin-title-input" class="form-control termin-add-input" placeholder="Bezeichnung">
+                    <input type="date" id="termin-date-input" class="form-control termin-add-date">
+                    <button class="btn btn-primary termin-add-btn" onclick="addTermin()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <div id="termine-list-container" class="termine-list-container"></div>
+            </div>
+
             <!-- Modal für letzte Eingabe rückgängig machen -->
             <div id="undo-last-modal" class="modal" style="display: none;">
                 <h2>Letzte Eingabe rückgängig machen</h2>
@@ -460,6 +514,9 @@
         </div>
     </div>
 
+    <!-- Flatpickr Date Picker -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/de.js"></script>
     <!-- SweetAlert für bessere Dialoge -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     <!-- html2canvas für Export-Funktionen -->
@@ -578,17 +635,18 @@
                         
                         localStorage.setItem('classes', JSON.stringify(cloudData.classes));
                         localStorage.setItem('lastUpdate', cloudData.lastUpdate || "0");
-                        
+                        applyCloudTermineAndPlanung(cloudData);
+
                         // Brücke zu script.js
                         if (typeof window.setClasses === 'function') {
                             window.setClasses(cloudData.classes);
                         }
-                        
+
                         // Hauptansicht neu rendern
                         if (typeof window.renderClassesGrid === 'function') {
                             window.renderClassesGrid();
                         }
-                        
+
                         if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Daten geladen (Init)';
                     } else {
                         console.log("Login-Initialisierung: Keine Cloud-Daten gefunden (Neues Konto?)");
@@ -633,6 +691,7 @@
                             // 1. Daten in localStorage synchronisieren
                             localStorage.setItem('classes', JSON.stringify(cloudData.classes));
                             localStorage.setItem('lastUpdate', cloudTimestamp);
+                            applyCloudTermineAndPlanung(cloudData);
 
                             // 2. Globale Variablen sofort aktualisieren (wichtig für script.js)
                             window.classes = cloudData.classes;
@@ -731,6 +790,33 @@
 
 
 
+        function applyCloudTermineAndPlanung(cloudData) {
+            const localExtra = localStorage.getItem('extraDataLastUpdate') || '0';
+            const cloudExtra = cloudData.extraDataLastUpdate || '0';
+            const hasLocalTermine = localStorage.getItem('termine') !== null;
+
+            // Cloud-Daten nur übernehmen wenn:
+            // (a) Cloud-Zeitstempel strikt neuer ist, ODER
+            // (b) lokal noch keine Daten vorhanden sind (neues Gerät)
+            const shouldApply = cloudExtra > localExtra || !hasLocalTermine;
+            if (!shouldApply) return;
+
+            if (Array.isArray(cloudData.termine)) {
+                localStorage.setItem('termine', JSON.stringify(cloudData.termine));
+                if (window.AppState) window.AppState.termine = cloudData.termine;
+            }
+            if (cloudData.planung && typeof cloudData.planung === 'object') {
+                Object.keys(cloudData.planung).forEach(id => {
+                    try {
+                        localStorage.setItem(`planung_${id}`, JSON.stringify(cloudData.planung[id]));
+                    } catch(e) {}
+                });
+            }
+            if (cloudExtra > '0') {
+                localStorage.setItem('extraDataLastUpdate', cloudExtra);
+            }
+        }
+
         window.saveDataToCloud = async (specificStudentIndex = null) => {
             const user = auth.currentUser;
             if (!user) return;
@@ -742,12 +828,24 @@
                 const userDocRef = doc(db, "userData", user.uid);
                 
                 // Wir nutzen merge: true, um nur Teile des Dokuments zu aktualisieren
+                const planungObj = {};
+                const classList = window.classes || (window.AppState ? window.AppState.classes : []);
+                classList.forEach((_, i) => {
+                    try {
+                        const p = localStorage.getItem(`planung_${i}`);
+                        if (p) planungObj[String(i)] = JSON.parse(p);
+                    } catch(e) {}
+                });
+
                 let data = {
                     lastUpdate: timestamp,
                     // Wichtig: Immer das komplette classes-Array senden.
                     // Teilupdates per "classes.<index>" sind bei Arrays in Firestore unzuverlässig
                     // und führten dazu, dass Zeugnis-Notizen nicht konsistent gespeichert wurden.
-                    classes: window.classes || (window.AppState ? window.AppState.classes : [])
+                    classes: window.classes || (window.AppState ? window.AppState.classes : []),
+                    termine: (window.AppState && window.AppState.termine) ? window.AppState.termine : [],
+                    planung: planungObj,
+                    extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
                 };
 
                 if (specificStudentIndex !== null) {
@@ -810,6 +908,7 @@
                     
                     localStorage.setItem('classes', JSON.stringify(cloudData.classes));
                     localStorage.setItem('lastUpdate', cloudTimestamp);
+                    applyCloudTermineAndPlanung(cloudData);
                     window.classes = cloudData.classes;
                     if (window.AppState) window.AppState.classes = cloudData.classes;
                     

@@ -6,7 +6,8 @@ const AppState = {
     currentPage: 'home',
     currentEvaluationStudentIndex: null,
     zeugnisViewMode: 'individual', // 'individual' or 'average'
-    isInitialSyncComplete: false // Neu: Sperre für Cloud-Sync beim Start
+    isInitialSyncComplete: false, // Neu: Sperre für Cloud-Sync beim Start
+    termine: []
 };
 
 // Start-Sperre setzen (3 Sekunden), damit Cloud-Daten Zeit zum Laden haben
@@ -357,6 +358,10 @@ function showPage(page, classId = null) {
 function showModule(module) {
     // Vor dem Modulwechsel offene Zeugnis-Eingaben sichern.
     saveFocusedZeugnisTextarea();
+
+    if (module === 'planung') {
+        loadPlanung();
+    }
 
     // Neu: Wenn zum Zeugnis-Tab gewechselt wird, IMMER erst einmal die neuesten Daten aus der Cloud erzwingen
     if (module === 'zeugnis') {
@@ -731,9 +736,9 @@ function renderClassesGrid() {
         classCard.className = 'class-card';
         
         classCard.innerHTML = `
-            <div class="class-card-header" style="background-color: ${cls.color || '#6c757d'}">
+            <div class="class-card-header">
                 <span>${cls.name}</span>
-                <span class="badge" style="background-color: ${cls.color || '#6c757d'}; color: white;">${studentCount} Schüler</span>
+                <span class="badge">${studentCount} Schüler</span>
             </div>
             <div class="class-card-body">
                 <div class="module-buttons">
@@ -859,13 +864,10 @@ function handleStudentDrop(event, targetIndex) {
 function createClass() {
     const classNameInput = safeGetElement('new-class-name');
     const subjectInput = safeGetElement('new-class-subject');
-    const colorInput = safeGetElement('new-class-color');
-
     if (!classNameInput) return;
 
     const className = classNameInput.value.trim();
     const subject = subjectInput ? subjectInput.value.trim() : '';
-    const color = colorInput ? colorInput.value : '#6c757d';
 
     if (!className) {
         if (typeof swal !== 'undefined') {
@@ -893,7 +895,6 @@ function createClass() {
     const newClass = {
         name: className,
         subject: subject,
-        color: color,
         students: [],
         homework: {},
         materials: {},
@@ -1006,22 +1007,17 @@ function editClass(classId) {
     const input = safeGetElement('edit-class-input');
     if (input) input.value = cls.name;
     
-    const colorInput = safeGetElement('edit-class-color');
-    if (colorInput) colorInput.value = cls.color || '#6c757d'; // Default grau
-    
     showModal('edit-class-modal');
 }
 
 // Klasse speichern nach Bearbeitung
 function saveEditedClass() {
     const input = safeGetElement('edit-class-input');
-    const colorInput = safeGetElement('edit-class-color');
     if (!input || classToEditId === null) return;
-    
+
     const newName = input.value.trim();
     if (newName) {
         classes[classToEditId].name = newName;
-        classes[classToEditId].color = colorInput ? colorInput.value : '#6c757d';
         saveData();
         renderClassesGrid();
         
@@ -1077,9 +1073,45 @@ function deleteClass(classId) {
 // ===== EVENT HANDLING =====
 
 // Event-Listener für Dokumentenladung
+function initFlatpickr() {
+    if (typeof flatpickr === 'undefined') return;
+    const locale = (flatpickr.l10ns && flatpickr.l10ns.de) ? flatpickr.l10ns.de : 'de';
+    const fpConfig = {
+        locale: locale,
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd.m.Y',
+        disableMobile: true,
+        onChange: function() { autoGeneratePlanungTable(); },
+        onOpen: function(selectedDates, dateStr, instance) {
+            setTimeout(function() {
+                const cal = instance.calendarContainer;
+                cal.style.position = 'fixed';
+                cal.style.top = '50%';
+                cal.style.left = '50%';
+                cal.style.transform = 'translate(-50%, -50%)';
+                cal.style.zIndex = '999999';
+                cal.style.marginTop = '0';
+            }, 0);
+        }
+    };
+    const terminConfig = Object.assign({}, fpConfig);
+    delete terminConfig.onChange;
+
+    const startEl = document.getElementById('planung-start-date');
+    const endEl = document.getElementById('planung-end-date');
+    const terminEl = document.getElementById('termin-date-input');
+    if (startEl) flatpickr(startEl, fpConfig);
+    if (endEl) flatpickr(endEl, fpConfig);
+    if (terminEl) flatpickr(terminEl, terminConfig);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisierungsfunktion rufen
+    initFlatpickr();
     loadData();
+    loadTermine();
+    loadPlanung();
     
     // Add styles for the project grades preview
     addProjectGradesPreviewStyles();
@@ -1092,6 +1124,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Wochentag-Checkboxen: Tabelle automatisch aktualisieren
+    document.querySelectorAll('.planung-day-cb').forEach(cb => {
+        cb.addEventListener('change', autoGeneratePlanungTable);
+    });
+
     // Event-Listener für Navigation
     const homeLink = document.getElementById('home-link');
     if (homeLink) {
@@ -4815,4 +4852,593 @@ function undoLastEntry() {
         deskClickHistory[desk.id].lastClickType = null;
         hideModal();
     }
+}
+
+// ===== TERMINE =====
+
+function loadTermine() {
+    try {
+        const saved = localStorage.getItem('termine');
+        AppState.termine = saved ? JSON.parse(saved) : [];
+    } catch (e) {
+        AppState.termine = [];
+    }
+
+    if (AppState.termine.length > 0 && !localStorage.getItem('extraDataLastUpdate')) {
+        localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+    }
+}
+
+function saveTermine() {
+    localStorage.setItem('termine', JSON.stringify(AppState.termine));
+    localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+    if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.triggerCloudSyncDebounced === 'function') {
+        window.triggerCloudSyncDebounced(2500);
+    }
+}
+
+function showTermineModal() {
+    loadTermine();
+    const dateInput = safeGetElement('termin-date-input');
+    if (dateInput && !dateInput.value) {
+        const today = localDateStr(new Date());
+        if (dateInput._flatpickr) dateInput._flatpickr.setDate(today, false);
+        else dateInput.value = today;
+    }
+    renderTermineList();
+    showModal('termine-modal');
+}
+
+function renderTermineList() {
+    const container = safeGetElement('termine-list-container');
+    if (!container) return;
+
+    const termine = AppState.termine || [];
+
+    if (termine.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="padding: 20px 0;">
+                <i class="fas fa-calendar"></i>
+                <p>Keine Termine vorhanden</p>
+            </div>
+        `;
+        return;
+    }
+
+    const sorted = [...termine].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Unterrichtstage der aktuellen Klasse ermitteln
+    const p = AppState.planung;
+    const hasPlanung = p && p.startDate && p.endDate && (p.selectedDays || []).length > 0;
+    const teachingDates = new Set();
+    if (hasPlanung) {
+        const cur = new Date(p.startDate + 'T00:00:00');
+        const end = new Date(p.endDate + 'T00:00:00');
+        while (cur <= end) {
+            if (p.selectedDays.includes(cur.getDay())) teachingDates.add(localDateStr(cur));
+            cur.setDate(cur.getDate() + 1);
+        }
+    }
+
+    const hiddenTermine = (p && p.hiddenTermine) ? p.hiddenTermine : [];
+
+    container.innerHTML = '';
+    sorted.forEach(termin => {
+        const isHidden = hiddenTermine.includes(termin.id);
+        let statusClass = '';
+        let statusIcon = '';
+        if (hasPlanung) {
+            if (teachingDates.has(termin.date)) {
+                statusClass = ' termin-on-teaching-day';
+                statusIcon = '<i class="fas fa-check-circle termin-status-icon" title="Fällt auf einen Unterrichtstag"></i>';
+            } else {
+                statusClass = ' termin-not-on-teaching-day';
+                statusIcon = '<i class="fas fa-times-circle termin-status-icon" title="Kein Unterrichtstag"></i>';
+            }
+        }
+        if (isHidden) statusClass += ' termin-ausgeblendet';
+
+        const item = document.createElement('div');
+        item.className = `termin-item${statusClass}`;
+        item.id = `termin-item-${termin.id}`;
+
+        const formattedDate = new Date(termin.date + 'T00:00:00').toLocaleDateString('de-DE', {
+            weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit'
+        });
+
+        item.innerHTML = `
+            <div class="termin-info">
+                ${statusIcon}
+                <div class="termin-info-text">
+                    <span class="termin-date">${formattedDate}</span>
+                    <span class="termin-title">${termin.title}</span>
+                </div>
+            </div>
+            <div class="termin-actions">
+                <label class="termin-ausblenden-label">
+                    <input type="checkbox" ${isHidden ? 'checked' : ''} onchange="toggleTerminAusblenden('${termin.id}', this.checked)"> Ausblenden
+                </label>
+                <button class="btn btn-sm btn-primary btn-square" onclick="editTermin('${termin.id}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger btn-square" onclick="deleteTermin('${termin.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+        container.appendChild(item);
+    });
+}
+
+function addTermin() {
+    const titleInput = safeGetElement('termin-title-input');
+    const dateInput = safeGetElement('termin-date-input');
+
+    if (!titleInput || !dateInput) return;
+
+    const title = titleInput.value.trim();
+    const date = dateInput.value;
+
+    if (!title) {
+        swal('Fehler', 'Bitte eine Bezeichnung eingeben', 'error');
+        return;
+    }
+    if (!date) {
+        swal('Fehler', 'Bitte ein Datum eingeben', 'error');
+        return;
+    }
+
+    if (!AppState.termine) AppState.termine = [];
+
+    const newId = Date.now().toString();
+    AppState.termine.push({ id: newId, title: title, date: date });
+    saveTermine();
+
+    titleInput.value = '';
+    renderTermineList();
+    renderPlanungTable();
+}
+
+
+function deleteTermin(terminId) {
+    swal({
+        title: 'Termin löschen?',
+        text: 'Möchtest du diesen Termin wirklich löschen?',
+        icon: 'warning',
+        buttons: ['Abbrechen', 'Löschen'],
+        dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+            AppState.termine = (AppState.termine || []).filter(t => t.id !== terminId);
+            saveTermine();
+            if (AppState.planung && AppState.planung.hiddenTermine) {
+                AppState.planung.hiddenTermine = AppState.planung.hiddenTermine.filter(id => id !== terminId);
+                savePlanung();
+            }
+            renderTermineList();
+            renderPlanungTable();
+        }
+    });
+}
+
+function toggleTerminAusblenden(terminId, checked) {
+    if (!AppState.planung) return;
+    if (!AppState.planung.hiddenTermine) AppState.planung.hiddenTermine = [];
+    if (checked) {
+        if (!AppState.planung.hiddenTermine.includes(terminId))
+            AppState.planung.hiddenTermine.push(terminId);
+    } else {
+        AppState.planung.hiddenTermine = AppState.planung.hiddenTermine.filter(id => id !== terminId);
+    }
+    savePlanung();
+    renderTermineList();
+    renderPlanungTable();
+}
+
+function editTermin(terminId) {
+    const termin = (AppState.termine || []).find(t => t.id === terminId);
+    if (!termin) return;
+
+    const item = safeGetElement(`termin-item-${terminId}`);
+    if (!item) return;
+
+    item.className = 'termin-item termin-item-editing';
+    item.innerHTML = `
+        <div class="termin-edit-form">
+            <div class="form-group">
+                <input type="text" class="form-control" id="termin-edit-title-${terminId}" value="${termin.title}">
+            </div>
+            <div class="form-group">
+                <input type="date" class="form-control" id="termin-edit-date-${terminId}" value="${termin.date}">
+            </div>
+            <div class="termin-edit-actions">
+                <button class="btn btn-sm btn-light" onclick="renderTermineList()">Abbrechen</button>
+                <button class="btn btn-sm btn-primary" onclick="saveEditedTermin('${terminId}')">Speichern</button>
+            </div>
+        </div>
+    `;
+    if (typeof flatpickr !== 'undefined') {
+        const locale = (flatpickr.l10ns && flatpickr.l10ns.de) ? flatpickr.l10ns.de : 'de';
+        const editDateEl = document.getElementById(`termin-edit-date-${terminId}`);
+        if (editDateEl) flatpickr(editDateEl, {
+            locale: locale,
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd.m.Y',
+            disableMobile: true,
+            defaultDate: termin.date,
+            onOpen: function(selectedDates, dateStr, instance) {
+                setTimeout(function() {
+                    const cal = instance.calendarContainer;
+                    cal.style.position = 'fixed';
+                    cal.style.top = '50%';
+                    cal.style.left = '50%';
+                    cal.style.transform = 'translate(-50%, -50%)';
+                    cal.style.zIndex = '999999';
+                    cal.style.marginTop = '0';
+                }, 0);
+            }
+        });
+    }
+}
+
+function saveEditedTermin(terminId) {
+    const titleInput = safeGetElement(`termin-edit-title-${terminId}`);
+    const dateInput = safeGetElement(`termin-edit-date-${terminId}`);
+    if (!titleInput || !dateInput) return;
+
+    const title = titleInput.value.trim();
+    const date = dateInput.value;
+
+    if (!title || !date) {
+        swal('Fehler', 'Bitte alle Felder ausfüllen', 'error');
+        return;
+    }
+
+    const index = (AppState.termine || []).findIndex(t => t.id === terminId);
+    if (index === -1) return;
+
+    AppState.termine[index] = {
+        ...AppState.termine[index],
+        title: title,
+        date: date
+    };
+
+    saveTermine();
+    renderTermineList();
+}
+
+// ── Planung ─────────────────────────────────────────────────────────────────
+
+const PLANUNG_DAY_NAMES = ['', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
+
+function planungStorageKey() {
+    return activeClassId !== null ? `planung_${activeClassId}` : 'planung';
+}
+
+function loadPlanung() {
+    try {
+        const saved = localStorage.getItem(planungStorageKey());
+        AppState.planung = saved ? JSON.parse(saved) : { startDate: '', endDate: '', selectedDays: [], entries: {} };
+    } catch (e) {
+        AppState.planung = { startDate: '', endDate: '', selectedDays: [], entries: {} };
+    }
+
+    const p = AppState.planung;
+    if (!p.entries) p.entries = {};
+    if (!p.hiddenTermine) p.hiddenTermine = [];
+    const startEl = safeGetElement('planung-start-date');
+    const endEl = safeGetElement('planung-end-date');
+    if (startEl) {
+        if (startEl._flatpickr) startEl._flatpickr.setDate(p.startDate || '', false);
+        else startEl.value = p.startDate || '';
+    }
+    if (endEl) {
+        if (endEl._flatpickr) endEl._flatpickr.setDate(p.endDate || '', false);
+        else endEl.value = p.endDate || '';
+    }
+
+    document.querySelectorAll('.planung-day-cb').forEach(cb => {
+        cb.checked = (p.selectedDays || []).includes(parseInt(cb.value));
+    });
+
+    renderPlanungTable();
+}
+
+function savePlanung() {
+    localStorage.setItem(planungStorageKey(), JSON.stringify(AppState.planung));
+    localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+    if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.triggerCloudSyncDebounced === 'function') {
+        window.triggerCloudSyncDebounced(2500);
+    }
+}
+
+function exportPlanungTable() {
+    const container = safeGetElement('planung-table-container');
+    if (!container || !container.querySelector('table')) {
+        swal('Hinweis', 'Es gibt keine Tabelle zum Exportieren.', 'info');
+        return;
+    }
+
+    const rows = container.querySelectorAll('.planung-row');
+    let tbodyHtml = '';
+    rows.forEach(row => {
+        const cells  = row.querySelectorAll('td');
+        const nr     = cells[1].textContent.trim();
+        const tagFull = cells[2].textContent.trim();
+        const tagMap  = { 'Montag': 'Mo.', 'Dienstag': 'Di.', 'Mittwoch': 'Mi.', 'Donnerstag': 'Do.', 'Freitag': 'Fr.' };
+        const tag     = tagMap[tagFull] || tagFull;
+        const datum  = cells[3].textContent.trim();
+        const inhalt = row.querySelector('textarea') ? row.querySelector('textarea').value : '';
+        const terminText = row.querySelector('.planung-termin-text') ? row.querySelector('.planung-termin-text').textContent.trim() : '';
+        const isTermin = row.classList.contains('planung-row-termin');
+        const rowStyle = isTermin ? ' class="termin-row"' : '';
+        const inhaltCell = terminText
+            ? `<span class="termin-label">${terminText}</span>${inhalt ? ' ' + inhalt : ''}`
+            : inhalt;
+        tbodyHtml += `<tr${rowStyle}><td>${nr}</td><td>${tag}</td><td>${datum}</td><td>${inhaltCell}</td></tr>`;
+    });
+
+    const className = (activeClassId !== null && classes[activeClassId]) ? classes[activeClassId].name : '';
+    const exportTitle = className ? `Planung - ${className}` : 'Planung';
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${exportTitle}</title><style>
+        body { font-family: sans-serif; font-size: 13px; padding: 24px; }
+        h2 { margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        col.col-nr    { width: 10%; }
+        col.col-tag   { width: 8%; }
+        col.col-datum { width: 17%; }
+        col.col-inhalt{ width: 65%; }
+        th { background: #4a6cf7; color: #fff; padding: 8px 12px; text-align: center; }
+        td { padding: 10px 12px; border-bottom: 1px solid #dee2e6; vertical-align: middle; text-align: center; word-wrap: break-word; }
+        td:last-child { text-align: left; }
+        tr:nth-child(even) td { background: #f8f9fa; }
+        tr.termin-row td { background: #fff8e1 !important; }
+        .termin-label { font-weight: 600; }
+        @media print { body { padding: 0; } }
+    </style></head><body>
+        <h2>${exportTitle}</h2>
+        <table>
+            <colgroup><col class="col-nr"><col class="col-tag"><col class="col-datum"><col class="col-inhalt"></colgroup>
+            <thead><tr><th>Nr.</th><th>Tag</th><th>Datum</th><th>Inhalt</th></tr></thead>
+            <tbody>${tbodyHtml}</tbody>
+        </table>
+        <script>window.onload = function(){ window.print(); }<\/script>
+    </body></html>`);
+    win.document.close();
+}
+
+function deletePlanungTable() {
+    swal({
+        title: 'Tabelle löschen?',
+        text: 'Alle Einträge und Einstellungen werden unwiderruflich gelöscht.',
+        icon: 'warning',
+        buttons: ['Abbrechen', 'Löschen'],
+        dangerMode: true,
+    }).then(willDelete => {
+        if (!willDelete) return;
+        AppState.planung = { startDate: '', endDate: '', selectedDays: [], entries: {}, hiddenTermine: [] };
+        savePlanung();
+        const startEl = safeGetElement('planung-start-date');
+        const endEl = safeGetElement('planung-end-date');
+        if (startEl) { if (startEl._flatpickr) startEl._flatpickr.clear(); else startEl.value = ''; }
+        if (endEl) { if (endEl._flatpickr) endEl._flatpickr.clear(); else endEl.value = ''; }
+        document.querySelectorAll('.planung-day-cb').forEach(cb => cb.checked = false);
+        const container = safeGetElement('planung-table-container');
+        if (container) container.innerHTML = '';
+    });
+}
+
+function autoGeneratePlanungTable() {
+    const startEl = safeGetElement('planung-start-date');
+    const endEl = safeGetElement('planung-end-date');
+    if (!startEl || !endEl) return;
+    const startDate = startEl.value;
+    const endDate = endEl.value;
+    if (!startDate || !endDate || startDate > endDate) return;
+    const selectedDays = [];
+    document.querySelectorAll('.planung-day-cb:checked').forEach(cb => {
+        selectedDays.push(parseInt(cb.value));
+    });
+    if (!selectedDays.length) {
+        if (AppState.planung) AppState.planung.selectedDays = [];
+        renderPlanungTable();
+        return;
+    }
+    generatePlanungTable();
+}
+
+function generatePlanungTable() {
+    const startEl = safeGetElement('planung-start-date');
+    const endEl = safeGetElement('planung-end-date');
+    if (!startEl || !endEl) return;
+
+    const startDate = startEl.value;
+    const endDate = endEl.value;
+    if (!startDate || !endDate || startDate > endDate) return;
+
+    const selectedDays = [];
+    document.querySelectorAll('.planung-day-cb:checked').forEach(cb => {
+        selectedDays.push(parseInt(cb.value));
+    });
+    if (!selectedDays.length) return;
+
+    if (!AppState.planung) AppState.planung = { entries: {}, hiddenTermine: [] };
+    AppState.planung.startDate = startDate;
+    AppState.planung.endDate = endDate;
+    AppState.planung.selectedDays = selectedDays;
+    if (!AppState.planung.entries) AppState.planung.entries = {};
+    if (!AppState.planung.hiddenTermine) AppState.planung.hiddenTermine = [];
+
+    savePlanung();
+    renderPlanungTable();
+}
+
+const ALL_DAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+
+function renderPlanungTable() {
+    const container = safeGetElement('planung-table-container');
+    if (!container) return;
+
+    const p = AppState.planung;
+    if (!p || !p.startDate || !p.endDate || !(p.selectedDays || []).length) {
+        container.innerHTML = '';
+        return;
+    }
+
+    // Unterrichtstage aufbauen
+    const teachingDates = new Set();
+    const rows = [];
+    const current = new Date(p.startDate + 'T00:00:00');
+    const end = new Date(p.endDate + 'T00:00:00');
+
+    while (current <= end) {
+        const dow = current.getDay();
+        if ((p.selectedDays || []).includes(dow)) {
+            const dateStr = localDateStr(current);
+            teachingDates.add(dateStr);
+            rows.push({ date: dateStr, dow, isTeaching: true, termins: [] });
+        }
+        current.setDate(current.getDate() + 1);
+    }
+
+    // Termine einarbeiten – ausgeblendete Termine dieser Klasse überspringen
+    const termine = AppState.termine || [];
+    const hiddenTermine = new Set(p.hiddenTermine || []);
+    termine.forEach(termin => {
+        if (hiddenTermine.has(termin.id)) return;
+        if (termin.date < p.startDate || termin.date > p.endDate) return;
+        if (teachingDates.has(termin.date)) {
+            rows.find(r => r.date === termin.date).termins.push(termin);
+        } else {
+            const d = new Date(termin.date + 'T00:00:00');
+            rows.push({ date: termin.date, dow: d.getDay(), isTeaching: false, termins: [termin] });
+        }
+    });
+
+    rows.sort((a, b) => a.date.localeCompare(b.date));
+
+    if (!rows.length) {
+        container.innerHTML = '<p class="planung-empty">Keine Unterrichtstage im gewählten Zeitraum.</p>';
+        return;
+    }
+
+    let nr = 0;
+    const tableRows = rows.map(row => {
+        if (row.isTeaching) nr++;
+        const formattedDate = new Date(row.date + 'T00:00:00').toLocaleDateString('de-DE', {
+            day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+        const inhalt = (p.entries && p.entries[row.date]) ? escapeHtml(p.entries[row.date]) : '';
+
+        const terminText = row.termins.map(t => escapeHtml(t.title)).join(', ');
+
+        if (row.isTeaching) {
+            return `<tr class="planung-row${terminText ? ' planung-row-termin' : ''}" data-date="${row.date}">
+                <td class="planung-col-handle"><i class="fas fa-grip-vertical"></i></td>
+                <td class="planung-col-nr">${nr}</td>
+                <td class="planung-col-tag">${PLANUNG_DAY_NAMES[row.dow]}</td>
+                <td class="planung-col-datum">${formattedDate}</td>
+                <td class="planung-col-inhalt">
+                    <div class="planung-inhalt-cell">
+                        ${terminText ? `<span class="planung-termin-text">${terminText}</span>` : ''}
+                        <textarea class="planung-inhalt-input" data-date="${row.date}" rows="1">${inhalt}</textarea>
+                    </div>
+                </td>
+            </tr>`;
+        } else {
+            return `<tr class="planung-row planung-row-termin" data-date="${row.date}">
+                <td class="planung-col-handle"></td>
+                <td class="planung-col-nr">—</td>
+                <td class="planung-col-tag">${ALL_DAY_NAMES[row.dow]}</td>
+                <td class="planung-col-datum">${formattedDate}</td>
+                <td class="planung-col-inhalt">${terminText}</td>
+            </tr>`;
+        }
+    }).join('');
+
+    container.innerHTML = `
+        <table class="planung-table">
+            <thead>
+                <tr>
+                    <th class="planung-col-handle"></th>
+                    <th class="planung-col-nr">Nr.</th>
+                    <th class="planung-col-tag">Tag</th>
+                    <th class="planung-col-datum">Datum</th>
+                    <th class="planung-col-inhalt">Inhalt</th>
+                </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+        </table>
+    `;
+
+    container.querySelectorAll('.planung-inhalt-input').forEach(ta => {
+        ta.addEventListener('input', function() {
+            if (!AppState.planung.entries) AppState.planung.entries = {};
+            AppState.planung.entries[this.dataset.date] = this.value;
+            savePlanung();
+        });
+    });
+
+    let planungDragSource = null;
+
+    container.querySelectorAll('.planung-row').forEach(row => {
+        const handle = row.querySelector('.planung-col-handle');
+        if (!handle || !row.dataset.date || !rows.find(r => r.date === row.dataset.date && r.isTeaching)) return;
+
+        handle.addEventListener('mousedown', () => { row.draggable = true; });
+
+        row.addEventListener('dragstart', e => {
+            planungDragSource = row.dataset.date;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => row.classList.add('planung-dragging'), 0);
+        });
+
+        row.addEventListener('dragend', () => {
+            row.draggable = false;
+            row.classList.remove('planung-dragging');
+            container.querySelectorAll('.planung-row').forEach(r => r.classList.remove('planung-drag-over'));
+            planungDragSource = null;
+        });
+
+        row.addEventListener('dragover', e => {
+            if (!planungDragSource || row.dataset.date === planungDragSource) return;
+            e.preventDefault();
+            container.querySelectorAll('.planung-row').forEach(r => r.classList.remove('planung-drag-over'));
+            row.classList.add('planung-drag-over');
+        });
+
+        row.addEventListener('dragleave', e => {
+            if (!row.contains(e.relatedTarget)) row.classList.remove('planung-drag-over');
+        });
+
+        row.addEventListener('drop', e => {
+            e.preventDefault();
+            const targetDate = row.dataset.date;
+            if (!planungDragSource || planungDragSource === targetDate) return;
+
+            const entries = AppState.planung.entries || {};
+            const srcContent = entries[planungDragSource] || '';
+            const tgtContent = entries[targetDate] || '';
+
+            if (srcContent) entries[targetDate] = srcContent; else delete entries[targetDate];
+            if (tgtContent) entries[planungDragSource] = tgtContent; else delete entries[planungDragSource];
+
+            AppState.planung.entries = entries;
+            planungDragSource = null;
+            savePlanung();
+            renderPlanungTable();
+        });
+    });
+}
+
+function localDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
