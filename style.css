@@ -2499,12 +2499,7 @@ select.form-control {
 }
 
 .planung-row.planung-dragging {
-    opacity: 0.35;
-}
-
-.planung-row.planung-drag-over td {
-    background: #dbeafe !important;
-    border-top: 2px solid var(--primary-color);
+    opacity: 0.5;
 }
 
 .planung-col-nr {

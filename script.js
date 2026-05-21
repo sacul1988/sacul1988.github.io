@@ -5387,6 +5387,7 @@ function renderPlanungTable() {
     });
 
     let planungDragSource = null;
+    let planungDragIndicator = null;
 
     container.querySelectorAll('.planung-row').forEach(row => {
         const handle = row.querySelector('.planung-col-handle');
@@ -5397,38 +5398,67 @@ function renderPlanungTable() {
         row.addEventListener('dragstart', e => {
             planungDragSource = row.dataset.date;
             e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', planungDragSource);
             setTimeout(() => row.classList.add('planung-dragging'), 0);
         });
 
         row.addEventListener('dragend', () => {
             row.draggable = false;
             row.classList.remove('planung-dragging');
-            container.querySelectorAll('.planung-row').forEach(r => r.classList.remove('planung-drag-over'));
+            if (planungDragIndicator) { planungDragIndicator.remove(); planungDragIndicator = null; }
             planungDragSource = null;
         });
 
         row.addEventListener('dragover', e => {
             if (!planungDragSource || row.dataset.date === planungDragSource) return;
             e.preventDefault();
-            container.querySelectorAll('.planung-row').forEach(r => r.classList.remove('planung-drag-over'));
-            row.classList.add('planung-drag-over');
-        });
+            e.dataTransfer.dropEffect = 'move';
 
-        row.addEventListener('dragleave', e => {
-            if (!row.contains(e.relatedTarget)) row.classList.remove('planung-drag-over');
+            if (planungDragIndicator) { planungDragIndicator.remove(); planungDragIndicator = null; }
+
+            const table = container.querySelector('.planung-table');
+            const rect = row.getBoundingClientRect();
+            const tableRect = table.getBoundingClientRect();
+
+            planungDragIndicator = document.createElement('div');
+            planungDragIndicator.style.position = 'absolute';
+            planungDragIndicator.style.top = (rect.top - tableRect.top - 2) + 'px';
+            planungDragIndicator.style.left = '0';
+            planungDragIndicator.style.width = '100%';
+            planungDragIndicator.style.height = '4px';
+            planungDragIndicator.style.backgroundColor = '#ff6600';
+            planungDragIndicator.style.zIndex = '10';
+            planungDragIndicator.style.pointerEvents = 'none';
+
+            table.style.position = 'relative';
+            table.appendChild(planungDragIndicator);
         });
 
         row.addEventListener('drop', e => {
             e.preventDefault();
+            if (planungDragIndicator) { planungDragIndicator.remove(); planungDragIndicator = null; }
             const targetDate = row.dataset.date;
             if (!planungDragSource || planungDragSource === targetDate) return;
 
-            const entries = AppState.planung.entries || {};
-            const srcContent = entries[planungDragSource] || '';
-            const tgtContent = entries[targetDate] || '';
+            const teachingRows = [...container.querySelectorAll('.planung-row[data-date]')]
+                .filter(r => rows.find(pr => pr.date === r.dataset.date && pr.isTeaching));
+            const dates = teachingRows.map(r => r.dataset.date);
 
-            if (srcContent) entries[targetDate] = srcContent; else delete entries[targetDate];
-            if (tgtContent) entries[planungDragSource] = tgtContent; else delete entries[planungDragSource];
+            const srcIdx = dates.indexOf(planungDragSource);
+            const tgtIdx = dates.indexOf(targetDate);
+            if (srcIdx === -1 || tgtIdx === -1) return;
+
+            const entries = { ...(AppState.planung.entries || {}) };
+            const contents = dates.map(d => entries[d]);
+
+            // Reorder: wie in Schülerverwaltung — verschieben, nicht tauschen
+            const [moved] = contents.splice(srcIdx, 1);
+            contents.splice(tgtIdx, 0, moved);
+
+            dates.forEach((d, i) => {
+                if (contents[i] !== undefined && contents[i] !== '') entries[d] = contents[i];
+                else delete entries[d];
+            });
 
             AppState.planung.entries = entries;
             planungDragSource = null;
