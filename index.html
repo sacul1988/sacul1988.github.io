@@ -791,27 +791,38 @@
         function applyCloudTermineAndPlanung(cloudData) {
             const localExtra = localStorage.getItem('extraDataLastUpdate') || '0';
             const cloudExtra = cloudData.extraDataLastUpdate || '0';
-            const hasLocalTermine = localStorage.getItem('termine') !== null;
 
-            // Cloud-Daten nur übernehmen wenn:
-            // (a) Cloud-Zeitstempel strikt neuer ist, ODER
-            // (b) lokal noch keine Daten vorhanden sind (neues Gerät)
-            const shouldApply = cloudExtra > localExtra || !hasLocalTermine;
-            if (!shouldApply) return;
-
+            // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
+            // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
             if (Array.isArray(cloudData.termine)) {
-                localStorage.setItem('termine', JSON.stringify(cloudData.termine));
-                if (window.AppState) window.AppState.termine = cloudData.termine;
+                const localTermine = JSON.parse(localStorage.getItem('termine') || '[]');
+                const localDeletedIds = new Set(JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'));
+                const cloudDeletedIds = cloudData.deletedTermineIds || [];
+                cloudDeletedIds.forEach(id => localDeletedIds.add(id));
+                if (cloudDeletedIds.length > 0) {
+                    localStorage.setItem('deletedTermineIds', JSON.stringify([...localDeletedIds]));
+                }
+
+                const localIds = new Set(localTermine.map(t => t.id));
+                const newFromCloud = cloudData.termine.filter(t => !localIds.has(t.id) && !localDeletedIds.has(t.id));
+                const filteredLocal = localTermine.filter(t => !localDeletedIds.has(t.id));
+                const merged = [...filteredLocal, ...newFromCloud];
+
+                localStorage.setItem('termine', JSON.stringify(merged));
+                if (window.AppState) window.AppState.termine = merged;
             }
-            if (cloudData.planung && typeof cloudData.planung === 'object') {
+
+            // Planung per Timestamp-Vergleich (unverändertes Verhalten)
+            const shouldApplyPlanung = cloudExtra > localExtra || !localStorage.getItem('extraDataLastUpdate');
+            if (shouldApplyPlanung && cloudData.planung && typeof cloudData.planung === 'object') {
                 Object.keys(cloudData.planung).forEach(id => {
                     try {
                         localStorage.setItem(`planung_${id}`, JSON.stringify(cloudData.planung[id]));
                     } catch(e) {}
                 });
-            }
-            if (cloudExtra > '0') {
-                localStorage.setItem('extraDataLastUpdate', cloudExtra);
+                if (cloudExtra > '0') {
+                    localStorage.setItem('extraDataLastUpdate', cloudExtra);
+                }
             }
         }
 
@@ -842,6 +853,7 @@
                     // und führten dazu, dass Zeugnis-Notizen nicht konsistent gespeichert wurden.
                     classes: window.classes || (window.AppState ? window.AppState.classes : []),
                     termine: (window.AppState && window.AppState.termine) ? window.AppState.termine : [],
+                    deletedTermineIds: JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'),
                     planung: planungObj,
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
                 };

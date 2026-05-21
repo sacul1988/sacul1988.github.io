@@ -5010,6 +5010,9 @@ function deleteTermin(terminId) {
         dangerMode: true,
     }).then((willDelete) => {
         if (willDelete) {
+            const deletedIds = JSON.parse(localStorage.getItem('deletedTermineIds') || '[]');
+            if (!deletedIds.includes(terminId)) deletedIds.push(terminId);
+            localStorage.setItem('deletedTermineIds', JSON.stringify(deletedIds));
             AppState.termine = (AppState.termine || []).filter(t => t.id !== terminId);
             saveTermine();
             if (AppState.planung && AppState.planung.hiddenTermine) {
