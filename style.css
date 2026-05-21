@@ -2477,6 +2477,7 @@ select.form-control {
     background: #eef2ff;
 }
 
+
 .planung-table td {
     padding: 14px 12px;
     border-bottom: 1px solid #dee2e6;
@@ -2484,22 +2485,16 @@ select.form-control {
     text-align: center;
 }
 
-.planung-col-handle {
-    width: 28px;
-    text-align: center;
-    vertical-align: middle;
-    color: #adb5bd;
-    cursor: grab;
-    padding: 8px 4px !important;
-    user-select: none;
-}
 
-.planung-col-handle:active {
-    cursor: grabbing;
-}
-
-.planung-row.planung-dragging {
+.planung-row.planung-dragging td {
+    background: #fff3e0 !important;
     opacity: 0.5;
+}
+
+.planung-row.planung-drag-over td {
+    background: #fff3e0 !important;
+    border-top: 2px solid #ff6600;
+    border-bottom: 2px solid #ff6600;
 }
 
 .planung-col-nr {

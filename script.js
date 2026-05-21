@@ -16,6 +16,8 @@ setTimeout(() => {
     console.log("App: Initial-Sync-Sperre aufgehoben.");
 }, 3500);
 
+window.AppState = AppState; // Für index.html (Firebase-Sync) zugänglich machen
+
 // ===== GLOBALE VARIABLEN (deprecated, use AppState) =====
 // Für Abwärtskompatibilität, aber bevorzuge AppState
 let classes = AppState.classes;
@@ -5341,7 +5343,6 @@ function renderPlanungTable() {
 
         if (row.isTeaching) {
             return `<tr class="planung-row${terminText ? ' planung-row-termin' : ''}" data-date="${row.date}">
-                <td class="planung-col-handle"><i class="fas fa-grip-vertical"></i></td>
                 <td class="planung-col-nr">${nr}</td>
                 <td class="planung-col-tag">${PLANUNG_DAY_NAMES[row.dow]}</td>
                 <td class="planung-col-datum">${formattedDate}</td>
@@ -5354,7 +5355,6 @@ function renderPlanungTable() {
             </tr>`;
         } else {
             return `<tr class="planung-row planung-row-termin" data-date="${row.date}">
-                <td class="planung-col-handle"></td>
                 <td class="planung-col-nr">—</td>
                 <td class="planung-col-tag">${ALL_DAY_NAMES[row.dow]}</td>
                 <td class="planung-col-datum">${formattedDate}</td>
@@ -5367,7 +5367,6 @@ function renderPlanungTable() {
         <table class="planung-table">
             <thead>
                 <tr>
-                    <th class="planung-col-handle"></th>
                     <th class="planung-col-nr">Nr.</th>
                     <th class="planung-col-tag">Tag</th>
                     <th class="planung-col-datum">Datum</th>
@@ -5384,16 +5383,15 @@ function renderPlanungTable() {
             AppState.planung.entries[this.dataset.date] = this.value;
             savePlanung();
         });
+        ta.addEventListener('mousedown', e => e.stopPropagation());
+        ta.addEventListener('dragstart', e => e.stopPropagation());
     });
 
     let planungDragSource = null;
-    let planungDragIndicator = null;
-
     container.querySelectorAll('.planung-row').forEach(row => {
-        const handle = row.querySelector('.planung-col-handle');
-        if (!handle || !row.dataset.date || !rows.find(r => r.date === row.dataset.date && r.isTeaching)) return;
+        if (!row.dataset.date || !rows.find(r => r.date === row.dataset.date && r.isTeaching)) return;
 
-        handle.addEventListener('mousedown', () => { row.draggable = true; });
+        row.draggable = true;
 
         row.addEventListener('dragstart', e => {
             planungDragSource = row.dataset.date;
@@ -5403,9 +5401,8 @@ function renderPlanungTable() {
         });
 
         row.addEventListener('dragend', () => {
-            row.draggable = false;
             row.classList.remove('planung-dragging');
-            if (planungDragIndicator) { planungDragIndicator.remove(); planungDragIndicator = null; }
+            container.querySelectorAll('.planung-row').forEach(r => r.classList.remove('planung-drag-over'));
             planungDragSource = null;
         });
 
@@ -5413,30 +5410,17 @@ function renderPlanungTable() {
             if (!planungDragSource || row.dataset.date === planungDragSource) return;
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
+            container.querySelectorAll('.planung-row').forEach(r => r.classList.remove('planung-drag-over'));
+            row.classList.add('planung-drag-over');
+        });
 
-            if (planungDragIndicator) { planungDragIndicator.remove(); planungDragIndicator = null; }
-
-            const table = container.querySelector('.planung-table');
-            const rect = row.getBoundingClientRect();
-            const tableRect = table.getBoundingClientRect();
-
-            planungDragIndicator = document.createElement('div');
-            planungDragIndicator.style.position = 'absolute';
-            planungDragIndicator.style.top = (rect.top - tableRect.top - 2) + 'px';
-            planungDragIndicator.style.left = '0';
-            planungDragIndicator.style.width = '100%';
-            planungDragIndicator.style.height = '4px';
-            planungDragIndicator.style.backgroundColor = '#ff6600';
-            planungDragIndicator.style.zIndex = '10';
-            planungDragIndicator.style.pointerEvents = 'none';
-
-            table.style.position = 'relative';
-            table.appendChild(planungDragIndicator);
+        row.addEventListener('dragleave', e => {
+            if (!row.contains(e.relatedTarget)) row.classList.remove('planung-drag-over');
         });
 
         row.addEventListener('drop', e => {
             e.preventDefault();
-            if (planungDragIndicator) { planungDragIndicator.remove(); planungDragIndicator = null; }
+            container.querySelectorAll('.planung-row').forEach(r => r.classList.remove('planung-drag-over'));
             const targetDate = row.dataset.date;
             if (!planungDragSource || planungDragSource === targetDate) return;
 
