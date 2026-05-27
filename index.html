@@ -509,6 +509,73 @@
                     <button class="btn btn-danger" onclick="undoLastEntry()">Rückgängig machen</button>
                 </div>
             </div>
+
+            <!-- Modal für Formulierungshilfen -->
+            <div id="mitarbeit-wizard-modal" class="modal mitarbeit-modal" style="display: none; max-width: 800px; width: 95%;">
+                <div class="wizard-header">
+                    <h2>Formulierungshilfen: <span id="wizard-student-name">Schüler</span></h2>
+                    <div class="wizard-header-filters">
+                        <button class="filter-circle-btn" data-color="blue" onclick="toggleColorFilter('blue')" title="Blau filtern (1/2)">1/2</button>
+                        <button class="filter-circle-btn" data-color="green" onclick="toggleColorFilter('green')" title="Grün filtern (2/3)">2/3</button>
+                        <button class="filter-circle-btn" data-color="orange" onclick="toggleColorFilter('orange')" title="Orange filtern (3/4)">3/4</button>
+                        <button class="filter-circle-btn" data-color="red" onclick="toggleColorFilter('red')" title="Rot filtern (4/5)">4/5</button>
+                    </div>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
+                
+                <div class="wizard-body">
+                    <!-- Sätze Hinzufügen Form -->
+                    <div class="wizard-add-phrase-form" style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px; font-size: 0.95rem; font-weight: 600;">Eigene Formulierungshilfe hinzufügen</h4>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                            <input type="text" id="wizard-new-phrase-input" class="form-control" placeholder="Satz eingeben (z.B. Arbeitet stets konzentriert.)" style="flex: 1; min-width: 250px; margin: 2px;">
+                            <select id="wizard-new-phrase-color" class="form-control" style="width: auto; min-width: 100px; margin: 2px;">
+                                <option value="blue">Blau</option>
+                                <option value="green">Grün</option>
+                                <option value="orange">Orange</option>
+                                <option value="red">Rot</option>
+                            </select>
+                            <input type="hidden" id="wizard-edit-phrase-id" value="">
+                            <button class="btn btn-primary" id="wizard-add-phrase-btn" onclick="saveCustomPhrase()" style="min-height: 40px; margin: 2px;">Speichern</button>
+                            <button class="btn btn-light" id="wizard-cancel-edit-btn" onclick="cancelEditPhrase()" style="min-height: 40px; margin: 2px; display: none;">Abbrechen</button>
+                        </div>
+                    </div>
+
+                    <!-- Sätze-Liste -->
+                    <div class="wizard-sentences-list" id="wizard-sentences-list" style="max-height: 380px;">
+                        <!-- Hier werden die eigenen Sätze dynamisch eingefügt -->
+                    </div>
+                </div>
+                
+                <div class="wizard-footer">
+                    <!-- Ziel-Textfeld und Vorschau -->
+                    <div class="wizard-footer-top">
+                        <div class="wizard-target-container">
+                            <label for="wizard-target-textarea"><strong>Ziel-Textfeld:</strong></label>
+                            <select id="wizard-target-textarea" class="form-control" style="width: auto; display: inline-block; margin-left: 8px;">
+                                <option value="left">Linke Notizen</option>
+                                <option value="right">Rechte Notizen</option>
+                                <option value="summary">Zusammenfassung</option>
+                            </select>
+                        </div>
+                        <div class="wizard-selection-summary">
+                            <strong>Auswahl:</strong> <span id="wizard-selected-count">0</span> Sätze ausgewählt
+                        </div>
+                    </div>
+                    
+                    <div class="wizard-preview-container" id="wizard-preview-container" style="display: none;">
+                        <strong>Vorschau der Sätze:</strong>
+                        <ul id="wizard-preview-list"></ul>
+                    </div>
+                    
+                    <div class="wizard-buttons-row" style="justify-content: flex-end;">
+                        <div>
+                            <button class="btn btn-secondary" onclick="hideModal()">Abbrechen</button>
+                            <button class="btn btn-success" onclick="insertSelectedMitarbeitPhrases()">Auswählen & Einfügen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -792,6 +859,15 @@
             const localExtra = localStorage.getItem('extraDataLastUpdate') || '0';
             const cloudExtra = cloudData.extraDataLastUpdate || '0';
 
+            // Formulierungshilfen synchronisieren
+            const shouldApplyFormulierungen = cloudExtra > localExtra || !localStorage.getItem('extraDataLastUpdate');
+            if (shouldApplyFormulierungen && Array.isArray(cloudData.formulierungshilfen)) {
+                localStorage.setItem('formulierungshilfen', JSON.stringify(cloudData.formulierungshilfen));
+                if (typeof window.setFormulierungshilfen === 'function') {
+                    window.setFormulierungshilfen(cloudData.formulierungshilfen);
+                }
+            }
+
             // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
             // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
             if (Array.isArray(cloudData.termine)) {
@@ -855,6 +931,7 @@
                     termine: (window.AppState && window.AppState.termine) ? window.AppState.termine : [],
                     deletedTermineIds: JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'),
                     planung: planungObj,
+                    formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
                 };
 

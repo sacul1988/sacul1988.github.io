@@ -5,7 +5,7 @@ const AppState = {
     activeModule: 'sitzplan',
     currentPage: 'home',
     currentEvaluationStudentIndex: null,
-    zeugnisViewMode: 'individual', // 'individual' or 'average'
+    zeugnisViewMode: localStorage.getItem('zeugnisViewMode') || 'individual', // 'individual' or 'average'
     isInitialSyncComplete: false, // Neu: Sperre für Cloud-Sync beim Start
     termine: []
 };
@@ -361,22 +361,32 @@ function showModule(module) {
     // Vor dem Modulwechsel offene Zeugnis-Eingaben sichern.
     saveFocusedZeugnisTextarea();
 
-    if (module === 'planung') {
-        loadPlanung();
+    // Wenn wir den Zeugnis- oder Planung-Tab verlassen, sofortige Datensicherung erzwingen
+    if ((activeModule === 'zeugnis' || activeModule === 'planung') && module !== activeModule) {
+        console.log(`showModule: Verlasse Modul "${activeModule}". Erzwungener Cloud-Upload gestartet.`);
+        if (typeof window.saveDataToCloud === 'function') {
+            window.saveDataToCloud();
+        }
     }
 
-    // Neu: Wenn zum Zeugnis-Tab gewechselt wird, IMMER erst einmal die neuesten Daten aus der Cloud erzwingen
-    if (module === 'zeugnis') {
+    // Wenn zum Zeugnis- oder Planung-Tab gewechselt wird, erst einmal die neuesten Daten aus der Cloud erzwingen
+    if (module === 'zeugnis' || module === 'planung') {
         if (typeof window.forceRefreshFromCloud === 'function') {
-            console.log("showModule: Zeugnis-Tab aktiviert. Erzwungener Cloud-Sync gestartet.");
+            console.log(`showModule: Modul "${module}" aktiviert. Erzwungener Cloud-Sync gestartet.`);
             
             window.forceRefreshFromCloud().then(() => {
-                // Modul erst rendern wenn Daten (hoffentlich) da sind
-                console.log("showModule: Refresh beendet, Ansicht wird aktualisiert.");
+                console.log(`showModule: Refresh beendet, Ansicht für "${module}" wird aktualisiert.`);
+                if (module === 'planung') {
+                    loadPlanung();
+                }
                 if (typeof renderModuleContent === 'function') {
                     renderModuleContent();
                 }
             });
+        } else {
+            if (module === 'planung') {
+                loadPlanung();
+            }
         }
     }
 
@@ -413,7 +423,7 @@ function showModule(module) {
 
 function isZeugnisNotesTextarea(element) {
     return !!(element &&
-        element.tagName === 'TEXTAREA' &&
+        (element.tagName === 'TEXTAREA' || element.tagName === 'DIV') &&
         element.id &&
         (element.id.startsWith('notes-left-') ||
          element.id.startsWith('notes-right-') ||
@@ -4493,6 +4503,7 @@ function calculateProjectAverage(projects) {
 // Funktion zum Umschalten der Zeugnisansicht (Durchschnitt an/aus)
 function toggleZeugnisView() {
     AppState.zeugnisViewMode = AppState.zeugnisViewMode === 'individual' ? 'average' : 'individual';
+    localStorage.setItem('zeugnisViewMode', AppState.zeugnisViewMode);
     
     // Update button styling
     const btn = safeGetElement('zeugnis-view-toggle');
@@ -4510,6 +4521,18 @@ function toggleZeugnisView() {
 }
 
 function renderZeugnisModule() {
+    // Update button styling based on persisted state
+    const btn = safeGetElement('zeugnis-view-toggle');
+    if (btn) {
+        if (AppState.zeugnisViewMode === 'average') {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-purple');
+        } else {
+            btn.classList.remove('btn-purple');
+            btn.classList.add('btn-primary');
+        }
+    }
+
     const container = safeGetElement('zeugnis-container');
     if (!container) return;
     
@@ -4574,7 +4597,10 @@ function renderZeugnisModule() {
         card.innerHTML = `
             <div class="card-header">
                 <h3>${student.name}</h3>
-                <button class="btn btn-sm btn-light" onclick="scrollToTopOfZeugnisModule()">Zurück</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-sm btn-info" onclick="scrollToTopOfZeugnisModule()">Zurück</button>
+                    <button class="btn btn-sm btn-primary" onclick="openMitarbeitAssistant(${index})">Formulierungshilfen</button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="zeugnis-top">
@@ -4596,16 +4622,16 @@ function renderZeugnisModule() {
                     <h4>Notizen für ${student.name}</h4>
                     <div class="zeugnis-notes-container">
                         <div class="zeugnis-notes-left">
-                            <textarea class="form-control notes-textarea" id="notes-left-${index}" rows="13" placeholder="Linke Notizen..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</textarea>
+                            <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Linke Notizen..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
                         </div>
                         <div class="zeugnis-notes-right">
-                            <textarea class="form-control notes-textarea" id="notes-right-${index}" rows="13" placeholder="Rechte Notizen..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${rightNotes}</textarea>
+                            <div contenteditable="true" class="form-control notes-textarea" id="notes-right-${index}" placeholder="Rechte Notizen..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${rightNotes}</div>
                         </div>
                     </div>
                 </div>
                 <div class="zeugnis-section summary-section">
                     <h4>Zusammenfassung und Zeugnisnote</h4>
-                    <textarea class="form-control notes-textarea" id="notes-summary-${index}" rows="4" placeholder="Zusammenfassung und Zeugnisnote..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${summaryNotes}</textarea>
+                    <div contenteditable="true" class="form-control notes-textarea" id="notes-summary-${index}" placeholder="Zusammenfassung und Zeugnisnote..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${summaryNotes}</div>
                 </div>
             </div>
         `;
@@ -4623,7 +4649,7 @@ function renderZeugnisModule() {
     
     // Neuer Event-Listener für automatische Aufzählungszeichen (Enter-Taste)
     const zeugnisListener = function(event) {
-        if (event.target.matches('textarea[id^="notes-left-"], textarea[id^="notes-right-"], textarea[id^="notes-summary-"]')) {
+        if (event.target.matches('div[id^="notes-left-"], div[id^="notes-right-"], div[id^="notes-summary-"]')) {
             if (event.key === 'Enter') {
                 const textarea = event.target;
                 const studentIndex = getStudentIndexFromZeugnisTextareaId(textarea.id);
@@ -4634,15 +4660,8 @@ function renderZeugnisModule() {
                     event.preventDefault();
                     event.stopPropagation();
 
-                    const start = textarea.selectionStart;
-                    const end = textarea.selectionEnd;
-                    const value = textarea.value;
-                    
-                    const insertText = '\n- ';
-                    textarea.value = value.substring(0, start) + insertText + value.substring(end);
-                    
-                    const newPos = start + insertText.length;
-                    textarea.selectionStart = textarea.selectionEnd = newPos;
+                    const insertHtml = '<br>- ';
+                    document.execCommand('insertHTML', false, insertHtml);
 
                     // Linke/rechte Notizen speichern wir direkt nach dem manuellen Zeilenumbruch.
                     saveStudentNotes(studentIndex);
@@ -4677,9 +4696,9 @@ function saveStudentNotes(studentIndex, isDebounced = false) {
     if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
     
     // KEIN .trim() beim Speichern, sonst werden Zeilenumbrüche am Ende (Enter) gelöscht
-    const leftNotesText = leftTextarea.value;
-    const rightNotesText = rightTextarea.value;
-    const summaryNotesText = summaryTextarea.value;
+    const leftNotesText = leftTextarea.innerHTML;
+    const rightNotesText = rightTextarea.innerHTML;
+    const summaryNotesText = summaryTextarea.innerHTML;
     
     const student = classes[activeClassId].students[studentIndex];
 
@@ -4743,6 +4762,7 @@ function exportAllStudentCards() {
                 h3 { margin-top: 5px; margin-bottom: 5px; }
                 ul { list-style-type: none; padding: 0; }
                 .notes { white-space: pre-wrap; }
+                .notes span { color: #000000 !important; }
                 .grade-badge { font-weight: bold; }
                 .grade-text { font-weight: bold; }
             </style>
@@ -5459,3 +5479,391 @@ function localDateStr(d) {
 function escapeHtml(str) {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+// ===== FORMULIERUNGSHILFEN (EHEMALS MITARBEIT-ASSISTENT) =====
+
+let customPhrases = JSON.parse(localStorage.getItem('formulierungshilfen') || '[]');
+
+window.setFormulierungshilfen = function(newPhrases) {
+    if (Array.isArray(newPhrases)) {
+        customPhrases = newPhrases;
+        localStorage.setItem('formulierungshilfen', JSON.stringify(newPhrases));
+        // Falls das Modal offen ist, neu rendern
+        const modal = document.getElementById('mitarbeit-wizard-modal');
+        if (modal && modal.style.display !== 'none') {
+            renderMitarbeitWizard();
+        }
+    }
+};
+
+const AppMitarbeitWizardState = {
+    studentIndex: null,
+    selectedPhrases: [] // Array von IDs ausgewählter Sätze
+};
+
+function openMitarbeitAssistant(studentIndex) {
+    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
+    
+    AppMitarbeitWizardState.studentIndex = studentIndex;
+    AppMitarbeitWizardState.selectedPhrases = [];
+    
+    const student = classes[activeClassId].students[studentIndex];
+    document.getElementById('wizard-student-name').textContent = student.name;
+    document.getElementById('wizard-target-textarea').value = 'left'; // Standardmäßig linke Notizen
+    
+    // Eingabefelder zurücksetzen
+    document.getElementById('wizard-new-phrase-input').value = '';
+    document.getElementById('wizard-new-phrase-color').value = 'blue';
+    document.getElementById('wizard-edit-phrase-id').value = '';
+    document.getElementById('wizard-cancel-edit-btn').style.display = 'none';
+    
+    // Farbefilter zurücksetzen (keine aktiv)
+    window.activeWizardColorFilters = [];
+    document.querySelectorAll('.filter-circle-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    renderMitarbeitWizard();
+    showModal('mitarbeit-wizard-modal');
+}
+
+function renderMitarbeitWizard() {
+    const listContainer = document.getElementById('wizard-sentences-list');
+    if (!listContainer) return;
+    
+    if (customPhrases.length === 0) {
+        listContainer.innerHTML = `
+            <div class="empty-state" style="padding: 20px;">
+                <i class="fas fa-comment-slash"></i>
+                <p>Keine Formulierungshilfen vorhanden.</p>
+                <p>Füge oben eigene Sätze hinzu, um zu beginnen.</p>
+            </div>
+        `;
+    } else {
+        // Sätze farblich sortieren (blau, grün, orange, rot)
+        const colorOrder = { blue: 1, green: 2, orange: 3, red: 4 };
+        const sortedPhrases = [...customPhrases].sort((a, b) => {
+            const orderA = colorOrder[a.color] || 99;
+            const orderB = colorOrder[b.color] || 99;
+            if (orderA !== orderB) return orderA - orderB;
+            return a.text.localeCompare(b.text, 'de');
+        });
+        
+        // Filter anwenden
+        const filteredPhrases = sortedPhrases.filter(phrase => (window.activeWizardColorFilters || []).includes(phrase.color));
+        
+        if (filteredPhrases.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state" style="padding: 20px;">
+                    <i class="fas fa-filter"></i>
+                    <p>Keine Formulierungshilfen für die ausgewählten Filter vorhanden.</p>
+                </div>
+            `;
+        } else {
+            listContainer.innerHTML = filteredPhrases.map((phrase) => {
+                const isSelected = AppMitarbeitWizardState.selectedPhrases.includes(phrase.id);
+                return `
+                    <div class="wizard-sentence-item level-${phrase.color} ${isSelected ? 'selected' : ''}" onclick="toggleMitarbeitPhraseById('${phrase.id}')">
+                        <input type="checkbox" id="phrase-checkbox-${phrase.id}" ${isSelected ? 'checked' : ''}>
+                        <label class="wizard-sentence-label" for="phrase-checkbox-${phrase.id}">${phrase.text}</label>
+                        <div class="wizard-item-actions">
+                            <button class="btn btn-sm btn-light" onclick="event.stopPropagation(); editCustomPhrase('${phrase.id}')" title="Bearbeiten">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteCustomPhrase('${phrase.id}')" title="Löschen">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+    
+    // Vorschau aktualisieren
+    const previewContainer = document.getElementById('wizard-preview-container');
+    const previewList = document.getElementById('wizard-preview-list');
+    const selectedCountSpan = document.getElementById('wizard-selected-count');
+    
+    if (selectedCountSpan) {
+        selectedCountSpan.textContent = AppMitarbeitWizardState.selectedPhrases.length;
+    }
+    
+    if (AppMitarbeitWizardState.selectedPhrases.length > 0) {
+        if (previewContainer) previewContainer.style.display = 'block';
+        if (previewList) {
+            previewList.innerHTML = AppMitarbeitWizardState.selectedPhrases.map(id => {
+                const phrase = customPhrases.find(p => p.id === id);
+                return phrase ? `<li>${phrase.text}</li>` : '';
+            }).join('');
+        }
+    } else {
+        if (previewContainer) previewContainer.style.display = 'none';
+        if (previewList) previewList.innerHTML = '';
+    }
+}
+
+function saveCustomPhrase() {
+    const inputEl = document.getElementById('wizard-new-phrase-input');
+    const colorEl = document.getElementById('wizard-new-phrase-color');
+    const editIdEl = document.getElementById('wizard-edit-phrase-id');
+    
+    if (!inputEl || !colorEl) return;
+    
+    const textVal = inputEl.value.trim();
+    const colorVal = colorEl.value;
+    const editId = editIdEl.value;
+    
+    if (textVal === '') {
+        if (typeof swal !== 'undefined') {
+            swal('Fehler', 'Bitte gib einen Satz ein.', 'error');
+        } else {
+            alert('Bitte gib einen Satz ein.');
+        }
+        return;
+    }
+    
+    if (editId === '') {
+        // Neuen Satz hinzufügen
+        const newPhrase = {
+            id: 'phrase_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            text: textVal,
+            color: colorVal
+        };
+        customPhrases.push(newPhrase);
+    } else {
+        // Bestehenden Satz bearbeiten
+        const phrase = customPhrases.find(p => p.id === editId);
+        if (phrase) {
+            phrase.text = textVal;
+            phrase.color = colorVal;
+        }
+        
+        // Editor-Modus zurücksetzen
+        editIdEl.value = '';
+        const cancelBtn = document.getElementById('wizard-cancel-edit-btn');
+        if (cancelBtn) cancelBtn.style.display = 'none';
+    }
+    
+    // In localStorage speichern
+    localStorage.setItem('formulierungshilfen', JSON.stringify(customPhrases));
+    localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+    
+    // Formular zurücksetzen
+    inputEl.value = '';
+    colorEl.value = 'blue';
+    
+    // Cloud-Sync synchronisieren
+    saveData();
+    
+    // Ansicht neu rendern
+    renderMitarbeitWizard();
+}
+
+function editCustomPhrase(phraseId) {
+    const phrase = customPhrases.find(p => p.id === phraseId);
+    if (!phrase) return;
+    
+    const inputEl = document.getElementById('wizard-new-phrase-input');
+    const colorEl = document.getElementById('wizard-new-phrase-color');
+    const editIdEl = document.getElementById('wizard-edit-phrase-id');
+    const cancelBtn = document.getElementById('wizard-cancel-edit-btn');
+    
+    if (inputEl) {
+        inputEl.value = phrase.text;
+        inputEl.focus();
+    }
+    if (colorEl) colorEl.value = phrase.color;
+    if (editIdEl) editIdEl.value = phrase.id;
+    if (cancelBtn) cancelBtn.style.display = 'inline-block';
+}
+
+function cancelEditPhrase() {
+    const inputEl = document.getElementById('wizard-new-phrase-input');
+    const colorEl = document.getElementById('wizard-new-phrase-color');
+    const editIdEl = document.getElementById('wizard-edit-phrase-id');
+    const cancelBtn = document.getElementById('wizard-cancel-edit-btn');
+    
+    if (inputEl) inputEl.value = '';
+    if (colorEl) colorEl.value = 'blue';
+    if (editIdEl) editIdEl.value = '';
+    if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
+function deleteCustomPhrase(phraseId) {
+    const performDelete = (id) => {
+        customPhrases = customPhrases.filter(p => p.id !== id);
+        AppMitarbeitWizardState.selectedPhrases = AppMitarbeitWizardState.selectedPhrases.filter(sid => sid !== id);
+        
+        // In localStorage speichern
+        localStorage.setItem('formulierungshilfen', JSON.stringify(customPhrases));
+        localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+        
+        // Falls wir gerade diesen bearbeiteten, Editor zurücksetzen
+        const editIdEl = document.getElementById('wizard-edit-phrase-id');
+        if (editIdEl && editIdEl.value === id) {
+            cancelEditPhrase();
+        }
+        
+        // Cloud-Sync synchronisieren
+        saveData();
+        
+        // Ansicht neu rendern
+        renderMitarbeitWizard();
+    };
+
+    if (typeof swal !== 'undefined') {
+        swal({
+            title: "Satz löschen?",
+            text: "Möchtest du diese Formulierungshilfe wirklich löschen?",
+            icon: "warning",
+            buttons: ["Abbrechen", "Löschen"],
+            dangerMode: true,
+        }).then((willDelete) => {
+            if (willDelete) {
+                performDelete(phraseId);
+            }
+        });
+    } else {
+        if (confirm("Möchtest du diesen Satz wirklich löschen?")) {
+            performDelete(phraseId);
+        }
+    }
+}
+
+function toggleMitarbeitPhraseById(phraseId) {
+    const idx = AppMitarbeitWizardState.selectedPhrases.indexOf(phraseId);
+    if (idx > -1) {
+        AppMitarbeitWizardState.selectedPhrases.splice(idx, 1);
+    } else {
+        AppMitarbeitWizardState.selectedPhrases.push(phraseId);
+    }
+    renderMitarbeitWizard();
+}
+
+function insertSelectedMitarbeitPhrases() {
+    const studentIndex = AppMitarbeitWizardState.studentIndex;
+    const targetVal = document.getElementById('wizard-target-textarea').value;
+    const textareaId = targetVal === 'left' ? `notes-left-${studentIndex}` : 
+                       targetVal === 'right' ? `notes-right-${studentIndex}` : 
+                       `notes-summary-${studentIndex}`;
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+    
+    let currentHtml = textarea.innerHTML || '';
+    if (currentHtml === '<br>' || currentHtml === '<div><br></div>') {
+        currentHtml = '';
+    }
+    
+    // Gemappte Texte und Farben der ausgewählten Sätze holen
+    const selectedPhrasesData = AppMitarbeitWizardState.selectedPhrases
+        .map(id => {
+            const phrase = customPhrases.find(p => p.id === id);
+            return phrase ? { text: phrase.text, color: phrase.color } : null;
+        })
+        .filter(Boolean);
+    
+    if (selectedPhrasesData.length > 0) {
+        if (targetVal === 'left' || targetVal === 'right') {
+            // Als Aufzählungspunkte mit Farben anhängen
+            selectedPhrasesData.forEach(phrase => {
+                currentHtml = currentHtml.trim();
+                const coloredHtml = `<span class="phrase-color-${phrase.color}">${phrase.text}</span>`;
+                if (currentHtml === '' || currentHtml === '- ') {
+                    currentHtml = `- ${coloredHtml}`;
+                } else {
+                    currentHtml += `<br>- ${coloredHtml}`;
+                }
+            });
+            currentHtml += '<br>';
+        } else {
+            // Als Fließtext-Sätze mit Farben anhängen
+            selectedPhrasesData.forEach(phrase => {
+                currentHtml = currentHtml.trim();
+                const coloredHtml = `<span class="phrase-color-${phrase.color}">${phrase.text}</span>`;
+                if (currentHtml === '') {
+                    currentHtml = coloredHtml;
+                } else {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = currentHtml;
+                    const plainText = tempDiv.textContent.trim();
+                    const lastChar = plainText.slice(-1);
+                    
+                    if (plainText !== '' && !['.', '!', '?'].includes(lastChar)) {
+                        currentHtml += '.';
+                    }
+                    currentHtml += ` ${coloredHtml}`;
+                }
+            });
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = currentHtml;
+            const plainText = tempDiv.textContent.trim();
+            if (plainText !== '' && !['.', '!', '?'].includes(plainText.slice(-1))) {
+                currentHtml += '.';
+            }
+        }
+        
+        textarea.innerHTML = currentHtml;
+        
+        // Speichern und Cloud-Sync anstoßen
+        saveStudentNotes(studentIndex);
+    }
+    
+    hideModal();
+}
+
+// Wizard-Funktionen global binden
+window.openMitarbeitAssistant = openMitarbeitAssistant;
+window.saveCustomPhrase = saveCustomPhrase;
+window.editCustomPhrase = editCustomPhrase;
+window.cancelEditPhrase = cancelEditPhrase;
+window.deleteCustomPhrase = deleteCustomPhrase;
+window.toggleMitarbeitPhraseById = toggleMitarbeitPhraseById;
+window.insertSelectedMitarbeitPhrases = insertSelectedMitarbeitPhrases;
+
+// Wizard-Filter global binden
+window.activeWizardColorFilters = [];
+window.toggleColorFilter = function(color) {
+    if (!window.activeWizardColorFilters) {
+        window.activeWizardColorFilters = [];
+    }
+    const idx = window.activeWizardColorFilters.indexOf(color);
+    if (idx > -1) {
+        window.activeWizardColorFilters.splice(idx, 1);
+    } else {
+        window.activeWizardColorFilters.push(color);
+    }
+    
+    const btn = document.querySelector(`.filter-circle-btn[data-color="${color}"]`);
+    if (btn) {
+        btn.classList.toggle('active');
+    }
+    
+    renderMitarbeitWizard();
+};
+window.resetColorFilter = function() {
+    const allColors = ['blue', 'green', 'orange', 'red'];
+    if (!window.activeWizardColorFilters) {
+        window.activeWizardColorFilters = [];
+    }
+    
+    if (window.activeWizardColorFilters.length === allColors.length) {
+        window.activeWizardColorFilters = [];
+    } else {
+        window.activeWizardColorFilters = [...allColors];
+    }
+    
+    allColors.forEach(color => {
+        const btn = document.querySelector(`.filter-circle-btn[data-color="${color}"]`);
+        if (btn) {
+            if (window.activeWizardColorFilters.includes(color)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+    });
+    
+    renderMitarbeitWizard();
+};
+
