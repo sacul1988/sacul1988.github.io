@@ -33,7 +33,13 @@
                 <i class="fas fa-circle-check" style="color: var(--success-color);"></i>
                 <span>Cloud-Synchronisierung aktiv</span>
             </div>
-            <button class="btn btn-sm btn-light" onclick="handleLogout()">Abmelden</button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div id="sync-counter-badge" title="Synchronisierungen heute" style="display: none; align-items: center; gap: 5px; background: rgba(255,255,255,0.22); border-radius: 20px; padding: 2px 10px 2px 8px; font-size: 0.82rem; font-weight: 600; color: #fff; cursor: default;">
+                    <i class="fas fa-arrow-up-from-bracket" style="font-size: 0.72rem;"></i>
+                    <span id="sync-counter-value">0</span>× heute
+                </div>
+                <button class="btn btn-sm btn-light" onclick="handleLogout()">Abmelden</button>
+            </div>
         </div>
 
         <!-- Pfadnavigation -->
@@ -717,6 +723,19 @@
             if (user) {
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('cloud-status-bar').style.display = 'flex';
+
+                // Sync-Zähler beim Laden wiederherstellen
+                const today = new Date().toISOString().slice(0, 10);
+                const savedDay = localStorage.getItem('syncCounterDay');
+                const savedCount = savedDay === today ? parseInt(localStorage.getItem('syncCounterCount') || '0', 10) : 0;
+                if (savedCount > 0) {
+                    const badge = document.getElementById('sync-counter-badge');
+                    const counterVal = document.getElementById('sync-counter-value');
+                    if (badge && counterVal) {
+                        counterVal.textContent = savedCount;
+                        badge.style.display = 'flex';
+                    }
+                }
                 
                 // Realtime Sync initialisieren
                 setupRealtimeSync(user.uid);
@@ -976,6 +995,23 @@
 
                 await setDoc(userDocRef, data, { merge: true });
                 localStorage.setItem('lastUpdate', timestamp);
+
+                // ===== SYNC-ZÄHLER =====
+                const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+                const savedDay = localStorage.getItem('syncCounterDay');
+                let count = savedDay === today ? parseInt(localStorage.getItem('syncCounterCount') || '0', 10) : 0;
+                count++;
+                localStorage.setItem('syncCounterDay', today);
+                localStorage.setItem('syncCounterCount', String(count));
+                // Badge anzeigen und aktualisieren
+                const badge = document.getElementById('sync-counter-badge');
+                const counterVal = document.getElementById('sync-counter-value');
+                if (badge && counterVal) {
+                    counterVal.textContent = count;
+                    badge.style.display = 'flex';
+                }
+                // =======================
+
                 if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> In Cloud gespeichert';
             } catch (error) { 
                 console.error("Save-Fehler", error);
