@@ -4716,6 +4716,9 @@ function renderZeugnisModule() {
 
 // Automatischer Overflow: Wenn das linke Textfeld voll ist, überlaufenden Text ins rechte verschieben
 function checkZeugnisNotesOverflow(studentIndex) {
+    // Rekursionsschutz: verhindert Endlosschleife durch saveStudentNotes → checkOverflow → saveStudentNotes
+    if (window._zeugnisOverflowChecking) return;
+
     const leftEl = document.getElementById(`notes-left-${studentIndex}`);
     const rightEl = document.getElementById(`notes-right-${studentIndex}`);
     if (!leftEl || !rightEl) return;
@@ -4758,9 +4761,15 @@ function checkZeugnisNotesOverflow(studentIndex) {
         sel.addRange(range);
     } catch(e) {}
 
-    // Speichern
-    saveStudentNotes(studentIndex);
+    // Speichern – mit Guard-Flag gegen Rekursion
+    window._zeugnisOverflowChecking = true;
+    try {
+        saveStudentNotes(studentIndex); // isDebounced=false → kein erneuter setTimeout
+    } finally {
+        window._zeugnisOverflowChecking = false;
+    }
 }
+
 
 function scrollToTopOfZeugnisModule() {
     console.log("Scroll to top called");
