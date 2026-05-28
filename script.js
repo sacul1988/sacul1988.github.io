@@ -4669,7 +4669,7 @@ function renderZeugnisModule() {
                     </div>
                 </div>
                 <div class="zeugnis-section summary-section">
-                    <h4>Zeugnisnote ${suggestedGrade ? `<span style="font-size: 0.82rem; font-weight: normal; color: #64748b; margin-left: 10px;">(Vorschlag: ${suggestedGrade}${selectedGrade !== suggestedGrade ? ` - <a href="#" onclick="applySuggestedGrade(${index}, '${suggestedGrade}'); return false;" style="color: #007bff; text-decoration: underline; cursor: pointer;">übernehmen</a>` : ''})</span>` : ''}</h4>
+                    <h4 id="zeugnisnote-header-${index}">Zeugnisnote ${suggestedGrade ? `<span style="font-size: 0.82rem; font-weight: normal; color: #64748b; margin-left: 10px;">(Vorschlag: ${suggestedGrade}${selectedGrade !== suggestedGrade ? ` - <a href="#" onclick="applySuggestedGrade(${index}, '${suggestedGrade}'); return false;" style="color: #007bff; text-decoration: underline; cursor: pointer;">übernehmen</a>` : ''})</span>` : ''}</h4>
                     <div class="zeugnisnote-selector">
                         ${gradesSelectorHtml}
                     </div>
@@ -4798,6 +4798,9 @@ function saveStudentNotes(studentIndex, isDebounced = false) {
     student.leftNotes = leftNotesText;
     student.rightNotes = rightNotesText;
 
+    // Notenvorschlag sofort dynamisch im DOM aktualisieren
+    updateZeugnisNoteVorschlag(studentIndex);
+
     // Overflow prüfen: Wenn linkes Feld voll, Text automatisch ins rechte verschieben
     // (nur beim Live-Tippen, nicht beim blur, um Doppelaufruf zu vermeiden)
     if (isDebounced) {
@@ -4909,12 +4912,32 @@ function calculateSuggestedGrade(student) {
         return null;
     }
     
-    if (finalValue <= 1.5) return "sehr gut";
-    if (finalValue <= 2.5) return "gut";
-    if (finalValue <= 3.5) return "befriedigend";
-    if (finalValue <= 4.5) return "ausreichend";
-    if (finalValue <= 5.5) return "mangelhaft";
+    // Breitere Schwellenwerte: Vorschlag ändert sich erst bei deutlicher Verschiebung des Verhältnisses
+    if (finalValue <= 2.0) return "sehr gut";
+    if (finalValue <= 2.9) return "gut";
+    if (finalValue <= 3.7) return "befriedigend";
+    if (finalValue <= 4.4) return "ausreichend";
+    if (finalValue <= 5.2) return "mangelhaft";
     return "ungenügend";
+}
+
+// Notenvorschlag im DOM dynamisch aktualisieren (ohne Seite neu zu rendern)
+function updateZeugnisNoteVorschlag(studentIndex) {
+    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students) return;
+    const student = classes[activeClassId].students[studentIndex];
+    if (!student) return;
+
+    const header = document.getElementById(`zeugnisnote-header-${studentIndex}`);
+    if (!header) return;
+
+    const suggestedGrade = calculateSuggestedGrade(student);
+    const selectedGrade = student.zeugnisnote || '';
+
+    const suggestionHtml = suggestedGrade
+        ? `<span style="font-size: 0.82rem; font-weight: normal; color: #64748b; margin-left: 10px;">(Vorschlag: ${suggestedGrade}${selectedGrade !== suggestedGrade ? ` - <a href="#" onclick="applySuggestedGrade(${studentIndex}, '${suggestedGrade}'); return false;" style="color: #007bff; text-decoration: underline; cursor: pointer;">übernehmen</a>` : ''})</span>`
+        : '';
+
+    header.innerHTML = `Zeugnisnote ${suggestionHtml}`;
 }
 
 // Vorschlag in die Zeugnisnote übernehmen
