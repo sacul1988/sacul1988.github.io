@@ -4535,6 +4535,86 @@ function toggleZeugnisView() {
     renderZeugnisModule();
 }
 
+// Hilfsfunktion zur Generierung des HTML für die Zeugnisnoten-Auswahl mit integriertem Notenvorschlag
+function getGradesSelectorHtml(student, index) {
+    const selectedGrade = student.zeugnisnote || '';
+    const suggestedGradeWithTendency = getSuggestedGradeWithTendency(student);
+    
+    const allSelectableGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5"];
+    const hasActiveSelection = allSelectableGrades.includes(selectedGrade);
+    
+    return allSelectableGrades.map(g => {
+        const isSelected = selectedGrade === g;
+        const isSuggested = suggestedGradeWithTendency === g;
+        const colorClass = Utils.getGradeColorClass(g);
+        
+        const colorMap = {
+            'grade-excellent': '#007bff',
+            'grade-good': '#28a745',
+            'grade-average': '#ffc107',
+            'grade-poor': '#fd7e14',
+            'grade-bad': '#dc143c',
+            'grade-very-bad': '#6c757d'
+        };
+        const bgColor = colorMap[colorClass] || '#6c757d';
+        
+        let btnStyle = `
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            margin: 0;
+        `;
+        
+        let titleAttr = '';
+        if (isSuggested) {
+            titleAttr = ' title="Vorgeschlagene Note (Notenvorschlag)"';
+        }
+        
+        if (hasActiveSelection) {
+            if (isSelected) {
+                const textColor = 'white';
+                btnStyle += `background-color: ${bgColor} !important; color: ${textColor} !important; box-shadow: 0 2px 5px rgba(0,0,0,0.2);`;
+            } else if (isSuggested) {
+                // Gestrichelter lila Rand als dezenter Hinweis auf den Vorschlag, auch wenn eine andere Note gewählt wurde
+                btnStyle += `
+                    background-color: #e2e8f0 !important;
+                    color: #94a3b8 !important;
+                    border: 2px dashed #c084fc !important;
+                `;
+            } else {
+                btnStyle += `
+                    background-color: #e2e8f0 !important;
+                    color: #94a3b8 !important;
+                    border-color: transparent !important;
+                `;
+            }
+        } else {
+            if (isSuggested) {
+                // Notenvorschlag als helle blasse Lila einfärben (#d8b4fe)
+                btnStyle += `
+                    background-color: #d8b4fe !important;
+                    color: #581c87 !important;
+                    border: 2px solid #a855f7 !important;
+                    box-shadow: 0 2px 5px rgba(168, 85, 247, 0.3);
+                `;
+            } else {
+                const textColor = 'white';
+                btnStyle += `background-color: ${bgColor} !important; color: ${textColor} !important;`;
+            }
+        }
+        
+        return `<button style="${btnStyle}"${titleAttr} onclick="selectZeugnisGrade(${index}, '${g}')">${g}</button>`;
+    }).join('');
+}
+
 function renderZeugnisModule() {
     // Update button styling based on persisted state
     const btn = safeGetElement('zeugnis-view-toggle');
@@ -4608,30 +4688,8 @@ function renderZeugnisModule() {
         const leftNotes = student.leftNotes || '- ';
         const rightNotes = student.rightNotes || '- ';
         
-        // Zeugnisnote automatisch vorschlagen und ggf. auswählen
-        let selectedGrade = student.zeugnisnote || '';
-        const suggestedGrade = calculateSuggestedGrade(student);
-        if (!selectedGrade && suggestedGrade) {
-            student.zeugnisnote = suggestedGrade;
-            selectedGrade = suggestedGrade;
-            // Im Hintergrund speichern
-            setTimeout(() => saveData(index), 0);
-        }
-        
-        const germanGrades = ["sehr gut", "gut", "befriedigend", "ausreichend", "mangelhaft", "ungenügend"];
-        const gradesSelectorHtml = germanGrades.map(g => {
-            const isSelected = selectedGrade === g;
-            const activeClass = isSelected ? 'active' : '';
-            let colorClass = '';
-            if (g === 'sehr gut') colorClass = 'grade-excellent';
-            else if (g === 'gut') colorClass = 'grade-good';
-            else if (g === 'befriedigend') colorClass = 'grade-average';
-            else if (g === 'ausreichend') colorClass = 'grade-poor';
-            else if (g === 'mangelhaft') colorClass = 'grade-bad';
-            else if (g === 'ungenügend') colorClass = 'grade-very-bad';
-            
-            return `<button class="btn-grade-select ${colorClass} ${activeClass}" onclick="selectZeugnisGrade(${index}, '${g}')">${g}</button>`;
-        }).join('');
+        // Zeugnisnote vorschlagen (ohne automatische Auswahl)
+        const gradesSelectorHtml = getGradesSelectorHtml(student, index);
         
         card.innerHTML = `
             <div class="card-header">
@@ -4668,9 +4726,10 @@ function renderZeugnisModule() {
                         </div>
                     </div>
                 </div>
-                <div class="zeugnis-section summary-section">
-                    <h4 id="zeugnisnote-header-${index}">Zeugnisnote ${suggestedGrade ? `<span style="font-size: 0.82rem; font-weight: normal; color: #64748b; margin-left: 10px;">(Vorschlag: ${suggestedGrade}${selectedGrade !== suggestedGrade ? ` - <a href="#" onclick="applySuggestedGrade(${index}, '${suggestedGrade}'); return false;" style="color: #007bff; text-decoration: underline; cursor: pointer;">übernehmen</a>` : ''})</span>` : ''}</h4>
-                    <div class="zeugnisnote-selector">
+                
+                <div class="zeugnis-section summary-section" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
+                    <h4 id="zeugnisnote-header-${index}" style="margin: 0; white-space: nowrap;">Zeugnisnote:</h4>
+                    <div class="zeugnisnote-selector" id="zeugnisnote-selector-${index}" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0;">
                         ${gradesSelectorHtml}
                     </div>
                 </div>
@@ -4832,40 +4891,15 @@ function selectZeugnisGrade(studentIndex, grade) {
     const currentGrade = student.zeugnisnote;
 
     if (currentGrade === grade) {
-        // Schon ausgewählt, nichts tun
-        return;
-    }
-
-    const performChange = () => {
-        student.zeugnisnote = grade;
-        saveData(studentIndex);
-        renderZeugnisModule();
-    };
-
-    if (currentGrade) {
-        // Falls bereits eine Note gesetzt ist, bestätigen lassen
-        if (typeof swal !== 'undefined') {
-            swal({
-                title: "Zeugnisnote ändern?",
-                text: `Möchtest du die Zeugnisnote für ${student.name} wirklich von "${currentGrade}" in "${grade}" ändern?`,
-                icon: "warning",
-                buttons: ["Abbrechen", "Ja, ändern"],
-                dangerMode: false,
-            })
-            .then((willChange) => {
-                if (willChange) {
-                    performChange();
-                }
-            });
-        } else {
-            if (confirm(`Möchtest du die Zeugnisnote für ${student.name} wirklich von "${currentGrade}" in "${grade}" ändern?`)) {
-                performChange();
-            }
-        }
+        // Wenn man die bereits ausgewählte Note erneut anklickt, wird sie abgewählt
+        student.zeugnisnote = '';
     } else {
-        // Direkt setzen, wenn noch keine Note vorhanden ist
-        performChange();
+        // Direkt setzen
+        student.zeugnisnote = grade;
     }
+    
+    saveData(studentIndex);
+    renderZeugnisModule();
 }
 window.selectZeugnisGrade = selectZeugnisGrade;
 
@@ -4874,7 +4908,7 @@ function countPhraseColors(student) {
     const counts = { blue: 0, green: 0, orange: 0, red: 0 };
     const combinedNotes = (student.leftNotes || '') + ' ' + (student.rightNotes || '');
     
-    const regex = /class="phrase-color-(blue|green|orange|red)"/g;
+    const regex = /phrase-color-(blue|green|orange|red)\b/g;
     let match;
     while ((match = regex.exec(combinedNotes)) !== null) {
         counts[match[1]]++;
@@ -4896,8 +4930,8 @@ function calculateSuggestedGrade(student) {
     const totalPhrases = counts.blue + counts.green + counts.orange + counts.red;
     let formulationAvg = null;
     if (totalPhrases > 0) {
-        // Notenbereiche: blue(1/2) -> 1.5, green(2/3) -> 2.5, orange(3/4) -> 3.5, red(4/5) -> 4.5
-        formulationAvg = (counts.blue * 1.5 + counts.green * 2.5 + counts.orange * 3.5 + counts.red * 4.5) / totalPhrases;
+        // Notenbereiche: blue(1/2) -> 1.5, green(2/3) -> 2.5, orange(3/4) -> 3.5, red(4/5) -> 5.0 (höhere Gewichtung für negative Sätze)
+        formulationAvg = (counts.blue * 1.5 + counts.green * 2.5 + counts.orange * 3.5 + counts.red * 5.0) / totalPhrases;
     }
     
     let finalValue = null;
@@ -4912,13 +4946,99 @@ function calculateSuggestedGrade(student) {
         return null;
     }
     
-    // Breitere Schwellenwerte: Vorschlag ändert sich erst bei deutlicher Verschiebung des Verhältnisses
-    if (finalValue <= 2.0) return "sehr gut";
-    if (finalValue <= 2.9) return "gut";
-    if (finalValue <= 3.7) return "befriedigend";
-    if (finalValue <= 4.4) return "ausreichend";
-    if (finalValue <= 5.2) return "mangelhaft";
-    return "ungenügend";
+    // Ermittle den vorläufigen Vorschlag basierend auf den Schwellenwerten
+    const gradesList = ["sehr gut", "gut", "befriedigend", "ausreichend", "mangelhaft", "ungenügend"];
+    let suggestedIndex = 5; // Standard: ungenügend
+    
+    if (finalValue <= 1.5) suggestedIndex = 0; // "sehr gut"
+    else if (finalValue <= 2.75) suggestedIndex = 1; // "gut"
+    else if (finalValue <= 3.75) suggestedIndex = 2; // "befriedigend"
+    else if (finalValue <= 4.75) suggestedIndex = 3; // "ausreichend"
+    else if (finalValue <= 5.5) suggestedIndex = 4; // "mangelhaft"
+    else suggestedIndex = 5; // "ungenügend"
+    
+    // Begrenzung: Die Note darf maximal um eine Stufe vom schriftlichen Durchschnitt abweichen
+    if (writtenAvg !== null) {
+        // Bestimme die Note der schriftlichen Leistung (gleiche Schwellenwerte)
+        let writtenIndex = 3; // Standard: ausreichend
+        if (writtenAvg <= 1.5) writtenIndex = 0; // sehr gut
+        else if (writtenAvg <= 2.75) writtenIndex = 1; // gut
+        else if (writtenAvg <= 3.75) writtenIndex = 2; // befriedigend
+        else if (writtenAvg <= 4.75) writtenIndex = 3; // ausreichend
+        else if (writtenAvg <= 5.5) writtenIndex = 4; // mangelhaft
+        else writtenIndex = 5; // ungenügend
+        
+        // Erlaube maximale Abweichung von +/- 1 Note
+        const minAllowedIndex = Math.max(0, writtenIndex - 1); // Ein Schritt besser
+        const maxAllowedIndex = Math.min(gradesList.length - 1, writtenIndex + 1); // Ein Schritt schlechter
+        
+        suggestedIndex = Math.min(Math.max(suggestedIndex, minAllowedIndex), maxAllowedIndex);
+    }
+    
+    return gradesList[suggestedIndex];
+}
+
+// Funktion zur Bestimmung des Notenvorschlags inklusive Tendenz (+/-) in Kurzform (z.B. "2-", "3")
+function getSuggestedGradeWithTendency(student) {
+    const suggestedGrade = calculateSuggestedGrade(student);
+    if (!suggestedGrade) return null;
+    
+    // Konvertiere Textnote in numerische Basisnote (z.B. "gut" -> "2")
+    const wholeGradesMap = {
+        "sehr gut": "1",
+        "gut": "2",
+        "befriedigend": "3",
+        "ausreichend": "4",
+        "mangelhaft": "5",
+        "ungenügend": "6"
+    };
+    
+    const N_label = wholeGradesMap[suggestedGrade];
+    if (!N_label) return suggestedGrade;
+    
+    let writtenAvg = null;
+    if (student.projects && student.projects.length > 0) {
+        const average = calculateProjectAverage(student.projects);
+        if (average) {
+            writtenAvg = parseFloat(average.exact);
+        }
+    }
+    
+    const counts = countPhraseColors(student);
+    const totalPhrases = counts.blue + counts.green + counts.orange + counts.red;
+    let formulationAvg = null;
+    if (totalPhrases > 0) {
+        formulationAvg = (counts.blue * 1.5 + counts.green * 2.5 + counts.orange * 3.5 + counts.red * 5.0) / totalPhrases;
+    }
+    
+    let finalValue = null;
+    if (writtenAvg !== null && formulationAvg !== null) {
+        finalValue = writtenAvg * 0.5 + formulationAvg * 0.5;
+    } else if (writtenAvg !== null) {
+        finalValue = writtenAvg;
+    } else if (formulationAvg !== null) {
+        finalValue = formulationAvg;
+    } else {
+        return N_label;
+    }
+    
+    const N = parseFloat(N_label);
+    if (N) {
+        const diff = finalValue - N;
+        if (diff <= -0.15) {
+            const plusGrade = N_label + "+";
+            if (gradeConversion[plusGrade] !== undefined) {
+                return plusGrade;
+            }
+        } else if (diff >= 0.15) {
+            const minusGrade = N_label + "-";
+            if (gradeConversion[minusGrade] !== undefined) {
+                return minusGrade;
+            }
+        }
+    }
+    
+    return N_label;
 }
 
 // Notenvorschlag im DOM dynamisch aktualisieren (ohne Seite neu zu rendern)
@@ -4927,54 +5047,40 @@ function updateZeugnisNoteVorschlag(studentIndex) {
     const student = classes[activeClassId].students[studentIndex];
     if (!student) return;
 
-    const header = document.getElementById(`zeugnisnote-header-${studentIndex}`);
-    if (!header) return;
-
-    const suggestedGrade = calculateSuggestedGrade(student);
-    const selectedGrade = student.zeugnisnote || '';
-
-    const suggestionHtml = suggestedGrade
-        ? `<span style="font-size: 0.82rem; font-weight: normal; color: #64748b; margin-left: 10px;">(Vorschlag: ${suggestedGrade}${selectedGrade !== suggestedGrade ? ` - <a href="#" onclick="applySuggestedGrade(${studentIndex}, '${suggestedGrade}'); return false;" style="color: #007bff; text-decoration: underline; cursor: pointer;">übernehmen</a>` : ''})</span>`
-        : '';
-
-    header.innerHTML = `Zeugnisnote ${suggestionHtml}`;
-}
-
-// Vorschlag in die Zeugnisnote übernehmen
-function applySuggestedGrade(studentIndex, grade) {
-    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
-    const student = classes[activeClassId].students[studentIndex];
-    
-    const performChange = () => {
-        student.zeugnisnote = grade;
-        saveData(studentIndex);
-        renderZeugnisModule();
-    };
-
-    if (student.zeugnisnote && student.zeugnisnote !== grade) {
-        if (typeof swal !== 'undefined') {
-            swal({
-                title: "Vorschlag übernehmen?",
-                text: `Möchtest du den Vorschlag "${grade}" für ${student.name} übernehmen?`,
-                icon: "info",
-                buttons: ["Abbrechen", "Ja, übernehmen"],
-            })
-            .then((willChange) => {
-                if (willChange) {
-                    performChange();
-                }
-            });
-        } else {
-            if (confirm(`Möchtest du den Vorschlag "${grade}" für ${student.name} übernehmen?`)) {
-                performChange();
-            }
-        }
-    } else {
-        performChange();
+    const selectorDiv = document.getElementById(`zeugnisnote-selector-${studentIndex}`);
+    if (selectorDiv) {
+        selectorDiv.innerHTML = getGradesSelectorHtml(student, studentIndex);
     }
 }
-window.applySuggestedGrade = applySuggestedGrade;
 
+
+
+// Hilfsfunktion zur Umwandlung von Kurznoten (z.B. "3+") in Textform für den Export (z.B. "befriedigend +")
+function getExportGradeWord(gradeCode) {
+    if (!gradeCode) return '-';
+    
+    const baseGradesMap = {
+        "1": "sehr gut",
+        "2": "gut",
+        "3": "befriedigend",
+        "4": "ausreichend",
+        "5": "mangelhaft",
+        "6": "ungenügend"
+    };
+    
+    const baseNumber = gradeCode.charAt(0);
+    const suffix = gradeCode.slice(1);
+    
+    const word = baseGradesMap[baseNumber];
+    if (!word) return gradeCode;
+    
+    if (suffix === "+") {
+        return `${word} +`;
+    } else if (suffix === "-") {
+        return `${word} -`;
+    }
+    return word;
+}
 
 // Alle Schüler-Karteikarten exportieren
 function exportAllStudentCards() {
@@ -5053,7 +5159,8 @@ function exportAllStudentCards() {
         
         const leftNotes = student.leftNotes || '';
         const rightNotes = student.rightNotes || '';
-        const zeugnisnote = student.zeugnisnote || '';
+        const rawZeugnisnote = student.zeugnisnote || '';
+        const zeugnisnote = getExportGradeWord(rawZeugnisnote);
         
         allPrintHtml += `
             <div class="student-page">
