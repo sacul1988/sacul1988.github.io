@@ -465,7 +465,8 @@ function renderModuleContent() {
             renderZeugnisModule();
             break;
         case 'sitzplan':
-            renderSitzplanModule();
+            // Kurze Verzögerung, damit der Browser den Workspace einblendet und getBoundingClientRect() korrekt misst.
+            setTimeout(renderSitzplanModule, 50);
             break;
         case 'planung':
             renderPlanung();
@@ -3218,19 +3219,23 @@ function autoGenerateSitzplan() {
     // Bestehende Tische behalten, aber nicht löschen
     const existingDesks = cls.sitzplan.desks || [];
     
+    const workspace = safeGetElement('workspace');
+    const workspaceRect = workspace ? workspace.getBoundingClientRect() : { width: 800, height: 600 };
+    
+    // Prüfen, ob wir ein valides Layout-Messergebnis haben (> 100px Breite/Höhe)
+    const hasValidSize = workspaceRect && workspaceRect.width > 100 && workspaceRect.height > 100;
+    const workspaceWidth = hasValidSize ? workspaceRect.width : 800;
+    const workspaceHeight = hasValidSize ? workspaceRect.height : 600;
+    
+    // Mitte des Workspace berechnen
+    const centerX = (workspaceWidth - 90) / 2; // Tischbreite abziehen
+    const centerY = (workspaceHeight - 60) / 2; // Tischhöhe abziehen
+    
     // Neue Tische für Schüler ohne Tisch erstellen
     cls.students.forEach((student, index) => {
         // Prüfen, ob bereits ein Tisch für diesen Schüler existiert
         const existingDesk = existingDesks.find(desk => desk.studentIndex === index);
         if (!existingDesk) {
-            // Neuen Tisch in der Mitte erstellen
-            const workspace = safeGetElement('workspace');
-            const workspaceRect = workspace ? workspace.getBoundingClientRect() : { width: 800, height: 600 };
-            
-            // Mitte des Workspace berechnen
-            const centerX = (workspaceRect.width - 90) / 2; // Tischbreite abziehen
-            const centerY = (workspaceRect.height - 60) / 2; // Tischhöhe abziehen
-            
             existingDesks.push({
                 id: `desk-${index}`,
                 studentIndex: index,
@@ -3238,6 +3243,13 @@ function autoGenerateSitzplan() {
                 y: centerY,
                 name: student.name
             });
+        } else {
+            // Falls der Tisch ungültige/negative Koordinaten hat (z.B. durch 0-Layout beim Öffnen)
+            // und wir jetzt eine valide Größe haben, korrigieren wir die Position zur Mitte.
+            if (hasValidSize && (existingDesk.x < 0 || existingDesk.y < 0)) {
+                existingDesk.x = centerX;
+                existingDesk.y = centerY;
+            }
         }
     });
     
@@ -4513,9 +4525,9 @@ function toggleZeugnisView() {
     if (btn) {
         if (AppState.zeugnisViewMode === 'average') {
             btn.classList.remove('btn-primary');
-            btn.classList.add('btn-purple');
+            btn.classList.add('btn-warning');
         } else {
-            btn.classList.remove('btn-purple');
+            btn.classList.remove('btn-warning');
             btn.classList.add('btn-primary');
         }
     }
@@ -4529,9 +4541,9 @@ function renderZeugnisModule() {
     if (btn) {
         if (AppState.zeugnisViewMode === 'average') {
             btn.classList.remove('btn-primary');
-            btn.classList.add('btn-purple');
+            btn.classList.add('btn-warning');
         } else {
-            btn.classList.remove('btn-purple');
+            btn.classList.remove('btn-warning');
             btn.classList.add('btn-primary');
         }
     }
@@ -4702,6 +4714,54 @@ function renderZeugnisModule() {
     };
 }
 
+// Automatischer Overflow: Wenn das linke Textfeld voll ist, überlaufenden Text ins rechte verschieben
+function checkZeugnisNotesOverflow(studentIndex) {
+    const leftEl = document.getElementById(`notes-left-${studentIndex}`);
+    const rightEl = document.getElementById(`notes-right-${studentIndex}`);
+    if (!leftEl || !rightEl) return;
+
+    // Prüfen ob linkes Feld überläuft (scrollHeight > clientHeight)
+    if (leftEl.scrollHeight <= leftEl.clientHeight) return;
+
+    // HTML-Inhalt in Zeilen aufteilen (getrennt durch <br>)
+    const leftHtml = leftEl.innerHTML || '';
+    const lines = leftHtml.split('<br>');
+    if (lines.length <= 1) return; // Nur eine Zeile, nichts zu verschieben
+
+    // Zeilen vom Ende entfernen bis kein Overflow mehr
+    let removedLines = [];
+    while (lines.length > 1 && leftEl.scrollHeight > leftEl.clientHeight) {
+        removedLines.unshift(lines.pop());
+        leftEl.innerHTML = lines.join('<br>');
+    }
+
+    if (removedLines.length === 0) return;
+
+    // Überlaufende Zeilen ins rechte Feld einfügen
+    const overflowHtml = removedLines.join('<br>');
+    const rightHtml = rightEl.innerHTML || '';
+    const rightIsEmpty = rightHtml === '' || rightHtml === '- ' || rightHtml === '<br>' || rightHtml === '<div><br></div>';
+
+    if (rightIsEmpty) {
+        rightEl.innerHTML = overflowHtml;
+    } else {
+        rightEl.innerHTML = overflowHtml + '<br>' + rightHtml;
+    }
+
+    // Cursor ans Ende des linken Felds setzen
+    try {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(leftEl);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    } catch(e) {}
+
+    // Speichern
+    saveStudentNotes(studentIndex);
+}
+
 function scrollToTopOfZeugnisModule() {
     console.log("Scroll to top called");
     document.documentElement.scrollTop = 0; // Für Chrome, Firefox, IE und Opera
@@ -4728,6 +4788,13 @@ function saveStudentNotes(studentIndex, isDebounced = false) {
     
     student.leftNotes = leftNotesText;
     student.rightNotes = rightNotesText;
+
+    // Overflow prüfen: Wenn linkes Feld voll, Text automatisch ins rechte verschieben
+    // (nur beim Live-Tippen, nicht beim blur, um Doppelaufruf zu vermeiden)
+    if (isDebounced) {
+        // Leicht verzögert, damit der Browser die Höhe korrekt berechnet hat
+        setTimeout(() => checkZeugnisNotesOverflow(studentIndex), 10);
+    }
     
     // Wenn es ein Live-Update (oninput) ist, nutzen wir einen SEHR KURZEN debounced Sync (500ms)
     // Das verhält sich dann fast so "stark" wie bei den Noten, schont aber den Cursor beim Tippen.
@@ -6070,17 +6137,17 @@ function renderPlanung() {
     
     if (listBtn && calendarBtn) {
         if (viewMode === 'calendar') {
-            calendarBtn.classList.remove('btn-light', 'btn-secondary');
-            calendarBtn.classList.add('btn-primary');
+            calendarBtn.classList.remove('btn-primary', 'btn-light', 'btn-secondary');
+            calendarBtn.classList.add('btn-warning');
             
-            listBtn.classList.remove('btn-primary', 'btn-purple');
-            listBtn.classList.add('btn-light');
-        } else {
-            listBtn.classList.remove('btn-light', 'btn-secondary');
+            listBtn.classList.remove('btn-warning', 'btn-light', 'btn-secondary');
             listBtn.classList.add('btn-primary');
+        } else {
+            listBtn.classList.remove('btn-primary', 'btn-light', 'btn-secondary');
+            listBtn.classList.add('btn-warning');
             
-            calendarBtn.classList.remove('btn-primary', 'btn-purple');
-            calendarBtn.classList.add('btn-light');
+            calendarBtn.classList.remove('btn-warning', 'btn-light', 'btn-secondary');
+            calendarBtn.classList.add('btn-primary');
         }
     }
     
