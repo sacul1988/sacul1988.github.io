@@ -467,6 +467,9 @@ function renderModuleContent() {
         case 'sitzplan':
             renderSitzplanModule();
             break;
+        case 'planung':
+            renderPlanung();
+            break;
     }
 }
 
@@ -5019,7 +5022,7 @@ function addTermin() {
 
     titleInput.value = '';
     renderTermineList();
-    renderPlanungTable();
+    renderPlanung();
 }
 
 
@@ -5042,7 +5045,7 @@ function deleteTermin(terminId) {
                 savePlanung();
             }
             renderTermineList();
-            renderPlanungTable();
+            renderPlanung();
         }
     });
 }
@@ -5058,7 +5061,7 @@ function toggleTerminAusblenden(terminId, checked) {
     }
     savePlanung();
     renderTermineList();
-    renderPlanungTable();
+    renderPlanung();
 }
 
 function editTermin(terminId) {
@@ -5168,7 +5171,21 @@ function loadPlanung() {
         cb.checked = (p.selectedDays || []).includes(parseInt(cb.value));
     });
 
-    renderPlanungTable();
+    // View-Modus initialisieren
+    AppState.planungViewMode = localStorage.getItem('planungViewMode') || 'list';
+    if (AppState.calendarYear === undefined || AppState.calendarMonth === undefined) {
+        if (p.startDate) {
+            const startDateParts = p.startDate.split('-');
+            AppState.calendarYear = parseInt(startDateParts[0]);
+            AppState.calendarMonth = parseInt(startDateParts[1]) - 1;
+        } else {
+            const today = new Date();
+            AppState.calendarYear = today.getFullYear();
+            AppState.calendarMonth = today.getMonth();
+        }
+    }
+
+    renderPlanung();
 }
 
 function savePlanung() {
@@ -5180,29 +5197,80 @@ function savePlanung() {
 }
 
 function exportPlanungTable() {
-    const container = safeGetElement('planung-table-container');
-    if (!container || !container.querySelector('table')) {
-        swal('Hinweis', 'Es gibt keine Tabelle zum Exportieren.', 'info');
+    const viewMode = AppState.planungViewMode || 'list';
+    if (viewMode === 'calendar') {
+        exportPlanungCalendar();
         return;
     }
 
-    const rows = container.querySelectorAll('.planung-row');
+    const p = AppState.planung;
+    if (!p || !p.startDate || !p.endDate || !(p.selectedDays || []).length) {
+        swal('Hinweis', 'Bitte gib einen Planungszeitraum und Unterrichtstage ein, um die Planung zu exportieren.', 'info');
+        return;
+    }
+
+    // Unterrichtstage aufbauen
+    const teachingDates = new Set();
+    const rows = [];
+    const current = new Date(p.startDate + 'T00:00:00');
+    const end = new Date(p.endDate + 'T00:00:00');
+
+    while (current <= end) {
+        const dow = current.getDay();
+        if ((p.selectedDays || []).includes(dow)) {
+            const dateStr = localDateStr(current);
+            teachingDates.add(dateStr);
+            rows.push({ date: dateStr, dow, isTeaching: true, termins: [] });
+        }
+        current.setDate(current.getDate() + 1);
+    }
+
+    // Termine einarbeiten
+    const termine = AppState.termine || [];
+    const hiddenTermine = new Set(p.hiddenTermine || []);
+    termine.forEach(termin => {
+        if (hiddenTermine.has(termin.id)) return;
+        if (termin.date < p.startDate || termin.date > p.endDate) return;
+        if (teachingDates.has(termin.date)) {
+            const row = rows.find(r => r.date === termin.date);
+            if (row) row.termins.push(termin);
+        } else {
+            const d = new Date(termin.date + 'T00:00:00');
+            rows.push({ date: termin.date, dow: d.getDay(), isTeaching: false, termins: [termin] });
+        }
+    });
+
+    rows.sort((a, b) => a.date.localeCompare(b.date));
+
+    if (!rows.length) {
+        swal('Hinweis', 'Es gibt keine Planungsdaten zum Exportieren.', 'info');
+        return;
+    }
+
     let tbodyHtml = '';
+    let nr = 0;
     rows.forEach(row => {
-        const cells  = row.querySelectorAll('td');
-        const nr     = cells[1].textContent.trim();
-        const tagFull = cells[2].textContent.trim();
-        const tagMap  = { 'Montag': 'Mo.', 'Dienstag': 'Di.', 'Mittwoch': 'Mi.', 'Donnerstag': 'Do.', 'Freitag': 'Fr.' };
-        const tag     = tagMap[tagFull] || tagFull;
-        const datum  = cells[3].textContent.trim();
-        const inhalt = row.querySelector('textarea') ? row.querySelector('textarea').value : '';
-        const terminText = row.querySelector('.planung-termin-text') ? row.querySelector('.planung-termin-text').textContent.trim() : '';
-        const isTermin = row.classList.contains('planung-row-termin');
+        if (row.isTeaching) nr++;
+        const formattedDate = new Date(row.date + 'T00:00:00').toLocaleDateString('de-DE', {
+            day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+        const inhalt = (p.entries && p.entries[row.date]) ? p.entries[row.date] : '';
+        const terminText = row.termins.map(t => t.title).join(', ');
+        
+        const nrText = row.isTeaching ? nr : '—';
+        const tagText = row.isTeaching ? PLANUNG_DAY_NAMES[row.dow] : ALL_DAY_NAMES[row.dow];
+        
+        const tagMap = { 'Montag': 'Mo.', 'Dienstag': 'Di.', 'Mittwoch': 'Mi.', 'Donnerstag': 'Do.', 'Freitag': 'Fr.', 'Samstag': 'Sa.', 'Sonntag': 'So.' };
+        const tagAbbr = tagMap[tagText] || tagText;
+
+        const isTermin = row.termins.length > 0 || !row.isTeaching;
         const rowStyle = isTermin ? ' class="termin-row"' : '';
+        
         const inhaltCell = terminText
-            ? `<span class="termin-label">${terminText}</span>${inhalt ? ' ' + inhalt : ''}`
-            : inhalt;
-        tbodyHtml += `<tr${rowStyle}><td>${nr}</td><td>${tag}</td><td>${datum}</td><td>${inhaltCell}</td></tr>`;
+            ? `<span class="termin-label">${escapeHtml(terminText)}</span>${inhalt ? ' ' + escapeHtml(inhalt) : ''}`
+            : escapeHtml(inhalt);
+
+        tbodyHtml += `<tr${rowStyle}><td>${nrText}</td><td>${tagAbbr}</td><td>${formattedDate}</td><td>${inhaltCell}</td></tr>`;
     });
 
     const className = (activeClassId !== null && classes[activeClassId]) ? classes[activeClassId].name : '';
@@ -5270,7 +5338,7 @@ function autoGeneratePlanungTable() {
     });
     if (!selectedDays.length) {
         if (AppState.planung) AppState.planung.selectedDays = [];
-        renderPlanungTable();
+        renderPlanung();
         return;
     }
     generatePlanungTable();
@@ -5299,7 +5367,7 @@ function generatePlanungTable() {
     if (!AppState.planung.hiddenTermine) AppState.planung.hiddenTermine = [];
 
     savePlanung();
-    renderPlanungTable();
+    renderPlanung();
 }
 
 const ALL_DAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -5467,7 +5535,7 @@ function renderPlanungTable() {
             AppState.planung.entries = entries;
             planungDragSource = null;
             savePlanung();
-            renderPlanungTable();
+            renderPlanung();
         });
     });
 }
@@ -5866,4 +5934,447 @@ window.resetColorFilter = function() {
     
     renderMitarbeitWizard();
 };
+
+
+// ===== SPALTENKALENDER-ANSICHT (PLANUNG) =====
+
+function setPlanungViewMode(mode) {
+    AppState.planungViewMode = mode;
+    localStorage.setItem('planungViewMode', mode);
+    renderPlanung();
+}
+
+function renderPlanung() {
+    const viewMode = AppState.planungViewMode || 'list';
+    const listContainer = safeGetElement('planung-table-container');
+    const calendarContainer = safeGetElement('planung-calendar-container');
+    const listBtn = safeGetElement('planung-view-list-btn');
+    const calendarBtn = safeGetElement('planung-view-calendar-btn');
+    
+    if (listBtn && calendarBtn) {
+        if (viewMode === 'calendar') {
+            calendarBtn.classList.remove('btn-light', 'btn-secondary');
+            calendarBtn.classList.add('btn-primary');
+            
+            listBtn.classList.remove('btn-primary', 'btn-purple');
+            listBtn.classList.add('btn-light');
+        } else {
+            listBtn.classList.remove('btn-light', 'btn-secondary');
+            listBtn.classList.add('btn-primary');
+            
+            calendarBtn.classList.remove('btn-primary', 'btn-purple');
+            calendarBtn.classList.add('btn-light');
+        }
+    }
+    
+    const daysGroup = safeGetElement('planung-setup-days-group');
+    if (daysGroup) {
+        daysGroup.style.display = viewMode === 'calendar' ? 'none' : 'flex';
+    }
+    
+    if (viewMode === 'calendar') {
+        if (listContainer) listContainer.style.display = 'none';
+        if (calendarContainer) {
+            calendarContainer.style.display = 'block';
+            renderPlanungCalendar();
+        }
+    } else {
+        if (calendarContainer) calendarContainer.style.display = 'none';
+        if (listContainer) {
+            listContainer.style.display = 'block';
+            renderPlanungTable();
+        }
+    }
+}
+
+const planungMonthNames = [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+];
+
+function renderPlanungCalendar() {
+    const container = safeGetElement('planung-calendar-container');
+    if (!container) return;
+    
+    const p = AppState.planung;
+    if (!p || !p.startDate || !p.endDate || !(p.selectedDays || []).length) {
+        container.innerHTML = '<p class="planung-empty" style="text-align: center; padding: 40px;">Bitte gib oben einen Zeitraum ein und wähle Unterrichtstage aus, um den Kalender anzuzeigen.</p>';
+        return;
+    }
+    
+    // Zu rendernde Monate bestimmen
+    const monthsToRender = [];
+    
+    // Von Start- bis Enddatum alle dazwischenliegenden Monate sammeln
+    const start = new Date(p.startDate + 'T00:00:00');
+    const end = new Date(p.endDate + 'T00:00:00');
+    
+    let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+    const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
+    
+    while (cur <= endLimit) {
+        monthsToRender.push({ year: cur.getFullYear(), month: cur.getMonth() });
+        cur.setMonth(cur.getMonth() + 1);
+    }
+    
+    const weekdayInitials = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    let columnsHtml = '';
+    
+    monthsToRender.forEach(({ year, month }) => {
+        const monthName = planungMonthNames[month];
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        let daysHtml = '';
+        
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            // Prüfen, ob der Tag im Zeitraum liegt
+            const isWithinRange = dateStr >= p.startDate && dateStr <= p.endDate;
+            
+            if (isWithinRange) {
+                const dateObj = new Date(dateStr + 'T00:00:00');
+                const dow = dateObj.getDay(); // 0=Sunday, 6=Saturday
+                
+                let rowClasses = [];
+                if (dow === 0) rowClasses.push('sunday');
+                else if (dow === 6) rowClasses.push('saturday');
+                
+                const isToday = dateStr === todayStr;
+                if (isToday) rowClasses.push('today');
+                // Termine sammeln (alle Termine des Tages, keine Ausblendung im Kalender)
+                const termine = AppState.termine || [];
+                const dayTermine = termine.filter(t => t.date === dateStr);
+                
+                // HTML für Termine
+                let appointmentsHtml = '';
+                if (dayTermine.length > 0) {
+                    appointmentsHtml = `<div class="calendar-day-appointments">` + 
+                        dayTermine.map(t => `<span class="calendar-day-appointment-badge" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</span>`).join('') + 
+                        `</div>`;
+                }
+                
+                daysHtml += `
+                    <div class="calendar-day-row ${rowClasses.join(' ')}" onclick="openCalendarDayDetails('${dateStr}')">
+                        <div class="calendar-day-label">
+                            <span class="day-num">${d}</span>
+                            <span class="day-dow">${weekdayInitials[dow]}</span>
+                        </div>
+                        <div class="calendar-day-content">
+                            ${appointmentsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        columnsHtml += `
+            <div class="calendar-month-column">
+                <div class="calendar-column-header">${monthName} ${year}</div>
+                <div class="calendar-column-days">
+                    ${daysHtml}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = `
+        <div class="calendar-columns-wrapper">
+            ${columnsHtml}
+        </div>
+    `;
+}
+
+function openCalendarDayDetails(dateStr) {
+    AppState.activeCalendarDay = dateStr;
+    
+    // Titel im Modal aktualisieren (Wochentag, DD.MM.YYYY)
+    const dateObj = new Date(dateStr + 'T00:00:00');
+    const formattedDate = dateObj.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+    document.getElementById('calendar-day-date-title').textContent = formattedDate;
+    
+    // Neuen Termin Input zurücksetzen
+    document.getElementById('calendar-day-new-termin-title').value = '';
+    
+    // Terminliste für diesen Tag rendern
+    renderCalendarDayTermineList(dateStr);
+    
+    showModal('calendar-day-modal');
+}
+
+function renderCalendarDayTermineList(dateStr) {
+    const listContainer = document.getElementById('calendar-day-termine-list');
+    if (!listContainer) return;
+    
+    const dayTermine = (AppState.termine || []).filter(t => t.date === dateStr);
+    
+    if (dayTermine.length === 0) {
+        listContainer.innerHTML = '<p style="color: var(--grey-color); font-size: 0.88rem; margin: 0; padding: 4px 0;">Keine Termine für diesen Tag.</p>';
+    } else {
+        listContainer.innerHTML = dayTermine.map(t => `
+            <div class="calendar-modal-termin-item">
+                <span>${escapeHtml(t.title || '')}</span>
+                <button class="btn btn-sm btn-danger btn-square" onclick="deleteCalendarDayTermin('${t.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `).join('');
+    }
+}
+
+function addCalendarDayTermin() {
+    const dateStr = AppState.activeCalendarDay;
+    if (!dateStr) return;
+    
+    const titleInput = document.getElementById('calendar-day-new-termin-title');
+    const title = titleInput.value.trim();
+    
+    if (!title) {
+        swal('Fehler', 'Bitte eine Bezeichnung eingeben', 'error');
+        return;
+    }
+    
+    if (!AppState.termine) AppState.termine = [];
+    const newId = Date.now().toString();
+    AppState.termine.push({ id: newId, title: title, date: dateStr });
+    
+    saveTermine();
+    titleInput.value = '';
+    renderCalendarDayTermineList(dateStr);
+    renderPlanung();
+}
+
+function deleteCalendarDayTermin(id) {
+    swal({
+        title: 'Termin löschen?',
+        text: 'Möchtest du diesen Termin wirklich löschen?',
+        icon: 'warning',
+        buttons: ['Abbrechen', 'Löschen'],
+        dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+            const deletedIds = JSON.parse(localStorage.getItem('deletedTermineIds') || '[]');
+            if (!deletedIds.includes(id)) deletedIds.push(id);
+            localStorage.setItem('deletedTermineIds', JSON.stringify(deletedIds));
+            AppState.termine = (AppState.termine || []).filter(t => t.id !== id);
+            
+            saveTermine();
+            
+            const dateStr = AppState.activeCalendarDay;
+            renderCalendarDayTermineList(dateStr);
+            renderPlanung();
+        }
+    });
+}
+
+// Binden an das window Objekt
+window.setPlanungViewMode = setPlanungViewMode;
+window.renderPlanung = renderPlanung;
+window.renderPlanungCalendar = renderPlanungCalendar;
+window.openCalendarDayDetails = openCalendarDayDetails;
+window.addCalendarDayTermin = addCalendarDayTermin;
+window.deleteCalendarDayTermin = deleteCalendarDayTermin;
+
+// Export der Kalenderansicht
+function exportPlanungCalendar() {
+    const container = safeGetElement('planung-calendar-container');
+    if (!container) return;
+    
+    const p = AppState.planung;
+    if (!p || !p.startDate || !p.endDate || !(p.selectedDays || []).length) {
+        swal('Hinweis', 'Bitte gib einen Planungszeitraum und Unterrichtstage ein, um den Kalender zu exportieren.', 'info');
+        return;
+    }
+
+    const calendarHtml = container.innerHTML;
+    const className = (activeClassId !== null && classes[activeClassId]) ? classes[activeClassId].name : '';
+    const exportTitle = className ? `Planung (Kalender) - ${className}` : 'Planung (Kalender)';
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${exportTitle}</title><style>
+        body { font-family: sans-serif; font-size: 11px; padding: 20px; background: #fff; color: #1e293b; }
+        h2 { margin-bottom: 20px; text-align: center; font-size: 1.5rem; color: #0f172a; }
+        
+        .calendar-columns-wrapper {
+            display: flex;
+            gap: 12px;
+            overflow: visible;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+        
+        .calendar-month-column {
+            width: 190px;
+            flex-shrink: 0;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            page-break-inside: avoid;
+        }
+        
+        .calendar-column-header {
+            background: #4a6cf7;
+            color: #ffffff;
+            padding: 10px 8px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+        
+        .calendar-day-row {
+            min-height: 48px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        
+        .calendar-day-row:last-child {
+            border-bottom: none;
+        }
+        
+        .calendar-day-row.empty-day {
+            background-color: #f8fafc;
+            opacity: 0.4;
+            background-image: linear-gradient(45deg, #cbd5e1 25%, transparent 25%, transparent 50%, #cbd5e1 50%, #cbd5e1 75%, transparent 75%, transparent);
+            background-size: 8px 8px;
+        }
+        
+        .calendar-day-row.sunday,
+        .calendar-day-row.saturday {
+            background-color: #f1f5f9;
+        }
+        
+        .calendar-day-row.today {
+            border-left: 3px solid #4a6cf7;
+        }
+        
+        .calendar-day-label {
+            width: 48px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        
+        .calendar-day-label .day-num {
+            width: 18px;
+            text-align: right;
+            display: inline-block;
+        }
+        
+        .calendar-day-label .day-dow {
+            color: #94a3b8;
+            font-size: 0.7rem;
+        }
+        
+        .calendar-day-content {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            justify-content: center;
+        }
+        
+        .calendar-day-appointments {
+            display: flex;
+            gap: 2px;
+            flex-direction: column;
+        }
+        
+        .calendar-day-appointment-badge {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #1e293b;
+            display: block;
+            border: none;
+            background: none;
+            box-shadow: none;
+            padding: 1px 0;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .calendar-day-entry-preview {
+            font-size: 0.65rem;
+            color: #475569;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        @media print {
+            body { padding: 0; margin: 0; }
+            .calendar-month-column { box-shadow: none; }
+            @page { size: landscape; margin: 0.5cm; }
+            
+            .calendar-columns-wrapper {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                width: 100% !important;
+                gap: 4px !important;
+            }
+            
+            .calendar-month-column {
+                width: 0 !important;
+                flex: 1 1 0% !important;
+                margin-bottom: 0 !important;
+                border-radius: 4px !important;
+            }
+            
+            .calendar-column-header {
+                font-size: 8px !important;
+                padding: 6px 2px !important;
+            }
+            
+            .calendar-day-row {
+                min-height: 20px !important;
+                height: 20px !important;
+                padding: 1px 4px !important;
+            }
+            
+            .calendar-day-label {
+                width: 26px !important;
+                font-size: 7px !important;
+                gap: 1px !important;
+            }
+            
+            .calendar-day-label .day-num {
+                width: 10px !important;
+            }
+            
+            .calendar-day-label .day-dow {
+                font-size: 6px !important;
+            }
+            
+            .calendar-day-appointment-badge {
+                font-size: 7px !important;
+                padding: 0 !important;
+            }
+        }
+    </style></head><body>
+        <h2>${exportTitle}</h2>
+        ${calendarHtml}
+        <script>window.onload = function(){ window.print(); }<\/script>
+    </body></html>`);
+    win.document.close();
+}
+
+window.exportPlanungCalendar = exportPlanungCalendar;
 

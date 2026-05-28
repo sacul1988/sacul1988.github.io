@@ -265,6 +265,12 @@
                             <div class="card-header">
                                 <h2>Planung</h2>
                                 <div>
+                                    <button class="btn btn-primary btn-icon" id="planung-view-list-btn" onclick="setPlanungViewMode('list')">
+                                        <i class="fas fa-list"></i> Listenansicht
+                                    </button>
+                                    <button class="btn btn-light btn-icon" id="planung-view-calendar-btn" onclick="setPlanungViewMode('calendar')">
+                                        <i class="fas fa-calendar-alt"></i> Kalenderansicht
+                                    </button>
                                     <button class="btn btn-primary btn-icon" onclick="deletePlanungTable()">
                                         <i class="fas fa-trash"></i> Tabelle löschen
                                     </button>
@@ -289,7 +295,7 @@
                                         <input type="date" id="planung-end-date" class="form-control planung-date-input">
                                     </div>
                                 </div>
-                                <div class="planung-setup-group">
+                                <div class="planung-setup-group" id="planung-setup-days-group">
                                     <div class="planung-days-row">
                                         <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="1"><span>Mo</span></label>
                                         <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="2"><span>Di</span></label>
@@ -301,6 +307,7 @@
                             </div>
 
                             <div id="planung-table-container"></div>
+                            <div id="planung-calendar-container" style="display: none;"></div>
                         </div>
                     </div>
 
@@ -497,6 +504,35 @@
                 </div>
 
                 <div id="termine-list-container" class="termine-list-container"></div>
+            </div>
+
+            <!-- Kalender Tag-Details Modal -->
+            <div id="calendar-day-modal" class="modal" style="display: none; max-width: 600px; width: 95%;">
+                <div class="wizard-header">
+                    <h2>Details für <span id="calendar-day-date-title">Datum</span></h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
+                <div class="wizard-body" style="padding-top: 10px;">
+                    <!-- Termine an diesem Tag -->
+                    <div>
+                        <h4 style="margin-bottom: 10px; font-weight: 600;"><i class="fas fa-calendar-check" style="color: var(--primary-color);"></i> Termine an diesem Tag</h4>
+                        <div id="calendar-day-termine-list" class="termine-list-container" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; padding: 0; max-height: 180px;">
+                            <!-- Termine werden hier dynamisch gelistet -->
+                        </div>
+                        
+                        <!-- Termin hinzufügen -->
+                        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-top: 10px;">
+                            <h5 style="margin-top: 0; margin-bottom: 8px; font-size: 0.88rem; font-weight: 600;">Neuen Termin für diesen Tag hinzufügen</h5>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="calendar-day-new-termin-title" class="form-control" placeholder="Terminbezeichnung" style="flex: 1;" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addCalendarDayTermin(); }">
+                                <button class="btn btn-primary" onclick="addCalendarDayTermin()" style="min-height: 40px;"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="wizard-footer" style="justify-content: flex-end; display: flex; gap: 10px; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                    <button class="btn btn-secondary" onclick="hideModal()">Schließen</button>
+                </div>
             </div>
 
             <!-- Modal für letzte Eingabe rückgängig machen -->
