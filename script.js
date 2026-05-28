@@ -4595,7 +4595,31 @@ function renderZeugnisModule() {
         // Notizen
         const leftNotes = student.leftNotes || '- ';
         const rightNotes = student.rightNotes || '- ';
-        const summaryNotes = student.summaryNotes || '';
+        
+        // Zeugnisnote automatisch vorschlagen und ggf. auswählen
+        let selectedGrade = student.zeugnisnote || '';
+        const suggestedGrade = calculateSuggestedGrade(student);
+        if (!selectedGrade && suggestedGrade) {
+            student.zeugnisnote = suggestedGrade;
+            selectedGrade = suggestedGrade;
+            // Im Hintergrund speichern
+            setTimeout(() => saveData(index), 0);
+        }
+        
+        const germanGrades = ["sehr gut", "gut", "befriedigend", "ausreichend", "mangelhaft", "ungenügend"];
+        const gradesSelectorHtml = germanGrades.map(g => {
+            const isSelected = selectedGrade === g;
+            const activeClass = isSelected ? 'active' : '';
+            let colorClass = '';
+            if (g === 'sehr gut') colorClass = 'grade-excellent';
+            else if (g === 'gut') colorClass = 'grade-good';
+            else if (g === 'befriedigend') colorClass = 'grade-average';
+            else if (g === 'ausreichend') colorClass = 'grade-poor';
+            else if (g === 'mangelhaft') colorClass = 'grade-bad';
+            else if (g === 'ungenügend') colorClass = 'grade-very-bad';
+            
+            return `<button class="btn-grade-select ${colorClass} ${activeClass}" onclick="selectZeugnisGrade(${index}, '${g}')">${g}</button>`;
+        }).join('');
         
         card.innerHTML = `
             <div class="card-header">
@@ -4633,8 +4657,10 @@ function renderZeugnisModule() {
                     </div>
                 </div>
                 <div class="zeugnis-section summary-section">
-                    <h4>Zusammenfassung und Zeugnisnote</h4>
-                    <div contenteditable="true" class="form-control notes-textarea" id="notes-summary-${index}" placeholder="Zusammenfassung und Zeugnisnote..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${summaryNotes}</div>
+                    <h4>Zeugnisnote ${suggestedGrade ? `<span style="font-size: 0.82rem; font-weight: normal; color: #64748b; margin-left: 10px;">(Vorschlag: ${suggestedGrade}${selectedGrade !== suggestedGrade ? ` - <a href="#" onclick="applySuggestedGrade(${index}, '${suggestedGrade}'); return false;" style="color: #007bff; text-decoration: underline; cursor: pointer;">übernehmen</a>` : ''})</span>` : ''}</h4>
+                    <div class="zeugnisnote-selector">
+                        ${gradesSelectorHtml}
+                    </div>
                 </div>
             </div>
         `;
@@ -4652,27 +4678,20 @@ function renderZeugnisModule() {
     
     // Neuer Event-Listener für automatische Aufzählungszeichen (Enter-Taste)
     const zeugnisListener = function(event) {
-        if (event.target.matches('div[id^="notes-left-"], div[id^="notes-right-"], div[id^="notes-summary-"]')) {
+        if (event.target.matches('div[id^="notes-left-"], div[id^="notes-right-"]')) {
             if (event.key === 'Enter') {
                 const textarea = event.target;
                 const studentIndex = getStudentIndexFromZeugnisTextareaId(textarea.id);
                 if (studentIndex < 0) return;
 
-                // Nur für linke/rechte Notizen Aufzählungszeichen hinzufügen
-                if (textarea.id.includes('notes-left-') || textarea.id.includes('notes-right-')) {
-                    event.preventDefault();
-                    event.stopPropagation();
+                event.preventDefault();
+                event.stopPropagation();
 
-                    const insertHtml = '<br>- ';
-                    document.execCommand('insertHTML', false, insertHtml);
+                const insertHtml = '<br>- ';
+                document.execCommand('insertHTML', false, insertHtml);
 
-                    // Linke/rechte Notizen speichern wir direkt nach dem manuellen Zeilenumbruch.
-                    saveStudentNotes(studentIndex);
-                } else {
-                    // In der Zusammenfassung die neue Zeile zuerst vom Browser einfügen lassen,
-                    // dann den aktualisierten Text speichern.
-                    setTimeout(() => saveStudentNotes(studentIndex), 0);
-                }
+                // Linke/rechte Notizen speichern wir direkt nach dem manuellen Zeilenumbruch.
+                saveStudentNotes(studentIndex);
             }
         }
     };
@@ -4694,25 +4713,21 @@ function scrollToTopOfZeugnisModule() {
 function saveStudentNotes(studentIndex, isDebounced = false) {
     const leftTextarea = safeGetElement(`notes-left-${studentIndex}`);
     const rightTextarea = safeGetElement(`notes-right-${studentIndex}`);
-    const summaryTextarea = safeGetElement(`notes-summary-${studentIndex}`);
-    if (!leftTextarea || !rightTextarea || !summaryTextarea) return;
+    if (!leftTextarea || !rightTextarea) return;
     if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
     
     // KEIN .trim() beim Speichern, sonst werden Zeilenumbrüche am Ende (Enter) gelöscht
     const leftNotesText = leftTextarea.innerHTML;
     const rightNotesText = rightTextarea.innerHTML;
-    const summaryNotesText = summaryTextarea.innerHTML;
     
     const student = classes[activeClassId].students[studentIndex];
 
     const hasChanges = student.leftNotes !== leftNotesText ||
-                       student.rightNotes !== rightNotesText ||
-                       student.summaryNotes !== summaryNotesText;
+                       student.rightNotes !== rightNotesText;
     if (!hasChanges) return;
     
     student.leftNotes = leftNotesText;
     student.rightNotes = rightNotesText;
-    student.summaryNotes = summaryNotesText;
     
     // Wenn es ein Live-Update (oninput) ist, nutzen wir einen SEHR KURZEN debounced Sync (500ms)
     // Das verhält sich dann fast so "stark" wie bei den Noten, schont aber den Cursor beim Tippen.
@@ -4730,6 +4745,137 @@ function saveStudentNotes(studentIndex, isDebounced = false) {
         saveData(studentIndex);
     }
 }
+
+// Zeugnisnote auswählen
+function selectZeugnisGrade(studentIndex, grade) {
+    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
+    const student = classes[activeClassId].students[studentIndex];
+    const currentGrade = student.zeugnisnote;
+
+    if (currentGrade === grade) {
+        // Schon ausgewählt, nichts tun
+        return;
+    }
+
+    const performChange = () => {
+        student.zeugnisnote = grade;
+        saveData(studentIndex);
+        renderZeugnisModule();
+    };
+
+    if (currentGrade) {
+        // Falls bereits eine Note gesetzt ist, bestätigen lassen
+        if (typeof swal !== 'undefined') {
+            swal({
+                title: "Zeugnisnote ändern?",
+                text: `Möchtest du die Zeugnisnote für ${student.name} wirklich von "${currentGrade}" in "${grade}" ändern?`,
+                icon: "warning",
+                buttons: ["Abbrechen", "Ja, ändern"],
+                dangerMode: false,
+            })
+            .then((willChange) => {
+                if (willChange) {
+                    performChange();
+                }
+            });
+        } else {
+            if (confirm(`Möchtest du die Zeugnisnote für ${student.name} wirklich von "${currentGrade}" in "${grade}" ändern?`)) {
+                performChange();
+            }
+        }
+    } else {
+        // Direkt setzen, wenn noch keine Note vorhanden ist
+        performChange();
+    }
+}
+window.selectZeugnisGrade = selectZeugnisGrade;
+
+// Hilfsfunktion zum Zählen der Farben aus den Notizen
+function countPhraseColors(student) {
+    const counts = { blue: 0, green: 0, orange: 0, red: 0 };
+    const combinedNotes = (student.leftNotes || '') + ' ' + (student.rightNotes || '');
+    
+    const regex = /class="phrase-color-(blue|green|orange|red)"/g;
+    let match;
+    while ((match = regex.exec(combinedNotes)) !== null) {
+        counts[match[1]]++;
+    }
+    return counts;
+}
+
+// Berechnungsvorschlag für die Zeugnisnote
+function calculateSuggestedGrade(student) {
+    let writtenAvg = null;
+    if (student.projects && student.projects.length > 0) {
+        const average = calculateProjectAverage(student.projects);
+        if (average) {
+            writtenAvg = parseFloat(average.exact);
+        }
+    }
+    
+    const counts = countPhraseColors(student);
+    const totalPhrases = counts.blue + counts.green + counts.orange + counts.red;
+    let formulationAvg = null;
+    if (totalPhrases > 0) {
+        // Notenbereiche: blue(1/2) -> 1.5, green(2/3) -> 2.5, orange(3/4) -> 3.5, red(4/5) -> 4.5
+        formulationAvg = (counts.blue * 1.5 + counts.green * 2.5 + counts.orange * 3.5 + counts.red * 4.5) / totalPhrases;
+    }
+    
+    let finalValue = null;
+    if (writtenAvg !== null && formulationAvg !== null) {
+        // Gewichtung: 50% schriftliche Durchschnittsnote, 50% Formulierungen aus den Notizen
+        finalValue = writtenAvg * 0.5 + formulationAvg * 0.5;
+    } else if (writtenAvg !== null) {
+        finalValue = writtenAvg;
+    } else if (formulationAvg !== null) {
+        finalValue = formulationAvg;
+    } else {
+        return null;
+    }
+    
+    if (finalValue <= 1.5) return "sehr gut";
+    if (finalValue <= 2.5) return "gut";
+    if (finalValue <= 3.5) return "befriedigend";
+    if (finalValue <= 4.5) return "ausreichend";
+    if (finalValue <= 5.5) return "mangelhaft";
+    return "ungenügend";
+}
+
+// Vorschlag in die Zeugnisnote übernehmen
+function applySuggestedGrade(studentIndex, grade) {
+    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
+    const student = classes[activeClassId].students[studentIndex];
+    
+    const performChange = () => {
+        student.zeugnisnote = grade;
+        saveData(studentIndex);
+        renderZeugnisModule();
+    };
+
+    if (student.zeugnisnote && student.zeugnisnote !== grade) {
+        if (typeof swal !== 'undefined') {
+            swal({
+                title: "Vorschlag übernehmen?",
+                text: `Möchtest du den Vorschlag "${grade}" für ${student.name} übernehmen?`,
+                icon: "info",
+                buttons: ["Abbrechen", "Ja, übernehmen"],
+            })
+            .then((willChange) => {
+                if (willChange) {
+                    performChange();
+                }
+            });
+        } else {
+            if (confirm(`Möchtest du den Vorschlag "${grade}" für ${student.name} übernehmen?`)) {
+                performChange();
+            }
+        }
+    } else {
+        performChange();
+    }
+}
+window.applySuggestedGrade = applySuggestedGrade;
+
 
 // Alle Schüler-Karteikarten exportieren
 function exportAllStudentCards() {
@@ -4808,7 +4954,7 @@ function exportAllStudentCards() {
         
         const leftNotes = student.leftNotes || '';
         const rightNotes = student.rightNotes || '';
-        const summaryNotes = student.summaryNotes || '';
+        const zeugnisnote = student.zeugnisnote || '';
         
         allPrintHtml += `
             <div class="student-page">
@@ -4832,8 +4978,8 @@ function exportAllStudentCards() {
                     <div class="notes" style="margin-top: 20px;">${rightNotes}</div>
                 </div>
                 <div class="section">
-                    <h2>Zusammenfassung und Zeugnisnote</h2>
-                    <div class="notes">${summaryNotes}</div>
+                    <h2>Zeugnisnote</h2>
+                    <div class="notes">${zeugnisnote || '-'}</div>
                 </div>
             </div>
         `;
@@ -5812,9 +5958,7 @@ function toggleMitarbeitPhraseById(phraseId) {
 function insertSelectedMitarbeitPhrases() {
     const studentIndex = AppMitarbeitWizardState.studentIndex;
     const targetVal = document.getElementById('wizard-target-textarea').value;
-    const textareaId = targetVal === 'left' ? `notes-left-${studentIndex}` : 
-                       targetVal === 'right' ? `notes-right-${studentIndex}` : 
-                       `notes-summary-${studentIndex}`;
+    const textareaId = targetVal === 'left' ? `notes-left-${studentIndex}` : `notes-right-${studentIndex}`;
     const textarea = document.getElementById(textareaId);
     if (!textarea) return;
     
@@ -5832,44 +5976,17 @@ function insertSelectedMitarbeitPhrases() {
         .filter(Boolean);
     
     if (selectedPhrasesData.length > 0) {
-        if (targetVal === 'left' || targetVal === 'right') {
-            // Als Aufzählungspunkte mit Farben anhängen
-            selectedPhrasesData.forEach(phrase => {
-                currentHtml = currentHtml.trim();
-                const coloredHtml = `<span class="phrase-color-${phrase.color}">${phrase.text}</span>`;
-                if (currentHtml === '' || currentHtml === '- ') {
-                    currentHtml = `- ${coloredHtml}`;
-                } else {
-                    currentHtml += `<br>- ${coloredHtml}`;
-                }
-            });
-            currentHtml += '<br>';
-        } else {
-            // Als Fließtext-Sätze mit Farben anhängen
-            selectedPhrasesData.forEach(phrase => {
-                currentHtml = currentHtml.trim();
-                const coloredHtml = `<span class="phrase-color-${phrase.color}">${phrase.text}</span>`;
-                if (currentHtml === '') {
-                    currentHtml = coloredHtml;
-                } else {
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = currentHtml;
-                    const plainText = tempDiv.textContent.trim();
-                    const lastChar = plainText.slice(-1);
-                    
-                    if (plainText !== '' && !['.', '!', '?'].includes(lastChar)) {
-                        currentHtml += '.';
-                    }
-                    currentHtml += ` ${coloredHtml}`;
-                }
-            });
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = currentHtml;
-            const plainText = tempDiv.textContent.trim();
-            if (plainText !== '' && !['.', '!', '?'].includes(plainText.slice(-1))) {
-                currentHtml += '.';
+        // Als Aufzählungspunkte mit Farben anhängen
+        selectedPhrasesData.forEach(phrase => {
+            currentHtml = currentHtml.trim();
+            const coloredHtml = `<span class="phrase-color-${phrase.color}">${phrase.text}</span>`;
+            if (currentHtml === '' || currentHtml === '- ') {
+                currentHtml = `- ${coloredHtml}`;
+            } else {
+                currentHtml += `<br>- ${coloredHtml}`;
             }
-        }
+        });
+        currentHtml += '<br>';
         
         textarea.innerHTML = currentHtml;
         
