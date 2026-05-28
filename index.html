@@ -724,17 +724,15 @@
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('cloud-status-bar').style.display = 'flex';
 
-                // Sync-Zähler beim Laden wiederherstellen
+                // Sync-Zähler beim Laden wiederherstellen (immer anzeigen)
                 const today = new Date().toISOString().slice(0, 10);
                 const savedDay = localStorage.getItem('syncCounterDay');
                 const savedCount = savedDay === today ? parseInt(localStorage.getItem('syncCounterCount') || '0', 10) : 0;
-                if (savedCount > 0) {
-                    const badge = document.getElementById('sync-counter-badge');
-                    const counterVal = document.getElementById('sync-counter-value');
-                    if (badge && counterVal) {
-                        counterVal.textContent = savedCount;
-                        badge.style.display = 'flex';
-                    }
+                const badge = document.getElementById('sync-counter-badge');
+                const counterVal = document.getElementById('sync-counter-value');
+                if (badge && counterVal) {
+                    counterVal.textContent = savedCount;
+                    badge.style.display = 'flex';
                 }
                 
                 // Realtime Sync initialisieren
