@@ -622,18 +622,11 @@
                                         </div>
                                     </div>
                                     <!-- Eingestellte Zeiten und Button -->
-                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
-                                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                                            <div style="display: flex; gap: 6px; align-items: center;">
-                                                <span style="font-size: 0.85rem; color: var(--grey-color); font-weight: 500;">Von:</span>
-                                                <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="width: 105px; min-height: 36px; padding: 0.2rem 0.5rem;">
-                                            </div>
-                                            <div style="display: flex; gap: 6px; align-items: center;">
-                                                <span style="font-size: 0.85rem; color: var(--grey-color); font-weight: 500;">Bis:</span>
-                                                <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="width: 105px; min-height: 36px; padding: 0.2rem 0.5rem;">
-                                            </div>
-                                        </div>
-                                        <div id="calendar-day-add-btn-container">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+                                        <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem;">
+                                        <span style="color: var(--grey-color); font-weight: 500;">–</span>
+                                        <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem;">
+                                        <div id="calendar-day-add-btn-container" style="margin-left: 4px;">
                                             <button class="btn btn-success btn-circle" onclick="addCalendarDayTermin()" title="Hinzufügen">
                                                 <i class="fas fa-check"></i>
                                             </button>
