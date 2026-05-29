@@ -8,7 +8,7 @@ Die Symbole bedeuten:
 - 🟠 Orange: Ausbaufähig (Note 3-4)
 - 🔴 Rot: Ungenügend (Note 4-5)
 
-## Mündliche Mitarbeit (20 Sätze)
+## Mündliche Mitarbeit (16 Sätze)
 
 1. 🔵 [Blau - Sehr gut / Note 1-2] die mündlichen Beiträge zeigen eine tiefregende und weiterführende Auseinandersetzung der Unterrichtsinhalte.
 2. 🔵 [Blau - Sehr gut / Note 1-2] hohe Motivation im Unterricht.
@@ -23,15 +23,11 @@ Die Symbole bedeuten:
 11. 🟠 [Orange - Ausbaufähig / Note 3-4] Aufgaben aus dem Unterricht werden grundlegend bearbeitet.
 12. 🟠 [Orange - Ausbaufähig / Note 3-4] eher zurückhaltende mündliche Mitarbeit.
 13. 🟠 [Orange - Ausbaufähig / Note 3-4] Erklärungen aus dem Unterricht können nur begrenzt für die eigene Arbeit an Aufgaben genutzt werden.
-14. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Ablenkungen im Unterricht durch andere Mitschüler*innen.
-15. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Fragen nach nicht verstandenen Unterrichtsinhalten.
-16. 🟠 [Orange - Ausbaufähig / Note 3-4] Mündliche Mitarbeit ist regelmäßig vorhanden, könnte aber noch weiter ausgebaut werden.
-17. 🟠 [Orange - Ausbaufähig / Note 3-4] teilweise gibt es kleine Ablenkungen im Unterricht.
-18. 🔴 [Rot - Ungenügend / Note 4-5] Beschäftigung mit anderen Dingen innerhalb des Unterrichts.
-19. 🔴 [Rot - Ungenügend / Note 4-5] keine oder sehr wenig mündliche Beteiligung im Unterricht.
-20. 🔴 [Rot - Ungenügend / Note 4-5] teilweise massive und wiederholte Störungen im Unterricht.
+14. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Fragen nach nicht verstandenen Unterrichtsinhalten.
+15. 🟠 [Orange - Ausbaufähig / Note 3-4] Mündliche Mitarbeit ist regelmäßig vorhanden, könnte aber noch weiter ausgebaut werden.
+16. 🔴 [Rot - Ungenügend / Note 4-5] keine oder sehr wenig mündliche Beteiligung im Unterricht.
 
-## Arbeitsverhalten (13 Sätze)
+## Arbeitsverhalten (9 Sätze)
 
 1. 🔵 [Blau - Sehr gut / Note 1-2] sehr zuverlässige, schnelle und ordentliche Bearbeitung von Aufgaben.
 2. 🟢 [Grün - Gut / Note 2-3] Materialien sind regelmäßig und vollständig vorhanden.
@@ -39,17 +35,24 @@ Die Symbole bedeuten:
 4. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden innerhalb der Arbeitszeit oft nicht fertiggestellt.
 5. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden insgesamt eher sehr langsam bearbeitet.
 6. 🟠 [Orange - Ausbaufähig / Note 3-4] Nutzt teilweise (trotz Hinweis) unpassende Arbeitsmittel für die Bearbeitung von Aufgaben.
-7. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr häufige und ausdauernde Toilettengänge.
-8. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr regelmäßige Ablenkungen durch andere Mitschüler.
-9. 🔴 [Rot - Ungenügend / Note 4-5] bewusste und gezielte Ablenkung anderer Mitschüler*innen.
-10. 🔴 [Rot - Ungenügend / Note 4-5] fast keine eigenständige Arbeit an Aufgaben möglich.
-11. 🔴 [Rot - Ungenügend / Note 4-5] insgesamt eine eher unselbstständige Arbeitsweise.
-12. 🔴 [Rot - Ungenügend / Note 4-5] Materialien fehlen sehr häufig noch zu Stundenbeginn.
-13. 🔴 [Rot - Ungenügend / Note 4-5] regelmäßige Ablenkungen mit und durch andere Mitschüler aus der Klasse.
+7. 🔴 [Rot - Ungenügend / Note 4-5] fast keine eigenständige Arbeit an Aufgaben möglich.
+8. 🔴 [Rot - Ungenügend / Note 4-5] insgesamt eine eher unselbstständige Arbeitsweise.
+9. 🔴 [Rot - Ungenügend / Note 4-5] Materialien fehlen sehr häufig noch zu Stundenbeginn.
 
 ## Sozialverhalten (0 Sätze)
 
 *Keine Sätze in dieser Kategorie gefunden.*
+
+## Störungen (8 Sätze)
+
+1. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Ablenkungen im Unterricht durch andere Mitschüler*innen.
+2. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr häufige und ausdauernde Toilettengänge.
+3. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr regelmäßige Ablenkungen durch andere Mitschüler.
+4. 🟠 [Orange - Ausbaufähig / Note 3-4] teilweise gibt es kleine Ablenkungen im Unterricht.
+5. 🔴 [Rot - Ungenügend / Note 4-5] Beschäftigung mit anderen Dingen innerhalb des Unterrichts.
+6. 🔴 [Rot - Ungenügend / Note 4-5] bewusste und gezielte Ablenkung anderer Mitschüler*innen.
+7. 🔴 [Rot - Ungenügend / Note 4-5] regelmäßige Ablenkungen mit und durch andere Mitschüler aus der Klasse.
+8. 🔴 [Rot - Ungenügend / Note 4-5] teilweise massive und wiederholte Störungen im Unterricht.
 
 ## Sonstiges (6 Sätze)
 

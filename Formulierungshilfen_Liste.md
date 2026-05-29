@@ -8,7 +8,7 @@ Die Symbole bedeuten:
 - 🟠 Orange: Ausbaufähig (Note 3-4)
 - 🔴 Rot: Ungenügend (Note 4-5)
 
-## Mündliche Mitarbeit (73 Sätze)
+## Mündliche Mitarbeit (66 Sätze)
 
 1. 🔵 [Blau - Sehr gut / Note 1-2] die mündlichen Beiträge zeigen eine tiefregende und weiterführende Auseinandersetzung der Unterrichtsinhalte
 2. 🔵 [Blau - Sehr gut / Note 1-2] die mündlichen Beiträge zeigen eine tiefregende und weiterführende Auseinandersetzung der Unterrichtsinhalte.
@@ -69,22 +69,15 @@ Die Symbole bedeuten:
 57. 🟠 [Orange - Ausbaufähig / Note 3-4] Erklärungen aus dem Unterricht können nur begrenzt für die eigene Arbeit an Aufgaben genutzt werden
 58. 🟠 [Orange - Ausbaufähig / Note 3-4] Erklärungen aus dem Unterricht können nur begrenzt für die eigene Arbeit an Aufgaben genutzt werden.
 59. 🟠 [Orange - Ausbaufähig / Note 3-4] Grundsätzlich eher zurückhaltende mündliche Mitarbeit.
-60. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Ablenkungen im Unterricht durch andere Mitschüler*innen.
-61. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Fragen nach nicht verstandenen Unterrichtsinhalten.
-62. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eher wenig mündliche Beteiligung.
-63. 🟠 [Orange - Ausbaufähig / Note 3-4] mündliche Beiträge zeigen jedoch eine eher oberflächliche / wiederholende Auseinandersetzung mit den Inhalten
-64. 🟠 [Orange - Ausbaufähig / Note 3-4] mündliche Beteiligung ist stark schwankend (teilweise gute und regelmäßige Beiträge / teilweise keine Beiträge über einen längeren Zeitraum)
-65. 🟠 [Orange - Ausbaufähig / Note 3-4] teilweise gibt es kleine Ablenkungen im Unterricht.
-66. 🟠 [Orange - Ausbaufähig / Note 3-4] Wenig mündliche Beteiligung mit teilweise richtigen Antworten.
-67. 🔴 [Rot - Ungenügend / Note 4-5] Beschäftigung mit anderen Dingen innerhalb des Unterrichts.
-68. 🔴 [Rot - Ungenügend / Note 4-5] häufige Ablenkungen im Unterricht durch andere Mitschülerinnen
-69. 🔴 [Rot - Ungenügend / Note 4-5] keine oder sehr wenig mündliche Beteiligung im Unterricht.
-70. 🔴 [Rot - Ungenügend / Note 4-5] Regelmäßiger Ausschluss vom laufenden Unterricht, da eine Bearbeitung von Aufgaben im Unterricht häufig nicht möglich ist
-71. 🔴 [Rot - Ungenügend / Note 4-5] teilweise gibt es kleine Ablenkungen im Unterricht
-72. 🔴 [Rot - Ungenügend / Note 4-5] teilweise massive und wiederholte Störungen im Unterricht.
-73. 🔴 [Rot - Ungenügend / Note 4-5] Teilweise massive und wiederholte Störungen im Unterricht.
+60. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Fragen nach nicht verstandenen Unterrichtsinhalten.
+61. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eher wenig mündliche Beteiligung.
+62. 🟠 [Orange - Ausbaufähig / Note 3-4] mündliche Beiträge zeigen jedoch eine eher oberflächliche / wiederholende Auseinandersetzung mit den Inhalten
+63. 🟠 [Orange - Ausbaufähig / Note 3-4] mündliche Beteiligung ist stark schwankend (teilweise gute und regelmäßige Beiträge / teilweise keine Beiträge über einen längeren Zeitraum)
+64. 🟠 [Orange - Ausbaufähig / Note 3-4] Wenig mündliche Beteiligung mit teilweise richtigen Antworten.
+65. 🔴 [Rot - Ungenügend / Note 4-5] keine oder sehr wenig mündliche Beteiligung im Unterricht.
+66. 🔴 [Rot - Ungenügend / Note 4-5] Regelmäßiger Ausschluss vom laufenden Unterricht, da eine Bearbeitung von Aufgaben im Unterricht häufig nicht möglich ist
 
-## Arbeitsverhalten (64 Sätze)
+## Arbeitsverhalten (52 Sätze)
 
 1. 🔵 [Blau - Sehr gut / Note 1-2] hat ein sehr ordentlich geführtes Heft abgegeben
 2. 🔵 [Blau - Sehr gut / Note 1-2] hat ein sehr ordentliches Heft abgegeben.
@@ -110,50 +103,60 @@ Die Symbole bedeuten:
 22. 🟢 [Grün - Gut / Note 2-3] Materialien sind regelmäßig und vollständig vorhanden.
 23. 🟢 [Grün - Gut / Note 2-3] Materialien sind zuverlässig vorhanden.
 24. 🟢 [Grün - Gut / Note 2-3] meistens gute und zuverlässige Bearbeitung der gestellten Aufgaben
-25. 🟢 [Grün - Gut / Note 2-3] Sehr häufige und ausdauernde Toilettengänge. (In jeder Stunde!)
-26. 🟢 [Grün - Gut / Note 2-3] Verstandene Aufgaben können dann zumeist sicher bearbeitet werden und auch nach einiger Zeit wieder erneut abgerufen werden.
-27. 🟢 [Grün - Gut / Note 2-3] verstandene Aufgaben werden ordentlich in der Arbeitszeit bearbeitet
-28. 🟢 [Grün - Gut / Note 2-3] verstandene Aufgaben werden zuverlässig erledigt
-29. 🟢 [Grün - Gut / Note 2-3] verstandene Aufgaben werden zuverlässig und ordentlich erledigt.
-30. 🟢 [Grün - Gut / Note 2-3] zuverlässige Bearbeitung von Aufgaben in der Arbeitszeit
-31. 🟢 [Grün - Gut / Note 2-3] überwiegend selbständige Arbeitsweise
-32. 🟠 [Orange - Ausbaufähig / Note 3-4] Benötigt häufig eine Aufforderung, um mit der Arbeit an Aufgaben zu beginnen.
-33. 🟠 [Orange - Ausbaufähig / Note 3-4] Benötigt oft eine direkte Aufforderung, um mit der Arbeit an Aufgaben zu beginnen.
-34. 🟠 [Orange - Ausbaufähig / Note 3-4] braucht teilweise regelmäßige Aufforderungen, um Aufgaben in der Arbeitszeit zu bearbeiten.
-35. 🟠 [Orange - Ausbaufähig / Note 3-4] etwas unordentliche Heftführung im abgegebenen Heft.
-36. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden innerhalb der Arbeitszeit oft nicht fertiggestellt
-37. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden innerhalb der Arbeitszeit oft nicht fertiggestellt.
-38. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden insgesamt eher sehr langsam bearbeitet
-39. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden insgesamt eher sehr langsam bearbeitet.
-40. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden nicht immer in der vorgegebenen Zeit bearbeitet.
-41. 🟠 [Orange - Ausbaufähig / Note 3-4] Heft abgegeben mit leicht unterdurchschnittlicher Ordentlichkeit.
-42. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eher langsame und unkonzentrierte Arbeit an gestellten Aufgaben
-43. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eine eher unstrukturierte Arbeitsweise (manchmal gelingt es gut, manchmal eher nicht)
-44. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eine etwas unordentliche Arbeitsweise.
-45. 🟠 [Orange - Ausbaufähig / Note 3-4] Nutzt teilweise (trotz Hinweis) nicht zugelassene Arbeitsmittel für die Bearbeitung von Aufgaben. (z.B. pinke Stifte für die Arbeit in Matheheften)
-46. 🟠 [Orange - Ausbaufähig / Note 3-4] Nutzt teilweise (trotz Hinweis) unpassende Arbeitsmittel für die Bearbeitung von Aufgaben.
-47. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr häufige und ausdauernde Toilettengänge.
-48. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr regelmäßige Ablenkungen durch andere Mitschüler.
-49. 🔴 [Rot - Ungenügend / Note 4-5] Bewusste Ablenkung anderer Mitschüler*innen.
-50. 🔴 [Rot - Ungenügend / Note 4-5] bewusste und gezielte Ablenkung anderer Mitschüler*innen.
-51. 🔴 [Rot - Ungenügend / Note 4-5] fast keine eigenständige Arbeit an Aufgaben möglich.
-52. 🔴 [Rot - Ungenügend / Note 4-5] Fast keine eigenständige Arbeit an Aufgaben möglich.
-53. 🔴 [Rot - Ungenügend / Note 4-5] insgesamt eine eher unselbstständige Arbeitsweise
-54. 🔴 [Rot - Ungenügend / Note 4-5] insgesamt eine eher unselbstständige Arbeitsweise.
-55. 🔴 [Rot - Ungenügend / Note 4-5] Jedoch regelmäßige Ablenkungen mit und durch andere Mitschüler aus der Klasse.
-56. 🔴 [Rot - Ungenügend / Note 4-5] machmal mit kleinen Unterbrechungen durch kleine Ablenkungen
-57. 🔴 [Rot - Ungenügend / Note 4-5] Materialien fehlen sehr häufig noch zu Stundenbeginn
-58. 🔴 [Rot - Ungenügend / Note 4-5] Materialien fehlen sehr häufig noch zu Stundenbeginn.
-59. 🔴 [Rot - Ungenügend / Note 4-5] Materialien fehlen teilweise.
-60. 🔴 [Rot - Ungenügend / Note 4-5] regelmäßige Ablenkungen mit und durch andere Mitschüler aus der Klasse.
-61. 🔴 [Rot - Ungenügend / Note 4-5] sehr häufige Ablenkungen mit und durch andere
-62. 🔴 [Rot - Ungenügend / Note 4-5] sehr regelmäßige Ablenkungen durch andere Mitschüler
-63. 🔴 [Rot - Ungenügend / Note 4-5] teilweise mit häufigen Ablenkungen durch andere Mitschüler
-64. 🔴 [Rot - Ungenügend / Note 4-5] Teilweise starke Ablenkungen durch und mit anderen Schülern aus der Klasse.
+25. 🟢 [Grün - Gut / Note 2-3] Verstandene Aufgaben können dann zumeist sicher bearbeitet werden und auch nach einiger Zeit wieder erneut abgerufen werden.
+26. 🟢 [Grün - Gut / Note 2-3] verstandene Aufgaben werden ordentlich in der Arbeitszeit bearbeitet
+27. 🟢 [Grün - Gut / Note 2-3] verstandene Aufgaben werden zuverlässig erledigt
+28. 🟢 [Grün - Gut / Note 2-3] verstandene Aufgaben werden zuverlässig und ordentlich erledigt.
+29. 🟢 [Grün - Gut / Note 2-3] zuverlässige Bearbeitung von Aufgaben in der Arbeitszeit
+30. 🟢 [Grün - Gut / Note 2-3] überwiegend selbständige Arbeitsweise
+31. 🟠 [Orange - Ausbaufähig / Note 3-4] Benötigt häufig eine Aufforderung, um mit der Arbeit an Aufgaben zu beginnen.
+32. 🟠 [Orange - Ausbaufähig / Note 3-4] Benötigt oft eine direkte Aufforderung, um mit der Arbeit an Aufgaben zu beginnen.
+33. 🟠 [Orange - Ausbaufähig / Note 3-4] braucht teilweise regelmäßige Aufforderungen, um Aufgaben in der Arbeitszeit zu bearbeiten.
+34. 🟠 [Orange - Ausbaufähig / Note 3-4] etwas unordentliche Heftführung im abgegebenen Heft.
+35. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden innerhalb der Arbeitszeit oft nicht fertiggestellt
+36. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden innerhalb der Arbeitszeit oft nicht fertiggestellt.
+37. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden insgesamt eher sehr langsam bearbeitet
+38. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden insgesamt eher sehr langsam bearbeitet.
+39. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden nicht immer in der vorgegebenen Zeit bearbeitet.
+40. 🟠 [Orange - Ausbaufähig / Note 3-4] Heft abgegeben mit leicht unterdurchschnittlicher Ordentlichkeit.
+41. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eher langsame und unkonzentrierte Arbeit an gestellten Aufgaben
+42. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eine eher unstrukturierte Arbeitsweise (manchmal gelingt es gut, manchmal eher nicht)
+43. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eine etwas unordentliche Arbeitsweise.
+44. 🟠 [Orange - Ausbaufähig / Note 3-4] Nutzt teilweise (trotz Hinweis) nicht zugelassene Arbeitsmittel für die Bearbeitung von Aufgaben. (z.B. pinke Stifte für die Arbeit in Matheheften)
+45. 🟠 [Orange - Ausbaufähig / Note 3-4] Nutzt teilweise (trotz Hinweis) unpassende Arbeitsmittel für die Bearbeitung von Aufgaben.
+46. 🔴 [Rot - Ungenügend / Note 4-5] fast keine eigenständige Arbeit an Aufgaben möglich.
+47. 🔴 [Rot - Ungenügend / Note 4-5] Fast keine eigenständige Arbeit an Aufgaben möglich.
+48. 🔴 [Rot - Ungenügend / Note 4-5] insgesamt eine eher unselbstständige Arbeitsweise
+49. 🔴 [Rot - Ungenügend / Note 4-5] insgesamt eine eher unselbstständige Arbeitsweise.
+50. 🔴 [Rot - Ungenügend / Note 4-5] Materialien fehlen sehr häufig noch zu Stundenbeginn
+51. 🔴 [Rot - Ungenügend / Note 4-5] Materialien fehlen sehr häufig noch zu Stundenbeginn.
+52. 🔴 [Rot - Ungenügend / Note 4-5] Materialien fehlen teilweise.
 
 ## Sozialverhalten (1 Sätze)
 
 1. 🟠 [Orange - Ausbaufähig / Note 3-4] vereinbarte Regeln zur mathematischen Schreibweise werden nicht immer eingehalten
+
+## Störungen (19 Sätze)
+
+1. 🟢 [Grün - Gut / Note 2-3] Sehr häufige und ausdauernde Toilettengänge. (In jeder Stunde!)
+2. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Ablenkungen im Unterricht durch andere Mitschüler*innen.
+3. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr häufige und ausdauernde Toilettengänge.
+4. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr regelmäßige Ablenkungen durch andere Mitschüler.
+5. 🟠 [Orange - Ausbaufähig / Note 3-4] teilweise gibt es kleine Ablenkungen im Unterricht.
+6. 🔴 [Rot - Ungenügend / Note 4-5] Beschäftigung mit anderen Dingen innerhalb des Unterrichts.
+7. 🔴 [Rot - Ungenügend / Note 4-5] Bewusste Ablenkung anderer Mitschüler*innen.
+8. 🔴 [Rot - Ungenügend / Note 4-5] bewusste und gezielte Ablenkung anderer Mitschüler*innen.
+9. 🔴 [Rot - Ungenügend / Note 4-5] häufige Ablenkungen im Unterricht durch andere Mitschülerinnen
+10. 🔴 [Rot - Ungenügend / Note 4-5] Jedoch regelmäßige Ablenkungen mit und durch andere Mitschüler aus der Klasse.
+11. 🔴 [Rot - Ungenügend / Note 4-5] machmal mit kleinen Unterbrechungen durch kleine Ablenkungen
+12. 🔴 [Rot - Ungenügend / Note 4-5] regelmäßige Ablenkungen mit und durch andere Mitschüler aus der Klasse.
+13. 🔴 [Rot - Ungenügend / Note 4-5] sehr häufige Ablenkungen mit und durch andere
+14. 🔴 [Rot - Ungenügend / Note 4-5] sehr regelmäßige Ablenkungen durch andere Mitschüler
+15. 🔴 [Rot - Ungenügend / Note 4-5] teilweise gibt es kleine Ablenkungen im Unterricht
+16. 🔴 [Rot - Ungenügend / Note 4-5] teilweise massive und wiederholte Störungen im Unterricht.
+17. 🔴 [Rot - Ungenügend / Note 4-5] Teilweise massive und wiederholte Störungen im Unterricht.
+18. 🔴 [Rot - Ungenügend / Note 4-5] teilweise mit häufigen Ablenkungen durch andere Mitschüler
+19. 🔴 [Rot - Ungenügend / Note 4-5] Teilweise starke Ablenkungen durch und mit anderen Schülern aus der Klasse.
 
 ## Sonstiges (22 Sätze)
 

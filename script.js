@@ -5955,15 +5955,17 @@ let customPhrases = JSON.parse(localStorage.getItem('formulierungshilfen') || '[
 
 const PhraseCategories = {
     mitarbeit: { name: 'Mündliche Mitarbeit', keywords: ['meldet', 'beteiligung', 'mündlich', 'beiträge', 'beitrag', 'äußert', 'gespräch', 'unterricht', 'wortmeldung', 'antworten', 'beteiligt'] },
-    arbeitsverhalten: { name: 'Arbeitsverhalten', keywords: ['arbeitet', 'konzentriert', 'hausaufgaben', 'sorgfalt', 'ordentlich', 'heft', 'aufgaben', 'tempo', 'ausdauer', 'ausdauernd', 'arbeitsplatz', 'material', 'selbstständig', 'selbständig', 'allein', 'hilfe', 'eigeninitiative', 'struktur', 'organisiert', 'planung', 'eigenständig', 'motiviert', 'interesse', 'interessiert', 'eifer', 'fleißig', 'bereitwillig', 'anstrengung', 'engagiert', 'freude', 'aktiv', 'ablenken', 'ablenkung', 'aufmerksam', 'aufmerksamkeit', 'bei der sache', 'fokussiert'] },
-    sozialverhalten: { name: 'Sozialverhalten', keywords: ['gruppe', 'partner', 'mitschüler', 'sozial', 'hilfsbereit', 'rücksichtsvoll', 'regeln', 'stört', 'verhalten', 'umgang', 'freundlich', 'team', 'fair'] },
+    arbeitsverhalten: { name: 'Arbeitsverhalten', keywords: ['arbeitet', 'konzentriert', 'hausaufgaben', 'sorgfalt', 'ordentlich', 'heft', 'aufgaben', 'tempo', 'ausdauer', 'ausdauernd', 'arbeitsplatz', 'material', 'selbstständig', 'selbständig', 'allein', 'hilfe', 'eigeninitiative', 'struktur', 'organisiert', 'planung', 'eigenständig', 'motiviert', 'interesse', 'interessiert', 'eifer', 'fleißig', 'bereitwillig', 'anstrengung', 'engagiert', 'freude', 'aktiv', 'aufmerksam', 'aufmerksamkeit', 'bei der sache', 'fokussiert'] },
+    sozialverhalten: { name: 'Sozialverhalten', keywords: ['gruppe', 'partner', 'mitschüler', 'sozial', 'hilfsbereit', 'rücksichtsvoll', 'regeln', 'verhalten', 'umgang', 'freundlich', 'team', 'fair'] },
+    stoerungen: { name: 'Störungen', keywords: ['stört', 'störungen', 'ablenken', 'ablenkung', 'ablenkungen', 'störung', 'stören', 'reinrufen', 'unterbrechen', 'unruhe', 'dazwischen', 'geschwätz', 'schwatzen', 'toilettengänge', 'ablenken', 'stör'] },
     sonstiges: { name: 'Sonstiges', keywords: [] }
 };
 
 function autoDetectCategory(text) {
     const textLower = (text || '').toLowerCase();
-    for (const [key, cat] of Object.entries(PhraseCategories)) {
-        if (key === 'sonstiges') continue;
+    const priorityOrder = ['stoerungen', 'mitarbeit', 'arbeitsverhalten', 'sozialverhalten'];
+    for (const key of priorityOrder) {
+        const cat = PhraseCategories[key];
         if (cat.keywords.some(kw => textLower.includes(kw))) {
             return key;
         }
@@ -6054,7 +6056,7 @@ function renderMitarbeitWizard() {
             `;
         } else {
             // Nach Kategorien gruppieren
-            const categoriesOrder = ['mitarbeit', 'arbeitsverhalten', 'sozialverhalten', 'sonstiges'];
+            const categoriesOrder = ['mitarbeit', 'arbeitsverhalten', 'sozialverhalten', 'stoerungen', 'sonstiges'];
             const grouped = {};
             categoriesOrder.forEach(catKey => {
                 grouped[catKey] = [];
