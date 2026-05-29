@@ -6295,17 +6295,20 @@ function insertSelectedMitarbeitPhrases() {
         .filter(Boolean);
     
     if (selectedPhrasesData.length > 0) {
-        // Als Aufzählungspunkte mit Farben anhängen
+        // Als fortlaufenden Text (ohne Absätze/Aufzählungspunkte) anhängen
         selectedPhrasesData.forEach(phrase => {
             currentHtml = currentHtml.trim();
+            // Eventuelle Zeilenumbrüche am Ende entfernen
+            currentHtml = currentHtml.replace(/(?:<br\s*\/?>\s*)+$/gi, '').trim();
+            
             const coloredHtml = `<span class="phrase-color-${phrase.color}">${phrase.text}</span>`;
             if (currentHtml === '' || currentHtml === '- ') {
-                currentHtml = `- ${coloredHtml}`;
+                currentHtml = coloredHtml;
             } else {
-                currentHtml += `<br>- ${coloredHtml}`;
+                currentHtml += ' ' + coloredHtml;
             }
         });
-        currentHtml += '<br>';
+        currentHtml += ' '; // Ein Leerzeichen am Ende anhängen, um direkt weitertippen zu können
         
         textarea.innerHTML = currentHtml;
         
