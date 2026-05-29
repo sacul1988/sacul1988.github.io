@@ -6824,6 +6824,10 @@ function openCalendarDayDetails(dateStr) {
     if (timeEndEl) timeEndEl.value = '';
     
     // Formularknöpfe und aktive Kreise zurücksetzen
+    AppState.timeRangeStage = 1;
+    const instruction = document.getElementById('time-range-instruction');
+    if (instruction) instruction.textContent = 'Klicke eine Startzeit an...';
+    
     updateCalendarDayFormUI();
     updateQuickSelectActiveStates();
     
@@ -6901,6 +6905,10 @@ function addCalendarDayTermin() {
     titleInput.value = '';
     if (timeStartInput) timeStartInput.value = '';
     if (timeEndInput) timeEndInput.value = '';
+    
+    AppState.timeRangeStage = 1;
+    const instruction = document.getElementById('time-range-instruction');
+    if (instruction) instruction.textContent = 'Klicke eine Startzeit an...';
     
     renderCalendarDayTermineList(dateStr);
     updateCalendarDayFormUI();
@@ -7155,18 +7163,73 @@ window.exportPlanungCalendar = exportPlanungCalendar;
 // ===== CALENDAR TIME QUICK SELECT =====
 
 function initTimeQuickSelect() {
-    const startContainer = document.getElementById('time-quick-start-container');
-    const endContainer = document.getElementById('time-quick-end-container');
-    if (!startContainer || !endContainer) return;
+    const rangeContainer = document.getElementById('time-quick-range-container');
+    if (!rangeContainer) return;
     
-    let htmlStart = '';
-    let htmlEnd = '';
+    // Wir behalten das Track-Div und fügen die Kreise hinzu
+    let trackHtml = '<div id="time-quick-active-track" class="time-quick-active-track" style="display: none;"></div>';
+    let circlesHtml = '';
     for (let h = 7; h <= 19; h++) {
-        htmlStart += `<button type="button" class="time-quick-circle" onclick="openTimeMinutesPopup(event, ${h}, 'start')">${h}</button>`;
-        htmlEnd += `<button type="button" class="time-quick-circle" onclick="openTimeMinutesPopup(event, ${h}, 'end')">${h}</button>`;
+        circlesHtml += `<button type="button" class="time-quick-circle" onclick="handleTimeRangeClick(event, ${h})">${h}</button>`;
     }
-    startContainer.innerHTML = htmlStart;
-    endContainer.innerHTML = htmlEnd;
+    rangeContainer.innerHTML = trackHtml + circlesHtml;
+}
+
+function handleTimeRangeClick(event, hour) {
+    if (!AppState.timeRangeStage) {
+        AppState.timeRangeStage = 1;
+    }
+    
+    const startIn = document.getElementById('calendar-day-new-termin-timestart');
+    const endIn = document.getElementById('calendar-day-new-termin-timeend');
+    const instruction = document.getElementById('time-range-instruction');
+    
+    if (AppState.timeRangeStage === 1) {
+        // Startzeit festlegen
+        const formattedHour = String(hour).padStart(2, '0');
+        if (startIn) startIn.value = `${formattedHour}:00`;
+        if (endIn) endIn.value = '';
+        
+        AppState.timeRangeStage = 2;
+        if (instruction) instruction.textContent = 'Klicke nun eine Endzeit an...';
+        
+        openTimeMinutesPopup(event, hour, 'start');
+    } else {
+        // Endzeit festlegen
+        const startVal = startIn ? startIn.value : '';
+        const startHour = startVal ? parseInt(startVal.split(':')[0]) : null;
+        
+        if (startHour === null) {
+            // Falls aus irgendeinem Grund kein Start da ist, behandeln wir es als Start
+            const formattedHour = String(hour).padStart(2, '0');
+            if (startIn) startIn.value = `${formattedHour}:00`;
+            AppState.timeRangeStage = 2;
+            if (instruction) instruction.textContent = 'Klicke nun eine Endzeit an...';
+            openTimeMinutesPopup(event, hour, 'start');
+        } else {
+            let finalStartHour = startHour;
+            let finalEndHour = hour;
+            let targetType = 'end';
+            
+            // Wenn die geklickte Endzeit vor der Startzeit liegt, vertauschen wir die Rollen
+            if (hour < startHour) {
+                finalStartHour = hour;
+                finalEndHour = startHour;
+                
+                const startMins = startVal.split(':')[1] || '00';
+                if (startIn) startIn.value = `${String(finalStartHour).padStart(2, '0')}:00`;
+                if (endIn) endIn.value = `${String(finalEndHour).padStart(2, '0')}:${startMins}`;
+                targetType = 'start'; // Wir passen die Minuten der Startzeit an, weil das der neu geklickte Kreis ist!
+            } else {
+                if (endIn) endIn.value = `${String(finalEndHour).padStart(2, '0')}:00`;
+            }
+            
+            AppState.timeRangeStage = 1;
+            if (instruction) instruction.textContent = 'Zeitraum ausgewählt. Klicke erneut, um neu zu starten.';
+            
+            openTimeMinutesPopup(event, hour, targetType);
+        }
+    }
 }
 
 function openTimeMinutesPopup(event, hour, type) {
@@ -7175,18 +7238,7 @@ function openTimeMinutesPopup(event, hour, type) {
     const popover = document.getElementById('time-minutes-popover');
     if (!popover) return;
     
-    // Active-Klasse von allen anderen Kreisen entfernen
-    document.querySelectorAll('.time-quick-circle').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    
     const formattedHour = String(hour).padStart(2, '0');
-    
-    // Sofort die Uhrzeit auf die volle Stunde (:00) setzen
-    const inputId = type === 'start' ? 'calendar-day-new-termin-timestart' : 'calendar-day-new-termin-timeend';
-    const input = document.getElementById(inputId);
-    if (input) {
-        input.value = `${formattedHour}:00`;
-    }
     
     // Drei kleine Kreise für 15, 30, 45 generieren
     const mins = ['15', '30', '45'];
@@ -7234,6 +7286,7 @@ function selectTimeQuick(timeVal, type) {
 
 window.openTimeMinutesPopup = openTimeMinutesPopup;
 window.selectTimeQuick = selectTimeQuick;
+window.handleTimeRangeClick = handleTimeRangeClick;
 
 function editCalendarDayTermin(id) {
     const termin = (AppState.termine || []).find(t => t.id === id);
@@ -7248,6 +7301,10 @@ function editCalendarDayTermin(id) {
     if (titleInput) titleInput.value = termin.title || '';
     if (startInput) startInput.value = termin.timeStart || '';
     if (endInput) endInput.value = termin.timeEnd || '';
+    
+    AppState.timeRangeStage = 1;
+    const instruction = document.getElementById('time-range-instruction');
+    if (instruction) instruction.textContent = 'Zeitraum ausgewählt. Klicke erneut, um neu zu starten.';
     
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
@@ -7279,6 +7336,7 @@ function updateCalendarDayFormUI() {
 
 function cancelEditCalendarDayTermin() {
     AppState.editingCalendarDayTerminId = null;
+    AppState.timeRangeStage = 1;
     
     const titleInput = document.getElementById('calendar-day-new-termin-title');
     const startInput = document.getElementById('calendar-day-new-termin-timestart');
@@ -7288,6 +7346,9 @@ function cancelEditCalendarDayTermin() {
     if (startInput) startInput.value = '';
     if (endInput) endInput.value = '';
     
+    const instruction = document.getElementById('time-range-instruction');
+    if (instruction) instruction.textContent = 'Klicke eine Startzeit an...';
+    
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
     updateQuickSelectActiveStates();
@@ -7296,30 +7357,63 @@ function cancelEditCalendarDayTermin() {
 function updateQuickSelectActiveStates() {
     const startIn = document.getElementById('calendar-day-new-termin-timestart');
     const endIn = document.getElementById('calendar-day-new-termin-timeend');
+    if (!startIn || !endIn) return;
     
-    const startVal = startIn ? startIn.value : '';
+    const startVal = startIn.value;
     const startHour = startVal ? parseInt(startVal.split(':')[0]) : null;
     
-    const endVal = endIn ? endIn.value : '';
+    const endVal = endIn.value;
     const endHour = endVal ? parseInt(endVal.split(':')[0]) : null;
     
-    document.querySelectorAll('#time-quick-start-container .time-quick-circle').forEach(c => {
+    const circles = document.querySelectorAll('#time-quick-range-container .time-quick-circle');
+    
+    circles.forEach(c => {
+        c.classList.remove('active-start', 'active-end', 'in-range');
         const h = parseInt(c.textContent);
-        if (h === startHour) {
-            c.classList.add('active');
-        } else {
-            c.classList.remove('active');
+        
+        if (startHour !== null && endHour !== null) {
+            const minH = Math.min(startHour, endHour);
+            const maxH = Math.max(startHour, endHour);
+            if (h === startHour) {
+                c.classList.add('active-start');
+            } else if (h === endHour) {
+                c.classList.add('active-end');
+            } else if (h > minH && h < maxH) {
+                c.classList.add('in-range');
+            }
+        } else if (startHour !== null) {
+            if (h === startHour) {
+                c.classList.add('active-start');
+            }
+        } else if (endHour !== null) {
+            if (h === endHour) {
+                c.classList.add('active-end');
+            }
         }
     });
     
-    document.querySelectorAll('#time-quick-end-container .time-quick-circle').forEach(c => {
-        const h = parseInt(c.textContent);
-        if (h === endHour) {
-            c.classList.add('active');
+    const track = document.getElementById('time-quick-active-track');
+    if (!track) return;
+    
+    if (startHour !== null && endHour !== null) {
+        const startCircle = [...circles].find(c => parseInt(c.textContent) === startHour);
+        const endCircle = [...circles].find(c => parseInt(c.textContent) === endHour);
+        
+        if (startCircle && endCircle) {
+            const startLeft = startCircle.offsetLeft + 17; // center (34px / 2)
+            const endLeft = endCircle.offsetLeft + 17; // center
+            const left = Math.min(startLeft, endLeft);
+            const width = Math.abs(endLeft - startLeft);
+            
+            track.style.left = `${left}px`;
+            track.style.width = `${width}px`;
+            track.style.display = 'block';
         } else {
-            c.classList.remove('active');
+            track.style.display = 'none';
         }
-    });
+    } else {
+        track.style.display = 'none';
+    }
 }
 
 window.editCalendarDayTermin = editCalendarDayTermin;

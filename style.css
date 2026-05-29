@@ -3400,3 +3400,48 @@ body.modal-open {
     cursor: pointer;
     box-sizing: border-box;
 }
+
+/* Single line range selection slider lines */
+.time-quick-select-container {
+    position: relative;
+    z-index: 1;
+}
+.time-quick-select-container::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 4px;
+    background: #e2e8f0;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 2px;
+}
+.time-quick-active-track {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 4px;
+    background: var(--primary-color);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 2px;
+}
+.time-quick-circle {
+    position: relative;
+    z-index: 2;
+}
+.time-quick-circle.active-start,
+.time-quick-circle.active-end {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2) !important;
+}
+.time-quick-circle.in-range {
+    background: #eff6ff !important;
+    border-color: #3b82f6 !important;
+    color: #1e3a8a !important;
+}
