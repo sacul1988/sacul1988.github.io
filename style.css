@@ -700,7 +700,7 @@ select.form-control {
 }
 
 .module-nav-item .btn i {
-    font-size: 1.4rem;
+    font-size: 1.55rem;
 }
 
 .module-nav-item .btn span {
@@ -726,7 +726,7 @@ select.form-control {
 
 .module-nav-item .btn-light {
     background-color: transparent;
-    color: var(--grey-color);
+    color: var(--dark-color); /* Kräftigeres Dunkelgrau (#1e293b) statt var(--grey-color) */
     border: none;
 }
 
@@ -3546,7 +3546,7 @@ body.modal-open {
     }
     
     .module-nav-item .btn i {
-        font-size: 1.25rem;
+        font-size: 1.4rem;
     }
     
     /* 5. Calendar Stacking vertically on mobile */
