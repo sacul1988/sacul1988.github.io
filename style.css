@@ -1453,6 +1453,15 @@ select.form-control {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
+/* Restore FontAwesome font-family for icons inside sitzplan module */
+#sitzplan-module .fas, 
+#sitzplan-module .far, 
+#sitzplan-module .fab, 
+#sitzplan-module .fa-solid, 
+#sitzplan-module .fa-regular,
+#sitzplan-module .fa {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+}
 
 #sitzplan-module .sitzplan-container {
     display: flex;
