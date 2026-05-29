@@ -2383,7 +2383,8 @@ select.form-control {
 }
 
 .planung-date-input {
-    width: 148px !important;
+    width: calc(10ch + 18px) !important;
+    min-width: 0 !important;
     padding: 5px 8px !important;
     font-size: 0.88rem !important;
     text-align: center !important;

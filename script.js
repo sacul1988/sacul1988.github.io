@@ -5937,22 +5937,19 @@ function exportPlanungTable() {
 
 function deletePlanungTable() {
     swal({
-        title: 'Tabelle löschen?',
-        text: 'Alle Einträge und Einstellungen werden unwiderruflich gelöscht.',
+        title: 'Planung löschen?',
+        text: 'Der gesamte Inhalt der Planungstabelle wird unwiderruflich gelöscht. Zeitraum und Einstellungen bleiben erhalten.',
         icon: 'warning',
         buttons: ['Abbrechen', 'Löschen'],
         dangerMode: true,
     }).then(willDelete => {
         if (!willDelete) return;
-        AppState.planung = { startDate: '', endDate: '', selectedDays: [], entries: {}, hiddenTermine: [], calendarStartDate: '', calendarEndDate: '' };
+        if (!AppState.planung) AppState.planung = {};
+        AppState.planung.entries = {};
         savePlanung();
-        const startEl = safeGetElement('planung-start-date');
-        const endEl = safeGetElement('planung-end-date');
-        if (startEl) { if (startEl._flatpickr) startEl._flatpickr.clear(); else startEl.value = ''; }
-        if (endEl) { if (endEl._flatpickr) endEl._flatpickr.clear(); else endEl.value = ''; }
-        document.querySelectorAll('.planung-day-cb').forEach(cb => cb.checked = false);
         const container = safeGetElement('planung-table-container');
         if (container) container.innerHTML = '';
+        autoGeneratePlanungTable();
     });
 }
 
@@ -5978,8 +5975,13 @@ function autoGeneratePlanungTable() {
         selectedDays.push(parseInt(cb.value));
     });
     if (!selectedDays.length) {
-        if (AppState.planung) AppState.planung.selectedDays = [];
-        renderPlanung();
+        if (!AppState.planung) AppState.planung = { entries: {}, hiddenTermine: [] };
+        AppState.planung.startDate = startDate;
+        AppState.planung.endDate = endDate;
+        AppState.planung.selectedDays = [];
+        savePlanung();
+        const container = safeGetElement('planung-table-container');
+        if (container) container.innerHTML = '';
         return;
     }
     generatePlanungTable();
@@ -7545,7 +7547,7 @@ function renderContactsModule() {
     if (filteredContacts.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="3" style="text-align: center; color: var(--grey-color); padding: 20px;">
+                <td colspan="2" style="text-align: center; color: var(--grey-color); padding: 20px;">
                     Keine Kontakte vorhanden
                 </td>
             </tr>
@@ -7576,9 +7578,8 @@ function renderContactsModule() {
         }
         
         tr.innerHTML = `
-            <td style="vertical-align: middle;"><strong>${escapeHtml(c.childName || '-')}</strong></td>
-            <td style="vertical-align: middle; padding: 8px 12px;">${detailsHtml}</td>
-            <td style="text-align: right; white-space: nowrap; vertical-align: middle;">
+            <td style="vertical-align: middle; cursor: pointer;" onclick="openContactPhonesModal('${c.id}')"><strong>${escapeHtml(c.childName || '-')}</strong></td>
+            <td style="text-align: center; white-space: nowrap; vertical-align: middle;">
                 <button onclick="openEditContactModal('${c.id}')" class="btn btn-primary btn-circle-sm" title="Bearbeiten" style="margin-right: 4px;">
                     <i class="fas fa-edit"></i>
                 </button>
@@ -7589,6 +7590,30 @@ function renderContactsModule() {
         `;
         tbody.appendChild(tr);
     });
+}
+
+function openContactPhonesModal(id) {
+    const contact = contacts.find(c => c.id === id);
+    if (!contact) return;
+
+    document.getElementById('contact-phones-modal-title').textContent = contact.childName || '-';
+
+    const phoneList = contact.phones || [{ label: contact.relation || '', number: contact.phone || '' }];
+    const validPhones = phoneList.filter(p => p.label || p.number);
+
+    const content = document.getElementById('contact-phones-modal-content');
+    if (validPhones.length === 0) {
+        content.innerHTML = `<p style="color: var(--grey-color);">Keine Telefonnummern hinterlegt</p>`;
+    } else {
+        content.innerHTML = validPhones.map(p => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
+                <span style="font-weight: 500; color: var(--dark-color);">${escapeHtml(p.label || '–')}</span>
+                <a href="tel:${escapeHtml(p.number || '')}" style="color: var(--primary-color); font-size: 1rem;">${escapeHtml(p.number || '–')}</a>
+            </div>
+        `).join('');
+    }
+
+    showModal('contact-phones-modal');
 }
 
 function filterContacts() {
