@@ -6825,8 +6825,6 @@ function openCalendarDayDetails(dateStr) {
     
     // Formularknöpfe und aktive Kreise zurücksetzen
     AppState.timeRangeStage = 1;
-    const instruction = document.getElementById('time-range-instruction');
-    if (instruction) instruction.textContent = '';
     
     updateCalendarDayFormUI();
     updateQuickSelectActiveStates();
@@ -6907,8 +6905,6 @@ function addCalendarDayTermin() {
     if (timeEndInput) timeEndInput.value = '';
     
     AppState.timeRangeStage = 1;
-    const instruction = document.getElementById('time-range-instruction');
-    if (instruction) instruction.textContent = '';
     
     renderCalendarDayTermineList(dateStr);
     updateCalendarDayFormUI();
@@ -7182,7 +7178,6 @@ function handleTimeRangeClick(event, hour) {
     
     const startIn = document.getElementById('calendar-day-new-termin-timestart');
     const endIn = document.getElementById('calendar-day-new-termin-timeend');
-    const instruction = document.getElementById('time-range-instruction');
     
     if (AppState.timeRangeStage === 1) {
         // Startzeit festlegen
@@ -7191,8 +7186,6 @@ function handleTimeRangeClick(event, hour) {
         if (endIn) endIn.value = '';
         
         AppState.timeRangeStage = 2;
-        if (instruction) instruction.textContent = 'Klicke nun eine Endzeit an...';
-        
         openTimeMinutesPopup(event, hour, 'start');
     } else {
         // Endzeit festlegen
@@ -7204,7 +7197,6 @@ function handleTimeRangeClick(event, hour) {
             const formattedHour = String(hour).padStart(2, '0');
             if (startIn) startIn.value = `${formattedHour}:00`;
             AppState.timeRangeStage = 2;
-            if (instruction) instruction.textContent = 'Klicke nun eine Endzeit an...';
             openTimeMinutesPopup(event, hour, 'start');
         } else {
             let finalStartHour = startHour;
@@ -7225,7 +7217,6 @@ function handleTimeRangeClick(event, hour) {
             }
             
             AppState.timeRangeStage = 1;
-            if (instruction) instruction.textContent = '';
             
             openTimeMinutesPopup(event, hour, targetType);
         }
@@ -7306,8 +7297,6 @@ function editCalendarDayTermin(id) {
     if (endInput) endInput.value = termin.timeEnd || '';
     
     AppState.timeRangeStage = 1;
-    const instruction = document.getElementById('time-range-instruction');
-    if (instruction) instruction.textContent = '';
     
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
@@ -7350,9 +7339,6 @@ function cancelEditCalendarDayTermin() {
     if (titleInput) titleInput.value = '';
     if (startInput) startInput.value = '';
     if (endInput) endInput.value = '';
-    
-    const instruction = document.getElementById('time-range-instruction');
-    if (instruction) instruction.textContent = '';
     
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
