@@ -3323,13 +3323,13 @@ body.modal-open {
     display: none; /* Hide scrollbar Chrome/Safari/Opera */
 }
 .time-quick-circle {
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     border: 1px solid var(--border-color);
     background: #ffffff;
     color: var(--dark-color);
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -3363,13 +3363,13 @@ body.modal-open {
     gap: 6px;
 }
 .time-minute-circle {
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     border: 1px solid var(--border-color);
     background: #ffffff;
     color: var(--dark-color);
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;

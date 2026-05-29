@@ -7155,8 +7155,8 @@ function openTimeMinutesPopup(event, hour, type) {
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     
     popover.style.top = `${rect.bottom + scrollTop + 6}px`;
-    // Zentriert unter dem Kreis positionieren (Kreis ist 28px breit, Popover hat eine Breite von ca. 100px)
-    popover.style.left = `${rect.left + scrollLeft - 36}px`;
+    // Zentriert unter dem Kreis positionieren (Kreis ist 34px breit, Popover hat eine Breite von ca. 126px)
+    popover.style.left = `${rect.left + scrollLeft - 46}px`;
     
     // Schließen, wenn man woanders hin klickt
     const closeListener = () => {
