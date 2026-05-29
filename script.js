@@ -7332,7 +7332,9 @@ function updateCalendarDayFormUI() {
         `;
     } else {
         container.innerHTML = `
-            <button class="btn btn-primary" onclick="addCalendarDayTermin()" style="min-height: 36px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-plus"></i> Hinzufügen</button>
+            <button class="btn btn-success btn-circle" onclick="addCalendarDayTermin()" title="Hinzufügen">
+                <i class="fas fa-check"></i>
+            </button>
         `;
     }
 }
@@ -7425,8 +7427,8 @@ function updateQuickSelectActiveStates() {
         const endCircle = [...circles].find(c => parseInt(c.getAttribute('data-hour') || c.textContent) === endHour);
         
         if (startCircle && endCircle) {
-            const startLeft = startCircle.offsetLeft + 17; // center (34px / 2)
-            const endLeft = endCircle.offsetLeft + 17; // center
+            const startLeft = startCircle.offsetLeft + 15; // center (30px / 2)
+            const endLeft = endCircle.offsetLeft + 15; // center
             const left = Math.min(startLeft, endLeft);
             const width = Math.abs(endLeft - startLeft);
             
