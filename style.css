@@ -3305,3 +3305,74 @@ body.modal-open {
     flex-direction: column;
     gap: 8px;
 }
+
+/* Time Quick Select styling */
+.time-quick-select-container {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 0 6px 0;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.time-quick-select-container::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari/Opera */
+}
+.time-quick-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    color: var(--dark-color);
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+    flex-shrink: 0;
+    outline: none;
+    box-sizing: border-box;
+}
+.time-quick-circle:hover {
+    background: var(--primary-color);
+    color: #ffffff;
+    border-color: var(--primary-color);
+    transform: scale(1.08);
+}
+.time-quick-circle.active {
+    background: var(--primary-color);
+    color: #ffffff;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+.time-minutes-popover {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 6px;
+    display: flex;
+    gap: 6px;
+}
+.time-minutes-popover button {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+.time-minutes-popover button:hover {
+    background: var(--primary-color);
+    color: #ffffff;
+}

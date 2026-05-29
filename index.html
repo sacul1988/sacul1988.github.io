@@ -527,12 +527,26 @@
                             <h5 style="margin-top: 0; margin-bottom: 8px; font-size: 0.88rem; font-weight: 600;">Neuen Termin für diesen Tag hinzufügen</h5>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <input type="text" id="calendar-day-new-termin-title" class="form-control" placeholder="Terminbezeichnung" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addCalendarDayTermin(); }">
-                                <div style="display: flex; gap: 8px; align-items: center;">
-                                    <span style="font-size: 0.85rem; color: var(--grey-color);">Von:</span>
-                                    <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="flex: 1; min-height: 38px;">
-                                    <span style="font-size: 0.85rem; color: var(--grey-color);">Bis:</span>
-                                    <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="flex: 1; min-height: 38px;">
-                                    <button class="btn btn-primary" onclick="addCalendarDayTermin()" style="min-height: 38px; padding: 0 16px;"><i class="fas fa-plus"></i></button>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <!-- Von-Zeit mit Schnellauswahl -->
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <div style="display: flex; gap: 8px; align-items: center; flex: 1; min-width: 140px;">
+                                            <span style="font-size: 0.85rem; color: var(--grey-color); width: 35px; flex-shrink: 0;">Von:</span>
+                                            <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="min-height: 38px;">
+                                        </div>
+                                        <div id="time-quick-start-container" class="time-quick-select-container" style="flex: 2; min-width: 250px;"></div>
+                                    </div>
+                                    <!-- Bis-Zeit mit Schnellauswahl -->
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <div style="display: flex; gap: 8px; align-items: center; flex: 1; min-width: 140px;">
+                                            <span style="font-size: 0.85rem; color: var(--grey-color); width: 35px; flex-shrink: 0;">Bis:</span>
+                                            <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="min-height: 38px;">
+                                        </div>
+                                        <div id="time-quick-end-container" class="time-quick-select-container" style="flex: 2; min-width: 250px;"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+                                        <button class="btn btn-primary" onclick="addCalendarDayTermin()" style="min-height: 38px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-plus"></i> Hinzufügen</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1101,6 +1115,9 @@
             window.saveDataToCloud();
         };
     </script>
+    <!-- Time Minutes Popover for Quick Select -->
+    <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
+
     <script src="script.js"></script>
 </body>
 </html>

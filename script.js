@@ -1209,6 +1209,9 @@ document.addEventListener('DOMContentLoaded', function() {
             window.isCategoryManuallySelected = true;
         });
     }
+    
+    // Zeit-Schnellauswahl initialisieren
+    initTimeQuickSelect();
 });
 
 // ===== SCHÜLERLISTE MODUL =====
@@ -7099,4 +7102,79 @@ function exportPlanungCalendar() {
 }
 
 window.exportPlanungCalendar = exportPlanungCalendar;
+
+// ===== CALENDAR TIME QUICK SELECT =====
+
+function initTimeQuickSelect() {
+    const startContainer = document.getElementById('time-quick-start-container');
+    const endContainer = document.getElementById('time-quick-end-container');
+    if (!startContainer || !endContainer) return;
+    
+    let htmlStart = '';
+    let htmlEnd = '';
+    for (let h = 7; h <= 20; h++) {
+        htmlStart += `<button type="button" class="time-quick-circle" onclick="openTimeMinutesPopup(event, ${h}, 'start')">${h}</button>`;
+        htmlEnd += `<button type="button" class="time-quick-circle" onclick="openTimeMinutesPopup(event, ${h}, 'end')">${h}</button>`;
+    }
+    startContainer.innerHTML = htmlStart;
+    endContainer.innerHTML = htmlEnd;
+}
+
+function openTimeMinutesPopup(event, hour, type) {
+    event.stopPropagation();
+    const btn = event.currentTarget;
+    const popover = document.getElementById('time-minutes-popover');
+    if (!popover) return;
+    
+    // Active-Klasse von allen anderen Kreisen entfernen
+    document.querySelectorAll('.time-quick-circle').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Minuten Buttons generieren
+    const mins = ['00', '15', '30', '45'];
+    const formattedHour = String(hour).padStart(2, '0');
+    popover.innerHTML = mins.map(m => {
+        const timeVal = `${formattedHour}:${m}`;
+        return `<button type="button" onclick="selectTimeQuick('${timeVal}', '${type}')">${timeVal}</button>`;
+    }).join('');
+    
+    // Popover anzeigen
+    popover.style.display = 'flex';
+    const rect = btn.getBoundingClientRect();
+    
+    // Position relativ zum Dokument berechnen
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    
+    popover.style.top = `${rect.bottom + scrollTop + 6}px`;
+    popover.style.left = `${rect.left + scrollLeft - 10}px`;
+    
+    // Schließen, wenn man woanders hin klickt
+    const closeListener = () => {
+        popover.style.display = 'none';
+        btn.classList.remove('active');
+        document.removeEventListener('click', closeListener);
+    };
+    
+    setTimeout(() => {
+        document.addEventListener('click', closeListener);
+    }, 0);
+}
+
+function selectTimeQuick(timeVal, type) {
+    const inputId = type === 'start' ? 'calendar-day-new-termin-timestart' : 'calendar-day-new-termin-timeend';
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.value = timeVal;
+    }
+    const popover = document.getElementById('time-minutes-popover');
+    if (popover) {
+        popover.style.display = 'none';
+    }
+    document.querySelectorAll('.time-quick-circle').forEach(c => c.classList.remove('active'));
+}
+
+window.openTimeMinutesPopup = openTimeMinutesPopup;
+window.selectTimeQuick = selectTimeQuick;
+
 
