@@ -3084,9 +3084,20 @@ div.notes-textarea:empty::before {
 .calendar-day-row.calendar-day-past {
     opacity: 0.65;
     text-decoration: line-through;
+    position: relative;
 }
 .calendar-day-row.calendar-day-past * {
     text-decoration: line-through;
+}
+.calendar-day-row.calendar-day-past::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 50%;
+    height: 1px;
+    background: rgba(71, 85, 105, 0.4);
+    pointer-events: none;
 }
 
 .planung-row-past {
@@ -3097,6 +3108,22 @@ div.notes-textarea:empty::before {
 .planung-row-past textarea,
 .planung-row-past .planung-termin-text {
     text-decoration: line-through;
+}
+.planung-row-past td {
+    position: relative;
+}
+.planung-row-past td::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1.5px;
+    background: rgba(71, 85, 105, 0.35);
+    pointer-events: none;
+}
+.planung-row-past textarea {
+    background: transparent !important;
 }
 
 .calendar-day-label {
