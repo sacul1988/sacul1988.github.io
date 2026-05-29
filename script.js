@@ -5958,6 +5958,16 @@ function autoGeneratePlanungTable() {
     const startDate = startEl.value;
     const endDate = endEl.value;
     if (!startDate || !endDate || startDate > endDate) return;
+
+    if (AppState.planungViewMode === 'calendar') {
+        if (!AppState.planung) AppState.planung = { entries: {}, hiddenTermine: [] };
+        AppState.planung.calendarStartDate = startDate;
+        AppState.planung.calendarEndDate = endDate;
+        savePlanung();
+        renderPlanungCalendar();
+        return;
+    }
+
     const selectedDays = [];
     document.querySelectorAll('.planung-day-cb:checked').forEach(cb => {
         selectedDays.push(parseInt(cb.value));
