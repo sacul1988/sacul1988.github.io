@@ -3322,13 +3322,13 @@ body.modal-open {
     display: none; /* Hide scrollbar Chrome/Safari/Opera */
 }
 .time-quick-circle {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 1px solid var(--border-color);
     background: #ffffff;
     color: var(--dark-color);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -3362,13 +3362,13 @@ body.modal-open {
     gap: 6px;
 }
 .time-minute-circle {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 1px solid var(--border-color);
     background: #ffffff;
     color: var(--dark-color);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -3457,11 +3457,11 @@ body.modal-open {
     height: 100%;
 }
 .time-quick-hour {
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     font-weight: 700;
 }
 .time-quick-minutes {
-    font-size: 0.5rem;
+    font-size: 0.52rem;
     font-weight: 600;
     opacity: 0.9;
     margin-top: -1px;

@@ -7427,8 +7427,8 @@ function updateQuickSelectActiveStates() {
         const endCircle = [...circles].find(c => parseInt(c.getAttribute('data-hour') || c.textContent) === endHour);
         
         if (startCircle && endCircle) {
-            const startLeft = startCircle.offsetLeft + 15; // center (30px / 2)
-            const endLeft = endCircle.offsetLeft + 15; // center
+            const startLeft = startCircle.offsetLeft + 16; // center (32px / 2)
+            const endLeft = endCircle.offsetLeft + 16; // center
             const left = Math.min(startLeft, endLeft);
             const width = Math.abs(endLeft - startLeft);
             
