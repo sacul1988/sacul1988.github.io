@@ -3455,3 +3455,171 @@ body.modal-open {
     color: #1e3a8a !important;
 }
 
+/* ==========================================
+   RESPONSIVE DESIGN FOR SMARTPHONES (iPhone)
+   ========================================== */
+@media (max-width: 576px) {
+    /* 1. Containers & Layout spacing */
+    .container {
+        padding: 8px;
+    }
+    
+    .card {
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+    }
+    
+    .card-header h2 {
+        font-size: 1.15rem;
+        width: 100%;
+        margin-bottom: 2px;
+    }
+    
+    .card-header-actions,
+    .card-header > div {
+        width: 100%;
+        justify-content: flex-start !important;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    
+    /* 2. Breadcrumb */
+    .breadcrumb {
+        padding: 8px 12px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+    
+    /* 3. Hide button text labels and style icon buttons */
+    .btn-text {
+        display: none !important;
+    }
+    
+    .btn-icon {
+        padding: 8px 10px !important;
+        justify-content: center;
+        min-width: 36px;
+        gap: 0 !important;
+    }
+    
+    .btn-icon i,
+    .btn-icon svg {
+        margin: 0 !important;
+        font-size: 1.1rem;
+    }
+    
+    /* 4. Compact Module Navigation Tabs for iPhone 17 Pro Max */
+    .module-nav {
+        gap: 4px;
+        padding: 4px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+    }
+    
+    .module-nav-item {
+        min-width: 55px;
+    }
+    
+    .module-nav-item .btn {
+        height: 48px;
+        padding: 4px 2px;
+        border-radius: 6px;
+        gap: 2px;
+    }
+    
+    .module-nav-item .btn i {
+        font-size: 1.25rem;
+    }
+    
+    /* 5. Calendar Stacking vertically on mobile */
+    #planung-calendar-container {
+        display: flex;
+        flex-direction: column !important;
+        gap: 20px;
+    }
+    
+    .calendar-month-column {
+        width: 100% !important;
+        max-width: 100%;
+        flex-shrink: 0;
+        border-radius: 8px;
+    }
+    
+    /* 6. Horizontally scrollable hours circle row inside modals */
+    .time-quick-select-container {
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        padding: 6px 4px !important;
+        display: flex !important;
+        gap: 6px !important;
+        justify-content: flex-start !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Hide connection line assets on mobile to avoid misalignment when scrolling */
+    .time-quick-select-container::before {
+        display: none !important;
+    }
+    
+    .time-quick-active-track {
+        display: none !important;
+    }
+    
+    .time-quick-circle {
+        flex: 0 0 auto !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        font-size: 0.9rem !important;
+    }
+    
+    /* 7. Sitzplan Workspace scroll indicators */
+    #sitzplan-module .workspace {
+        height: 50vh;
+        min-height: 350px;
+    }
+    
+    #sitzplan-module .sitzplan-controls {
+        gap: 6px;
+        padding: 6px 0;
+        justify-content: flex-start !important;
+    }
+    
+    /* 8. Table & Scroll Container wrapper */
+    .student-list-container,
+    .student-list-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .student-list-table th, 
+    .student-list-table td {
+        padding: 8px 6px;
+        font-size: 0.9rem;
+    }
+    
+    /* 9. General Modals */
+    .modal {
+        width: 95% !important;
+        max-width: 95% !important;
+        padding: 12px !important;
+    }
+    
+    /* 10. Login container */
+    .login-card {
+        width: 92% !important;
+        padding: 20px 15px !important;
+    }
+}
+
+

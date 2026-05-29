@@ -57,13 +57,13 @@
                         <h2>Klassen</h2>
                         <div class="card-header-actions">
                             <button class="btn btn-primary btn-icon" onclick="showModal('add-class-modal')">
-                                <i class="fas fa-plus"></i> Klasse hinzufügen
+                                <i class="fas fa-plus"></i> <span class="btn-text">Klasse hinzufügen</span>
                             </button>
                             <button class="btn btn-primary btn-icon" onclick="exportAllData(event)" title="Alle Daten als Datei exportieren">
-                                <i class="fas fa-arrow-down"></i> Exportieren
+                                <i class="fas fa-arrow-down"></i> <span class="btn-text">Exportieren</span>
                             </button>
                             <button class="btn btn-secondary btn-icon" onclick="handleImportButtonClick(event)" title="Daten aus Datei importieren">
-                                <i class="fas fa-arrow-up"></i> Importieren
+                                <i class="fas fa-arrow-up"></i> <span class="btn-text">Importieren</span>
                             </button>
                         </div>
                     </div>
@@ -119,7 +119,7 @@
                                         <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                             <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                                         </svg>
-                                        Schülerliste exportieren
+                                        <span class="btn-text">Schülerliste exportieren</span>
                                     </button>
                                 </div>
                             </div>
@@ -150,7 +150,7 @@
                                     <p>Füge Namen ein (einen Namen pro Zeile):</p>
                                     <textarea id="import-names" class="form-control" rows="5" placeholder="Max Mustermann&#10;Erika Musterfrau&#10;..."></textarea>
                                     <button class="btn btn-primary btn-icon" style="margin-top: 10px;" onclick="importStudents()">
-                                        <i class="fas fa-file-import"></i> Hinzufügen
+                                        <i class="fas fa-file-import"></i> <span class="btn-text">Hinzufügen</span>
                                     </button>
                                 </div>
                             </div>
@@ -167,7 +167,7 @@
                                             <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                                 <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                                             </svg>
-                                            Sitzplan exportieren
+                                            <span class="btn-text">Sitzplan exportieren</span>
                                         </button>
                                     </div>
                                 </div>
@@ -175,13 +175,13 @@
                                 <!-- Button-Leiste über dem Sitzplan -->
                 <div class="sitzplan-controls">
                 <button class="btn btn-primary btn-icon" id="edit-mode-btn" onclick="setMode('edit')">
-                    Bearbeiten
+                    <i class="fas fa-edit"></i> <span class="btn-text">Bearbeiten</span>
                 </button>
                 <button class="btn btn-primary btn-icon" id="work-mode-btn" onclick="setMode('work')">
-                    Arbeitsphase
+                    <i class="fas fa-running"></i> <span class="btn-text">Arbeitsphase</span>
                 </button>
                 <button class="btn btn-primary btn-icon" id="evaluation-mode-btn" onclick="setMode('evaluation')">
-                    Material
+                    <i class="fas fa-clipboard-check"></i> <span class="btn-text">Material</span>
                 </button>
             </div>                            <div class="sitzplan-container">
                                 <div class="main-content">
@@ -202,22 +202,22 @@
                                 <h2>Schriftlich</h2>
                                 <div>
                                     <button class="btn btn-primary btn-icon" id="collapse-all-btn" onclick="collapseAllStudents()">
-                                        <i class="fas fa-compress-alt"></i> Einklappen
+                                        <i class="fas fa-compress-alt"></i> <span class="btn-text">Einklappen</span>
                                     </button>
                                     <button class="btn btn-primary btn-icon" onclick="showAddProjectToAllModal()">
-                                        <i class="fas fa-plus"></i> Projekt
+                                        <i class="fas fa-plus"></i> <span class="btn-text">Projekt</span>
                                     </button>
                                     <button class="btn btn-primary btn-icon" onclick="showDeleteProjectForAllModal()">
-                                        <i class="fas fa-trash"></i> Löschen
+                                        <i class="fas fa-trash"></i> <span class="btn-text">Löschen</span>
                                     </button>
                                     <button class="btn btn-primary btn-icon" onclick="exportGrades()">
                                         <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                             <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                                         </svg>
-                                        Noten exportieren
+                                        <span class="btn-text">Noten exportieren</span>
                                     </button>
                                     <button class="btn btn-info btn-icon" onclick="toggleSearch('noten')">
-                                        <i class="fas fa-search"></i> Suchen
+                                        <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
                                     </button>
                                 </div>
                             </div>
@@ -272,19 +272,19 @@
                                 <h2>Planung</h2>
                                 <div>
                                     <button class="btn btn-primary btn-icon" id="planung-view-list-btn" onclick="setPlanungViewMode('list')">
-                                        <i class="fas fa-list"></i> Planungsansicht
+                                        <i class="fas fa-list"></i> <span class="btn-text">Planungsansicht</span>
                                     </button>
                                     <button class="btn btn-primary btn-icon" id="planung-view-calendar-btn" onclick="setPlanungViewMode('calendar')">
-                                        <i class="fas fa-calendar-alt"></i> Kalenderansicht
+                                        <i class="fas fa-calendar-alt"></i> <span class="btn-text">Kalenderansicht</span>
                                     </button>
                                     <button class="btn btn-primary btn-icon" onclick="deletePlanungTable()">
-                                        <i class="fas fa-trash"></i> Tabelle löschen
+                                        <i class="fas fa-trash"></i> <span class="btn-text">Tabelle löschen</span>
                                     </button>
                                     <button class="btn btn-primary btn-icon" onclick="exportPlanungTable()">
                                         <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                             <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                                         </svg>
-                                        Tabelle exportieren
+                                        <span class="btn-text">Tabelle exportieren</span>
                                     </button>
                                 </div>
                             </div>
@@ -307,12 +307,12 @@
                                         <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="5"><span>Fr</span></label>
                                     </div>
                                     <button class="btn btn-secondary btn-icon" onclick="showTermineModal()" style="margin-left: 8px;">
-                                        <i class="fas fa-calendar-alt"></i> Termine ein/ausblenden
+                                        <i class="fas fa-calendar-alt"></i> <span class="btn-text">Termine ein/ausblenden</span>
                                     </button>
                                 </div>
                                 <div class="planung-setup-group" id="planung-setup-export-group" style="display: none; margin-left: auto;">
                                     <button class="btn btn-primary btn-icon" id="planung-export-ics-btn" onclick="exportAllTermineToICS()">
-                                        <i class="fas fa-file-download"></i> Termine exportieren
+                                        <i class="fas fa-file-download"></i> <span class="btn-text">Termine exportieren</span>
                                     </button>
                                 </div>
                             </div>
@@ -332,13 +332,13 @@
                                         <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                             <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                                         </svg>
-                                        Zeugnisse exportieren
+                                        <span class="btn-text">Zeugnisse exportieren</span>
                                     </button>
                                     <button class="btn btn-primary btn-icon" id="zeugnis-view-toggle" onclick="toggleZeugnisView()">
-                                        <i class="fas fa-calculator"></i> Durchschnitt
+                                        <i class="fas fa-calculator"></i> <span class="btn-text">Durchschnitt</span>
                                     </button>
                                     <button class="btn btn-info btn-icon" onclick="toggleSearch('zeugnis')">
-                                        <i class="fas fa-search"></i> Suchen
+                                        <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
                                     </button>
                                 </div>
                             </div>
