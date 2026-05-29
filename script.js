@@ -6755,9 +6755,6 @@ function renderPlanungCalendar() {
     }
     
     const weekdayInitials = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    
     let columnsHtml = '';
     
     monthsToRender.forEach(({ year, month }) => {
