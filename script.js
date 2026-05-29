@@ -4763,8 +4763,21 @@ function renderZeugnisModule() {
         const konsequenzCount = student.hwHistory ? student.hwHistory.filter(entry => entry.type === 'abschreibtext' || entry.type === 'nachsitzen').length : 0;
         
         // Notizen
-        const leftNotes = student.leftNotes || '- ';
+        let leftNotes = student.leftNotes || '- ';
         const rightNotes = student.rightNotes || '- ';
+        if (student.rightNotes && student.rightNotes !== '- ' && student.rightNotes.trim() !== '') {
+            const cleanLeft = (leftNotes === '- ' || leftNotes.trim() === '') ? '' : leftNotes;
+            const cleanRight = (student.rightNotes === '- ' || student.rightNotes.trim() === '') ? '' : student.rightNotes;
+            if (cleanLeft && cleanRight) {
+                leftNotes = cleanLeft + '<br>' + cleanRight;
+            } else if (cleanRight) {
+                leftNotes = cleanRight;
+            }
+            student.leftNotes = leftNotes;
+            student.rightNotes = '';
+            // Save data locally and sync
+            saveData(index);
+        }
         
         // Zeugnisnote vorschlagen (ohne automatische Auswahl)
         const gradesSelectorHtml = getGradesSelectorHtml(student, index);
@@ -4796,12 +4809,7 @@ function renderZeugnisModule() {
                 <div class="zeugnis-section">
                     <h4>Notizen für ${student.name}</h4>
                     <div class="zeugnis-notes-container">
-                        <div class="zeugnis-notes-left">
-                            <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Linke Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
-                        </div>
-                        <div class="zeugnis-notes-right">
-                            <div contenteditable="true" class="form-control notes-textarea" id="notes-right-${index}" placeholder="Rechte Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${rightNotes}</div>
-                        </div>
+                        <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
                     </div>
                 </div>
                 
@@ -4819,61 +4827,7 @@ function renderZeugnisModule() {
 
 }
 
-// Automatischer Overflow: Wenn das linke Textfeld voll ist, überlaufenden Text ins rechte verschieben
-function checkZeugnisNotesOverflow(studentIndex) {
-    // Rekursionsschutz: verhindert Endlosschleife durch saveStudentNotes → checkOverflow → saveStudentNotes
-    if (window._zeugnisOverflowChecking) return;
 
-    const leftEl = document.getElementById(`notes-left-${studentIndex}`);
-    const rightEl = document.getElementById(`notes-right-${studentIndex}`);
-    if (!leftEl || !rightEl) return;
-
-    // Prüfen ob linkes Feld überläuft (scrollHeight > clientHeight)
-    if (leftEl.scrollHeight <= leftEl.clientHeight) return;
-
-    // HTML-Inhalt in Zeilen aufteilen (getrennt durch <br>)
-    const leftHtml = leftEl.innerHTML || '';
-    const lines = leftHtml.split('<br>');
-    if (lines.length <= 1) return; // Nur eine Zeile, nichts zu verschieben
-
-    // Zeilen vom Ende entfernen bis kein Overflow mehr
-    let removedLines = [];
-    while (lines.length > 1 && leftEl.scrollHeight > leftEl.clientHeight) {
-        removedLines.unshift(lines.pop());
-        leftEl.innerHTML = lines.join('<br>');
-    }
-
-    if (removedLines.length === 0) return;
-
-    // Überlaufende Zeilen ins rechte Feld einfügen
-    const overflowHtml = removedLines.join('<br>');
-    const rightHtml = rightEl.innerHTML || '';
-    const rightIsEmpty = rightHtml === '' || rightHtml === '- ' || rightHtml === '<br>' || rightHtml === '<div><br></div>';
-
-    if (rightIsEmpty) {
-        rightEl.innerHTML = overflowHtml;
-    } else {
-        rightEl.innerHTML = overflowHtml + '<br>' + rightHtml;
-    }
-
-    // Cursor ans Ende des linken Felds setzen
-    try {
-        const range = document.createRange();
-        const sel = window.getSelection();
-        range.selectNodeContents(leftEl);
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    } catch(e) {}
-
-    // Speichern – mit Guard-Flag gegen Rekursion
-    window._zeugnisOverflowChecking = true;
-    try {
-        saveStudentNotes(studentIndex); // isDebounced=false → kein erneuter setTimeout
-    } finally {
-        window._zeugnisOverflowChecking = false;
-    }
-}
 
 
 function scrollToTopOfZeugnisModule() {
@@ -5001,32 +4955,21 @@ window.splitSpanAtCaret = splitSpanAtCaret;
 // Notizen speichern
 function saveStudentNotes(studentIndex, isDebounced = false) {
     const leftTextarea = safeGetElement(`notes-left-${studentIndex}`);
-    const rightTextarea = safeGetElement(`notes-right-${studentIndex}`);
-    if (!leftTextarea || !rightTextarea) return;
+    if (!leftTextarea) return;
     if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
     
     // KEIN .trim() beim Speichern, sonst werden Zeilenumbrüche am Ende (Enter) gelöscht
     const leftNotesText = leftTextarea.innerHTML;
-    const rightNotesText = rightTextarea.innerHTML;
     
     const student = classes[activeClassId].students[studentIndex];
 
-    const hasChanges = student.leftNotes !== leftNotesText ||
-                       student.rightNotes !== rightNotesText;
+    const hasChanges = student.leftNotes !== leftNotesText;
     if (!hasChanges) return;
     
     student.leftNotes = leftNotesText;
-    student.rightNotes = rightNotesText;
 
     // Notenvorschlag sofort dynamisch im DOM aktualisieren
     updateZeugnisNoteVorschlag(studentIndex);
-
-    // Overflow prüfen: Wenn linkes Feld voll, Text automatisch ins rechte verschieben
-    // (nur beim Live-Tippen, nicht beim blur, um Doppelaufruf zu vermeiden)
-    if (isDebounced) {
-        // Leicht verzögert, damit der Browser die Höhe korrekt berechnet hat
-        setTimeout(() => checkZeugnisNotesOverflow(studentIndex), 10);
-    }
     
     // Wenn es ein Live-Update (oninput) ist, nutzen wir einen SEHR KURZEN debounced Sync (500ms)
     // Das verhält sich dann fast so "stark" wie bei den Noten, schont aber den Cursor beim Tippen.
@@ -5342,7 +5285,7 @@ function exportAllStudentCards() {
                 <div class="section">
                     <h2>Notizen</h2>
                     <div class="notes">${leftNotes}</div>
-                    <div class="notes" style="margin-top: 20px;">${rightNotes}</div>
+                    ${rightNotes ? `<div class="notes" style="margin-top: 20px;">${rightNotes}</div>` : ''}
                 </div>
                 <div class="section">
                     <h2>Zeugnisnote</h2>
@@ -6291,7 +6234,6 @@ function openMitarbeitAssistant(studentIndex) {
     
     const student = classes[activeClassId].students[studentIndex];
     document.getElementById('wizard-student-name').textContent = student.name;
-    document.getElementById('wizard-target-textarea').value = 'left'; // Standardmäßig linke Notizen
     
     // Eingabefelder zurücksetzen
     document.getElementById('wizard-new-phrase-input').value = '';
@@ -6578,8 +6520,7 @@ function toggleMitarbeitPhraseById(phraseId) {
 
 function insertSelectedMitarbeitPhrases() {
     const studentIndex = AppMitarbeitWizardState.studentIndex;
-    const targetVal = document.getElementById('wizard-target-textarea').value;
-    const textareaId = targetVal === 'left' ? `notes-left-${studentIndex}` : `notes-right-${studentIndex}`;
+    const textareaId = `notes-left-${studentIndex}`;
     const textarea = document.getElementById(textareaId);
     if (!textarea) return;
     
@@ -7470,5 +7411,55 @@ window.editCalendarDayTermin = editCalendarDayTermin;
 window.updateCalendarDayFormUI = updateCalendarDayFormUI;
 window.cancelEditCalendarDayTermin = cancelEditCalendarDayTermin;
 window.updateQuickSelectActiveStates = updateQuickSelectActiveStates;
+
+// ===== MOBILE BOTTOM SHEET (ACTION SHEET) =====
+
+function openMobileActionSheet(title, sourceButtonsSelector) {
+    const backdrop = document.getElementById('mobile-action-sheet-backdrop');
+    const container = document.getElementById('action-sheet-buttons-container');
+    const titleEl = document.getElementById('action-sheet-title');
+    
+    if (!backdrop || !container || !titleEl) return;
+    
+    titleEl.textContent = title;
+    container.innerHTML = '';
+    
+    const sourceContainer = document.querySelector(sourceButtonsSelector);
+    if (sourceContainer) {
+        const buttons = sourceContainer.querySelectorAll('button');
+        buttons.forEach(btn => {
+            const clonedBtn = btn.cloneNode(true);
+            
+            // Clean up button ID to prevent duplicate IDs in the DOM
+            clonedBtn.removeAttribute('id');
+            
+            const originalOnClick = clonedBtn.getAttribute('onclick');
+            if (originalOnClick) {
+                clonedBtn.setAttribute('onclick', `${originalOnClick}; closeMobileActionSheet();`);
+            }
+            
+            container.appendChild(clonedBtn);
+        });
+    }
+    
+    backdrop.style.display = 'flex';
+    backdrop.offsetHeight; // Force reflow to trigger CSS transition
+    backdrop.classList.add('show');
+}
+
+function closeMobileActionSheet() {
+    const backdrop = document.getElementById('mobile-action-sheet-backdrop');
+    if (!backdrop) return;
+    
+    backdrop.classList.remove('show');
+    setTimeout(() => {
+        if (!backdrop.classList.contains('show')) {
+            backdrop.style.display = 'none';
+        }
+    }, 300);
+}
+
+window.openMobileActionSheet = openMobileActionSheet;
+window.closeMobileActionSheet = closeMobileActionSheet;
 
 

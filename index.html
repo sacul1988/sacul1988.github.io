@@ -121,12 +121,17 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2>Schülerliste</h2>
-                                <div>
-                                    <button class="btn btn-secondary btn-icon" onclick="showExportStudentsModal()">
-                                        <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                            <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                        </svg>
-                                        <span class="btn-text">Schülerliste exportieren</span>
+                                <div class="card-header-actions">
+                                    <div class="desktop-header-buttons">
+                                        <button class="btn btn-secondary btn-icon" onclick="showExportStudentsModal()">
+                                            <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                            </svg>
+                                            <span class="btn-text">Schülerliste exportieren</span>
+                                        </button>
+                                    </div>
+                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Schülerliste', '#schueler-module .desktop-header-buttons')">
+                                        <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                 </div>
                             </div>
@@ -169,12 +174,17 @@
                         <div class="card">
                                 <div class="card-header">
                                     <h2>Sitzplan</h2>
-                                    <div>
-                                        <button class="btn btn-secondary btn-icon" onclick="exportSitzplanAsJPEG()" title="Sitzplan exportieren">
-                                            <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                            </svg>
-                                            <span class="btn-text">Sitzplan exportieren</span>
+                                    <div class="card-header-actions">
+                                        <div class="desktop-header-buttons">
+                                            <button class="btn btn-secondary btn-icon" onclick="exportSitzplanAsJPEG()" title="Sitzplan exportieren">
+                                                <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                    <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                                </svg>
+                                                <span class="btn-text">Sitzplan exportieren</span>
+                                            </button>
+                                        </div>
+                                        <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Sitzplan', '#sitzplan-module .desktop-header-buttons')">
+                                            <i class="fas fa-ellipsis-h"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -207,24 +217,29 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2>Schriftlich</h2>
-                                <div>
-                                    <button class="btn btn-primary btn-icon" id="collapse-all-btn" onclick="collapseAllStudents()">
-                                        <i class="fas fa-compress-alt"></i> <span class="btn-text">Einklappen</span>
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="showAddProjectToAllModal()">
-                                        <i class="fas fa-plus"></i> <span class="btn-text">Projekt</span>
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="showDeleteProjectForAllModal()">
-                                        <i class="fas fa-trash"></i> <span class="btn-text">Löschen</span>
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="exportGrades()">
-                                        <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                            <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                        </svg>
-                                        <span class="btn-text">Noten exportieren</span>
-                                    </button>
-                                    <button class="btn btn-info btn-icon" onclick="toggleSearch('noten')">
-                                        <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
+                                <div class="card-header-actions">
+                                    <div class="desktop-header-buttons">
+                                        <button class="btn btn-primary btn-icon" id="collapse-all-btn" onclick="collapseAllStudents()">
+                                            <i class="fas fa-compress-alt"></i> <span class="btn-text">Einklappen</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" onclick="showAddProjectToAllModal()">
+                                            <i class="fas fa-plus"></i> <span class="btn-text">Projekt</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" onclick="showDeleteProjectForAllModal()">
+                                            <i class="fas fa-trash"></i> <span class="btn-text">Löschen</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" onclick="exportGrades()">
+                                            <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                            </svg>
+                                            <span class="btn-text">Noten exportieren</span>
+                                        </button>
+                                        <button class="btn btn-info btn-icon" onclick="toggleSearch('noten')">
+                                            <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
+                                        </button>
+                                    </div>
+                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Noten / Schriftlich', '#noten-module .desktop-header-buttons')">
+                                        <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                 </div>
                             </div>
@@ -277,21 +292,26 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2>Planung</h2>
-                                <div>
-                                    <button class="btn btn-primary btn-icon" id="planung-view-list-btn" onclick="setPlanungViewMode('list')">
-                                        <i class="fas fa-list"></i> <span class="btn-text">Planungsansicht</span>
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" id="planung-view-calendar-btn" onclick="setPlanungViewMode('calendar')">
-                                        <i class="fas fa-calendar-alt"></i> <span class="btn-text">Kalenderansicht</span>
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="deletePlanungTable()">
-                                        <i class="fas fa-trash"></i> <span class="btn-text">Tabelle löschen</span>
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="exportPlanungTable()">
-                                        <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                            <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                        </svg>
-                                        <span class="btn-text">Tabelle exportieren</span>
+                                <div class="card-header-actions">
+                                    <div class="desktop-header-buttons">
+                                        <button class="btn btn-primary btn-icon" id="planung-view-list-btn" onclick="setPlanungViewMode('list')">
+                                            <i class="fas fa-list"></i> <span class="btn-text">Planungsansicht</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" id="planung-view-calendar-btn" onclick="setPlanungViewMode('calendar')">
+                                            <i class="fas fa-calendar-alt"></i> <span class="btn-text">Kalenderansicht</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" onclick="deletePlanungTable()">
+                                            <i class="fas fa-trash"></i> <span class="btn-text">Tabelle löschen</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" onclick="exportPlanungTable()">
+                                            <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                            </svg>
+                                            <span class="btn-text">Tabelle exportieren</span>
+                                        </button>
+                                    </div>
+                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Planung', '#planung-module .desktop-header-buttons')">
+                                        <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                 </div>
                             </div>
@@ -334,18 +354,23 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2>Zeugnis</h2>
-                                <div>
-                                    <button class="btn btn-primary btn-icon" onclick="exportAllStudentCards()">
-                                        <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                            <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                        </svg>
-                                        <span class="btn-text">Zeugnisse exportieren</span>
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" id="zeugnis-view-toggle" onclick="toggleZeugnisView()">
-                                        <i class="fas fa-calculator"></i> <span class="btn-text">Durchschnitt</span>
-                                    </button>
-                                    <button class="btn btn-info btn-icon" onclick="toggleSearch('zeugnis')">
-                                        <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
+                                <div class="card-header-actions">
+                                    <div class="desktop-header-buttons">
+                                        <button class="btn btn-primary btn-icon" onclick="exportAllStudentCards()">
+                                            <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                            </svg>
+                                            <span class="btn-text">Zeugnisse exportieren</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" id="zeugnis-view-toggle" onclick="toggleZeugnisView()">
+                                            <i class="fas fa-calculator"></i> <span class="btn-text">Durchschnitt</span>
+                                        </button>
+                                        <button class="btn btn-info btn-icon" onclick="toggleSearch('zeugnis')">
+                                            <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
+                                        </button>
+                                    </div>
+                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Zeugnis', '#zeugnis-module .desktop-header-buttons')">
+                                        <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                 </div>
                             </div>
@@ -628,13 +653,6 @@
                 <div class="wizard-footer">
                     <!-- Ziel-Textfeld und Vorschau -->
                     <div class="wizard-footer-top">
-                        <div class="wizard-target-container">
-                            <label for="wizard-target-textarea"><strong>Ziel-Textfeld:</strong></label>
-                            <select id="wizard-target-textarea" class="form-control" style="width: auto; display: inline-block; margin-left: 8px;">
-                                <option value="left">Linke Notizen</option>
-                                <option value="right">Rechte Notizen</option>
-                            </select>
-                        </div>
                         <div class="wizard-selection-summary">
                             <strong>Auswahl:</strong> <span id="wizard-selected-count">0</span> Sätze ausgewählt
                         </div>
@@ -651,6 +669,18 @@
                             <button class="btn btn-success" onclick="insertSelectedMitarbeitPhrases()">Auswählen & Einfügen</button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Sheet Modal (nur auf Mobilgeräten) -->
+        <div id="mobile-action-sheet-backdrop" class="action-sheet-backdrop" onclick="closeMobileActionSheet()">
+            <div class="action-sheet" onclick="event.stopPropagation()">
+                <div class="action-sheet-drag-handle"></div>
+                <h3 id="action-sheet-title">Aktionen</h3>
+                <div class="action-sheet-body" id="action-sheet-buttons-container"></div>
+                <div class="action-sheet-footer">
+                    <button class="btn btn-light btn-block cancel-btn" onclick="closeMobileActionSheet()">Abbrechen</button>
                 </div>
             </div>
         </div>
