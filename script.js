@@ -1270,10 +1270,10 @@ function renderStudentsModule() {
             </td>
             <td>
                 <div class="student-actions">
-                    <button class="btn btn-sm btn-primary btn-square" onclick="editStudentName(${index})">
+                    <button class="btn btn-sm btn-primary btn-circle-sm" onclick="editStudentName(${index})" title="Schüler bearbeiten">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger btn-square" onclick="deleteStudent(${index})">
+                    <button class="btn btn-sm btn-danger btn-circle-sm" onclick="deleteStudent(${index})" title="Schüler löschen">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -7233,11 +7233,11 @@ function openTimeMinutesPopup(event, hour, type) {
     
     const formattedHour = String(hour).padStart(2, '0');
     
-    // Vier leere Kreise für 00, 15, 30, 45 generieren (ohne Text, nur visuell)
+    // Vier kleine Kreise für 00, 15, 30, 45 generieren
     const mins = ['00', '15', '30', '45'];
     popover.innerHTML = mins.map(m => {
         const timeVal = `${formattedHour}:${m}`;
-        return `<button type="button" class="time-minute-circle" onclick="selectTimeQuick('${timeVal}', '${type}')" title=":${m}"></button>`;
+        return `<button type="button" class="time-minute-circle" onclick="selectTimeQuick('${timeVal}', '${type}')" title=":${m}">${m}</button>`;
     }).join('');
     
     // Popover anzeigen
@@ -7369,17 +7369,13 @@ function updateQuickSelectActiveStates() {
             const maxH = Math.max(startHour, endHour);
             if (h === startHour && h === endHour) {
                 c.classList.add('active-start', 'active-end');
-                const startMins = startVal ? startVal.split(':')[1] : '00';
-                const endMins = endVal ? endVal.split(':')[1] : '00';
-                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">${startMins}-${endMins}</span></div>`;
+                c.innerHTML = h;
             } else if (h === startHour) {
                 c.classList.add('active-start');
-                const startMins = startVal ? startVal.split(':')[1] : '00';
-                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">:${startMins}</span></div>`;
+                c.innerHTML = h;
             } else if (h === endHour) {
                 c.classList.add('active-end');
-                const endMins = endVal ? endVal.split(':')[1] : '00';
-                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">:${endMins}</span></div>`;
+                c.innerHTML = h;
             } else if (h > minH && h < maxH) {
                 c.classList.add('in-range');
                 c.innerHTML = h;
@@ -7389,16 +7385,14 @@ function updateQuickSelectActiveStates() {
         } else if (startHour !== null) {
             if (h === startHour) {
                 c.classList.add('active-start');
-                const startMins = startVal ? startVal.split(':')[1] : '00';
-                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">:${startMins}</span></div>`;
+                c.innerHTML = h;
             } else {
                 c.innerHTML = h;
             }
         } else if (endHour !== null) {
             if (h === endHour) {
                 c.classList.add('active-end');
-                const endMins = endVal ? endVal.split(':')[1] : '00';
-                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">:${endMins}</span></div>`;
+                c.innerHTML = h;
             } else {
                 c.innerHTML = h;
             }
