@@ -3307,19 +3307,14 @@ body.modal-open {
 }
 
 /* Time Quick Select styling */
+/* Time Quick Select styling */
 .time-quick-select-container {
     display: flex;
-    gap: 6px;
+    justify-content: space-between;
     align-items: center;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
     padding: 2px 0 6px 0;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-.time-quick-select-container::-webkit-scrollbar {
-    display: none; /* Hide scrollbar Chrome/Safari/Opera */
+    width: 100%;
+    box-sizing: border-box;
 }
 .time-quick-circle {
     width: 32px;
@@ -3400,6 +3395,20 @@ body.modal-open {
     cursor: pointer;
     box-sizing: border-box;
 }
+.btn-circle-sm {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    min-height: 28px !important;
+    min-width: 28px !important;
+    font-size: 0.82rem;
+    cursor: pointer;
+    box-sizing: border-box;
+}
 
 /* Single line range selection slider lines */
 .time-quick-select-container {
@@ -3409,8 +3418,8 @@ body.modal-open {
 .time-quick-select-container::before {
     content: '';
     position: absolute;
-    left: 20px;
-    right: 20px;
+    left: 16px;
+    right: 16px;
     top: 50%;
     transform: translateY(-50%);
     height: 4px;

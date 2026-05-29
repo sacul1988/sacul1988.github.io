@@ -6854,10 +6854,10 @@ function renderCalendarDayTermineList(dateStr) {
                 <div class="calendar-modal-termin-item" style="${itemStyle}">
                     <span>${timeDisplay}${escapeHtml(t.title || '')}</span>
                     <div style="display: flex; gap: 4px;">
-                        <button class="btn btn-sm btn-primary btn-square" onclick="editCalendarDayTermin('${t.id}')" title="Diesen Termin bearbeiten">
+                        <button class="btn btn-sm btn-primary btn-circle-sm" onclick="editCalendarDayTermin('${t.id}')" title="Diesen Termin bearbeiten">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-square" onclick="deleteCalendarDayTermin('${t.id}')" title="Diesen Termin löschen">
+                        <button class="btn btn-sm btn-danger btn-circle-sm" onclick="deleteCalendarDayTermin('${t.id}')" title="Diesen Termin löschen">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
