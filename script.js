@@ -7112,7 +7112,7 @@ function initTimeQuickSelect() {
     
     let htmlStart = '';
     let htmlEnd = '';
-    for (let h = 7; h <= 20; h++) {
+    for (let h = 7; h <= 19; h++) {
         htmlStart += `<button type="button" class="time-quick-circle" onclick="openTimeMinutesPopup(event, ${h}, 'start')">${h}</button>`;
         htmlEnd += `<button type="button" class="time-quick-circle" onclick="openTimeMinutesPopup(event, ${h}, 'end')">${h}</button>`;
     }
