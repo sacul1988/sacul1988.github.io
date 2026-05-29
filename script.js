@@ -7,7 +7,8 @@ const AppState = {
     currentEvaluationStudentIndex: null,
     zeugnisViewMode: localStorage.getItem('zeugnisViewMode') || 'individual', // 'individual' or 'average'
     isInitialSyncComplete: false, // Neu: Sperre für Cloud-Sync beim Start
-    termine: []
+    termine: [],
+    contacts: JSON.parse(localStorage.getItem('contacts') || '[]')
 };
 
 // Start-Sperre setzen (3 Sekunden), damit Cloud-Daten Zeit zum Laden haben
@@ -22,6 +23,8 @@ window.AppState = AppState; // Für index.html (Firebase-Sync) zugänglich mache
 // Für Abwärtskompatibilität, aber bevorzuge AppState
 let classes = AppState.classes;
 window.classes = classes; // Explizit global für index.html verfügbar machen
+let contacts = AppState.contacts;
+window.contacts = contacts;
 let activeClassId = AppState.activeClassId;
 let activeModule = AppState.activeModule;
 let currentPage = AppState.currentPage;
@@ -484,6 +487,9 @@ function renderModuleContent() {
             break;
         case 'planung':
             renderPlanung();
+            break;
+        case 'kontakte':
+            renderContactsModule();
             break;
     }
 }
@@ -7461,5 +7467,165 @@ function closeMobileActionSheet() {
 
 window.openMobileActionSheet = openMobileActionSheet;
 window.closeMobileActionSheet = closeMobileActionSheet;
+
+// ===== CENTRALIZED CONTACTS (ADRESSBUCH) =====
+
+function setContacts(newContacts) {
+    contacts = newContacts || [];
+    AppState.contacts = contacts;
+    if (activeModule === 'kontakte') {
+        renderContactsModule();
+    }
+}
+
+function renderContactsModule() {
+    const tbody = document.getElementById('contacts-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    const filterText = (document.getElementById('search-input-kontakte')?.value || '').toLowerCase().trim();
+    
+    // Sort contacts by child name
+    const sortedContacts = [...contacts].sort((a, b) => (a.childName || '').localeCompare(b.childName || ''));
+    
+    const filteredContacts = sortedContacts.filter(c => {
+        const child = (c.childName || '').toLowerCase();
+        const relation = (c.relation || '').toLowerCase();
+        const phone = (c.phone || '').toLowerCase();
+        return child.includes(filterText) || relation.includes(filterText) || phone.includes(filterText);
+    });
+    
+    if (filteredContacts.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--grey-color); padding: 20px;">
+                    Keine Kontakte vorhanden
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    filteredContacts.forEach(c => {
+        const tr = document.createElement('tr');
+        
+        // Clean up tel href
+        const cleanPhone = (c.phone || '').replace(/[^0-9+]/g, '');
+        
+        tr.innerHTML = `
+            <td><strong>${c.childName || '-'}</strong></td>
+            <td>${c.relation || '-'}</td>
+            <td>${c.phone || '-'}</td>
+            <td style="text-align: right; white-space: nowrap;">
+                <a href="tel:${cleanPhone}" class="btn btn-success btn-icon btn-sm" title="Anrufen" style="margin-right: 4px;">
+                    <i class="fas fa-phone"></i>
+                </a>
+                <button onclick="openEditContactModal('${c.id}')" class="btn btn-primary btn-icon btn-sm" title="Bearbeiten" style="margin-right: 4px;">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteContact('${c.id}')" class="btn btn-danger btn-icon btn-sm" title="Löschen">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function filterContacts() {
+    renderContactsModule();
+}
+
+function openAddContactModal() {
+    document.getElementById('contact-modal-title').textContent = 'Kontakt hinzufügen';
+    document.getElementById('contact-edit-id').value = '';
+    document.getElementById('contact-child-name').value = '';
+    document.getElementById('contact-relation').value = '';
+    document.getElementById('contact-phone').value = '';
+    showModal('contact-modal');
+}
+
+function openEditContactModal(contactId) {
+    const contact = contacts.find(c => c.id === contactId);
+    if (!contact) return;
+    
+    document.getElementById('contact-modal-title').textContent = 'Kontakt bearbeiten';
+    document.getElementById('contact-edit-id').value = contact.id;
+    document.getElementById('contact-child-name').value = contact.childName || '';
+    document.getElementById('contact-relation').value = contact.relation || '';
+    document.getElementById('contact-phone').value = contact.phone || '';
+    showModal('contact-modal');
+}
+
+function saveContact() {
+    const idInput = document.getElementById('contact-edit-id').value;
+    const childName = document.getElementById('contact-child-name').value.trim();
+    const relation = document.getElementById('contact-relation').value.trim();
+    const phone = document.getElementById('contact-phone').value.trim();
+    
+    if (!childName) {
+        swal('Fehler', 'Bitte gib den Namen des Kindes ein.', 'error');
+        return;
+    }
+    
+    if (idInput) {
+        // Edit existing
+        const contactIndex = contacts.findIndex(c => c.id === idInput);
+        if (contactIndex > -1) {
+            contacts[contactIndex].childName = childName;
+            contacts[contactIndex].relation = relation;
+            contacts[contactIndex].phone = phone;
+        }
+    } else {
+        // Add new
+        const newContact = {
+            id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            childName: childName,
+            relation: relation,
+            phone: phone
+        };
+        contacts.push(newContact);
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+    AppState.contacts = contacts;
+    
+    // Trigger Cloud Sync
+    saveData();
+    
+    // Refresh UI & close modal
+    renderContactsModule();
+    hideModal();
+}
+
+function deleteContact(contactId) {
+    const contact = contacts.find(c => c.id === contactId);
+    if (!contact) return;
+    
+    swal({
+        title: "Kontakt löschen?",
+        text: `Möchtest du den Kontakt für "${contact.childName}" wirklich löschen?`,
+        icon: "warning",
+        buttons: ["Abbrechen", "Löschen"],
+        dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+            contacts = contacts.filter(c => c.id !== contactId);
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+            AppState.contacts = contacts;
+            saveData();
+            renderContactsModule();
+        }
+    });
+}
+
+window.setContacts = setContacts;
+window.renderContactsModule = renderContactsModule;
+window.filterContacts = filterContacts;
+window.openAddContactModal = openAddContactModal;
+window.openEditContactModal = openEditContactModal;
+window.saveContact = saveContact;
+window.deleteContact = deleteContact;
 
 

@@ -112,6 +112,11 @@
                             <i class="fas fa-clipboard-list"></i>
                         </button>
                     </div>
+                    <div class="module-nav-item" data-module="kontakte">
+                        <button class="btn btn-light" onclick="showModule('kontakte')">
+                            <i class="fas fa-address-book"></i>
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Container für Module -->
@@ -381,6 +386,46 @@
                             
                             <div id="zeugnis-container">
                                 <!-- Hier werden die Schüler-Karteikarten dynamisch eingefügt -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kontakte Modul -->
+                    <div id="kontakte-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Zentrales Adressbuch</h2>
+                                <div class="card-header-actions">
+                                    <div class="desktop-header-buttons">
+                                        <button class="btn btn-primary btn-icon" onclick="openAddContactModal()">
+                                            <i class="fas fa-plus"></i> <span class="btn-text">Kontakt hinzufügen</span>
+                                        </button>
+                                    </div>
+                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Kontakte', '#kontakte-module .desktop-header-buttons')">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 15px;">
+                                <div class="form-group" style="margin-bottom: 15px;">
+                                    <input type="text" class="form-control search-input" id="search-input-kontakte" placeholder="Kontakte durchsuchen..." oninput="filterContacts()">
+                                </div>
+                                <div class="student-list-container">
+                                    <table class="student-list-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Kind</th>
+                                                <th>Bezugsperson</th>
+                                                <th>Telefonnummer</th>
+                                                <th style="width: 150px; text-align: right;">Aktionen</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="contacts-table-body">
+                                            <!-- Kontakte werden hier dynamisch eingefügt -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -671,6 +716,31 @@
                     </div>
                 </div>
             </div>
+            <!-- Kontakt hinzufügen/bearbeiten Modal -->
+            <div id="contact-modal" class="modal" style="display: none;">
+                <h2 id="contact-modal-title">Kontakt hinzufügen</h2>
+                <input type="hidden" id="contact-edit-id" value="">
+                
+                <div class="form-group">
+                    <label for="contact-child-name">Name des Kindes</label>
+                    <input type="text" id="contact-child-name" class="form-control" placeholder="z.B. Max Mustermann">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact-relation">Bezugsperson (z.B. Mutter, Vater, Oma)</label>
+                    <input type="text" id="contact-relation" class="form-control" placeholder="z.B. Mutter">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact-phone">Telefonnummer</label>
+                    <input type="text" id="contact-phone" class="form-control" placeholder="Telefonnummer">
+                </div>
+                
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
+                    <button class="btn btn-primary" onclick="saveContact()">Speichern</button>
+                </div>
+            </div>
         </div>
         
         <!-- Bottom Sheet Modal (nur auf Mobilgeräten) -->
@@ -817,12 +887,16 @@
                         console.log("Login-Initialisierung: Lade Cloud-Stand in lokalen Speicher.");
                         
                         localStorage.setItem('classes', JSON.stringify(cloudData.classes));
+                        localStorage.setItem('contacts', JSON.stringify(cloudData.contacts || []));
                         localStorage.setItem('lastUpdate', cloudData.lastUpdate || "0");
                         applyCloudTermineAndPlanung(cloudData);
 
                         // Brücke zu script.js
                         if (typeof window.setClasses === 'function') {
                             window.setClasses(cloudData.classes);
+                        }
+                        if (typeof window.setContacts === 'function') {
+                            window.setContacts(cloudData.contacts || []);
                         }
 
                         // Hauptansicht neu rendern
@@ -873,16 +947,24 @@
                             
                             // 1. Daten in localStorage synchronisieren
                             localStorage.setItem('classes', JSON.stringify(cloudData.classes));
+                            localStorage.setItem('contacts', JSON.stringify(cloudData.contacts || []));
                             localStorage.setItem('lastUpdate', cloudTimestamp);
                             applyCloudTermineAndPlanung(cloudData);
 
                             // 2. Globale Variablen sofort aktualisieren (wichtig für script.js)
                             window.classes = cloudData.classes;
-                            if (window.AppState) window.AppState.classes = cloudData.classes;
+                            window.contacts = cloudData.contacts || [];
+                            if (window.AppState) {
+                                window.AppState.classes = cloudData.classes;
+                                window.AppState.contacts = cloudData.contacts || [];
+                            }
                             
                             // 3. Lokale Variablen in script.js über die Brücken-Funktion aktualisieren
                             if (typeof window.setClasses === 'function') {
                                 window.setClasses(cloudData.classes);
+                                if (typeof window.setContacts === 'function') {
+                                    window.setContacts(cloudData.contacts || []);
+                                }
                             } else {
                                 // Fallback falls script.js geladen ist aber window.setClasses noch nicht (selten)
                                 if (window.classes) {
@@ -927,11 +1009,18 @@
                                                               activeElement.tagName === 'TEXTAREA' && 
                                                               activeElement.classList && 
                                                               activeElement.classList.contains('planung-inhalt-input');
+                                
+                                const isUserTypingInContacts = activeElement && 
+                                                              activeElement.tagName === 'INPUT' && 
+                                                              (activeElement.id === 'search-input-kontakte' || 
+                                                               activeElement.id === 'contact-child-name' || 
+                                                               activeElement.id === 'contact-relation' || 
+                                                               activeElement.id === 'contact-phone');
 
                                 // Spezialbehandlung für Sitzplan-Drag: Wenn gerade ein Tisch bewegt wird, NICHT neu rendern
                                 const isDraggingSitzplan = window.isDraggingDesk === true;
 
-                                if (isUserTypingInZeugnis || isUserTypingInPlanung || isDraggingSitzplan) {
+                                if (isUserTypingInZeugnis || isUserTypingInPlanung || isUserTypingInContacts || isDraggingSitzplan) {
                                     console.log("Realtime Update: Nutzer interagiert gerade (Tippen/Drag). UI-Refresh unterdrückt.");
                                     if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Synchronisiert (Hintergrund)';
                                     
@@ -939,6 +1028,9 @@
                                     // zumindest im Hintergrund für script.js aktuell sind für das nächste Save-Event.
                                     if (typeof window.setClasses === 'function') {
                                         window.setClasses(cloudData.classes);
+                                    }
+                                    if (typeof window.setContacts === 'function') {
+                                        window.setContacts(cloudData.contacts || []);
                                     }
                                     return true;
                                 }
@@ -1061,6 +1153,7 @@
                     planung: planungObj,
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
                     formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]'),
+                    contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
                 };
 

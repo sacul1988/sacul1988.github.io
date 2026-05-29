@@ -3798,4 +3798,15 @@ body.modal-open {
     }
 }
 
+/* --- Contacts Module --- */
+#kontakte-module .student-list-table td {
+    vertical-align: middle;
+}
+
+#kontakte-module .student-list-table td .btn {
+    padding: 6px 10px !important;
+    min-height: 32px;
+    font-size: 0.85rem;
+}
+
 
