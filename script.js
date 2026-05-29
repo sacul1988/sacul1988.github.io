@@ -7508,7 +7508,7 @@ function addPhoneRowInModal(label = '', number = '') {
     row.innerHTML = `
         <input type="text" class="form-control phone-label" placeholder="z.B. Mutter" value="${escapeHtml(label)}" style="flex: 1;">
         <input type="text" class="form-control phone-number" placeholder="Telefonnummer" value="${escapeHtml(number)}" style="flex: 1.5;">
-        <button type="button" class="btn btn-danger btn-icon btn-sm" onclick="this.parentElement.remove()" title="Entfernen" style="padding: 6px 10px !important; min-height: 32px;">
+        <button type="button" class="btn btn-danger btn-circle-sm" onclick="this.parentElement.remove()" title="Entfernen">
             <i class="fas fa-trash"></i>
         </button>
     `;
@@ -7565,19 +7565,11 @@ function renderContactsModule() {
             detailsHtml = `
                 <table style="width: 100%; border: none; margin: 0; background: transparent;">
                     ${phoneList.map((p, idx) => {
-                        const cleanPhone = (p.number || '').replace(/[^0-9+]/g, '');
                         const borderStyle = idx < phoneList.length - 1 ? 'border-bottom: 1px solid var(--border-color);' : 'border: none;';
                         return `
                             <tr style="${borderStyle}">
-                                <td style="border: none; padding: 6px 12px; font-weight: 500; width: 35%; color: var(--dark-color);">${escapeHtml(p.label || '-')}</td>
+                                <td style="border: none; padding: 6px 12px; font-weight: 500; width: 40%; color: var(--dark-color);">${escapeHtml(p.label || '-')}</td>
                                 <td style="border: none; padding: 6px 12px; color: var(--dark-color);">${escapeHtml(p.number || '-')}</td>
-                                <td style="border: none; padding: 6px 12px; text-align: right; width: 60px;">
-                                    ${p.number ? `
-                                        <a href="tel:${cleanPhone}" class="btn btn-success btn-icon btn-sm" title="Anrufen" style="padding: 4px 8px !important; min-height: 28px;">
-                                            <i class="fas fa-phone"></i>
-                                        </a>
-                                    ` : ''}
-                                </td>
                             </tr>
                         `;
                     }).join('')}
@@ -7591,10 +7583,10 @@ function renderContactsModule() {
             <td style="vertical-align: middle;"><strong>${escapeHtml(c.childName || '-')}</strong></td>
             <td style="padding: 0; vertical-align: middle;">${detailsHtml}</td>
             <td style="text-align: right; white-space: nowrap; vertical-align: middle;">
-                <button onclick="openEditContactModal('${c.id}')" class="btn btn-primary btn-icon btn-sm" title="Bearbeiten" style="margin-right: 4px;">
+                <button onclick="openEditContactModal('${c.id}')" class="btn btn-primary btn-circle-sm" title="Bearbeiten" style="margin-right: 4px;">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button onclick="deleteContact('${c.id}')" class="btn btn-danger btn-icon btn-sm" title="Löschen">
+                <button onclick="deleteContact('${c.id}')" class="btn btn-danger btn-circle-sm" title="Löschen">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
