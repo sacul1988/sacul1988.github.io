@@ -5791,7 +5791,7 @@ function loadPlanung() {
     });
 
     // View-Modus initialisieren
-    AppState.planungViewMode = localStorage.getItem('planungViewMode') || 'calendar';
+    AppState.planungViewMode = 'calendar';
     if (AppState.calendarYear === undefined || AppState.calendarMonth === undefined) {
         if (p.startDate) {
             const startDateParts = p.startDate.split('-');
