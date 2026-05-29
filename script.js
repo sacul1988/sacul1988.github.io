@@ -5775,26 +5775,33 @@ function loadPlanung() {
     const p = AppState.planung;
     if (!p.entries) p.entries = {};
     if (!p.hiddenTermine) p.hiddenTermine = [];
+
+    // View-Modus initialisieren
+    AppState.planungViewMode = 'calendar';
+
+    const isCalendar = AppState.planungViewMode === 'calendar';
+    const initialStart = isCalendar ? (p.calendarStartDate || '') : (p.startDate || '');
+    const initialEnd = isCalendar ? (p.calendarEndDate || '') : (p.endDate || '');
+
     const startEl = safeGetElement('planung-start-date');
     const endEl = safeGetElement('planung-end-date');
     if (startEl) {
-        if (startEl._flatpickr) startEl._flatpickr.setDate(p.startDate || '', false);
-        else startEl.value = p.startDate || '';
+        if (startEl._flatpickr) startEl._flatpickr.setDate(initialStart, false);
+        else startEl.value = initialStart;
     }
     if (endEl) {
-        if (endEl._flatpickr) endEl._flatpickr.setDate(p.endDate || '', false);
-        else endEl.value = p.endDate || '';
+        if (endEl._flatpickr) endEl._flatpickr.setDate(initialEnd, false);
+        else endEl.value = initialEnd;
     }
 
     document.querySelectorAll('.planung-day-cb').forEach(cb => {
         cb.checked = (p.selectedDays || []).includes(parseInt(cb.value));
     });
 
-    // View-Modus initialisieren
-    AppState.planungViewMode = 'calendar';
     if (AppState.calendarYear === undefined || AppState.calendarMonth === undefined) {
-        if (p.startDate) {
-            const startDateParts = p.startDate.split('-');
+        const defaultStart = p.calendarStartDate || p.startDate || '';
+        if (defaultStart) {
+            const startDateParts = defaultStart.split('-');
             AppState.calendarYear = parseInt(startDateParts[0]);
             AppState.calendarMonth = parseInt(startDateParts[1]) - 1;
         } else {
@@ -5932,7 +5939,7 @@ function deletePlanungTable() {
         dangerMode: true,
     }).then(willDelete => {
         if (!willDelete) return;
-        AppState.planung = { startDate: '', endDate: '', selectedDays: [], entries: {}, hiddenTermine: [] };
+        AppState.planung = { startDate: '', endDate: '', selectedDays: [], entries: {}, hiddenTermine: [], calendarStartDate: '', calendarEndDate: '' };
         savePlanung();
         const startEl = safeGetElement('planung-start-date');
         const endEl = safeGetElement('planung-end-date');
@@ -6617,6 +6624,21 @@ function renderPlanung() {
     const calendarContainer = safeGetElement('planung-calendar-container');
     const listBtn = safeGetElement('planung-view-list-btn');
     const calendarBtn = safeGetElement('planung-view-calendar-btn');
+
+    const p = AppState.planung || {};
+    const startEl = safeGetElement('planung-start-date');
+    const endEl = safeGetElement('planung-end-date');
+    const currentStart = viewMode === 'calendar' ? (p.calendarStartDate || '') : (p.startDate || '');
+    const currentEnd = viewMode === 'calendar' ? (p.calendarEndDate || '') : (p.endDate || '');
+
+    if (startEl) {
+        if (startEl._flatpickr) startEl._flatpickr.setDate(currentStart, false);
+        else startEl.value = currentStart;
+    }
+    if (endEl) {
+        if (endEl._flatpickr) endEl._flatpickr.setDate(currentEnd, false);
+        else endEl.value = currentEnd;
+    }
     
     if (listBtn && calendarBtn) {
         if (viewMode === 'calendar') {
@@ -6668,8 +6690,8 @@ function renderPlanungCalendar() {
     if (!container) return;
     
     const p = AppState.planung;
-    if (!p || !p.startDate || !p.endDate || !(p.selectedDays || []).length) {
-        container.innerHTML = '<p class="planung-empty" style="text-align: center; padding: 40px;">Bitte gib oben einen Zeitraum ein und wähle Unterrichtstage aus, um den Kalender anzuzeigen.</p>';
+    if (!p || !p.calendarStartDate || !p.calendarEndDate) {
+        container.innerHTML = '<p class="planung-empty" style="text-align: center; padding: 40px;">Bitte gib oben einen Zeitraum ein, um den Kalender anzuzeigen.</p>';
         return;
     }
     
@@ -6677,8 +6699,8 @@ function renderPlanungCalendar() {
     const monthsToRender = [];
     
     // Von Start- bis Enddatum alle dazwischenliegenden Monate sammeln
-    const start = new Date(p.startDate + 'T00:00:00');
-    const end = new Date(p.endDate + 'T00:00:00');
+    const start = new Date(p.calendarStartDate + 'T00:00:00');
+    const end = new Date(p.calendarEndDate + 'T00:00:00');
     
     let cur = new Date(start.getFullYear(), start.getMonth(), 1);
     const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
@@ -6703,7 +6725,7 @@ function renderPlanungCalendar() {
         for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             // Prüfen, ob der Tag im Zeitraum liegt
-            const isWithinRange = dateStr >= p.startDate && dateStr <= p.endDate;
+            const isWithinRange = dateStr >= p.calendarStartDate && dateStr <= p.calendarEndDate;
             
             if (isWithinRange) {
                 const dateObj = new Date(dateStr + 'T00:00:00');
@@ -6873,8 +6895,8 @@ function exportPlanungCalendar() {
     if (!container) return;
     
     const p = AppState.planung;
-    if (!p || !p.startDate || !p.endDate || !(p.selectedDays || []).length) {
-        swal('Hinweis', 'Bitte gib einen Planungszeitraum und Unterrichtstage ein, um den Kalender zu exportieren.', 'info');
+    if (!p || !p.calendarStartDate || !p.calendarEndDate) {
+        swal('Hinweis', 'Bitte gib einen Planungszeitraum ein, um den Kalender zu exportieren.', 'info');
         return;
     }
 
