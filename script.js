@@ -5794,18 +5794,18 @@ function loadPlanung() {
     // View-Modus initialisieren
     AppState.planungViewMode = 'calendar';
 
-    // Automatisch heutiges Datum als Startdatum nutzen, wenn gespeichertes in der Vergangenheit liegt
+    // Automatisch heutiges Datum als Startdatum nutzen, wenn ein neuer Tag anbricht oder die App geladen wird
     const todayObj = new Date();
     const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
 
-    if (p.calendarStartDate && p.calendarStartDate < todayStr) {
-        // Gespeichertes Startdatum ist vergangen → heute anzeigen (im Arbeitsspeicher, nicht dauerhaft speichern)
+    const lastDayKey = 'calendarLastLoadedDay';
+    const lastLoadedDay = localStorage.getItem(lastDayKey);
+
+    if (lastLoadedDay !== todayStr) {
+        // Neuer Tag angebrochen → Startdatum automatisch auf heute zurücksetzen und speichern
         p.calendarStartDate = todayStr;
-        const startEl = safeGetElement('planung-start-date');
-        if (startEl) {
-            if (startEl._flatpickr) startEl._flatpickr.setDate(todayStr, false);
-            else startEl.value = todayStr;
-        }
+        localStorage.setItem(lastDayKey, todayStr);
+        savePlanung();
     }
 
     const isCalendar = AppState.planungViewMode === 'calendar';
@@ -6734,17 +6734,15 @@ function renderPlanungCalendar() {
         return;
     }
     
-    // Effektives Startdatum: niemals vor heute (vergangene Tage ausblenden)
     const todayObj = new Date();
     const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
-    const effectiveStart = p.calendarStartDate > todayStr ? p.calendarStartDate : todayStr;
-
+    
+    // Monatssuche startet ab calendarStartDate
+    const start = new Date(p.calendarStartDate + 'T00:00:00');
+    const end = new Date(p.calendarEndDate + 'T00:00:00');
+    
     // Zu rendernde Monate bestimmen
     const monthsToRender = [];
-    
-    // Von Start- bis Enddatum alle dazwischenliegenden Monate sammeln
-    const start = new Date(effectiveStart + 'T00:00:00');
-    const end = new Date(p.calendarEndDate + 'T00:00:00');
     
     let cur = new Date(start.getFullYear(), start.getMonth(), 1);
     const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
@@ -6765,8 +6763,8 @@ function renderPlanungCalendar() {
         
         for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            // Prüfen, ob der Tag im effektiven Zeitraum liegt (ab heute / gewähltem Start bis Ende)
-            const isWithinRange = dateStr >= effectiveStart && dateStr <= p.calendarEndDate;
+            // Prüfen, ob der Tag im Zeitraum liegt (ab Startdatum bis Enddatum)
+            const isWithinRange = dateStr >= p.calendarStartDate && dateStr <= p.calendarEndDate;
             
             if (isWithinRange) {
                 const dateObj = new Date(dateStr + 'T00:00:00');
