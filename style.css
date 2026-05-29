@@ -3311,6 +3311,7 @@ body.modal-open {
     display: flex;
     gap: 6px;
     align-items: center;
+    justify-content: center;
     overflow-x: auto;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
