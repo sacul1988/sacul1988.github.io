@@ -376,6 +376,20 @@ function showModule(module) {
             
             window.forceRefreshFromCloud().then(() => {
                 console.log(`showModule: Refresh beendet, Ansicht für "${module}" wird aktualisiert.`);
+                
+                // Fokus-Verlust Schutz: Wenn der Nutzer bereits in ein Eingabefeld geklickt hat,
+                // überspringen wir das erneute Rendern, um ihn beim Schreiben/Fokussieren nicht zu stören.
+                const activeEl = document.activeElement;
+                const isUserTyping = activeEl && (
+                    (module === 'zeugnis' && typeof isZeugnisNotesTextarea === 'function' && isZeugnisNotesTextarea(activeEl)) ||
+                    (module === 'planung' && activeEl.classList && activeEl.classList.contains('planung-inhalt-input'))
+                );
+                
+                if (isUserTyping) {
+                    console.log(`showModule: Nutzer editiert bereits in "${module}". Re-Render nach Cloud-Refresh übersprungen.`);
+                    return;
+                }
+
                 if (module === 'planung') {
                     loadPlanung();
                 }

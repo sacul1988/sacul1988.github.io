@@ -854,7 +854,7 @@
                                     return true;
                                 }
 
-                                // Spezialbehandlung für Zeugnis-Modul: Wenn der Nutzer gerade schreibt, NICHT das UI neu rendern
+                                // Spezialbehandlung für Zeugnis- und Planung-Module: Wenn der Nutzer gerade schreibt, NICHT das UI neu rendern
                                 // Wir prüfen das global, bevor wir irgendwelche Render-Funktionen aufrufen
                                 const activeElement = document.activeElement;
                                 const isUserTypingInZeugnis = activeElement && 
@@ -864,10 +864,15 @@
                                                               activeElement.id.startsWith('notes-right-') || 
                                                               activeElement.id.startsWith('notes-summary-'));
 
+                                const isUserTypingInPlanung = activeElement && 
+                                                              activeElement.tagName === 'TEXTAREA' && 
+                                                              activeElement.classList && 
+                                                              activeElement.classList.contains('planung-inhalt-input');
+
                                 // Spezialbehandlung für Sitzplan-Drag: Wenn gerade ein Tisch bewegt wird, NICHT neu rendern
                                 const isDraggingSitzplan = window.isDraggingDesk === true;
 
-                                if (isUserTypingInZeugnis || isDraggingSitzplan) {
+                                if (isUserTypingInZeugnis || isUserTypingInPlanung || isDraggingSitzplan) {
                                     console.log("Realtime Update: Nutzer interagiert gerade (Tippen/Drag). UI-Refresh unterdrückt.");
                                     if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Synchronisiert (Hintergrund)';
                                     
