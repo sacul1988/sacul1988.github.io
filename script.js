@@ -6809,6 +6809,10 @@ function renderPlanungCalendar() {
 }
 
 function openCalendarDayDetails(dateStr) {
+    if (openCalendarDayDetails._busy) return;
+    openCalendarDayDetails._busy = true;
+    setTimeout(() => { openCalendarDayDetails._busy = false; }, 800);
+
     AppState.activeCalendarDay = dateStr;
     AppState.editingCalendarDayTerminId = null;
     
@@ -7604,6 +7608,10 @@ function renderContactsModule() {
 }
 
 function openContactPhonesModal(id) {
+    if (openContactPhonesModal._busy) return;
+    openContactPhonesModal._busy = true;
+    setTimeout(() => { openContactPhonesModal._busy = false; }, 800);
+
     const contact = contacts.find(c => c.id === id);
     if (!contact) return;
 
