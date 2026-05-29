@@ -5488,7 +5488,8 @@ function renderTermineList() {
             weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit'
         });
 
-        const timeDisplay = termin.timeStart ? ` <span class="termin-time" style="font-weight: 600; font-size: 0.8rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">${termin.timeStart}${termin.timeEnd ? ' - ' + termin.timeEnd : ''}</span>` : '';
+        // Uhrzeiten im Termine-Modal nicht anzeigen (timeDisplay bleibt leer)
+        const timeDisplay = '';
 
         item.innerHTML = `
             <div class="termin-info">
@@ -5791,6 +5792,16 @@ function loadPlanung() {
     if (!p.entries) p.entries = {};
     if (!p.hiddenTermine) p.hiddenTermine = [];
 
+    // Kalender-Zeitraum global laden (klassenübergreifend)
+    let globalCalendarRange = { startDate: '', endDate: '' };
+    try {
+        const savedGlobal = localStorage.getItem('planung_global_calendar_range');
+        if (savedGlobal) globalCalendarRange = JSON.parse(savedGlobal);
+    } catch (e) {}
+
+    p.calendarStartDate = globalCalendarRange.startDate || '';
+    p.calendarEndDate = globalCalendarRange.endDate || '';
+
     // View-Modus initialisieren
     AppState.planungViewMode = 'calendar';
 
@@ -5802,10 +5813,16 @@ function loadPlanung() {
     const lastLoadedDay = localStorage.getItem(lastDayKey);
 
     if (lastLoadedDay !== todayStr) {
-        // Neuer Tag angebrochen → Startdatum automatisch auf heute zurücksetzen und speichern
+        // Neuer Tag angebrochen → Startdatum auf heute zurücksetzen
         p.calendarStartDate = todayStr;
         localStorage.setItem(lastDayKey, todayStr);
-        savePlanung();
+        
+        // Direkt global speichern
+        const newGlobalRange = {
+            startDate: todayStr,
+            endDate: p.calendarEndDate || ''
+        };
+        localStorage.setItem('planung_global_calendar_range', JSON.stringify(newGlobalRange));
     }
 
     const isCalendar = AppState.planungViewMode === 'calendar';
@@ -5844,6 +5861,16 @@ function loadPlanung() {
 }
 
 function savePlanung() {
+    // Kalender-Zeitraum global speichern (klassenübergreifend)
+    const p = AppState.planung;
+    if (p) {
+        const globalRange = {
+            startDate: p.calendarStartDate || '',
+            endDate: p.calendarEndDate || ''
+        };
+        localStorage.setItem('planung_global_calendar_range', JSON.stringify(globalRange));
+    }
+
     localStorage.setItem(planungStorageKey(), JSON.stringify(AppState.planung));
     localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
     if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.triggerCloudSyncDebounced === 'function') {
