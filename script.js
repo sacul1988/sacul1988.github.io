@@ -5466,9 +5466,6 @@ function renderTermineList() {
         item.id = `termin-item-${termin.id}`;
         item.style.cursor = 'pointer';
         item.onclick = function(e) {
-            if (item.classList.contains('termin-item-editing')) {
-                return;
-            }
             toggleTerminAusblenden(termin.id, !isHidden);
         };
 
@@ -5485,14 +5482,6 @@ function renderTermineList() {
                     <span class="termin-date">${formattedDate}${timeDisplay}</span>
                     <span class="termin-title">${termin.title}</span>
                 </div>
-            </div>
-            <div class="termin-actions">
-                <button class="btn btn-sm btn-primary btn-square" onclick="event.stopPropagation(); editTermin('${termin.id}')" title="Bearbeiten">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger btn-square" onclick="event.stopPropagation(); deleteTermin('${termin.id}')" title="Löschen">
-                    <i class="fas fa-trash"></i>
-                </button>
             </div>
         `;
 
