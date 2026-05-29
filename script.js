@@ -4870,8 +4870,10 @@ function scrollToTopOfZeugnisModule() {
 
 // Spantext bei Tastatureingabe aufteilen, damit der neu getippte Text immer in Standardschriftart (schwarz) ist
 function splitSpanAtCaret(event) {
-    // Nur bei druckbaren einzelnen Zeichen (Tastatureingabe) abfangen
-    if (event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey) {
+    const isEnter = event.key === 'Enter';
+    const isPrintableChar = event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+
+    if (!isEnter && !isPrintableChar) {
         return;
     }
 
@@ -4887,10 +4889,17 @@ function splitSpanAtCaret(event) {
         span = span.parentNode;
     }
 
-    // Wenn der Cursor in einem farbigen Span steht, brechen wir aus diesem aus, damit der Text schwarz wird
+    // Wenn der Cursor in einem farbigen Span steht, brechen wir aus diesem aus, damit der Text schwarz wird bzw. der Umbruch außerhalb stattfindet
     if (span && span.tagName === 'SPAN' && span.className.match(/phrase-color-(blue|green|orange|red|yellow)/)) {
         event.preventDefault();
-        const char = event.key;
+
+        // Node erstellen: Entweder ein BR-Element (bei Enter) oder einen TextNode (bei Zeichen)
+        let newInsertedNode;
+        if (isEnter) {
+            newInsertedNode = document.createElement('br');
+        } else {
+            newInsertedNode = document.createTextNode(event.key);
+        }
 
         let textNode = null;
         let offset = 0;
@@ -4913,48 +4922,58 @@ function splitSpanAtCaret(event) {
             const text = textNode.nodeValue;
             const leftText = text.substring(0, offset);
             const rightText = text.substring(offset);
-            const newTextNode = document.createTextNode(char);
 
             if (leftText === '') {
                 // Am Anfang des Spans: davor einfügen
-                span.parentNode.insertBefore(newTextNode, span);
+                span.parentNode.insertBefore(newInsertedNode, span);
             } else if (rightText === '') {
                 // Am Ende des Spans: danach einfügen
                 if (span.nextSibling) {
-                    span.parentNode.insertBefore(newTextNode, span.nextSibling);
+                    span.parentNode.insertBefore(newInsertedNode, span.nextSibling);
                 } else {
-                    span.parentNode.appendChild(newTextNode);
+                    span.parentNode.appendChild(newInsertedNode);
                 }
             } else {
-                // In der Mitte des Spans: Span aufteilen und Text dazwischen einfügen
+                // In der Mitte des Spans: Span aufteilen und Text/Umbruch dazwischen einfügen
                 const rightSpan = span.cloneNode(false);
                 rightSpan.textContent = rightText;
                 
                 textNode.nodeValue = leftText;
                 
-                span.parentNode.insertBefore(newTextNode, span.nextSibling);
-                span.parentNode.insertBefore(rightSpan, newTextNode.nextSibling);
+                span.parentNode.insertBefore(newInsertedNode, span.nextSibling);
+                span.parentNode.insertBefore(rightSpan, newInsertedNode.nextSibling);
             }
-
-            // Cursor direkt hinter das neu getippte Zeichen setzen
-            const newRange = document.createRange();
-            newRange.setStartAfter(newTextNode);
-            newRange.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(newRange);
         } else {
             // Fallback: Einfaches Einfügen nach dem Span
-            const newTextNode = document.createTextNode(char);
             if (span.nextSibling) {
-                span.parentNode.insertBefore(newTextNode, span.nextSibling);
+                span.parentNode.insertBefore(newInsertedNode, span.nextSibling);
             } else {
-                span.parentNode.appendChild(newTextNode);
+                span.parentNode.appendChild(newInsertedNode);
             }
-            const newRange = document.createRange();
-            newRange.setStartAfter(newTextNode);
-            newRange.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(newRange);
+        }
+
+        // Cursor direkt hinter das neu eingefügte Element (BR oder TextNode) setzen
+        const newRange = document.createRange();
+        newRange.setStartAfter(newInsertedNode);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+
+        // Falls wir ein BR eingefügt haben, müssen wir bei manchen Browsern (z.B. Chrome/Safari) 
+        // sicherstellen, dass nach einem BR am Ende eines contenteditable-Blocks ein unsichtbarer Umbruch 
+        // für die Visualisierung vorhanden ist, damit die Zeile fokussierbar bleibt.
+        if (isEnter) {
+            const parent = newInsertedNode.parentNode;
+            if (parent && parent.lastChild === newInsertedNode) {
+                const extraBr = document.createElement('br');
+                parent.appendChild(extraBr);
+                
+                // Cursor MUSS vor dem extraBr (also direkt nach unserem echten BR) bleiben
+                newRange.setStartAfter(newInsertedNode);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+            }
         }
 
         // input-Event manuell triggern, damit die Notizen gespeichert werden
