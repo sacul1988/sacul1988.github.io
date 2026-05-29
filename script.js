@@ -6295,7 +6295,7 @@ function insertSelectedMitarbeitPhrases() {
         .filter(Boolean);
     
     if (selectedPhrasesData.length > 0) {
-        // Als fortlaufenden Text (ohne Absätze/Aufzählungspunkte) anhängen
+        // Als Aufzählungspunkte mit Spiegelstrich, aber ohne leere Absätze anhängen
         selectedPhrasesData.forEach(phrase => {
             currentHtml = currentHtml.trim();
             // Eventuelle Zeilenumbrüche am Ende entfernen
@@ -6303,12 +6303,11 @@ function insertSelectedMitarbeitPhrases() {
             
             const coloredHtml = `<span class="phrase-color-${phrase.color}">${phrase.text}</span>`;
             if (currentHtml === '' || currentHtml === '- ') {
-                currentHtml = coloredHtml;
+                currentHtml = `- ${coloredHtml}`;
             } else {
-                currentHtml += ' ' + coloredHtml;
+                currentHtml += `<br>- ${coloredHtml}`;
             }
         });
-        currentHtml += ' '; // Ein Leerzeichen am Ende anhängen, um direkt weitertippen zu können
         
         textarea.innerHTML = currentHtml;
         
