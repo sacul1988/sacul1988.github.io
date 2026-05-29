@@ -5,7 +5,7 @@ Diese Sätze kombinieren die Vorlagen aus dem Modal sowie alle individuellen Sä
 Die Symbole bedeuten:
 - 🔵 Blau: Sehr gut (Note 1-2)
 - 🟢 Grün: Gut (Note 2-3)
-- 🟠 Orange: Ausbaufähig (Note 3-4)
+- 🟡 Gelb: Ausbaufähig (Note 3-4)
 - 🔴 Rot: Ungenügend (Note 4-5)
 
 ## Mündliche Mitarbeit (66 Sätze)
@@ -64,16 +64,16 @@ Die Symbole bedeuten:
 52. 🟢 [Grün - Gut / Note 2-3] Unterrichtsmaterialien sind zuverlässig vorhanden.
 53. 🟢 [Grün - Gut / Note 2-3] Wenn Beteiligung vorhanden ist, sind die Beiträge richtig.
 54. 🟢 [Grün - Gut / Note 2-3] zeigt durch mündliche Beiträge, dass Unterrichtsinhalte verstanden wurden
-55. 🟠 [Orange - Ausbaufähig / Note 3-4] Aufgaben aus dem Unterricht werden grundlegend bearbeitet.
-56. 🟠 [Orange - Ausbaufähig / Note 3-4] eher zurückhaltende mündliche Mitarbeit.
-57. 🟠 [Orange - Ausbaufähig / Note 3-4] Erklärungen aus dem Unterricht können nur begrenzt für die eigene Arbeit an Aufgaben genutzt werden
-58. 🟠 [Orange - Ausbaufähig / Note 3-4] Erklärungen aus dem Unterricht können nur begrenzt für die eigene Arbeit an Aufgaben genutzt werden.
-59. 🟠 [Orange - Ausbaufähig / Note 3-4] Grundsätzlich eher zurückhaltende mündliche Mitarbeit.
-60. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Fragen nach nicht verstandenen Unterrichtsinhalten.
-61. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eher wenig mündliche Beteiligung.
-62. 🟠 [Orange - Ausbaufähig / Note 3-4] mündliche Beiträge zeigen jedoch eine eher oberflächliche / wiederholende Auseinandersetzung mit den Inhalten
-63. 🟠 [Orange - Ausbaufähig / Note 3-4] mündliche Beteiligung ist stark schwankend (teilweise gute und regelmäßige Beiträge / teilweise keine Beiträge über einen längeren Zeitraum)
-64. 🟠 [Orange - Ausbaufähig / Note 3-4] Wenig mündliche Beteiligung mit teilweise richtigen Antworten.
+55. 🟡 [Gelb - Ausbaufähig / Note 3-4] Aufgaben aus dem Unterricht werden grundlegend bearbeitet.
+56. 🟡 [Gelb - Ausbaufähig / Note 3-4] eher zurückhaltende mündliche Mitarbeit.
+57. 🟡 [Gelb - Ausbaufähig / Note 3-4] Erklärungen aus dem Unterricht können nur begrenzt für die eigene Arbeit an Aufgaben genutzt werden
+58. 🟡 [Gelb - Ausbaufähig / Note 3-4] Erklärungen aus dem Unterricht können nur begrenzt für die eigene Arbeit an Aufgaben genutzt werden.
+59. 🟡 [Gelb - Ausbaufähig / Note 3-4] Grundsätzlich eher zurückhaltende mündliche Mitarbeit.
+60. 🟡 [Gelb - Ausbaufähig / Note 3-4] häufige Fragen nach nicht verstandenen Unterrichtsinhalten.
+61. 🟡 [Gelb - Ausbaufähig / Note 3-4] insgesamt eher wenig mündliche Beteiligung.
+62. 🟡 [Gelb - Ausbaufähig / Note 3-4] mündliche Beiträge zeigen jedoch eine eher oberflächliche / wiederholende Auseinandersetzung mit den Inhalten
+63. 🟡 [Gelb - Ausbaufähig / Note 3-4] mündliche Beteiligung ist stark schwankend (teilweise gute und regelmäßige Beiträge / teilweise keine Beiträge über einen längeren Zeitraum)
+64. 🟡 [Gelb - Ausbaufähig / Note 3-4] Wenig mündliche Beteiligung mit teilweise richtigen Antworten.
 65. 🔴 [Rot - Ungenügend / Note 4-5] keine oder sehr wenig mündliche Beteiligung im Unterricht.
 66. 🔴 [Rot - Ungenügend / Note 4-5] Regelmäßiger Ausschluss vom laufenden Unterricht, da eine Bearbeitung von Aufgaben im Unterricht häufig nicht möglich ist
 
@@ -109,21 +109,21 @@ Die Symbole bedeuten:
 28. 🟢 [Grün - Gut / Note 2-3] verstandene Aufgaben werden zuverlässig und ordentlich erledigt.
 29. 🟢 [Grün - Gut / Note 2-3] zuverlässige Bearbeitung von Aufgaben in der Arbeitszeit
 30. 🟢 [Grün - Gut / Note 2-3] überwiegend selbständige Arbeitsweise
-31. 🟠 [Orange - Ausbaufähig / Note 3-4] Benötigt häufig eine Aufforderung, um mit der Arbeit an Aufgaben zu beginnen.
-32. 🟠 [Orange - Ausbaufähig / Note 3-4] Benötigt oft eine direkte Aufforderung, um mit der Arbeit an Aufgaben zu beginnen.
-33. 🟠 [Orange - Ausbaufähig / Note 3-4] braucht teilweise regelmäßige Aufforderungen, um Aufgaben in der Arbeitszeit zu bearbeiten.
-34. 🟠 [Orange - Ausbaufähig / Note 3-4] etwas unordentliche Heftführung im abgegebenen Heft.
-35. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden innerhalb der Arbeitszeit oft nicht fertiggestellt
-36. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden innerhalb der Arbeitszeit oft nicht fertiggestellt.
-37. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden insgesamt eher sehr langsam bearbeitet
-38. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden insgesamt eher sehr langsam bearbeitet.
-39. 🟠 [Orange - Ausbaufähig / Note 3-4] gestellte Aufgaben werden nicht immer in der vorgegebenen Zeit bearbeitet.
-40. 🟠 [Orange - Ausbaufähig / Note 3-4] Heft abgegeben mit leicht unterdurchschnittlicher Ordentlichkeit.
-41. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eher langsame und unkonzentrierte Arbeit an gestellten Aufgaben
-42. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eine eher unstrukturierte Arbeitsweise (manchmal gelingt es gut, manchmal eher nicht)
-43. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eine etwas unordentliche Arbeitsweise.
-44. 🟠 [Orange - Ausbaufähig / Note 3-4] Nutzt teilweise (trotz Hinweis) nicht zugelassene Arbeitsmittel für die Bearbeitung von Aufgaben. (z.B. pinke Stifte für die Arbeit in Matheheften)
-45. 🟠 [Orange - Ausbaufähig / Note 3-4] Nutzt teilweise (trotz Hinweis) unpassende Arbeitsmittel für die Bearbeitung von Aufgaben.
+31. 🟡 [Gelb - Ausbaufähig / Note 3-4] Benötigt häufig eine Aufforderung, um mit der Arbeit an Aufgaben zu beginnen.
+32. 🟡 [Gelb - Ausbaufähig / Note 3-4] Benötigt oft eine direkte Aufforderung, um mit der Arbeit an Aufgaben zu beginnen.
+33. 🟡 [Gelb - Ausbaufähig / Note 3-4] braucht teilweise regelmäßige Aufforderungen, um Aufgaben in der Arbeitszeit zu bearbeiten.
+34. 🟡 [Gelb - Ausbaufähig / Note 3-4] etwas unordentliche Heftführung im abgegebenen Heft.
+35. 🟡 [Gelb - Ausbaufähig / Note 3-4] gestellte Aufgaben werden innerhalb der Arbeitszeit oft nicht fertiggestellt
+36. 🟡 [Gelb - Ausbaufähig / Note 3-4] gestellte Aufgaben werden innerhalb der Arbeitszeit oft nicht fertiggestellt.
+37. 🟡 [Gelb - Ausbaufähig / Note 3-4] gestellte Aufgaben werden insgesamt eher sehr langsam bearbeitet
+38. 🟡 [Gelb - Ausbaufähig / Note 3-4] gestellte Aufgaben werden insgesamt eher sehr langsam bearbeitet.
+39. 🟡 [Gelb - Ausbaufähig / Note 3-4] gestellte Aufgaben werden nicht immer in der vorgegebenen Zeit bearbeitet.
+40. 🟡 [Gelb - Ausbaufähig / Note 3-4] Heft abgegeben mit leicht unterdurchschnittlicher Ordentlichkeit.
+41. 🟡 [Gelb - Ausbaufähig / Note 3-4] insgesamt eher langsame und unkonzentrierte Arbeit an gestellten Aufgaben
+42. 🟡 [Gelb - Ausbaufähig / Note 3-4] insgesamt eine eher unstrukturierte Arbeitsweise (manchmal gelingt es gut, manchmal eher nicht)
+43. 🟡 [Gelb - Ausbaufähig / Note 3-4] insgesamt eine etwas unordentliche Arbeitsweise.
+44. 🟡 [Gelb - Ausbaufähig / Note 3-4] Nutzt teilweise (trotz Hinweis) nicht zugelassene Arbeitsmittel für die Bearbeitung von Aufgaben. (z.B. pinke Stifte für die Arbeit in Matheheften)
+45. 🟡 [Gelb - Ausbaufähig / Note 3-4] Nutzt teilweise (trotz Hinweis) unpassende Arbeitsmittel für die Bearbeitung von Aufgaben.
 46. 🔴 [Rot - Ungenügend / Note 4-5] fast keine eigenständige Arbeit an Aufgaben möglich.
 47. 🔴 [Rot - Ungenügend / Note 4-5] Fast keine eigenständige Arbeit an Aufgaben möglich.
 48. 🔴 [Rot - Ungenügend / Note 4-5] insgesamt eine eher unselbstständige Arbeitsweise
@@ -134,15 +134,15 @@ Die Symbole bedeuten:
 
 ## Sozialverhalten (1 Sätze)
 
-1. 🟠 [Orange - Ausbaufähig / Note 3-4] vereinbarte Regeln zur mathematischen Schreibweise werden nicht immer eingehalten
+1. 🟡 [Gelb - Ausbaufähig / Note 3-4] vereinbarte Regeln zur mathematischen Schreibweise werden nicht immer eingehalten
 
 ## Störungen (19 Sätze)
 
 1. 🟢 [Grün - Gut / Note 2-3] Sehr häufige und ausdauernde Toilettengänge. (In jeder Stunde!)
-2. 🟠 [Orange - Ausbaufähig / Note 3-4] häufige Ablenkungen im Unterricht durch andere Mitschüler*innen.
-3. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr häufige und ausdauernde Toilettengänge.
-4. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr regelmäßige Ablenkungen durch andere Mitschüler.
-5. 🟠 [Orange - Ausbaufähig / Note 3-4] teilweise gibt es kleine Ablenkungen im Unterricht.
+2. 🟡 [Gelb - Ausbaufähig / Note 3-4] häufige Ablenkungen im Unterricht durch andere Mitschüler*innen.
+3. 🟡 [Gelb - Ausbaufähig / Note 3-4] sehr häufige und ausdauernde Toilettengänge.
+4. 🟡 [Gelb - Ausbaufähig / Note 3-4] sehr regelmäßige Ablenkungen durch andere Mitschüler.
+5. 🟡 [Gelb - Ausbaufähig / Note 3-4] teilweise gibt es kleine Ablenkungen im Unterricht.
 6. 🔴 [Rot - Ungenügend / Note 4-5] Beschäftigung mit anderen Dingen innerhalb des Unterrichts.
 7. 🔴 [Rot - Ungenügend / Note 4-5] Bewusste Ablenkung anderer Mitschüler*innen.
 8. 🔴 [Rot - Ungenügend / Note 4-5] bewusste und gezielte Ablenkung anderer Mitschüler*innen.
@@ -166,14 +166,14 @@ Die Symbole bedeuten:
 4. 🟢 [Grün - Gut / Note 2-3] inhaltliche Vorgaben werden eingehalten (z.B. beim Zeichnen)
 5. 🟢 [Grün - Gut / Note 2-3] Insgesamt eine noch knapp zufriedenstellende Arbeitsweise.
 6. 🟢 [Grün - Gut / Note 2-3] mathematische Inhalte sind gut und sicher verstanden
-7. 🟠 [Orange - Ausbaufähig / Note 3-4] Benötigt meiste eine Aufforderung durch den Lehrer, um mit der Arbeit zu beginnen.
-8. 🟠 [Orange - Ausbaufähig / Note 3-4] braucht sehr häufige Erinnerungen, um mit der Arbeit zu beginnen oder diese fortzusetzen.
-9. 🟠 [Orange - Ausbaufähig / Note 3-4] Grundsätzlich eine sehr langsame Arbeitsweise.
-10. 🟠 [Orange - Ausbaufähig / Note 3-4] insgesamt eher langsame Arbeitsweise
-11. 🟠 [Orange - Ausbaufähig / Note 3-4] sehr langsame Arbeitsweise.
-12. 🟠 [Orange - Ausbaufähig / Note 3-4] Teilweise gibt es melden, jedoch ist ist keine Regelmäßigkeit zu erkennen.
-13. 🟠 [Orange - Ausbaufähig / Note 3-4] Vorgaben zur mathematischen Darstellungsweise (z.B. beim Zeichnen) werden nicht immer eingehalten
-14. 🟠 [Orange - Ausbaufähig / Note 3-4] Vorgaben zur mathematischen Darstellungsweise (z.B. beim Zeichnen) werden nicht immer eingehalten.
+7. 🟡 [Gelb - Ausbaufähig / Note 3-4] Benötigt meiste eine Aufforderung durch den Lehrer, um mit der Arbeit zu beginnen.
+8. 🟡 [Gelb - Ausbaufähig / Note 3-4] braucht sehr häufige Erinnerungen, um mit der Arbeit zu beginnen oder diese fortzusetzen.
+9. 🟡 [Gelb - Ausbaufähig / Note 3-4] Grundsätzlich eine sehr langsame Arbeitsweise.
+10. 🟡 [Gelb - Ausbaufähig / Note 3-4] insgesamt eher langsame Arbeitsweise
+11. 🟡 [Gelb - Ausbaufähig / Note 3-4] sehr langsame Arbeitsweise.
+12. 🟡 [Gelb - Ausbaufähig / Note 3-4] Teilweise gibt es melden, jedoch ist ist keine Regelmäßigkeit zu erkennen.
+13. 🟡 [Gelb - Ausbaufähig / Note 3-4] Vorgaben zur mathematischen Darstellungsweise (z.B. beim Zeichnen) werden nicht immer eingehalten
+14. 🟡 [Gelb - Ausbaufähig / Note 3-4] Vorgaben zur mathematischen Darstellungsweise (z.B. beim Zeichnen) werden nicht immer eingehalten.
 15. 🔴 [Rot - Ungenügend / Note 4-5] Auch mit viel Unterstützung insgesamt eher ein geringer Lernfortschritt.
 16. 🔴 [Rot - Ungenügend / Note 4-5] große allgemeine Schwierigkeiten im Fach Mathematik
 17. 🔴 [Rot - Ungenügend / Note 4-5] große allgemeine Schwierigkeiten im Fach Mathematik.

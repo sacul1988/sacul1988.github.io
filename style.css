@@ -2804,15 +2804,15 @@ td.planung-col-inhalt {
 }
 
 .wizard-sentence-item.level-orange {
-    border-left: 5px solid #f97316;
-    background-color: #fff7ed;
+    border-left: 5px solid #ca8a04;
+    background-color: #fefdf0;
 }
 .wizard-sentence-item.level-orange:hover {
-    background-color: #ffedd5;
+    background-color: #fef9c3;
 }
 .wizard-sentence-item.level-orange.selected {
-    background-color: #fed7aa;
-    border-color: #f97316;
+    background-color: #fef08a;
+    border-color: #ca8a04;
 }
 
 .wizard-sentence-item.level-red {
@@ -2949,7 +2949,7 @@ td.planung-col-inhalt {
     background-color: #22c55e;
 }
 .filter-circle-btn[data-color="orange"] {
-    background-color: #f97316;
+    background-color: #ca8a04;
 }
 .filter-circle-btn[data-color="red"] {
     background-color: #ef4444;
@@ -2978,7 +2978,7 @@ td.planung-col-inhalt {
     color: #22c55e !important;
 }
 .phrase-color-orange {
-    color: #f97316 !important;
+    color: #ca8a04 !important;
 }
 .phrase-color-red {
     color: #ef4444 !important;
