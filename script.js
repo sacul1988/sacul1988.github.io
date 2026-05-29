@@ -7561,27 +7561,23 @@ function renderContactsModule() {
         ];
         
         let detailsHtml = '';
-        if (phoneList.length > 0 && (phoneList[0].label || phoneList[0].number)) {
-            detailsHtml = `
-                <table style="width: 100%; border: none; margin: 0; background: transparent;">
-                    ${phoneList.map((p, idx) => {
-                        const borderStyle = idx < phoneList.length - 1 ? 'border-bottom: 1px solid var(--border-color);' : 'border: none;';
-                        return `
-                            <tr style="${borderStyle}">
-                                <td style="border: none; padding: 6px 12px; font-weight: 500; width: 40%; color: var(--dark-color);">${escapeHtml(p.label || '-')}</td>
-                                <td style="border: none; padding: 6px 12px; color: var(--dark-color);">${escapeHtml(p.number || '-')}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </table>
-            `;
+        const validPhones = phoneList.filter(p => p.label || p.number);
+        if (validPhones.length > 0) {
+            const parts = validPhones.map(p => {
+                const label = escapeHtml(p.label || '');
+                const number = escapeHtml(p.number || '');
+                if (label && number) return `<span style="font-weight:500;">${label}:</span> ${number}`;
+                if (label) return `<span style="font-weight:500;">${label}</span>`;
+                return number;
+            });
+            detailsHtml = `<span style="color: var(--dark-color);">${parts.join('<span style="color: var(--border-color); margin: 0 8px;">|</span>')}</span>`;
         } else {
-            detailsHtml = `<span style="color: var(--grey-color); padding-left: 12px;">Keine Telefonnummern hinterlegt</span>`;
+            detailsHtml = `<span style="color: var(--grey-color);">Keine Telefonnummern hinterlegt</span>`;
         }
         
         tr.innerHTML = `
             <td style="vertical-align: middle;"><strong>${escapeHtml(c.childName || '-')}</strong></td>
-            <td style="padding: 0; vertical-align: middle;">${detailsHtml}</td>
+            <td style="vertical-align: middle; padding: 8px 12px;">${detailsHtml}</td>
             <td style="text-align: right; white-space: nowrap; vertical-align: middle;">
                 <button onclick="openEditContactModal('${c.id}')" class="btn btn-primary btn-circle-sm" title="Bearbeiten" style="margin-right: 4px;">
                     <i class="fas fa-edit"></i>
