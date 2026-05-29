@@ -63,14 +63,19 @@
                     <div class="card-header">
                         <h2>Klassen</h2>
                         <div class="card-header-actions">
-                            <button class="btn btn-primary btn-icon" onclick="showModal('add-class-modal')">
-                                <i class="fas fa-plus"></i> <span class="btn-text">Klasse hinzufügen</span>
-                            </button>
-                            <button class="btn btn-primary btn-icon" onclick="exportAllData(event)" title="Alle Daten als Datei exportieren">
-                                <i class="fas fa-arrow-down"></i> <span class="btn-text">Exportieren</span>
-                            </button>
-                            <button class="btn btn-secondary btn-icon" onclick="handleImportButtonClick(event)" title="Daten aus Datei importieren">
-                                <i class="fas fa-arrow-up"></i> <span class="btn-text">Importieren</span>
+                            <div class="desktop-header-buttons">
+                                <button class="btn btn-primary btn-icon" onclick="showModal('add-class-modal')">
+                                    <i class="fas fa-plus"></i> <span class="btn-text">Klasse hinzufügen</span>
+                                </button>
+                                <button class="btn btn-primary btn-icon" onclick="exportAllData(event)" title="Alle Daten als Datei exportieren">
+                                    <i class="fas fa-arrow-down"></i> <span class="btn-text">Exportieren</span>
+                                </button>
+                                <button class="btn btn-secondary btn-icon" onclick="handleImportButtonClick(event)" title="Daten aus Datei importieren">
+                                    <i class="fas fa-arrow-up"></i> <span class="btn-text">Importieren</span>
+                                </button>
+                            </div>
+                            <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Klassen', '#home-page .desktop-header-buttons')">
+                                <i class="fas fa-ellipsis-h"></i>
                             </button>
                         </div>
                     </div>

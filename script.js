@@ -4789,9 +4789,9 @@ function renderZeugnisModule() {
         const gradesSelectorHtml = getGradesSelectorHtml(student, index);
         
         card.innerHTML = `
-            <div class="card-header">
-                <h3>${student.name}</h3>
-                <div style="display: flex; gap: 8px;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
+                <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
+                <div style="display: flex; gap: 6px; flex-shrink: 0;">
                     <button class="btn btn-sm btn-info" onclick="scrollToTopOfZeugnisModule()">Zurück</button>
                     <button class="btn btn-sm btn-primary" onclick="openMitarbeitAssistant(${index})">Formulierungshilfen</button>
                 </div>
