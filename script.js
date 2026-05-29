@@ -481,6 +481,7 @@ function showModal(modalId) {
 
     modalContainer.style.display = 'flex';
     modalContainer.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
 
     // Alle Modals ausblenden
     const modals = document.querySelectorAll('.modal');
@@ -519,6 +520,8 @@ function hideModal() {
             });
         }
     }
+
+    document.body.classList.remove('modal-open');
 
     // Sitzplan-spezifische Logik: selectedDesk zurücksetzen und Auswahl aufheben
     selectedDesk = null;
@@ -1151,6 +1154,45 @@ document.addEventListener('DOMContentLoaded', function() {
         homeLink.addEventListener('click', (e) => {
             e.preventDefault();
             showPage('home');
+        });
+    }
+
+    // Verhindere das Scrollen des Hintergrunds bei Berührung des Modals (ausgenommen scrollbare Elemente)
+    const modalContainer = document.getElementById('modal-container');
+    if (modalContainer) {
+        modalContainer.addEventListener('touchmove', function(e) {
+            let isScrollable = false;
+            let el = e.target;
+            while (el && el !== modalContainer) {
+                const style = window.getComputedStyle(el);
+                const overflowY = style.getPropertyValue('overflow-y');
+                const isScrollableStyle = overflowY === 'auto' || overflowY === 'scroll';
+                const hasScrollableContent = el.scrollHeight > el.clientHeight;
+                if (isScrollableStyle && hasScrollableContent) {
+                    isScrollable = true;
+                    break;
+                }
+                el = el.parentNode;
+            }
+            if (!isScrollable) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    }
+
+    // Auto-Kategorisierung während des Tippens im Formulierungshilfen-Modal
+    const newPhraseInput = document.getElementById('wizard-new-phrase-input');
+    const newPhraseCategory = document.getElementById('wizard-new-phrase-category');
+    if (newPhraseInput && newPhraseCategory) {
+        newPhraseInput.addEventListener('input', function() {
+            if (!window.isCategoryManuallySelected) {
+                const detected = autoDetectCategory(newPhraseInput.value);
+                newPhraseCategory.value = detected;
+            }
+        });
+        
+        newPhraseCategory.addEventListener('change', function() {
+            window.isCategoryManuallySelected = true;
         });
     }
 });
@@ -5904,6 +5946,24 @@ function escapeHtml(str) {
 
 let customPhrases = JSON.parse(localStorage.getItem('formulierungshilfen') || '[]');
 
+const PhraseCategories = {
+    mitarbeit: { name: 'Mündliche Mitarbeit', keywords: ['meldet', 'beteiligung', 'mündlich', 'beiträge', 'beitrag', 'äußert', 'gespräch', 'unterricht', 'wortmeldung', 'antworten', 'beteiligt'] },
+    arbeitsverhalten: { name: 'Arbeitsverhalten', keywords: ['arbeitet', 'konzentriert', 'hausaufgaben', 'sorgfalt', 'ordentlich', 'heft', 'aufgaben', 'tempo', 'ausdauer', 'ausdauernd', 'arbeitsplatz', 'material', 'selbstständig', 'selbständig', 'allein', 'hilfe', 'eigeninitiative', 'struktur', 'organisiert', 'planung', 'eigenständig', 'motiviert', 'interesse', 'interessiert', 'eifer', 'fleißig', 'bereitwillig', 'anstrengung', 'engagiert', 'freude', 'aktiv', 'ablenken', 'ablenkung', 'aufmerksam', 'aufmerksamkeit', 'bei der sache', 'fokussiert'] },
+    sozialverhalten: { name: 'Sozialverhalten', keywords: ['gruppe', 'partner', 'mitschüler', 'sozial', 'hilfsbereit', 'rücksichtsvoll', 'regeln', 'stört', 'verhalten', 'umgang', 'freundlich', 'team', 'fair'] },
+    sonstiges: { name: 'Sonstiges', keywords: [] }
+};
+
+function autoDetectCategory(text) {
+    const textLower = (text || '').toLowerCase();
+    for (const [key, cat] of Object.entries(PhraseCategories)) {
+        if (key === 'sonstiges') continue;
+        if (cat.keywords.some(kw => textLower.includes(kw))) {
+            return key;
+        }
+    }
+    return 'sonstiges';
+}
+
 window.setFormulierungshilfen = function(newPhrases) {
     if (Array.isArray(newPhrases)) {
         customPhrases = newPhrases;
@@ -5934,8 +5994,12 @@ function openMitarbeitAssistant(studentIndex) {
     // Eingabefelder zurücksetzen
     document.getElementById('wizard-new-phrase-input').value = '';
     document.getElementById('wizard-new-phrase-color').value = 'blue';
+    if (document.getElementById('wizard-new-phrase-category')) {
+        document.getElementById('wizard-new-phrase-category').value = 'mitarbeit';
+    }
     document.getElementById('wizard-edit-phrase-id').value = '';
     document.getElementById('wizard-cancel-edit-btn').style.display = 'none';
+    window.isCategoryManuallySelected = false;
     
     // Farbefilter zurücksetzen (keine aktiv)
     window.activeWizardColorFilters = [];
@@ -5960,7 +6024,7 @@ function renderMitarbeitWizard() {
             </div>
         `;
     } else {
-        // Sätze farblich sortieren (blau, grün, orange, rot)
+        // Sätze farblich sortieren (blau, grün, orange, rot) und alphabetisch
         const colorOrder = { blue: 1, green: 2, orange: 3, red: 4 };
         const sortedPhrases = [...customPhrases].sort((a, b) => {
             const orderA = colorOrder[a.color] || 99;
@@ -5969,8 +6033,10 @@ function renderMitarbeitWizard() {
             return a.text.localeCompare(b.text, 'de');
         });
         
-        // Filter anwenden
-        const filteredPhrases = sortedPhrases.filter(phrase => (window.activeWizardColorFilters || []).includes(phrase.color));
+        // Filter anwenden (falls keine Filter aktiv, zeige alle)
+        const filteredPhrases = window.activeWizardColorFilters.length === 0
+            ? sortedPhrases
+            : sortedPhrases.filter(phrase => window.activeWizardColorFilters.includes(phrase.color));
         
         if (filteredPhrases.length === 0) {
             listContainer.innerHTML = `
@@ -5980,23 +6046,54 @@ function renderMitarbeitWizard() {
                 </div>
             `;
         } else {
-            listContainer.innerHTML = filteredPhrases.map((phrase) => {
-                const isSelected = AppMitarbeitWizardState.selectedPhrases.includes(phrase.id);
-                return `
-                    <div class="wizard-sentence-item level-${phrase.color} ${isSelected ? 'selected' : ''}" onclick="toggleMitarbeitPhraseById('${phrase.id}')">
-                        <input type="checkbox" id="phrase-checkbox-${phrase.id}" ${isSelected ? 'checked' : ''}>
-                        <label class="wizard-sentence-label" for="phrase-checkbox-${phrase.id}">${phrase.text}</label>
-                        <div class="wizard-item-actions">
-                            <button class="btn btn-sm btn-light" onclick="event.stopPropagation(); editCustomPhrase('${phrase.id}')" title="Bearbeiten">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteCustomPhrase('${phrase.id}')" title="Löschen">
-                                <i class="fas fa-trash"></i>
-                            </button>
+            // Nach Kategorien gruppieren
+            const categoriesOrder = ['mitarbeit', 'arbeitsverhalten', 'sozialverhalten', 'sonstiges'];
+            const grouped = {};
+            categoriesOrder.forEach(catKey => {
+                grouped[catKey] = [];
+            });
+            
+            filteredPhrases.forEach(phrase => {
+                const cat = phrase.category || autoDetectCategory(phrase.text);
+                if (grouped[cat]) {
+                    grouped[cat].push(phrase);
+                } else {
+                    grouped['sonstiges'].push(phrase);
+                }
+            });
+            
+            let html = '';
+            categoriesOrder.forEach(catKey => {
+                const phrasesInCat = grouped[catKey];
+                if (phrasesInCat.length > 0) {
+                    const catName = PhraseCategories[catKey].name;
+                    html += `
+                        <div class="wizard-category-group">
+                            <div class="wizard-category-header">${catName}</div>
+                            <div class="wizard-category-body">
+                                ${phrasesInCat.map(phrase => {
+                                    const isSelected = AppMitarbeitWizardState.selectedPhrases.includes(phrase.id);
+                                    return `
+                                        <div class="wizard-sentence-item level-${phrase.color} ${isSelected ? 'selected' : ''}" onclick="toggleMitarbeitPhraseById('${phrase.id}')">
+                                            <input type="checkbox" id="phrase-checkbox-${phrase.id}" ${isSelected ? 'checked' : ''}>
+                                            <label class="wizard-sentence-label" for="phrase-checkbox-${phrase.id}">${phrase.text}</label>
+                                            <div class="wizard-item-actions">
+                                                <button class="btn btn-sm btn-light" onclick="event.stopPropagation(); editCustomPhrase('${phrase.id}')" title="Bearbeiten">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteCustomPhrase('${phrase.id}')" title="Löschen">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
                         </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }
+            });
+            listContainer.innerHTML = html;
         }
     }
     
@@ -6026,12 +6123,14 @@ function renderMitarbeitWizard() {
 function saveCustomPhrase() {
     const inputEl = document.getElementById('wizard-new-phrase-input');
     const colorEl = document.getElementById('wizard-new-phrase-color');
+    const categoryEl = document.getElementById('wizard-new-phrase-category');
     const editIdEl = document.getElementById('wizard-edit-phrase-id');
     
     if (!inputEl || !colorEl) return;
     
     const textVal = inputEl.value.trim();
     const colorVal = colorEl.value;
+    const categoryVal = categoryEl ? categoryEl.value : autoDetectCategory(textVal);
     const editId = editIdEl.value;
     
     if (textVal === '') {
@@ -6048,7 +6147,8 @@ function saveCustomPhrase() {
         const newPhrase = {
             id: 'phrase_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             text: textVal,
-            color: colorVal
+            color: colorVal,
+            category: categoryVal
         };
         customPhrases.push(newPhrase);
     } else {
@@ -6057,6 +6157,7 @@ function saveCustomPhrase() {
         if (phrase) {
             phrase.text = textVal;
             phrase.color = colorVal;
+            phrase.category = categoryVal;
         }
         
         // Editor-Modus zurücksetzen
@@ -6072,6 +6173,8 @@ function saveCustomPhrase() {
     // Formular zurücksetzen
     inputEl.value = '';
     colorEl.value = 'blue';
+    if (categoryEl) categoryEl.value = 'mitarbeit';
+    window.isCategoryManuallySelected = false;
     
     // Cloud-Sync synchronisieren
     saveData();
@@ -6086,6 +6189,7 @@ function editCustomPhrase(phraseId) {
     
     const inputEl = document.getElementById('wizard-new-phrase-input');
     const colorEl = document.getElementById('wizard-new-phrase-color');
+    const categoryEl = document.getElementById('wizard-new-phrase-category');
     const editIdEl = document.getElementById('wizard-edit-phrase-id');
     const cancelBtn = document.getElementById('wizard-cancel-edit-btn');
     
@@ -6094,20 +6198,29 @@ function editCustomPhrase(phraseId) {
         inputEl.focus();
     }
     if (colorEl) colorEl.value = phrase.color;
+    if (categoryEl) {
+        categoryEl.value = phrase.category || autoDetectCategory(phrase.text);
+    }
     if (editIdEl) editIdEl.value = phrase.id;
     if (cancelBtn) cancelBtn.style.display = 'inline-block';
+    
+    // Beim Bearbeiten nehmen wir an, dass der Benutzer die Kategorie absichtlich gesetzt/bestätigt hat
+    window.isCategoryManuallySelected = true;
 }
 
 function cancelEditPhrase() {
     const inputEl = document.getElementById('wizard-new-phrase-input');
     const colorEl = document.getElementById('wizard-new-phrase-color');
+    const categoryEl = document.getElementById('wizard-new-phrase-category');
     const editIdEl = document.getElementById('wizard-edit-phrase-id');
     const cancelBtn = document.getElementById('wizard-cancel-edit-btn');
     
     if (inputEl) inputEl.value = '';
     if (colorEl) colorEl.value = 'blue';
+    if (categoryEl) categoryEl.value = 'mitarbeit';
     if (editIdEl) editIdEl.value = '';
     if (cancelBtn) cancelBtn.style.display = 'none';
+    window.isCategoryManuallySelected = false;
 }
 
 function deleteCustomPhrase(phraseId) {

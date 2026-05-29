@@ -3242,3 +3242,45 @@ div.notes-textarea:empty::before {
 .btn-grade-select.active.grade-very-bad {
     background-color: #6c757d !important;
 }
+
+/* Scroll-Sperre und Scroll-Isolierung für Modals */
+body.modal-open {
+    overflow: hidden !important;
+    overscroll-behavior: contain;
+}
+
+.modal, 
+.wizard-sentences-list, 
+.hw-history-container, 
+.termine-list-container {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Kategorisierung der Formulierungshilfen */
+.wizard-category-group {
+    margin-bottom: 20px;
+}
+
+.wizard-category-group:last-child {
+    margin-bottom: 0;
+}
+
+.wizard-category-header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 10px;
+    margin-top: 8px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 6px;
+    user-select: none;
+}
+
+.wizard-category-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
