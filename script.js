@@ -6797,6 +6797,7 @@ function renderPlanungCalendar() {
 
 function openCalendarDayDetails(dateStr) {
     AppState.activeCalendarDay = dateStr;
+    AppState.editingCalendarDayTerminId = null;
     
     // Titel im Modal aktualisieren (Wochentag, DD.MM.YYYY)
     const dateObj = new Date(dateStr + 'T00:00:00');
@@ -6809,6 +6810,9 @@ function openCalendarDayDetails(dateStr) {
     const timeEndEl = document.getElementById('calendar-day-new-termin-timeend');
     if (timeStartEl) timeStartEl.value = '';
     if (timeEndEl) timeEndEl.value = '';
+    
+    // Formularknöpfe zurücksetzen
+    updateCalendarDayFormUI();
     
     // Terminliste für diesen Tag rendern
     renderCalendarDayTermineList(dateStr);
@@ -6827,10 +6831,15 @@ function renderCalendarDayTermineList(dateStr) {
     } else {
         listContainer.innerHTML = dayTermine.map(t => {
             const timeDisplay = t.timeStart ? ` <span style="font-weight: 500; font-size: 0.85rem; color: #64748b; margin-right: 6px;">(${t.timeStart}${t.timeEnd ? ' - ' + t.timeEnd : ''})</span>` : '';
+            const isEditing = AppState.editingCalendarDayTerminId === t.id;
+            const itemStyle = isEditing ? 'background: #eff6ff; border-color: #3b82f6;' : '';
             return `
-                <div class="calendar-modal-termin-item">
+                <div class="calendar-modal-termin-item" style="${itemStyle}">
                     <span>${timeDisplay}${escapeHtml(t.title || '')}</span>
                     <div style="display: flex; gap: 4px;">
+                        <button class="btn btn-sm btn-primary btn-square" onclick="editCalendarDayTermin('${t.id}')" title="Diesen Termin bearbeiten">
+                            <i class="fas fa-edit"></i>
+                        </button>
                         <button class="btn btn-sm btn-danger btn-square" onclick="deleteCalendarDayTermin('${t.id}')" title="Diesen Termin löschen">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -6859,8 +6868,21 @@ function addCalendarDayTermin() {
     }
     
     if (!AppState.termine) AppState.termine = [];
-    const newId = Date.now().toString();
-    AppState.termine.push({ id: newId, title: title, date: dateStr, timeStart: timeStart, timeEnd: timeEnd });
+    
+    if (AppState.editingCalendarDayTerminId) {
+        // Bestehenden Termin bearbeiten
+        const idx = AppState.termine.findIndex(t => t.id === AppState.editingCalendarDayTerminId);
+        if (idx !== -1) {
+            AppState.termine[idx].title = title;
+            AppState.termine[idx].timeStart = timeStart;
+            AppState.termine[idx].timeEnd = timeEnd;
+        }
+        AppState.editingCalendarDayTerminId = null;
+    } else {
+        // Neuen Termin hinzufügen
+        const newId = Date.now().toString();
+        AppState.termine.push({ id: newId, title: title, date: dateStr, timeStart: timeStart, timeEnd: timeEnd });
+    }
     
     saveTermine();
     titleInput.value = '';
@@ -6868,6 +6890,7 @@ function addCalendarDayTermin() {
     if (timeEndInput) timeEndInput.value = '';
     
     renderCalendarDayTermineList(dateStr);
+    updateCalendarDayFormUI();
     renderPlanung();
 }
 
@@ -6884,6 +6907,18 @@ function deleteCalendarDayTermin(id) {
             if (!deletedIds.includes(id)) deletedIds.push(id);
             localStorage.setItem('deletedTermineIds', JSON.stringify(deletedIds));
             AppState.termine = (AppState.termine || []).filter(t => t.id !== id);
+            
+            if (AppState.editingCalendarDayTerminId === id) {
+                AppState.editingCalendarDayTerminId = null;
+                updateCalendarDayFormUI();
+                
+                // Inputs leeren
+                document.getElementById('calendar-day-new-termin-title').value = '';
+                const startIn = document.getElementById('calendar-day-new-termin-timestart');
+                const endIn = document.getElementById('calendar-day-new-termin-timeend');
+                if (startIn) startIn.value = '';
+                if (endIn) endIn.value = '';
+            }
             
             saveTermine();
             
@@ -7185,5 +7220,59 @@ function selectTimeQuick(timeVal, type) {
 
 window.openTimeMinutesPopup = openTimeMinutesPopup;
 window.selectTimeQuick = selectTimeQuick;
+
+function editCalendarDayTermin(id) {
+    const termin = (AppState.termine || []).find(t => t.id === id);
+    if (!termin) return;
+    
+    AppState.editingCalendarDayTerminId = id;
+    
+    const titleInput = document.getElementById('calendar-day-new-termin-title');
+    const startInput = document.getElementById('calendar-day-new-termin-timestart');
+    const endInput = document.getElementById('calendar-day-new-termin-timeend');
+    
+    if (titleInput) titleInput.value = termin.title || '';
+    if (startInput) startInput.value = termin.timeStart || '';
+    if (endInput) endInput.value = termin.timeEnd || '';
+    
+    renderCalendarDayTermineList(AppState.activeCalendarDay);
+    updateCalendarDayFormUI();
+}
+
+function updateCalendarDayFormUI() {
+    const isEditing = !!AppState.editingCalendarDayTerminId;
+    const container = document.getElementById('calendar-day-add-btn-container');
+    if (!container) return;
+    
+    if (isEditing) {
+        container.innerHTML = `
+            <button class="btn btn-secondary" onclick="cancelEditCalendarDayTermin()" style="min-height: 36px; padding: 0 16px; margin-right: 6px;">Abbrechen</button>
+            <button class="btn btn-primary" onclick="addCalendarDayTermin()" style="min-height: 36px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-save"></i> Speichern</button>
+        `;
+    } else {
+        container.innerHTML = `
+            <button class="btn btn-primary" onclick="addCalendarDayTermin()" style="min-height: 36px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-plus"></i> Hinzufügen</button>
+        `;
+    }
+}
+
+function cancelEditCalendarDayTermin() {
+    AppState.editingCalendarDayTerminId = null;
+    
+    const titleInput = document.getElementById('calendar-day-new-termin-title');
+    const startInput = document.getElementById('calendar-day-new-termin-timestart');
+    const endInput = document.getElementById('calendar-day-new-termin-timeend');
+    
+    if (titleInput) titleInput.value = '';
+    if (startInput) startInput.value = '';
+    if (endInput) endInput.value = '';
+    
+    renderCalendarDayTermineList(AppState.activeCalendarDay);
+    updateCalendarDayFormUI();
+}
+
+window.editCalendarDayTermin = editCalendarDayTermin;
+window.updateCalendarDayFormUI = updateCalendarDayFormUI;
+window.cancelEditCalendarDayTermin = cancelEditCalendarDayTermin;
 
 
