@@ -3032,7 +3032,8 @@ function exportAllData(event) {
         const exportData = {
             version: "1.0",
             timestamp: new Date().toISOString(),
-            classes: classes
+            classes: classes,
+            formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]')
         };
         
         // Als JSON konvertieren
@@ -3118,6 +3119,12 @@ function importBackupFile(event) {
                     
                     // In localStorage speichern
                     localStorage.setItem('classes', JSON.stringify(classes));
+                    
+                    // Formulierungshilfen wiederherstellen, falls im Backup vorhanden
+                    if (importData.formulierungshilfen && Array.isArray(importData.formulierungshilfen)) {
+                        customPhrases = importData.formulierungshilfen;
+                        localStorage.setItem('formulierungshilfen', JSON.stringify(customPhrases));
+                    }
                     
                     // UI aktualisieren und Cloud-Sync triggern
                     renderClassesGrid();
