@@ -7130,12 +7130,20 @@ function openTimeMinutesPopup(event, hour, type) {
     document.querySelectorAll('.time-quick-circle').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
     
-    // Minuten Buttons generieren
-    const mins = ['00', '15', '30', '45'];
     const formattedHour = String(hour).padStart(2, '0');
+    
+    // Sofort die Uhrzeit auf die volle Stunde (:00) setzen
+    const inputId = type === 'start' ? 'calendar-day-new-termin-timestart' : 'calendar-day-new-termin-timeend';
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.value = `${formattedHour}:00`;
+    }
+    
+    // Drei kleine Kreise für 15, 30, 45 generieren
+    const mins = ['15', '30', '45'];
     popover.innerHTML = mins.map(m => {
         const timeVal = `${formattedHour}:${m}`;
-        return `<button type="button" onclick="selectTimeQuick('${timeVal}', '${type}')">${timeVal}</button>`;
+        return `<button type="button" class="time-minute-circle" onclick="selectTimeQuick('${timeVal}', '${type}')">${m}</button>`;
     }).join('');
     
     // Popover anzeigen
@@ -7147,7 +7155,8 @@ function openTimeMinutesPopup(event, hour, type) {
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     
     popover.style.top = `${rect.bottom + scrollTop + 6}px`;
-    popover.style.left = `${rect.left + scrollLeft - 10}px`;
+    // Zentriert unter dem Kreis positionieren (Kreis ist 28px breit, Popover hat eine Breite von ca. 100px)
+    popover.style.left = `${rect.left + scrollLeft - 36}px`;
     
     // Schließen, wenn man woanders hin klickt
     const closeListener = () => {

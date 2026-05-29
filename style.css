@@ -3356,24 +3356,33 @@ body.modal-open {
 .time-minutes-popover {
     background: #ffffff;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     padding: 6px;
     display: flex;
     gap: 6px;
 }
-.time-minutes-popover button {
-    background: #f1f5f9;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 0.82rem;
-    font-weight: 600;
+.time-minute-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
     color: var(--dark-color);
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: all 0.1s ease;
+    transition: all 0.15s ease;
+    padding: 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    outline: none;
 }
-.time-minutes-popover button:hover {
+.time-minute-circle:hover {
     background: var(--primary-color);
     color: #ffffff;
+    border-color: var(--primary-color);
 }
