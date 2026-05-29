@@ -7478,6 +7478,43 @@ function setContacts(newContacts) {
     }
 }
 
+function toggleSearchContacts() {
+    const searchContainer = document.getElementById('search-container-kontakte');
+    if (searchContainer) {
+        const isVisible = searchContainer.style.display !== 'none';
+        searchContainer.style.display = isVisible ? 'none' : 'block';
+        const input = document.getElementById('search-input-kontakte');
+        if (input) {
+            input.value = '';
+        }
+        filterContacts();
+        if (!isVisible && input) {
+            input.focus();
+        }
+    }
+}
+
+function addPhoneRowInModal(label = '', number = '') {
+    const container = document.getElementById('contact-phones-container');
+    if (!container) return;
+    
+    const row = document.createElement('div');
+    row.className = 'contact-phone-row';
+    row.style.display = 'flex';
+    row.style.gap = '8px';
+    row.style.marginBottom = '8px';
+    row.style.alignItems = 'center';
+    
+    row.innerHTML = `
+        <input type="text" class="form-control phone-label" placeholder="z.B. Mutter" value="${escapeHtml(label)}" style="flex: 1;">
+        <input type="text" class="form-control phone-number" placeholder="Telefonnummer" value="${escapeHtml(number)}" style="flex: 1.5;">
+        <button type="button" class="btn btn-danger btn-icon btn-sm" onclick="this.parentElement.remove()" title="Entfernen" style="padding: 6px 10px !important; min-height: 32px;">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    container.appendChild(row);
+}
+
 function renderContactsModule() {
     const tbody = document.getElementById('contacts-table-body');
     if (!tbody) return;
@@ -7490,15 +7527,25 @@ function renderContactsModule() {
     
     const filteredContacts = sortedContacts.filter(c => {
         const child = (c.childName || '').toLowerCase();
-        const relation = (c.relation || '').toLowerCase();
-        const phone = (c.phone || '').toLowerCase();
-        return child.includes(filterText) || relation.includes(filterText) || phone.includes(filterText);
+        
+        if (child.includes(filterText)) return true;
+        
+        // Match multiple phone entries (including fallback for old format)
+        const phoneList = c.phones || [
+            { label: c.relation || '', number: c.phone || '' }
+        ];
+        
+        return phoneList.some(p => {
+            const label = (p.label || '').toLowerCase();
+            const number = (p.number || '').toLowerCase();
+            return label.includes(filterText) || number.includes(filterText);
+        });
     });
     
     if (filteredContacts.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" style="text-align: center; color: var(--grey-color); padding: 20px;">
+                <td colspan="3" style="text-align: center; color: var(--grey-color); padding: 20px;">
                     Keine Kontakte vorhanden
                 </td>
             </tr>
@@ -7509,17 +7556,41 @@ function renderContactsModule() {
     filteredContacts.forEach(c => {
         const tr = document.createElement('tr');
         
-        // Clean up tel href
-        const cleanPhone = (c.phone || '').replace(/[^0-9+]/g, '');
+        const phoneList = c.phones || [
+            { label: c.relation || '', number: c.phone || '' }
+        ];
+        
+        let detailsHtml = '';
+        if (phoneList.length > 0 && (phoneList[0].label || phoneList[0].number)) {
+            detailsHtml = `
+                <table style="width: 100%; border: none; margin: 0; background: transparent;">
+                    ${phoneList.map((p, idx) => {
+                        const cleanPhone = (p.number || '').replace(/[^0-9+]/g, '');
+                        const borderStyle = idx < phoneList.length - 1 ? 'border-bottom: 1px solid var(--border-color);' : 'border: none;';
+                        return `
+                            <tr style="${borderStyle}">
+                                <td style="border: none; padding: 6px 12px; font-weight: 500; width: 35%; color: var(--dark-color);">${escapeHtml(p.label || '-')}</td>
+                                <td style="border: none; padding: 6px 12px; color: var(--dark-color);">${escapeHtml(p.number || '-')}</td>
+                                <td style="border: none; padding: 6px 12px; text-align: right; width: 60px;">
+                                    ${p.number ? `
+                                        <a href="tel:${cleanPhone}" class="btn btn-success btn-icon btn-sm" title="Anrufen" style="padding: 4px 8px !important; min-height: 28px;">
+                                            <i class="fas fa-phone"></i>
+                                        </a>
+                                    ` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </table>
+            `;
+        } else {
+            detailsHtml = `<span style="color: var(--grey-color); padding-left: 12px;">Keine Telefonnummern hinterlegt</span>`;
+        }
         
         tr.innerHTML = `
-            <td><strong>${c.childName || '-'}</strong></td>
-            <td>${c.relation || '-'}</td>
-            <td>${c.phone || '-'}</td>
-            <td style="text-align: right; white-space: nowrap;">
-                <a href="tel:${cleanPhone}" class="btn btn-success btn-icon btn-sm" title="Anrufen" style="margin-right: 4px;">
-                    <i class="fas fa-phone"></i>
-                </a>
+            <td style="vertical-align: middle;"><strong>${escapeHtml(c.childName || '-')}</strong></td>
+            <td style="padding: 0; vertical-align: middle;">${detailsHtml}</td>
+            <td style="text-align: right; white-space: nowrap; vertical-align: middle;">
                 <button onclick="openEditContactModal('${c.id}')" class="btn btn-primary btn-icon btn-sm" title="Bearbeiten" style="margin-right: 4px;">
                     <i class="fas fa-edit"></i>
                 </button>
@@ -7540,8 +7611,12 @@ function openAddContactModal() {
     document.getElementById('contact-modal-title').textContent = 'Kontakt hinzufügen';
     document.getElementById('contact-edit-id').value = '';
     document.getElementById('contact-child-name').value = '';
-    document.getElementById('contact-relation').value = '';
-    document.getElementById('contact-phone').value = '';
+    
+    const container = document.getElementById('contact-phones-container');
+    if (container) container.innerHTML = '';
+    
+    addPhoneRowInModal('', '');
+    
     showModal('contact-modal');
 }
 
@@ -7552,49 +7627,64 @@ function openEditContactModal(contactId) {
     document.getElementById('contact-modal-title').textContent = 'Kontakt bearbeiten';
     document.getElementById('contact-edit-id').value = contact.id;
     document.getElementById('contact-child-name').value = contact.childName || '';
-    document.getElementById('contact-relation').value = contact.relation || '';
-    document.getElementById('contact-phone').value = contact.phone || '';
+    
+    const container = document.getElementById('contact-phones-container');
+    if (container) container.innerHTML = '';
+    
+    const phoneList = contact.phones || [
+        { label: contact.relation || '', number: contact.phone || '' }
+    ];
+    
+    phoneList.forEach(p => {
+        addPhoneRowInModal(p.label, p.number);
+    });
+    
+    if (phoneList.length === 0) {
+        addPhoneRowInModal('', '');
+    }
+    
     showModal('contact-modal');
 }
 
 function saveContact() {
     const idInput = document.getElementById('contact-edit-id').value;
     const childName = document.getElementById('contact-child-name').value.trim();
-    const relation = document.getElementById('contact-relation').value.trim();
-    const phone = document.getElementById('contact-phone').value.trim();
     
     if (!childName) {
         swal('Fehler', 'Bitte gib den Namen des Kindes ein.', 'error');
         return;
     }
     
+    const phoneRows = document.querySelectorAll('.contact-phone-row');
+    const phones = [];
+    phoneRows.forEach(row => {
+        const label = (row.querySelector('.phone-label')?.value || '').trim();
+        const number = (row.querySelector('.phone-number')?.value || '').trim();
+        if (label || number) {
+            phones.push({ label, number });
+        }
+    });
+    
     if (idInput) {
-        // Edit existing
         const contactIndex = contacts.findIndex(c => c.id === idInput);
         if (contactIndex > -1) {
             contacts[contactIndex].childName = childName;
-            contacts[contactIndex].relation = relation;
-            contacts[contactIndex].phone = phone;
+            contacts[contactIndex].phones = phones;
+            delete contacts[contactIndex].relation;
+            delete contacts[contactIndex].phone;
         }
     } else {
-        // Add new
         const newContact = {
             id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             childName: childName,
-            relation: relation,
-            phone: phone
+            phones: phones
         };
         contacts.push(newContact);
     }
     
-    // Save to localStorage
     localStorage.setItem('contacts', JSON.stringify(contacts));
     AppState.contacts = contacts;
-    
-    // Trigger Cloud Sync
     saveData();
-    
-    // Refresh UI & close modal
     renderContactsModule();
     hideModal();
 }
@@ -7627,5 +7717,7 @@ window.openAddContactModal = openAddContactModal;
 window.openEditContactModal = openEditContactModal;
 window.saveContact = saveContact;
 window.deleteContact = deleteContact;
+window.toggleSearchContacts = toggleSearchContacts;
+window.addPhoneRowInModal = addPhoneRowInModal;
 
 

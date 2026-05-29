@@ -400,6 +400,9 @@
                                         <button class="btn btn-primary btn-icon" onclick="openAddContactModal()">
                                             <i class="fas fa-plus"></i> <span class="btn-text">Kontakt hinzufügen</span>
                                         </button>
+                                        <button class="btn btn-info btn-icon" onclick="toggleSearchContacts()">
+                                            <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
+                                        </button>
                                     </div>
                                     <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Kontakte', '#kontakte-module .desktop-header-buttons')">
                                         <i class="fas fa-ellipsis-h"></i>
@@ -408,7 +411,7 @@
                             </div>
                             
                             <div style="padding: 15px;">
-                                <div class="form-group" style="margin-bottom: 15px;">
+                                <div class="search-container" id="search-container-kontakte" style="display: none; margin-bottom: 15px;">
                                     <input type="text" class="form-control search-input" id="search-input-kontakte" placeholder="Kontakte durchsuchen..." oninput="filterContacts()">
                                 </div>
                                 <div class="student-list-container">
@@ -416,8 +419,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Kind</th>
-                                                <th>Bezugsperson</th>
-                                                <th>Telefonnummer</th>
+                                                <th>Bezugsperson & Telefonnummer</th>
                                                 <th style="width: 150px; text-align: right;">Aktionen</th>
                                             </tr>
                                         </thead>
@@ -726,17 +728,17 @@
                     <input type="text" id="contact-child-name" class="form-control" placeholder="z.B. Max Mustermann">
                 </div>
                 
-                <div class="form-group">
-                    <label for="contact-relation">Bezugsperson (z.B. Mutter, Vater, Oma)</label>
-                    <input type="text" id="contact-relation" class="form-control" placeholder="z.B. Mutter">
+                <div class="form-group" style="margin-top: 15px;">
+                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">Telefonnummern</label>
+                    <div id="contact-phones-container">
+                        <!-- Hier werden die Nummern-Zeilen dynamisch eingefügt -->
+                    </div>
+                    <button type="button" class="btn btn-light btn-sm btn-icon" onclick="addPhoneRowInModal()" style="margin-top: 8px; display: inline-flex; align-items: center; gap: 4px;">
+                        <i class="fas fa-plus"></i> <span class="btn-text">Nummer hinzufügen</span>
+                    </button>
                 </div>
                 
-                <div class="form-group">
-                    <label for="contact-phone">Telefonnummer</label>
-                    <input type="text" id="contact-phone" class="form-control" placeholder="Telefonnummer">
-                </div>
-                
-                <div style="text-align: right; margin-top: 20px;">
+                <div style="text-align: right; margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px;">
                     <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="saveContact()">Speichern</button>
                 </div>
@@ -1014,8 +1016,8 @@
                                                               activeElement.tagName === 'INPUT' && 
                                                               (activeElement.id === 'search-input-kontakte' || 
                                                                activeElement.id === 'contact-child-name' || 
-                                                               activeElement.id === 'contact-relation' || 
-                                                               activeElement.id === 'contact-phone');
+                                                               activeElement.classList.contains('phone-label') || 
+                                                               activeElement.classList.contains('phone-number'));
 
                                 // Spezialbehandlung für Sitzplan-Drag: Wenn gerade ein Tisch bewegt wird, NICHT neu rendern
                                 const isDraggingSitzplan = window.isDraggingDesk === true;
