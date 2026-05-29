@@ -6852,10 +6852,10 @@ function renderCalendarDayTermineList(dateStr) {
                 <div class="calendar-modal-termin-item" style="${itemStyle}">
                     <span>${timeDisplay}${escapeHtml(t.title || '')}</span>
                     <div style="display: flex; gap: 4px;">
-                        <button class="btn btn-sm btn-primary btn-circle-sm" onclick="editCalendarDayTermin('${t.id}')" title="Diesen Termin bearbeiten">
+                        <button class="btn btn-sm btn-primary btn-circle" onclick="editCalendarDayTermin('${t.id}')" title="Diesen Termin bearbeiten">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-circle-sm" onclick="deleteCalendarDayTermin('${t.id}')" title="Diesen Termin löschen">
+                        <button class="btn btn-sm btn-danger btn-circle" onclick="deleteCalendarDayTermin('${t.id}')" title="Diesen Termin löschen">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -7186,6 +7186,7 @@ function handleTimeRangeClick(event, hour) {
         if (endIn) endIn.value = '';
         
         AppState.timeRangeStage = 2;
+        updateQuickSelectActiveStates();
         openTimeMinutesPopup(event, hour, 'start');
     } else {
         // Endzeit festlegen
@@ -7197,6 +7198,7 @@ function handleTimeRangeClick(event, hour) {
             const formattedHour = String(hour).padStart(2, '0');
             if (startIn) startIn.value = `${formattedHour}:00`;
             AppState.timeRangeStage = 2;
+            updateQuickSelectActiveStates();
             openTimeMinutesPopup(event, hour, 'start');
         } else {
             let finalStartHour = startHour;
@@ -7217,7 +7219,7 @@ function handleTimeRangeClick(event, hour) {
             }
             
             AppState.timeRangeStage = 1;
-            
+            updateQuickSelectActiveStates();
             openTimeMinutesPopup(event, hour, targetType);
         }
     }
@@ -7231,11 +7233,11 @@ function openTimeMinutesPopup(event, hour, type) {
     
     const formattedHour = String(hour).padStart(2, '0');
     
-    // Vier kleine Kreise für 00, 15, 30, 45 generieren
+    // Vier leere Kreise für 00, 15, 30, 45 generieren (ohne Text, nur visuell)
     const mins = ['00', '15', '30', '45'];
     popover.innerHTML = mins.map(m => {
         const timeVal = `${formattedHour}:${m}`;
-        return `<button type="button" class="time-minute-circle" onclick="selectTimeQuick('${timeVal}', '${type}')">${m}</button>`;
+        return `<button type="button" class="time-minute-circle" onclick="selectTimeQuick('${timeVal}', '${type}')" title=":${m}"></button>`;
     }).join('');
     
     // Popover anzeigen
