@@ -5464,30 +5464,33 @@ function renderTermineList() {
         const item = document.createElement('div');
         item.className = `termin-item${statusClass}`;
         item.id = `termin-item-${termin.id}`;
+        item.style.cursor = 'pointer';
+        item.onclick = function(e) {
+            if (item.classList.contains('termin-item-editing')) {
+                return;
+            }
+            toggleTerminAusblenden(termin.id, !isHidden);
+        };
 
         const formattedDate = new Date(termin.date + 'T00:00:00').toLocaleDateString('de-DE', {
             weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit'
         });
 
+        const timeDisplay = termin.timeStart ? ` <span class="termin-time" style="font-weight: 600; font-size: 0.8rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">${termin.timeStart}${termin.timeEnd ? ' - ' + termin.timeEnd : ''}</span>` : '';
+
         item.innerHTML = `
             <div class="termin-info">
                 ${statusIcon}
                 <div class="termin-info-text">
-                    <span class="termin-date">${formattedDate}</span>
+                    <span class="termin-date">${formattedDate}${timeDisplay}</span>
                     <span class="termin-title">${termin.title}</span>
                 </div>
             </div>
             <div class="termin-actions">
-                <label class="termin-ausblenden-label">
-                    <input type="checkbox" ${isHidden ? 'checked' : ''} onchange="toggleTerminAusblenden('${termin.id}', this.checked)"> Ausblenden
-                </label>
-                <button class="btn btn-sm btn-info btn-square" onclick="exportSingleTerminToICS('${termin.id}')" title="Diesen Termin als .ics exportieren">
-                    <i class="fas fa-file-download"></i>
-                </button>
-                <button class="btn btn-sm btn-primary btn-square" onclick="editTermin('${termin.id}')">
+                <button class="btn btn-sm btn-primary btn-square" onclick="event.stopPropagation(); editTermin('${termin.id}')" title="Bearbeiten">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-danger btn-square" onclick="deleteTermin('${termin.id}')">
+                <button class="btn btn-sm btn-danger btn-square" onclick="event.stopPropagation(); deleteTermin('${termin.id}')" title="Löschen">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -5574,9 +5577,19 @@ function editTermin(terminId) {
 
     item.className = 'termin-item termin-item-editing';
     item.innerHTML = `
-        <div class="termin-edit-form">
+        <div class="termin-edit-form" onclick="event.stopPropagation()">
             <div class="form-group">
-                <input type="text" class="form-control" id="termin-edit-title-${terminId}" value="${termin.title}">
+                <input type="text" class="form-control" id="termin-edit-title-${terminId}" value="${termin.title}" placeholder="Bezeichnung">
+            </div>
+            <div class="form-group" style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <div style="flex: 1; display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 0.8rem; color: var(--grey-color);">Von:</span>
+                    <input type="time" class="form-control" id="termin-edit-timestart-${terminId}" value="${termin.timeStart || ''}">
+                </div>
+                <div style="flex: 1; display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 0.8rem; color: var(--grey-color);">Bis:</span>
+                    <input type="time" class="form-control" id="termin-edit-timeend-${terminId}" value="${termin.timeEnd || ''}">
+                </div>
             </div>
             <div class="form-group">
                 <input type="date" class="form-control" id="termin-edit-date-${terminId}" value="${termin.date}">
@@ -5615,10 +5628,14 @@ function editTermin(terminId) {
 function saveEditedTermin(terminId) {
     const titleInput = safeGetElement(`termin-edit-title-${terminId}`);
     const dateInput = safeGetElement(`termin-edit-date-${terminId}`);
+    const timeStartInput = safeGetElement(`termin-edit-timestart-${terminId}`);
+    const timeEndInput = safeGetElement(`termin-edit-timeend-${terminId}`);
     if (!titleInput || !dateInput) return;
 
     const title = titleInput.value.trim();
     const date = dateInput.value;
+    const timeStart = timeStartInput ? timeStartInput.value : '';
+    const timeEnd = timeEndInput ? timeEndInput.value : '';
 
     if (!title || !date) {
         swal('Fehler', 'Bitte alle Felder ausfüllen', 'error');
@@ -5631,11 +5648,14 @@ function saveEditedTermin(terminId) {
     AppState.termine[index] = {
         ...AppState.termine[index],
         title: title,
-        date: date
+        date: date,
+        timeStart: timeStart,
+        timeEnd: timeEnd
     };
 
     saveTermine();
     renderTermineList();
+    renderPlanung();
 }
 
 // ===== ICS EXPORT HELPER FUNCTIONS =====
@@ -5660,11 +5680,6 @@ function generateICS(termine) {
             .replace(/,/g, '\\,')
             .replace(/\n/g, '\\n');
             
-        // Use clean date parsing (avoid timezone shifting issues by appending time)
-        const startDate = new Date(t.date + 'T00:00:00');
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 1);
-        
         const formatDate = (d) => {
             const y = d.getFullYear();
             const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -5672,11 +5687,43 @@ function generateICS(termine) {
             return `${y}${m}${day}`;
         };
         
+        const formatDateTime = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            const ss = String(d.getSeconds()).padStart(2, '0');
+            return `${y}${m}${day}T${hh}${mm}${ss}`;
+        };
+        
         ics.push('BEGIN:VEVENT');
         ics.push(`UID:${t.id}@schulverwaltung`);
         ics.push(`DTSTAMP:${dtStamp}`);
-        ics.push(`DTSTART;VALUE=DATE:${formatDate(startDate)}`);
-        ics.push(`DTEND;VALUE=DATE:${formatDate(endDate)}`);
+        
+        if (t.timeStart) {
+            // Timed event
+            const startDate = new Date(`${t.date}T${t.timeStart}:00`);
+            let endDate;
+            if (t.timeEnd) {
+                endDate = new Date(`${t.date}T${t.timeEnd}:00`);
+                if (endDate < startDate) {
+                    endDate.setDate(endDate.getDate() + 1);
+                }
+            } else {
+                endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // default +1 hour
+            }
+            ics.push(`DTSTART:${formatDateTime(startDate)}`);
+            ics.push(`DTEND:${formatDateTime(endDate)}`);
+        } else {
+            // All-day event
+            const startDate = new Date(t.date + 'T00:00:00');
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 1);
+            ics.push(`DTSTART;VALUE=DATE:${formatDate(startDate)}`);
+            ics.push(`DTEND;VALUE=DATE:${formatDate(endDate)}`);
+        }
+        
         ics.push(`SUMMARY:${escapedTitle}`);
         ics.push('DESCRIPTION:Termin aus der Schulverwaltung');
         ics.push('END:VEVENT');
@@ -6600,6 +6647,10 @@ function renderPlanung() {
     if (daysGroup) {
         daysGroup.style.display = viewMode === 'calendar' ? 'none' : 'flex';
     }
+    const exportGroup = safeGetElement('planung-setup-export-group');
+    if (exportGroup) {
+        exportGroup.style.display = viewMode === 'calendar' ? 'flex' : 'none';
+    }
     
     if (viewMode === 'calendar') {
         if (listContainer) listContainer.style.display = 'none';
@@ -6724,8 +6775,12 @@ function openCalendarDayDetails(dateStr) {
     const formattedDate = dateObj.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
     document.getElementById('calendar-day-date-title').textContent = formattedDate;
     
-    // Neuen Termin Input zurücksetzen
+    // Neuen Termin Input und Zeit-Inputs zurücksetzen
     document.getElementById('calendar-day-new-termin-title').value = '';
+    const timeStartEl = document.getElementById('calendar-day-new-termin-timestart');
+    const timeEndEl = document.getElementById('calendar-day-new-termin-timeend');
+    if (timeStartEl) timeStartEl.value = '';
+    if (timeEndEl) timeEndEl.value = '';
     
     // Terminliste für diesen Tag rendern
     renderCalendarDayTermineList(dateStr);
@@ -6742,19 +6797,19 @@ function renderCalendarDayTermineList(dateStr) {
     if (dayTermine.length === 0) {
         listContainer.innerHTML = '<p style="color: var(--grey-color); font-size: 0.88rem; margin: 0; padding: 4px 0;">Keine Termine für diesen Tag.</p>';
     } else {
-        listContainer.innerHTML = dayTermine.map(t => `
-            <div class="calendar-modal-termin-item">
-                <span>${escapeHtml(t.title || '')}</span>
-                <div style="display: flex; gap: 4px;">
-                    <button class="btn btn-sm btn-info btn-square" onclick="exportSingleTerminToICS('${t.id}')" title="Diesen Termin als .ics exportieren">
-                        <i class="fas fa-file-download"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger btn-square" onclick="deleteCalendarDayTermin('${t.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
+        listContainer.innerHTML = dayTermine.map(t => {
+            const timeDisplay = t.timeStart ? ` <span style="font-weight: 500; font-size: 0.85rem; color: #64748b; margin-right: 6px;">(${t.timeStart}${t.timeEnd ? ' - ' + t.timeEnd : ''})</span>` : '';
+            return `
+                <div class="calendar-modal-termin-item">
+                    <span>${timeDisplay}${escapeHtml(t.title || '')}</span>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="btn btn-sm btn-danger btn-square" onclick="deleteCalendarDayTermin('${t.id}')" title="Diesen Termin löschen">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 }
 
@@ -6765,6 +6820,11 @@ function addCalendarDayTermin() {
     const titleInput = document.getElementById('calendar-day-new-termin-title');
     const title = titleInput.value.trim();
     
+    const timeStartInput = document.getElementById('calendar-day-new-termin-timestart');
+    const timeEndInput = document.getElementById('calendar-day-new-termin-timeend');
+    const timeStart = timeStartInput ? timeStartInput.value : '';
+    const timeEnd = timeEndInput ? timeEndInput.value : '';
+    
     if (!title) {
         swal('Fehler', 'Bitte eine Bezeichnung eingeben', 'error');
         return;
@@ -6772,10 +6832,13 @@ function addCalendarDayTermin() {
     
     if (!AppState.termine) AppState.termine = [];
     const newId = Date.now().toString();
-    AppState.termine.push({ id: newId, title: title, date: dateStr });
+    AppState.termine.push({ id: newId, title: title, date: dateStr, timeStart: timeStart, timeEnd: timeEnd });
     
     saveTermine();
     titleInput.value = '';
+    if (timeStartInput) timeStartInput.value = '';
+    if (timeEndInput) timeEndInput.value = '';
+    
     renderCalendarDayTermineList(dateStr);
     renderPlanung();
 }

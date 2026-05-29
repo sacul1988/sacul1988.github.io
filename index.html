@@ -301,7 +301,7 @@
                                         <input type="date" id="planung-end-date" class="form-control planung-date-input">
                                     </div>
                                 </div>
-                                <div class="planung-setup-group" id="planung-setup-days-group">
+                                <div class="planung-setup-group" id="planung-setup-days-group" style="margin-left: auto;">
                                     <div class="planung-days-row">
                                         <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="1"><span>Mo</span></label>
                                         <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="2"><span>Di</span></label>
@@ -309,6 +309,11 @@
                                         <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="4"><span>Do</span></label>
                                         <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="5"><span>Fr</span></label>
                                     </div>
+                                </div>
+                                <div class="planung-setup-group" id="planung-setup-export-group" style="display: none; margin-left: auto;">
+                                    <button class="btn btn-info btn-icon" id="planung-export-ics-btn" onclick="exportAllTermineToICS()">
+                                        <i class="fas fa-file-download"></i> Termine exportieren
+                                    </button>
                                 </div>
                             </div>
 
@@ -498,12 +503,7 @@
                         <i class="fas fa-calendar-alt"></i>
                         <span>Termine</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <button class="btn btn-sm btn-info" onclick="exportAllTermineToICS()" style="margin: 0; padding: 6px 12px; font-size: 0.8rem; min-height: 32px !important; height: 32px !important; display: inline-flex; align-items: center; gap: 6px;" title="Alle Termine als .ics exportieren">
-                            <i class="fas fa-file-download"></i> Export (.ics)
-                        </button>
-                        <button class="termin-modal-close" onclick="hideModal()"><i class="fas fa-times"></i></button>
-                    </div>
+                    <button class="termin-modal-close" onclick="hideModal()"><i class="fas fa-times"></i></button>
                 </div>
 
                 <div class="termin-add-form">
@@ -534,9 +534,15 @@
                         <!-- Termin hinzufügen -->
                         <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-top: 10px;">
                             <h5 style="margin-top: 0; margin-bottom: 8px; font-size: 0.88rem; font-weight: 600;">Neuen Termin für diesen Tag hinzufügen</h5>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="text" id="calendar-day-new-termin-title" class="form-control" placeholder="Terminbezeichnung" style="flex: 1;" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addCalendarDayTermin(); }">
-                                <button class="btn btn-primary" onclick="addCalendarDayTermin()" style="min-height: 40px;"><i class="fas fa-plus"></i></button>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input type="text" id="calendar-day-new-termin-title" class="form-control" placeholder="Terminbezeichnung" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addCalendarDayTermin(); }">
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span style="font-size: 0.85rem; color: var(--grey-color);">Von:</span>
+                                    <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="flex: 1; min-height: 38px;">
+                                    <span style="font-size: 0.85rem; color: var(--grey-color);">Bis:</span>
+                                    <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="flex: 1; min-height: 38px;">
+                                    <button class="btn btn-primary" onclick="addCalendarDayTermin()" style="min-height: 38px; padding: 0 16px;"><i class="fas fa-plus"></i></button>
+                                </div>
                             </div>
                         </div>
                     </div>

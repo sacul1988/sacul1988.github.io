@@ -2236,6 +2236,7 @@ select.form-control {
     gap: 12px;
     transition: box-shadow 0.15s;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    cursor: pointer;
 }
 
 .termin-item:hover {
@@ -2248,14 +2249,19 @@ select.form-control {
 }
 
 .termin-item.termin-not-on-teaching-day {
-    border-left: 3px solid #f9a86c;
-    background: #fffaf6;
+    border-left: 3px solid var(--danger-color);
+    background: #fef2f2;
 }
 
 .termin-item.termin-ausgeblendet {
     opacity: 0.45;
     background: #f8f9fa;
     border-color: #e2e5e9;
+}
+
+.termin-item.termin-ausgeblendet .termin-title,
+.termin-item.termin-ausgeblendet .termin-date {
+    text-decoration: line-through;
 }
 
 .termin-item.termin-item-editing {
@@ -2270,7 +2276,7 @@ select.form-control {
 }
 
 .termin-on-teaching-day .termin-status-icon { color: #4caf50; }
-.termin-not-on-teaching-day .termin-status-icon { color: #f9a86c; }
+.termin-not-on-teaching-day .termin-status-icon { color: var(--danger-color); }
 
 .termin-info {
     display: flex;
@@ -2308,39 +2314,7 @@ select.form-control {
     flex-shrink: 0;
 }
 
-.termin-ausblenden-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    color: var(--grey-color);
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid #dee2e6;
-    background: #fff;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
 
-.termin-ausblenden-label:hover {
-    background: #f0f2f5;
-    border-color: #adb5bd;
-}
-
-.termin-ausgeblendet .termin-ausblenden-label {
-    background: #e9ecef;
-    border-color: #adb5bd;
-    color: var(--dark-color);
-}
-
-.termin-ausblenden-label input[type="checkbox"] {
-    width: 13px;
-    height: 13px;
-    cursor: pointer;
-    accent-color: var(--primary-color);
-}
 
 .termin-edit-form {
     width: 100%;
