@@ -2804,7 +2804,7 @@ td.planung-col-inhalt {
 }
 
 .wizard-sentence-item.level-orange {
-    border-left: 5px solid #ca8a04;
+    border-left: 5px solid #eab308;
     background-color: #fefdf0;
 }
 .wizard-sentence-item.level-orange:hover {
@@ -2812,7 +2812,7 @@ td.planung-col-inhalt {
 }
 .wizard-sentence-item.level-orange.selected {
     background-color: #fef08a;
-    border-color: #ca8a04;
+    border-color: #eab308;
 }
 
 .wizard-sentence-item.level-red {
@@ -2949,7 +2949,8 @@ td.planung-col-inhalt {
     background-color: #22c55e;
 }
 .filter-circle-btn[data-color="orange"] {
-    background-color: #ca8a04;
+    background-color: #eab308;
+    color: #0f172a;
 }
 .filter-circle-btn[data-color="red"] {
     background-color: #ef4444;
