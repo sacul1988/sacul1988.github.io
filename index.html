@@ -286,9 +286,6 @@
                                         </svg>
                                         Tabelle exportieren
                                     </button>
-                                    <button class="btn btn-secondary btn-icon" onclick="showTermineModal()">
-                                        <i class="fas fa-calendar-alt"></i> Termine
-                                    </button>
                                 </div>
                             </div>
 
@@ -309,6 +306,9 @@
                                         <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="4"><span>Do</span></label>
                                         <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="5"><span>Fr</span></label>
                                     </div>
+                                    <button class="btn btn-secondary btn-icon" onclick="showTermineModal()" style="margin-left: 8px;">
+                                        <i class="fas fa-calendar-alt"></i> Termine ein/ausblenden
+                                    </button>
                                 </div>
                                 <div class="planung-setup-group" id="planung-setup-export-group" style="display: none; margin-left: auto;">
                                     <button class="btn btn-primary btn-icon" id="planung-export-ics-btn" onclick="exportAllTermineToICS()">
