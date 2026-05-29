@@ -335,22 +335,18 @@
                                     </button>
                                 </div>
                                 <div id="planung-setup-controls-wrapper">
-                                    <div class="planung-setup-group" id="planung-setup-days-group" style="margin-left: auto;">
-                                        <div class="planung-days-row">
-                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="1"><span>Mo</span></label>
-                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="2"><span>Di</span></label>
-                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="3"><span>Mi</span></label>
-                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="4"><span>Do</span></label>
-                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="5"><span>Fr</span></label>
-                                        </div>
-                                        <button class="btn btn-secondary btn-icon" onclick="showTermineModal()" style="margin-left: 8px;">
+                                    <div class="planung-setup-group" id="planung-setup-days-group">
+                                        <button class="btn btn-secondary btn-icon" onclick="showModal('unterrichtstage-modal')">
+                                            <i class="fas fa-calendar-week"></i> <span class="btn-text">Unterrichtstage</span>
+                                        </button>
+                                        <button class="btn btn-secondary btn-icon" onclick="showTermineModal()">
                                             <i class="fas fa-calendar-alt"></i> <span class="btn-text">Termine ein/ausblenden</span>
                                         </button>
-                                        <button class="btn btn-primary btn-icon" onclick="deletePlanungTable()" style="margin-left: 8px;">
+                                        <button class="btn btn-primary btn-icon" onclick="deletePlanungTable()">
                                             <i class="fas fa-trash"></i> <span class="btn-text">Planung löschen</span>
                                         </button>
                                     </div>
-                                    <div class="planung-setup-group" id="planung-setup-export-group" style="display: none; margin-left: auto;">
+                                    <div class="planung-setup-group" id="planung-setup-export-group" style="display: none;">
                                         <button class="btn btn-primary btn-icon" id="planung-export-ics-btn" onclick="exportAllTermineToICS()">
                                             <i class="fas fa-file-download"></i> <span class="btn-text">Termine exportieren</span>
                                         </button>
@@ -444,6 +440,22 @@
         
         <!-- Modals -->
         <div id="modal-container" style="display: none;" onclick="closeModalOnOutsideClick(event)" role="dialog" aria-modal="true" aria-hidden="true">
+            <!-- Unterrichtstage Modal -->
+            <div id="unterrichtstage-modal" class="modal" style="display: none;">
+                <h2><i class="fas fa-calendar-week"></i> Unterrichtstage</h2>
+                <p style="font-size: 0.9rem; color: var(--grey-color); margin-bottom: 16px;">Wähle die Wochentage aus, an denen Unterricht stattfindet.</p>
+                <div class="planung-days-row" style="justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="1"><span>Mo</span></label>
+                    <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="2"><span>Di</span></label>
+                    <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="3"><span>Mi</span></label>
+                    <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="4"><span>Do</span></label>
+                    <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="5"><span>Fr</span></label>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="hideModal()">Fertig</button>
+                </div>
+            </div>
+
             <!-- Klasse hinzufügen Modal -->
             <div id="add-class-modal" class="modal" style="display: none;" role="dialog" aria-labelledby="add-class-title">
                 <h2 id="add-class-title">Neue Klasse hinzufügen</h2>
@@ -657,38 +669,50 @@
             <div id="mitarbeit-wizard-modal" class="modal mitarbeit-modal" style="display: none; max-width: 800px; width: 95%;">
                 <div class="wizard-header">
                     <h2>Formulierungshilfen: <span id="wizard-student-name">Schüler</span></h2>
-                    <div class="wizard-header-filters">
-                        <button class="filter-circle-btn" data-color="blue" onclick="toggleColorFilter('blue')" title="Blau filtern (1/2)">1/2</button>
-                        <button class="filter-circle-btn" data-color="green" onclick="toggleColorFilter('green')" title="Grün filtern (2/3)">2/3</button>
-                        <button class="filter-circle-btn" data-color="orange" onclick="toggleColorFilter('orange')" title="Gelb filtern (3/4)">3/4</button>
-                        <button class="filter-circle-btn" data-color="red" onclick="toggleColorFilter('red')" title="Rot filtern (4/5)">4/5</button>
-                    </div>
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
                 
-                <div class="wizard-body">
-                    <!-- Sätze Hinzufügen Form -->
-                    <div class="wizard-add-phrase-form" style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;">
-                        <h4 style="margin-bottom: 8px; font-size: 0.95rem; font-weight: 600;">Eigene Formulierungshilfe hinzufügen</h4>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                            <input type="text" id="wizard-new-phrase-input" class="form-control" placeholder="Satz eingeben (z.B. Arbeitet stets konzentriert.)" style="flex: 1; min-width: 250px; margin: 2px;">
-                            <select id="wizard-new-phrase-color" class="form-control" style="width: auto; min-width: 100px; margin: 2px;">
-                                <option value="blue">1 / 2</option>
-                                <option value="green">2 / 3</option>
-                                <option value="orange">3 / 4</option>
-                                <option value="red">4 / 5</option>
-                            </select>
-                            <select id="wizard-new-phrase-category" class="form-control" style="width: auto; min-width: 160px; margin: 2px;">
-                                <option value="mitarbeit">Mündliche Mitarbeit</option>
-                                <option value="arbeitsverhalten">Arbeitsverhalten</option>
-                                <option value="sozialverhalten">Sozialverhalten</option>
-                                <option value="stoerungen">Störungen</option>
-                                <option value="sonstiges">Sonstiges</option>
-                            </select>
-                            <input type="hidden" id="wizard-edit-phrase-id" value="">
-                            <button class="btn btn-primary" id="wizard-add-phrase-btn" onclick="saveCustomPhrase()" style="min-height: 40px; margin: 2px;">Speichern</button>
-                            <button class="btn btn-light" id="wizard-cancel-edit-btn" onclick="cancelEditPhrase()" style="min-height: 40px; margin: 2px; display: none;">Abbrechen</button>
+                <!-- Sub-Modal: Formulierungshilfe hinzufügen -->
+                <div id="add-phrase-submodal" style="display: none; position: absolute; inset: 0; background: rgba(15,23,42,0.5); border-radius: inherit; z-index: 20; align-items: center; justify-content: center; padding: 20px;">
+                    <div style="background: white; border-radius: 12px; padding: 20px; width: 100%; max-width: 700px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); box-sizing: border-box;">
+                        <h3 id="add-phrase-submodal-title" style="margin-bottom: 12px; font-size: 1rem; font-weight: 700;">Formulierungshilfe hinzufügen</h3>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <input type="text" id="wizard-new-phrase-input" class="form-control" placeholder="Satz eingeben (z.B. Arbeitet stets konzentriert.)">
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                                <select id="wizard-new-phrase-category" class="form-control" style="flex: 1; min-width: 140px;">
+                                    <option value="mitarbeit">Mündliche Mitarbeit</option>
+                                    <option value="arbeitsverhalten">Arbeitsverhalten</option>
+                                    <option value="sozialverhalten">Sozialverhalten</option>
+                                    <option value="stoerungen">Störungen</option>
+                                    <option value="sonstiges">Sonstiges</option>
+                                </select>
+                                <select id="wizard-new-phrase-color" class="form-control" style="width: auto; min-width: 90px;">
+                                    <option value="blue">1 / 2</option>
+                                    <option value="green">2 / 3</option>
+                                    <option value="orange">3 / 4</option>
+                                    <option value="red">4 / 5</option>
+                                </select>
+                                <input type="hidden" id="wizard-edit-phrase-id" value="">
+                                <button class="btn btn-primary" id="wizard-add-phrase-btn" onclick="saveCustomPhrase()" style="min-height: 40px;">Speichern</button>
+                                <button class="btn btn-light" id="wizard-cancel-edit-btn" onclick="cancelEditPhrase()" style="min-height: 40px; display: none;">Abbrechen</button>
+                                <button class="btn btn-light" onclick="closeAddPhraseSubmodal()" style="min-height: 40px;">Schließen</button>
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="wizard-body">
+                    <!-- Filter-Kreise + Button-Zeile -->
+                    <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <div class="wizard-header-filters" style="margin: 0;">
+                            <button class="filter-circle-btn" data-color="blue" onclick="toggleColorFilter('blue')" title="Blau filtern (1/2)">1/2</button>
+                            <button class="filter-circle-btn" data-color="green" onclick="toggleColorFilter('green')" title="Grün filtern (2/3)">2/3</button>
+                            <button class="filter-circle-btn" data-color="orange" onclick="toggleColorFilter('orange')" title="Gelb filtern (3/4)">3/4</button>
+                            <button class="filter-circle-btn" data-color="red" onclick="toggleColorFilter('red')" title="Rot filtern (4/5)">4/5</button>
+                        </div>
+                        <button class="btn btn-primary btn-icon" onclick="openAddPhraseSubmodal()">
+                            <i class="fas fa-plus"></i> <span class="btn-text">Formulierung</span>
+                        </button>
                     </div>
 
                     <!-- Sätze-Liste -->

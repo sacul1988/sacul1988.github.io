@@ -6430,7 +6430,11 @@ function saveCustomPhrase() {
     
     // Cloud-Sync synchronisieren
     saveData();
-    
+
+    // Sub-Modal schließen
+    const sub = document.getElementById('add-phrase-submodal');
+    if (sub) sub.style.display = 'none';
+
     // Ansicht neu rendern
     renderMitarbeitWizard();
 }
@@ -6455,9 +6459,13 @@ function editCustomPhrase(phraseId) {
     }
     if (editIdEl) editIdEl.value = phrase.id;
     if (cancelBtn) cancelBtn.style.display = 'inline-block';
-    
-    // Beim Bearbeiten nehmen wir an, dass der Benutzer die Kategorie absichtlich gesetzt/bestätigt hat
+
     window.isCategoryManuallySelected = true;
+
+    // Sub-Modal öffnen
+    const titleEl = document.getElementById('add-phrase-submodal-title');
+    if (titleEl) titleEl.textContent = 'Formulierungshilfe bearbeiten';
+    openAddPhraseSubmodal();
 }
 
 function cancelEditPhrase() {
@@ -6473,6 +6481,8 @@ function cancelEditPhrase() {
     if (editIdEl) editIdEl.value = '';
     if (cancelBtn) cancelBtn.style.display = 'none';
     window.isCategoryManuallySelected = false;
+    const titleEl = document.getElementById('add-phrase-submodal-title');
+    if (titleEl) titleEl.textContent = 'Formulierungshilfe hinzufügen';
 }
 
 function deleteCustomPhrase(phraseId) {
@@ -6768,7 +6778,7 @@ function renderPlanungCalendar() {
                 }
                 
                 daysHtml += `
-                    <div class="calendar-day-row ${rowClasses.join(' ')}" onclick="openCalendarDayDetails('${dateStr}')">
+                    <div class="calendar-day-row ${rowClasses.join(' ')}" onclick="event.stopPropagation(); openCalendarDayDetails('${dateStr}')">
                         <div class="calendar-day-label">
                             <span class="day-num">${d}</span>
                             <span class="day-dow">${weekdayInitials[dow]}</span>
@@ -7579,7 +7589,7 @@ function renderContactsModule() {
         }
         
         tr.innerHTML = `
-            <td style="vertical-align: middle; cursor: pointer;" onclick="openContactPhonesModal('${c.id}')"><strong>${escapeHtml(c.childName || '-')}</strong></td>
+            <td style="vertical-align: middle; cursor: pointer;" onclick="event.stopPropagation(); openContactPhonesModal('${c.id}')"><strong>${escapeHtml(c.childName || '-')}</strong></td>
             <td style="text-align: center; white-space: nowrap; vertical-align: middle;">
                 <button onclick="openEditContactModal('${c.id}')" class="btn btn-primary btn-circle-sm" title="Bearbeiten" style="margin-right: 4px;">
                     <i class="fas fa-edit"></i>
@@ -7619,6 +7629,21 @@ function openContactPhonesModal(id) {
     showModal('contact-phones-modal');
 }
 
+function openAddPhraseSubmodal() {
+    const sub = document.getElementById('add-phrase-submodal');
+    if (sub) {
+        sub.style.display = 'flex';
+        const input = document.getElementById('wizard-new-phrase-input');
+        if (input) setTimeout(() => input.focus(), 50);
+    }
+}
+
+function closeAddPhraseSubmodal() {
+    const sub = document.getElementById('add-phrase-submodal');
+    if (sub) sub.style.display = 'none';
+    cancelEditPhrase();
+}
+
 function copyPhoneNumber(number, btn) {
     navigator.clipboard.writeText(number).then(() => {
         const original = btn.textContent.trim();
@@ -7632,6 +7657,7 @@ function copyPhoneNumber(number, btn) {
         }, 1500);
     });
 }
+
 
 function openPlanungOptionsSheet() {
     const backdrop = document.getElementById('mobile-action-sheet-backdrop');

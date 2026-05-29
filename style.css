@@ -2370,6 +2370,15 @@ select.form-control {
     margin-left: auto;
 }
 
+#planung-setup-controls-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-left: auto;
+    gap: 6px;
+}
+
+
 .planung-date-range {
     display: flex;
     align-items: center;
@@ -2588,6 +2597,7 @@ td.planung-col-inhalt {
 /* Mitarbeit-Assistent Wizard Styling */
 .mitarbeit-modal {
     max-height: 95vh !important;
+    position: relative;
 }
 
 .wizard-header {
@@ -2900,8 +2910,8 @@ td.planung-col-inhalt {
 }
 
 .filter-circle-btn {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: none;
     cursor: pointer;
@@ -2913,7 +2923,7 @@ td.planung-col-inhalt {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.65rem;
+    font-size: 0.72rem;
     font-weight: 700;
     color: #ffffff;
     font-family: inherit;
@@ -3765,6 +3775,10 @@ body.modal-open {
         display: none !important;
     }
 
+    .planung-setup > .planung-setup-group:first-child {
+        width: 100%;
+    }
+
     #planung-table-container {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -3783,9 +3797,13 @@ body.modal-open {
         align-items: center;
         border: 1px solid var(--border-color) !important;
         background-color: #f1f5f9 !important;
-        color: var(--dark-color) !important;
+        color: #1e293b !important;
         cursor: pointer;
         flex-shrink: 0;
+    }
+
+    .mobile-overflow-btn i {
+        color: #1e293b !important;
     }
 
     .mobile-overflow-btn:hover {
