@@ -4807,7 +4807,7 @@ function renderZeugnisModule() {
                 event.preventDefault();
                 event.stopPropagation();
 
-                const insertHtml = '<br>- ';
+                const insertHtml = '<br>';
                 document.execCommand('insertHTML', false, insertHtml);
 
                 // Linke/rechte Notizen speichern wir direkt nach dem manuellen Zeilenumbruch.
