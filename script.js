@@ -7225,7 +7225,7 @@ function handleTimeRangeClick(event, hour) {
             }
             
             AppState.timeRangeStage = 1;
-            if (instruction) instruction.textContent = 'Zeitraum ausgewählt. Klicke erneut, um neu zu starten.';
+            if (instruction) instruction.textContent = '';
             
             openTimeMinutesPopup(event, hour, targetType);
         }
@@ -7307,7 +7307,7 @@ function editCalendarDayTermin(id) {
     
     AppState.timeRangeStage = 1;
     const instruction = document.getElementById('time-range-instruction');
-    if (instruction) instruction.textContent = 'Zeitraum ausgewählt. Klicke erneut, um neu zu starten.';
+    if (instruction) instruction.textContent = '';
     
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
