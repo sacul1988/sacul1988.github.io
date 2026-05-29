@@ -7616,6 +7616,69 @@ function openContactPhonesModal(id) {
     showModal('contact-phones-modal');
 }
 
+function openPlanungOptionsSheet() {
+    const backdrop = document.getElementById('mobile-action-sheet-backdrop');
+    const container = document.getElementById('action-sheet-buttons-container');
+    const titleEl = document.getElementById('action-sheet-title');
+    if (!backdrop || !container || !titleEl) return;
+
+    titleEl.textContent = 'Planung';
+    container.innerHTML = '';
+
+    const viewMode = AppState.planungViewMode || 'list';
+
+    if (viewMode === 'list') {
+        const dayNames = { 1: 'Mo', 2: 'Di', 3: 'Mi', 4: 'Do', 5: 'Fr' };
+        const daysWrapper = document.createElement('div');
+        daysWrapper.style.cssText = 'margin-bottom: 16px;';
+        daysWrapper.innerHTML = '<div style="font-size: 0.82rem; font-weight: 600; color: var(--grey-color); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Wochentage</div>';
+        const chipsRow = document.createElement('div');
+        chipsRow.className = 'planung-days-row';
+        [1, 2, 3, 4, 5].forEach(v => {
+            const realCb = document.querySelector(`.planung-day-cb[value="${v}"]`);
+            const label = document.createElement('label');
+            label.className = 'planung-day-chip';
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = realCb ? realCb.checked : false;
+            input.addEventListener('change', function() {
+                const real = document.querySelector(`.planung-day-cb[value="${v}"]`);
+                if (real) { real.checked = this.checked; autoGeneratePlanungTable(); }
+            });
+            const span = document.createElement('span');
+            span.textContent = dayNames[v];
+            label.appendChild(input);
+            label.appendChild(span);
+            chipsRow.appendChild(label);
+        });
+        daysWrapper.appendChild(chipsRow);
+        container.appendChild(daysWrapper);
+
+        const btn1 = document.createElement('button');
+        btn1.className = 'btn btn-secondary btn-icon';
+        btn1.style.marginBottom = '8px';
+        btn1.innerHTML = '<i class="fas fa-calendar-alt"></i> <span class="btn-text">Termine ein/ausblenden</span>';
+        btn1.onclick = () => { closeMobileActionSheet(); showTermineModal(); };
+        container.appendChild(btn1);
+
+        const btn2 = document.createElement('button');
+        btn2.className = 'btn btn-primary btn-icon';
+        btn2.innerHTML = '<i class="fas fa-trash"></i> <span class="btn-text">Planung löschen</span>';
+        btn2.onclick = () => { closeMobileActionSheet(); deletePlanungTable(); };
+        container.appendChild(btn2);
+    } else {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-primary btn-icon';
+        btn.innerHTML = '<i class="fas fa-file-download"></i> <span class="btn-text">Termine exportieren</span>';
+        btn.onclick = () => { closeMobileActionSheet(); exportAllTermineToICS(); };
+        container.appendChild(btn);
+    }
+
+    backdrop.style.display = 'flex';
+    backdrop.offsetHeight;
+    backdrop.classList.add('show');
+}
+
 function filterContacts() {
     renderContactsModule();
 }

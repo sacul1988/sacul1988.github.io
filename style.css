@@ -3564,33 +3564,31 @@ body.modal-open {
         border-radius: 8px;
     }
     
-    /* 6. Horizontally scrollable hours circle row inside modals */
+    /* 6. Time circles: 2 rows on mobile */
     .time-quick-select-container {
-        overflow-x: auto !important;
-        white-space: nowrap !important;
-        padding: 6px 4px !important;
+        overflow-x: hidden !important;
+        white-space: normal !important;
+        padding: 6px 0 !important;
         display: flex !important;
+        flex-wrap: wrap !important;
         gap: 6px !important;
         justify-content: flex-start !important;
-        -webkit-overflow-scrolling: touch;
     }
-    
-    /* Hide connection line assets on mobile to avoid misalignment when scrolling */
+
     .time-quick-select-container::before {
         display: none !important;
     }
-    
+
     .time-quick-active-track {
         display: none !important;
     }
-    
+
     .time-quick-circle {
-        flex: 0 0 auto !important;
-        width: 32px !important;
-        height: 32px !important;
-        min-width: 32px !important;
-        min-height: 32px !important;
-        font-size: 0.9rem !important;
+        flex: 0 0 calc((100% - 36px) / 7) !important;
+        width: calc((100% - 36px) / 7) !important;
+        height: 36px !important;
+        min-width: 0 !important;
+        font-size: 0.85rem !important;
     }
     
     /* 7. Sitzplan Workspace scroll indicators */
@@ -3653,6 +3651,19 @@ body.modal-open {
 @media (max-width: 768px) {
     .desktop-header-buttons {
         display: none !important; /* Hide inline buttons on mobile */
+    }
+
+    #planung-setup-controls-wrapper {
+        display: none !important;
+    }
+
+    #planung-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .planung-table {
+        min-width: 480px;
     }
     
     .mobile-overflow-btn {

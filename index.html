@@ -330,26 +330,31 @@
                                         <span class="planung-range-text">–</span>
                                         <input type="date" id="planung-end-date" class="form-control planung-date-input">
                                     </div>
+                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openPlanungOptionsSheet()" style="margin-left: auto;">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
                                 </div>
-                                <div class="planung-setup-group" id="planung-setup-days-group" style="margin-left: auto;">
-                                    <div class="planung-days-row">
-                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="1"><span>Mo</span></label>
-                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="2"><span>Di</span></label>
-                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="3"><span>Mi</span></label>
-                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="4"><span>Do</span></label>
-                                        <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="5"><span>Fr</span></label>
+                                <div id="planung-setup-controls-wrapper">
+                                    <div class="planung-setup-group" id="planung-setup-days-group" style="margin-left: auto;">
+                                        <div class="planung-days-row">
+                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="1"><span>Mo</span></label>
+                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="2"><span>Di</span></label>
+                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="3"><span>Mi</span></label>
+                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="4"><span>Do</span></label>
+                                            <label class="planung-day-chip"><input type="checkbox" class="planung-day-cb" value="5"><span>Fr</span></label>
+                                        </div>
+                                        <button class="btn btn-secondary btn-icon" onclick="showTermineModal()" style="margin-left: 8px;">
+                                            <i class="fas fa-calendar-alt"></i> <span class="btn-text">Termine ein/ausblenden</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" onclick="deletePlanungTable()" style="margin-left: 8px;">
+                                            <i class="fas fa-trash"></i> <span class="btn-text">Planung löschen</span>
+                                        </button>
                                     </div>
-                                    <button class="btn btn-secondary btn-icon" onclick="showTermineModal()" style="margin-left: 8px;">
-                                        <i class="fas fa-calendar-alt"></i> <span class="btn-text">Termine ein/ausblenden</span>
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="deletePlanungTable()" style="margin-left: 8px;">
-                                        <i class="fas fa-trash"></i> <span class="btn-text">Planung löschen</span>
-                                    </button>
-                                </div>
-                                <div class="planung-setup-group" id="planung-setup-export-group" style="display: none; margin-left: auto;">
-                                    <button class="btn btn-primary btn-icon" id="planung-export-ics-btn" onclick="exportAllTermineToICS()">
-                                        <i class="fas fa-file-download"></i> <span class="btn-text">Termine exportieren</span>
-                                    </button>
+                                    <div class="planung-setup-group" id="planung-setup-export-group" style="display: none; margin-left: auto;">
+                                        <button class="btn btn-primary btn-icon" id="planung-export-ics-btn" onclick="exportAllTermineToICS()">
+                                            <i class="fas fa-file-download"></i> <span class="btn-text">Termine exportieren</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
