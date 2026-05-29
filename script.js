@@ -4788,38 +4788,6 @@ function renderZeugnisModule() {
         container.appendChild(card);
     });
 
-    // Entferne alte Event-Listener, bevor wir neue hinzufügen
-    const oldListeners = container._zeugnisListeners;
-    if (oldListeners) {
-        if (oldListeners.keydown) {
-            container.removeEventListener('keydown', oldListeners.keydown);
-        }
-    }
-    
-    // Neuer Event-Listener für automatische Aufzählungszeichen (Enter-Taste)
-    const zeugnisListener = function(event) {
-        if (event.target.matches('div[id^="notes-left-"], div[id^="notes-right-"]')) {
-            if (event.key === 'Enter') {
-                const textarea = event.target;
-                const studentIndex = getStudentIndexFromZeugnisTextareaId(textarea.id);
-                if (studentIndex < 0) return;
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                const insertHtml = '<br>';
-                document.execCommand('insertHTML', false, insertHtml);
-
-                // Linke/rechte Notizen speichern wir direkt nach dem manuellen Zeilenumbruch.
-                saveStudentNotes(studentIndex);
-            }
-        }
-    };
-    
-    container.addEventListener('keydown', zeugnisListener);
-    container._zeugnisListeners = {
-        keydown: zeugnisListener
-    };
 }
 
 // Automatischer Overflow: Wenn das linke Textfeld voll ist, überlaufenden Text ins rechte verschieben
