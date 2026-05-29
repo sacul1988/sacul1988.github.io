@@ -7240,8 +7240,8 @@ function openTimeMinutesPopup(event, hour, type) {
     
     const formattedHour = String(hour).padStart(2, '0');
     
-    // Drei kleine Kreise für 15, 30, 45 generieren
-    const mins = ['15', '30', '45'];
+    // Vier kleine Kreise für 00, 15, 30, 45 generieren
+    const mins = ['00', '15', '30', '45'];
     popover.innerHTML = mins.map(m => {
         const timeVal = `${formattedHour}:${m}`;
         return `<button type="button" class="time-minute-circle" onclick="selectTimeQuick('${timeVal}', '${type}')">${m}</button>`;
@@ -7256,8 +7256,8 @@ function openTimeMinutesPopup(event, hour, type) {
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     
     popover.style.top = `${rect.bottom + scrollTop + 6}px`;
-    // Zentriert unter dem Kreis positionieren (Kreis ist 34px breit, Popover hat eine Breite von ca. 126px)
-    popover.style.left = `${rect.left + scrollLeft - 46}px`;
+    // Zentriert unter dem Kreis positionieren (Kreis ist 34px breit, Popover hat eine Breite von ca. 168px)
+    popover.style.left = `${rect.left + scrollLeft - 67}px`;
     
     // Schließen, wenn man woanders hin klickt
     const closeListener = () => {
