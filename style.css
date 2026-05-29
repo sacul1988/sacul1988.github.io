@@ -3622,11 +3622,113 @@ body.modal-open {
         max-width: 95% !important;
         padding: 12px !important;
     }
-    
+
     /* 10. Login container */
     .login-card {
         width: 92% !important;
         padding: 20px 15px !important;
+    }
+
+    /* 11. Formulierungshilfen Modal */
+    .mitarbeit-modal {
+        display: flex !important;
+        flex-direction: column !important;
+        max-height: 92vh !important;
+        overflow-y: hidden !important;
+        padding: 10px !important;
+    }
+
+    .mitarbeit-modal .wizard-header {
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        position: relative;
+        align-items: flex-start;
+    }
+
+    .mitarbeit-modal .wizard-header h2 {
+        font-size: 0.9rem !important;
+        order: 1;
+        flex: 1 1 100%;
+        padding-right: 32px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mitarbeit-modal .wizard-header-filters {
+        order: 2;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        flex: 1;
+    }
+
+    .mitarbeit-modal .wizard-close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 1.4rem !important;
+    }
+
+    .mitarbeit-modal .wizard-body {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mitarbeit-modal .wizard-add-phrase-form {
+        padding: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .mitarbeit-modal .wizard-add-phrase-form h4 {
+        font-size: 0.82rem !important;
+        margin-bottom: 6px !important;
+    }
+
+    .mitarbeit-modal .wizard-add-phrase-form > div {
+        flex-direction: column !important;
+        gap: 6px !important;
+    }
+
+    .mitarbeit-modal #wizard-new-phrase-input {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .mitarbeit-modal #wizard-new-phrase-color,
+    .mitarbeit-modal #wizard-new-phrase-category {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .mitarbeit-modal .wizard-sentences-list {
+        max-height: 32vh !important;
+    }
+
+    .mitarbeit-modal .wizard-footer {
+        flex-shrink: 0;
+        margin-top: 8px !important;
+        padding-top: 8px !important;
+        gap: 6px !important;
+    }
+
+    .mitarbeit-modal .wizard-preview-container {
+        max-height: 55px !important;
+        padding: 6px 10px !important;
+    }
+
+    .mitarbeit-modal .wizard-buttons-row {
+        margin-top: 0 !important;
+    }
+
+    .mitarbeit-modal .wizard-buttons-row button {
+        font-size: 0.82rem !important;
+        padding: 8px 12px !important;
+        min-height: 36px !important;
     }
 }
 

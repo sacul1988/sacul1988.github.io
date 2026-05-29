@@ -6671,13 +6671,14 @@ function renderPlanung() {
         }
     }
     
+    const isMobile = window.innerWidth <= 768;
     const daysGroup = safeGetElement('planung-setup-days-group');
     if (daysGroup) {
-        daysGroup.style.display = viewMode === 'calendar' ? 'none' : 'flex';
+        daysGroup.style.display = isMobile ? 'none' : (viewMode === 'calendar' ? 'none' : 'flex');
     }
     const exportGroup = safeGetElement('planung-setup-export-group');
     if (exportGroup) {
-        exportGroup.style.display = viewMode === 'calendar' ? 'flex' : 'none';
+        exportGroup.style.display = isMobile ? 'none' : (viewMode === 'calendar' ? 'flex' : 'none');
     }
     
     if (viewMode === 'calendar') {
@@ -7608,12 +7609,28 @@ function openContactPhonesModal(id) {
         content.innerHTML = validPhones.map(p => `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
                 <span style="font-weight: 500; color: var(--dark-color);">${escapeHtml(p.label || '–')}</span>
-                <a href="tel:${escapeHtml(p.number || '')}" style="color: var(--primary-color); font-size: 1rem;">${escapeHtml(p.number || '–')}</a>
+                <button onclick="copyPhoneNumber('${escapeHtml(p.number || '')}', this)" style="background: none; border: none; cursor: pointer; color: var(--primary-color); font-size: 1rem; font-weight: 500; padding: 4px 0;" title="Nummer kopieren">
+                    ${escapeHtml(p.number || '–')}
+                </button>
             </div>
         `).join('');
     }
 
     showModal('contact-phones-modal');
+}
+
+function copyPhoneNumber(number, btn) {
+    navigator.clipboard.writeText(number).then(() => {
+        const original = btn.textContent.trim();
+        btn.textContent = '✓ Kopiert';
+        btn.style.color = 'var(--success-color)';
+        btn.style.fontWeight = '700';
+        setTimeout(() => {
+            btn.textContent = original;
+            btn.style.color = 'var(--primary-color)';
+            btn.style.fontWeight = '500';
+        }, 1500);
+    });
 }
 
 function openPlanungOptionsSheet() {
