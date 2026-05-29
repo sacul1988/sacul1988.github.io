@@ -5481,6 +5481,9 @@ function renderTermineList() {
                 <label class="termin-ausblenden-label">
                     <input type="checkbox" ${isHidden ? 'checked' : ''} onchange="toggleTerminAusblenden('${termin.id}', this.checked)"> Ausblenden
                 </label>
+                <button class="btn btn-sm btn-info btn-square" onclick="exportSingleTerminToICS('${termin.id}')" title="Diesen Termin als .ics exportieren">
+                    <i class="fas fa-file-download"></i>
+                </button>
                 <button class="btn btn-sm btn-primary btn-square" onclick="editTermin('${termin.id}')">
                     <i class="fas fa-edit"></i>
                 </button>
@@ -5634,6 +5637,88 @@ function saveEditedTermin(terminId) {
     saveTermine();
     renderTermineList();
 }
+
+// ===== ICS EXPORT HELPER FUNCTIONS =====
+
+function generateICS(termine) {
+    const now = new Date();
+    const dtStamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    
+    let ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Schulverwaltung//DE',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH'
+    ];
+    
+    termine.forEach(t => {
+        // Clean title for ICS (escape commas, semi-colons and newlines)
+        const escapedTitle = t.title
+            .replace(/\\/g, '\\\\')
+            .replace(/;/g, '\\;')
+            .replace(/,/g, '\\,')
+            .replace(/\n/g, '\\n');
+            
+        // Use clean date parsing (avoid timezone shifting issues by appending time)
+        const startDate = new Date(t.date + 'T00:00:00');
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 1);
+        
+        const formatDate = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}${m}${day}`;
+        };
+        
+        ics.push('BEGIN:VEVENT');
+        ics.push(`UID:${t.id}@schulverwaltung`);
+        ics.push(`DTSTAMP:${dtStamp}`);
+        ics.push(`DTSTART;VALUE=DATE:${formatDate(startDate)}`);
+        ics.push(`DTEND;VALUE=DATE:${formatDate(endDate)}`);
+        ics.push(`SUMMARY:${escapedTitle}`);
+        ics.push('DESCRIPTION:Termin aus der Schulverwaltung');
+        ics.push('END:VEVENT');
+    });
+    
+    ics.push('END:VCALENDAR');
+    return ics.join('\r\n');
+}
+
+function downloadICSFile(filename, content) {
+    const blob = new Blob([content], { type: 'text/calendar;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+window.exportAllTermineToICS = function() {
+    const termine = AppState.termine || [];
+    if (termine.length === 0) {
+        swal('Fehler', 'Keine Termine vorhanden zum Exportieren.', 'error');
+        return;
+    }
+    
+    const icsContent = generateICS(termine);
+    downloadICSFile('Termine_Schulverwaltung.ics', icsContent);
+};
+
+window.exportSingleTerminToICS = function(terminId) {
+    const termin = (AppState.termine || []).find(t => t.id === terminId);
+    if (!termin) return;
+    
+    const icsContent = generateICS([termin]);
+    // Clean filename
+    const safeTitle = termin.title.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+    downloadICSFile(`Termin_${safeTitle}.ics`, icsContent);
+};
 
 // ── Planung ─────────────────────────────────────────────────────────────────
 
@@ -6660,9 +6745,14 @@ function renderCalendarDayTermineList(dateStr) {
         listContainer.innerHTML = dayTermine.map(t => `
             <div class="calendar-modal-termin-item">
                 <span>${escapeHtml(t.title || '')}</span>
-                <button class="btn btn-sm btn-danger btn-square" onclick="deleteCalendarDayTermin('${t.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div style="display: flex; gap: 4px;">
+                    <button class="btn btn-sm btn-info btn-square" onclick="exportSingleTerminToICS('${t.id}')" title="Diesen Termin als .ics exportieren">
+                        <i class="fas fa-file-download"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-square" onclick="deleteCalendarDayTermin('${t.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </div>
         `).join('');
     }

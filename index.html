@@ -498,7 +498,12 @@
                         <i class="fas fa-calendar-alt"></i>
                         <span>Termine</span>
                     </div>
-                    <button class="termin-modal-close" onclick="hideModal()"><i class="fas fa-times"></i></button>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn btn-sm btn-info" onclick="exportAllTermineToICS()" style="margin: 0; padding: 6px 12px; font-size: 0.8rem; min-height: 32px !important; height: 32px !important; display: inline-flex; align-items: center; gap: 6px;" title="Alle Termine als .ics exportieren">
+                            <i class="fas fa-file-download"></i> Export (.ics)
+                        </button>
+                        <button class="termin-modal-close" onclick="hideModal()"><i class="fas fa-times"></i></button>
+                    </div>
                 </div>
 
                 <div class="termin-add-form">
