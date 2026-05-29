@@ -6826,7 +6826,7 @@ function openCalendarDayDetails(dateStr) {
     // Formularknöpfe und aktive Kreise zurücksetzen
     AppState.timeRangeStage = 1;
     const instruction = document.getElementById('time-range-instruction');
-    if (instruction) instruction.textContent = 'Klicke eine Startzeit an...';
+    if (instruction) instruction.textContent = '';
     
     updateCalendarDayFormUI();
     updateQuickSelectActiveStates();
@@ -6908,7 +6908,7 @@ function addCalendarDayTermin() {
     
     AppState.timeRangeStage = 1;
     const instruction = document.getElementById('time-range-instruction');
-    if (instruction) instruction.textContent = 'Klicke eine Startzeit an...';
+    if (instruction) instruction.textContent = '';
     
     renderCalendarDayTermineList(dateStr);
     updateCalendarDayFormUI();
@@ -7350,7 +7350,7 @@ function cancelEditCalendarDayTermin() {
     if (endInput) endInput.value = '';
     
     const instruction = document.getElementById('time-range-instruction');
-    if (instruction) instruction.textContent = 'Klicke eine Startzeit an...';
+    if (instruction) instruction.textContent = '';
     
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
