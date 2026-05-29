@@ -7170,7 +7170,7 @@ function initTimeQuickSelect() {
     let trackHtml = '<div id="time-quick-active-track" class="time-quick-active-track" style="display: none;"></div>';
     let circlesHtml = '';
     for (let h = 7; h <= 19; h++) {
-        circlesHtml += `<button type="button" class="time-quick-circle" onclick="handleTimeRangeClick(event, ${h})">${h}</button>`;
+        circlesHtml += `<button type="button" class="time-quick-circle" data-hour="${h}" onclick="handleTimeRangeClick(event, ${h})">${h}</button>`;
     }
     rangeContainer.innerHTML = trackHtml + circlesHtml;
 }
@@ -7369,26 +7369,48 @@ function updateQuickSelectActiveStates() {
     
     circles.forEach(c => {
         c.classList.remove('active-start', 'active-end', 'in-range');
-        const h = parseInt(c.textContent);
+        const h = parseInt(c.getAttribute('data-hour') || c.textContent);
         
         if (startHour !== null && endHour !== null) {
             const minH = Math.min(startHour, endHour);
             const maxH = Math.max(startHour, endHour);
-            if (h === startHour) {
+            if (h === startHour && h === endHour) {
+                c.classList.add('active-start', 'active-end');
+                const startMins = startVal ? startVal.split(':')[1] : '00';
+                const endMins = endVal ? endVal.split(':')[1] : '00';
+                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">${startMins}-${endMins}</span></div>`;
+            } else if (h === startHour) {
                 c.classList.add('active-start');
+                const startMins = startVal ? startVal.split(':')[1] : '00';
+                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">:${startMins}</span></div>`;
             } else if (h === endHour) {
                 c.classList.add('active-end');
+                const endMins = endVal ? endVal.split(':')[1] : '00';
+                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">:${endMins}</span></div>`;
             } else if (h > minH && h < maxH) {
                 c.classList.add('in-range');
+                c.innerHTML = h;
+            } else {
+                c.innerHTML = h;
             }
         } else if (startHour !== null) {
             if (h === startHour) {
                 c.classList.add('active-start');
+                const startMins = startVal ? startVal.split(':')[1] : '00';
+                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">:${startMins}</span></div>`;
+            } else {
+                c.innerHTML = h;
             }
         } else if (endHour !== null) {
             if (h === endHour) {
                 c.classList.add('active-end');
+                const endMins = endVal ? endVal.split(':')[1] : '00';
+                c.innerHTML = `<div class="time-quick-circle-content"><span class="time-quick-hour">${h}</span><span class="time-quick-minutes">:${endMins}</span></div>`;
+            } else {
+                c.innerHTML = h;
             }
+        } else {
+            c.innerHTML = h;
         }
     });
     
@@ -7396,8 +7418,8 @@ function updateQuickSelectActiveStates() {
     if (!track) return;
     
     if (startHour !== null && endHour !== null) {
-        const startCircle = [...circles].find(c => parseInt(c.textContent) === startHour);
-        const endCircle = [...circles].find(c => parseInt(c.textContent) === endHour);
+        const startCircle = [...circles].find(c => parseInt(c.getAttribute('data-hour') || c.textContent) === startHour);
+        const endCircle = [...circles].find(c => parseInt(c.getAttribute('data-hour') || c.textContent) === endHour);
         
         if (startCircle && endCircle) {
             const startLeft = startCircle.offsetLeft + 17; // center (34px / 2)
