@@ -6039,17 +6039,19 @@ function renderPlanungTable() {
     }
 
     let nr = 0;
+    const todayStr = localDateStr(new Date());
     const tableRows = rows.map(row => {
         if (row.isTeaching) nr++;
         const formattedDate = new Date(row.date + 'T00:00:00').toLocaleDateString('de-DE', {
             day: '2-digit', month: '2-digit', year: 'numeric'
         });
         const inhalt = (p.entries && p.entries[row.date]) ? escapeHtml(p.entries[row.date]) : '';
+        const isPast = row.date < todayStr;
 
         const terminText = row.termins.map(t => escapeHtml(t.title)).join(', ');
 
         if (row.isTeaching) {
-            return `<tr class="planung-row${terminText ? ' planung-row-termin' : ''}" data-date="${row.date}">
+            return `<tr class="planung-row${terminText ? ' planung-row-termin' : ''} ${isPast ? 'planung-row-past' : ''}" data-date="${row.date}">
                 <td class="planung-col-nr">${nr}</td>
                 <td class="planung-col-tag">${PLANUNG_DAY_NAMES[row.dow]}</td>
                 <td class="planung-col-datum">${formattedDate}</td>
@@ -6061,7 +6063,7 @@ function renderPlanungTable() {
                 </td>
             </tr>`;
         } else {
-            return `<tr class="planung-row planung-row-termin" data-date="${row.date}">
+            return `<tr class="planung-row planung-row-termin ${isPast ? 'planung-row-past' : ''}" data-date="${row.date}">
                 <td class="planung-col-nr">—</td>
                 <td class="planung-col-tag">${ALL_DAY_NAMES[row.dow]}</td>
                 <td class="planung-col-datum">${formattedDate}</td>
@@ -6713,6 +6715,8 @@ function renderPlanungCalendar() {
                 
                 const isToday = dateStr === todayStr;
                 if (isToday) rowClasses.push('today');
+                const isPast = dateStr < todayStr;
+                if (isPast) rowClasses.push('calendar-day-past');
                 // Termine sammeln (alle Termine des Tages, keine Ausblendung im Kalender)
                 const termine = AppState.termine || [];
                 const dayTermine = termine.filter(t => t.date === dateStr);

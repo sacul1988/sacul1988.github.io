@@ -3081,6 +3081,22 @@ div.notes-textarea:empty::before {
     font-weight: 700;
 }
 
+.calendar-day-row.calendar-day-past {
+    opacity: 0.65;
+}
+.calendar-day-row.calendar-day-past .day-num,
+.calendar-day-row.calendar-day-past .day-dow,
+.calendar-day-row.calendar-day-past .calendar-day-appointment-badge {
+    text-decoration: line-through;
+}
+
+.planung-row-past td:not(.planung-col-inhalt),
+.planung-row-past .planung-termin-text,
+.planung-row-past textarea {
+    text-decoration: line-through;
+    opacity: 0.65;
+}
+
 .calendar-day-label {
     width: 55px;
     font-size: 0.8rem;
