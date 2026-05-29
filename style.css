@@ -2990,6 +2990,7 @@ div.notes-textarea {
     white-space: pre-wrap;
     word-break: break-word;
     background-color: #fff;
+    color: #000;
     cursor: text;
 }
 div.notes-textarea[id^="notes-left-"], div.notes-textarea[id^="notes-right-"] {

@@ -4782,10 +4782,10 @@ function renderZeugnisModule() {
                     <h4>Notizen für ${student.name}</h4>
                     <div class="zeugnis-notes-container">
                         <div class="zeugnis-notes-left">
-                            <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Linke Notizen..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
+                            <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Linke Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
                         </div>
                         <div class="zeugnis-notes-right">
-                            <div contenteditable="true" class="form-control notes-textarea" id="notes-right-${index}" placeholder="Rechte Notizen..." oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${rightNotes}</div>
+                            <div contenteditable="true" class="form-control notes-textarea" id="notes-right-${index}" placeholder="Rechte Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${rightNotes}</div>
                         </div>
                     </div>
                 </div>
@@ -4867,6 +4867,102 @@ function scrollToTopOfZeugnisModule() {
     document.body.scrollTop = 0; // Für Safari
     window.scrollTo({ top: 0, behavior: 'auto' }); 
 }
+
+// Spantext bei Tastatureingabe aufteilen, damit der neu getippte Text immer in Standardschriftart (schwarz) ist
+function splitSpanAtCaret(event) {
+    // Nur bei druckbaren einzelnen Zeichen (Tastatureingabe) abfangen
+    if (event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+    }
+
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    const container = range.startContainer;
+
+    // Suche nach einem übergeordneten, farbcodierten Span-Element
+    let span = container.nodeType === 3 ? container.parentNode : container;
+    while (span && span.tagName !== 'SPAN' && span !== event.currentTarget) {
+        span = span.parentNode;
+    }
+
+    // Wenn der Cursor in einem farbigen Span steht, brechen wir aus diesem aus, damit der Text schwarz wird
+    if (span && span.tagName === 'SPAN' && span.className.match(/phrase-color-(blue|green|orange|red|yellow)/)) {
+        event.preventDefault();
+        const char = event.key;
+
+        let textNode = null;
+        let offset = 0;
+
+        if (container.nodeType === 3) {
+            textNode = container;
+            offset = range.startOffset;
+        } else {
+            // Fallback falls der Cursor direkt auf dem Element positioniert ist
+            if (container.childNodes && container.childNodes.length > 0) {
+                const child = container.childNodes[Math.min(range.startOffset, container.childNodes.length - 1)];
+                if (child && child.nodeType === 3) {
+                    textNode = child;
+                    offset = range.startOffset >= container.childNodes.length ? child.nodeValue.length : 0;
+                }
+            }
+        }
+
+        if (textNode) {
+            const text = textNode.nodeValue;
+            const leftText = text.substring(0, offset);
+            const rightText = text.substring(offset);
+            const newTextNode = document.createTextNode(char);
+
+            if (leftText === '') {
+                // Am Anfang des Spans: davor einfügen
+                span.parentNode.insertBefore(newTextNode, span);
+            } else if (rightText === '') {
+                // Am Ende des Spans: danach einfügen
+                if (span.nextSibling) {
+                    span.parentNode.insertBefore(newTextNode, span.nextSibling);
+                } else {
+                    span.parentNode.appendChild(newTextNode);
+                }
+            } else {
+                // In der Mitte des Spans: Span aufteilen und Text dazwischen einfügen
+                const rightSpan = span.cloneNode(false);
+                rightSpan.textContent = rightText;
+                
+                textNode.nodeValue = leftText;
+                
+                span.parentNode.insertBefore(newTextNode, span.nextSibling);
+                span.parentNode.insertBefore(rightSpan, newTextNode.nextSibling);
+            }
+
+            // Cursor direkt hinter das neu getippte Zeichen setzen
+            const newRange = document.createRange();
+            newRange.setStartAfter(newTextNode);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+        } else {
+            // Fallback: Einfaches Einfügen nach dem Span
+            const newTextNode = document.createTextNode(char);
+            if (span.nextSibling) {
+                span.parentNode.insertBefore(newTextNode, span.nextSibling);
+            } else {
+                span.parentNode.appendChild(newTextNode);
+            }
+            const newRange = document.createRange();
+            newRange.setStartAfter(newTextNode);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+        }
+
+        // input-Event manuell triggern, damit die Notizen gespeichert werden
+        const inputEvent = new Event('input', { bubbles: true });
+        event.currentTarget.dispatchEvent(inputEvent);
+    }
+}
+window.splitSpanAtCaret = splitSpanAtCaret;
 
 // Notizen speichern
 function saveStudentNotes(studentIndex, isDebounced = false) {
