@@ -1212,6 +1212,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Zeit-Schnellauswahl initialisieren
     initTimeQuickSelect();
+    
+    // Event-Listener für manuelle Zeiteingabe
+    const timestartEl = document.getElementById('calendar-day-new-termin-timestart');
+    const timeendEl = document.getElementById('calendar-day-new-termin-timeend');
+    if (timestartEl) {
+        timestartEl.addEventListener('input', updateQuickSelectActiveStates);
+        timestartEl.addEventListener('change', updateQuickSelectActiveStates);
+    }
+    if (timeendEl) {
+        timeendEl.addEventListener('input', updateQuickSelectActiveStates);
+        timeendEl.addEventListener('change', updateQuickSelectActiveStates);
+    }
 });
 
 // ===== SCHÜLERLISTE MODUL =====
@@ -6811,8 +6823,9 @@ function openCalendarDayDetails(dateStr) {
     if (timeStartEl) timeStartEl.value = '';
     if (timeEndEl) timeEndEl.value = '';
     
-    // Formularknöpfe zurücksetzen
+    // Formularknöpfe und aktive Kreise zurücksetzen
     updateCalendarDayFormUI();
+    updateQuickSelectActiveStates();
     
     // Terminliste für diesen Tag rendern
     renderCalendarDayTermineList(dateStr);
@@ -6891,6 +6904,7 @@ function addCalendarDayTermin() {
     
     renderCalendarDayTermineList(dateStr);
     updateCalendarDayFormUI();
+    updateQuickSelectActiveStates();
     renderPlanung();
 }
 
@@ -7196,7 +7210,7 @@ function openTimeMinutesPopup(event, hour, type) {
     // Schließen, wenn man woanders hin klickt
     const closeListener = () => {
         popover.style.display = 'none';
-        btn.classList.remove('active');
+        updateQuickSelectActiveStates();
         document.removeEventListener('click', closeListener);
     };
     
@@ -7215,7 +7229,7 @@ function selectTimeQuick(timeVal, type) {
     if (popover) {
         popover.style.display = 'none';
     }
-    document.querySelectorAll('.time-quick-circle').forEach(c => c.classList.remove('active'));
+    updateQuickSelectActiveStates();
 }
 
 window.openTimeMinutesPopup = openTimeMinutesPopup;
@@ -7237,6 +7251,7 @@ function editCalendarDayTermin(id) {
     
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
+    updateQuickSelectActiveStates();
 }
 
 function updateCalendarDayFormUI() {
@@ -7246,8 +7261,14 @@ function updateCalendarDayFormUI() {
     
     if (isEditing) {
         container.innerHTML = `
-            <button class="btn btn-secondary" onclick="cancelEditCalendarDayTermin()" style="min-height: 36px; padding: 0 16px; margin-right: 6px;">Abbrechen</button>
-            <button class="btn btn-primary" onclick="addCalendarDayTermin()" style="min-height: 36px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-save"></i> Speichern</button>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-secondary btn-circle" onclick="cancelEditCalendarDayTermin()" title="Abbrechen">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button class="btn btn-success btn-circle" onclick="addCalendarDayTermin()" title="Speichern">
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
         `;
     } else {
         container.innerHTML = `
@@ -7269,10 +7290,41 @@ function cancelEditCalendarDayTermin() {
     
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
+    updateQuickSelectActiveStates();
+}
+
+function updateQuickSelectActiveStates() {
+    const startIn = document.getElementById('calendar-day-new-termin-timestart');
+    const endIn = document.getElementById('calendar-day-new-termin-timeend');
+    
+    const startVal = startIn ? startIn.value : '';
+    const startHour = startVal ? parseInt(startVal.split(':')[0]) : null;
+    
+    const endVal = endIn ? endIn.value : '';
+    const endHour = endVal ? parseInt(endVal.split(':')[0]) : null;
+    
+    document.querySelectorAll('#time-quick-start-container .time-quick-circle').forEach(c => {
+        const h = parseInt(c.textContent);
+        if (h === startHour) {
+            c.classList.add('active');
+        } else {
+            c.classList.remove('active');
+        }
+    });
+    
+    document.querySelectorAll('#time-quick-end-container .time-quick-circle').forEach(c => {
+        const h = parseInt(c.textContent);
+        if (h === endHour) {
+            c.classList.add('active');
+        } else {
+            c.classList.remove('active');
+        }
+    });
 }
 
 window.editCalendarDayTermin = editCalendarDayTermin;
 window.updateCalendarDayFormUI = updateCalendarDayFormUI;
 window.cancelEditCalendarDayTermin = cancelEditCalendarDayTermin;
+window.updateQuickSelectActiveStates = updateQuickSelectActiveStates;
 
 
