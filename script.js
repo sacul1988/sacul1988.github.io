@@ -5791,7 +5791,7 @@ function loadPlanung() {
     });
 
     // View-Modus initialisieren
-    AppState.planungViewMode = localStorage.getItem('planungViewMode') || 'list';
+    AppState.planungViewMode = localStorage.getItem('planungViewMode') || 'calendar';
     if (AppState.calendarYear === undefined || AppState.calendarMonth === undefined) {
         if (p.startDate) {
             const startDateParts = p.startDate.split('-');
@@ -5816,7 +5816,7 @@ function savePlanung() {
 }
 
 function exportPlanungTable() {
-    const viewMode = AppState.planungViewMode || 'list';
+    const viewMode = AppState.planungViewMode || 'calendar';
     if (viewMode === 'calendar') {
         exportPlanungCalendar();
         return;
@@ -6610,7 +6610,7 @@ function setPlanungViewMode(mode) {
 }
 
 function renderPlanung() {
-    const viewMode = AppState.planungViewMode || 'list';
+    const viewMode = AppState.planungViewMode || 'calendar';
     const listContainer = safeGetElement('planung-table-container');
     const calendarContainer = safeGetElement('planung-calendar-container');
     const listBtn = safeGetElement('planung-view-list-btn');
