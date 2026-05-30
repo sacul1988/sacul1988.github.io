@@ -515,7 +515,11 @@ function showModal(modalId) {
     // Gewünschtes Modal anzeigen
     const targetModal = safeGetElement(modalId);
     if (targetModal) {
-        targetModal.style.display = 'block';
+        if (targetModal.classList.contains('mitarbeit-modal')) {
+            targetModal.style.display = 'flex';
+        } else {
+            targetModal.style.display = 'block';
+        }
         targetModal.setAttribute('aria-hidden', 'false');
 
         // Fokus auf das erste fokussierbare Element setzen
@@ -6235,6 +6239,7 @@ const AppMitarbeitWizardState = {
 };
 
 function openMitarbeitAssistant(studentIndex) {
+    if (activeModule !== 'zeugnis') return;
     if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
     
     AppMitarbeitWizardState.studentIndex = studentIndex;
@@ -6809,6 +6814,7 @@ function renderPlanungCalendar() {
 }
 
 function openCalendarDayDetails(dateStr) {
+    if (activeModule !== 'planung') return;
     if (openCalendarDayDetails._busy) return;
     openCalendarDayDetails._busy = true;
     setTimeout(() => { openCalendarDayDetails._busy = false; }, 800);
@@ -7487,6 +7493,8 @@ window.closeMobileActionSheet = closeMobileActionSheet;
 
 // ===== CENTRALIZED CONTACTS (ADRESSBUCH) =====
 
+let contactsInteractionLock = false;
+
 function setContacts(newContacts) {
     contacts = newContacts || [];
     AppState.contacts = contacts;
@@ -7608,9 +7616,10 @@ function renderContactsModule() {
 }
 
 function openContactPhonesModal(id) {
-    if (openContactPhonesModal._busy) return;
-    openContactPhonesModal._busy = true;
-    setTimeout(() => { openContactPhonesModal._busy = false; }, 800);
+    if (activeModule !== 'kontakte') return;
+    if (contactsInteractionLock) return;
+    contactsInteractionLock = true;
+    setTimeout(() => { contactsInteractionLock = false; }, 800);
 
     const contact = contacts.find(c => c.id === id);
     if (!contact) return;
@@ -7679,31 +7688,12 @@ function openPlanungOptionsSheet() {
     const viewMode = AppState.planungViewMode || 'list';
 
     if (viewMode === 'list') {
-        const dayNames = { 1: 'Mo', 2: 'Di', 3: 'Mi', 4: 'Do', 5: 'Fr' };
-        const daysWrapper = document.createElement('div');
-        daysWrapper.style.cssText = 'margin-bottom: 16px;';
-        daysWrapper.innerHTML = '<div style="font-size: 0.82rem; font-weight: 600; color: var(--grey-color); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Wochentage</div>';
-        const chipsRow = document.createElement('div');
-        chipsRow.className = 'planung-days-row';
-        [1, 2, 3, 4, 5].forEach(v => {
-            const realCb = document.querySelector(`.planung-day-cb[value="${v}"]`);
-            const label = document.createElement('label');
-            label.className = 'planung-day-chip';
-            const input = document.createElement('input');
-            input.type = 'checkbox';
-            input.checked = realCb ? realCb.checked : false;
-            input.addEventListener('change', function() {
-                const real = document.querySelector(`.planung-day-cb[value="${v}"]`);
-                if (real) { real.checked = this.checked; autoGeneratePlanungTable(); }
-            });
-            const span = document.createElement('span');
-            span.textContent = dayNames[v];
-            label.appendChild(input);
-            label.appendChild(span);
-            chipsRow.appendChild(label);
-        });
-        daysWrapper.appendChild(chipsRow);
-        container.appendChild(daysWrapper);
+        const btnDays = document.createElement('button');
+        btnDays.className = 'btn btn-secondary btn-icon';
+        btnDays.style.marginBottom = '8px';
+        btnDays.innerHTML = '<i class="fas fa-calendar-week"></i> <span class="btn-text">Unterrichtstage</span>';
+        btnDays.onclick = () => { closeMobileActionSheet(); showModal('unterrichtstage-modal'); };
+        container.appendChild(btnDays);
 
         const btn1 = document.createElement('button');
         btn1.className = 'btn btn-secondary btn-icon';
@@ -7735,6 +7725,10 @@ function filterContacts() {
 }
 
 function openAddContactModal() {
+    if (contactsInteractionLock) return;
+    contactsInteractionLock = true;
+    setTimeout(() => { contactsInteractionLock = false; }, 800);
+
     document.getElementById('contact-modal-title').textContent = 'Kontakt hinzufügen';
     document.getElementById('contact-edit-id').value = '';
     document.getElementById('contact-child-name').value = '';
@@ -7748,6 +7742,10 @@ function openAddContactModal() {
 }
 
 function openEditContactModal(contactId) {
+    if (contactsInteractionLock) return;
+    contactsInteractionLock = true;
+    setTimeout(() => { contactsInteractionLock = false; }, 800);
+
     const contact = contacts.find(c => c.id === contactId);
     if (!contact) return;
     
@@ -7817,6 +7815,10 @@ function saveContact() {
 }
 
 function deleteContact(contactId) {
+    if (contactsInteractionLock) return;
+    contactsInteractionLock = true;
+    setTimeout(() => { contactsInteractionLock = false; }, 800);
+
     const contact = contacts.find(c => c.id === contactId);
     if (!contact) return;
     

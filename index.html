@@ -692,10 +692,12 @@
                                     <option value="orange">3 / 4</option>
                                     <option value="red">4 / 5</option>
                                 </select>
+                            </div>
+                            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; width: 100%; box-sizing: border-box;">
+                                <button class="btn btn-light" onclick="closeAddPhraseSubmodal()" style="min-height: 40px;">Schließen</button>
+                                <button class="btn btn-light" id="wizard-cancel-edit-btn" onclick="cancelEditPhrase()" style="min-height: 40px; display: none;">Abbrechen</button>
                                 <input type="hidden" id="wizard-edit-phrase-id" value="">
                                 <button class="btn btn-primary" id="wizard-add-phrase-btn" onclick="saveCustomPhrase()" style="min-height: 40px;">Speichern</button>
-                                <button class="btn btn-light" id="wizard-cancel-edit-btn" onclick="cancelEditPhrase()" style="min-height: 40px; display: none;">Abbrechen</button>
-                                <button class="btn btn-light" onclick="closeAddPhraseSubmodal()" style="min-height: 40px;">Schließen</button>
                             </div>
                         </div>
                     </div>
@@ -703,7 +705,7 @@
 
                 <div class="wizard-body">
                     <!-- Filter-Kreise + Button-Zeile -->
-                    <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; box-sizing: border-box;">
                         <div class="wizard-header-filters" style="margin: 0;">
                             <button class="filter-circle-btn" data-color="blue" onclick="toggleColorFilter('blue')" title="Blau filtern (1/2)">1/2</button>
                             <button class="filter-circle-btn" data-color="green" onclick="toggleColorFilter('green')" title="Grün filtern (2/3)">2/3</button>

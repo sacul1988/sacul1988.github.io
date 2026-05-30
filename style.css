@@ -1958,7 +1958,7 @@ select.form-control {
 }
 
 /* Responsive Anpassungen für kleine Bildschirme */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .swal-modal {
         width: 95% !important;
         margin: 10px;
@@ -1978,6 +1978,23 @@ select.form-control {
     .swal-button--deleteOne,
     .swal-button--deleteAll {
         min-width: 100% !important;
+    }
+
+    .btn-text {
+        display: none !important;
+    }
+
+    .btn-icon {
+        padding: 8px 10px !important;
+        justify-content: center;
+        min-width: 36px;
+        gap: 0 !important;
+    }
+
+    .btn-icon i,
+    .btn-icon svg {
+        margin: 0 !important;
+        font-size: 1.1rem;
     }
 }
 
@@ -2598,6 +2615,8 @@ td.planung-col-inhalt {
 .mitarbeit-modal {
     max-height: 95vh !important;
     position: relative;
+    flex-direction: column;
+    overflow-y: hidden;
 }
 
 .wizard-header {
@@ -2607,6 +2626,14 @@ td.planung-col-inhalt {
     margin-bottom: 16px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.wizard-body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
 }
 
 .wizard-header h2 {
@@ -2851,6 +2878,7 @@ td.planung-col-inhalt {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex-shrink: 0;
 }
 
 .wizard-footer-top {
@@ -3519,24 +3547,6 @@ body.modal-open {
         border-radius: 8px;
     }
     
-    /* 3. Hide button text labels and style icon buttons */
-    .btn-text {
-        display: none !important;
-    }
-    
-    .btn-icon {
-        padding: 8px 10px !important;
-        justify-content: center;
-        min-width: 36px;
-        gap: 0 !important;
-    }
-    
-    .btn-icon i,
-    .btn-icon svg {
-        margin: 0 !important;
-        font-size: 1.1rem;
-    }
-    
     /* 4. Compact Module Navigation Tabs for iPhone 17 Pro Max */
     .module-nav {
         gap: 4px;
@@ -3647,8 +3657,6 @@ body.modal-open {
 
     /* 11. Formulierungshilfen Modal */
     .mitarbeit-modal {
-        display: flex !important;
-        flex-direction: column !important;
         max-height: 92vh !important;
         overflow-y: hidden !important;
         padding: 10px !important;
@@ -3675,10 +3683,18 @@ body.modal-open {
     }
 
     .mitarbeit-modal .wizard-header-filters {
-        order: 2;
         margin-left: 0 !important;
         margin-right: 0 !important;
-        flex: 1;
+    }
+
+    .mitarbeit-modal button[onclick="openAddPhraseSubmodal()"] {
+        margin-left: auto !important;
+        padding: 8px 12px !important;
+        gap: 6px !important;
+    }
+
+    .mitarbeit-modal button[onclick="openAddPhraseSubmodal()"] .btn-text {
+        display: inline !important;
     }
 
     .mitarbeit-modal .wizard-close-btn {
@@ -3686,13 +3702,6 @@ body.modal-open {
         top: 0;
         right: 0;
         font-size: 1.4rem !important;
-    }
-
-    .mitarbeit-modal .wizard-body {
-        flex: 1;
-        overflow-y: auto;
-        min-height: 0;
-        -webkit-overflow-scrolling: touch;
     }
 
     .mitarbeit-modal .wizard-add-phrase-form {
@@ -3766,7 +3775,7 @@ body.modal-open {
 }
 
 /* --- iPhone / Mobilgeräte (Bottom Sheet) --- */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .desktop-header-buttons {
         display: none !important; /* Hide inline buttons on mobile */
     }
