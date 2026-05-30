@@ -7608,7 +7608,7 @@ function openContactPhonesModal(id) {
         content.innerHTML = `<p style="color: var(--grey-color);">Keine Telefonnummern hinterlegt</p>`;
     } else {
         content.innerHTML = validPhones.map(p => `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
                 <span style="font-weight: 500; color: var(--dark-color);">${escapeHtml(p.label || '–')}</span>
                 <button onclick="copyPhoneNumber('${escapeHtml(p.number || '')}', this)" style="background: none; border: none; cursor: pointer; color: var(--primary-color); font-size: 1rem; font-weight: 500; padding: 4px 0;" title="Nummer kopieren">
                     ${escapeHtml(p.number || '–')}
