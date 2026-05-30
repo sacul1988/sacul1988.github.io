@@ -1106,6 +1106,8 @@ function deleteClass(classId) {
             } else if (currentPage === 'class' && activeClassId > classId) {
                 // Index anpassen, wenn eine Klasse davor gelöscht wurde
                 activeClassId--;
+                AppState.activeClassId = activeClassId;
+                localStorage.setItem('activeClassId', activeClassId);
             }
             
             renderClassesGrid();
@@ -4019,9 +4021,8 @@ function exportSitzplanAsJPEG() {
     
     // Lade-Animation anzeigen
     const exportBtn = document.querySelector('button[onclick="exportSitzplanAsJPEG()"]');
-    const originalText = exportBtn.innerHTML;
-    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exportiere...';
-    exportBtn.disabled = true;
+    const originalText = exportBtn ? exportBtn.innerHTML : '';
+    if (exportBtn) { exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exportiere...'; exportBtn.disabled = true; }
     
     // Ursprüngliche Größe des Workspace speichern
     const originalWidth = workspace.style.width;
@@ -4073,6 +4074,7 @@ function exportSitzplanAsJPEG() {
             
             // Bild in neuem Fenster öffnen und drucken
             const printWindow = window.open('', '_blank');
+            if (!printWindow) { swal('Hinweis', 'Bitte Popup-Blocker deaktivieren um zu exportieren.', 'info'); return; }
             printWindow.document.write('<html><head><title>Sitzplan Druck</title></head><body style="margin:0;"><img src="' + imageData + '" style="max-width:100%; height:auto;"></body></html>');
             printWindow.document.close();
             printWindow.print();
@@ -4096,8 +4098,8 @@ function exportSitzplanAsJPEG() {
             });
             
             // Button zurücksetzen
-            exportBtn.innerHTML = originalText;
-            exportBtn.disabled = false;
+            if (exportBtn) exportBtn.innerHTML = originalText;
+            if (exportBtn) exportBtn.disabled = false;
         }).catch(function(error) {
             console.error('Export fehlgeschlagen:', error);
             // Hintergrundfarben wiederherstellen
@@ -4116,8 +4118,8 @@ function exportSitzplanAsJPEG() {
                     }
                 });
             });
-            exportBtn.innerHTML = originalText;
-            exportBtn.disabled = false;
+            if (exportBtn) exportBtn.innerHTML = originalText;
+            if (exportBtn) exportBtn.disabled = false;
             swal("Export fehlgeschlagen", "Beim Exportieren ist ein Fehler aufgetreten", "error");
         });
         return;
@@ -4215,8 +4217,8 @@ function exportSitzplanAsJPEG() {
         });
         
         // Button zurücksetzen
-        exportBtn.innerHTML = originalText;
-        exportBtn.disabled = false;
+        if (exportBtn) exportBtn.innerHTML = originalText;
+        if (exportBtn) exportBtn.disabled = false;
     }).catch(function(error) {
         console.error('Export fehlgeschlagen:', error);
         
@@ -4249,8 +4251,8 @@ function exportSitzplanAsJPEG() {
         });
         
         // Button zurücksetzen
-        exportBtn.innerHTML = originalText;
-        exportBtn.disabled = false;
+        if (exportBtn) exportBtn.innerHTML = originalText;
+        if (exportBtn) exportBtn.disabled = false;
         
         // Fehlermeldung
         swal("Export fehlgeschlagen", "Beim Exportieren ist ein Fehler aufgetreten", "error");
@@ -5339,6 +5341,7 @@ function exportAllStudentCards() {
     
     // Öffne in neuem Fenster
     const printWindow = window.open('', '_blank');
+    if (!printWindow) { swal('Hinweis', 'Bitte Popup-Blocker deaktivieren um zu exportieren.', 'info'); return; }
     printWindow.document.write(allPrintHtml);
     printWindow.document.close();
     printWindow.focus();
@@ -5939,6 +5942,7 @@ function exportPlanungTable() {
     const exportTitle = className ? `Planung - ${className}` : 'Planung';
 
     const win = window.open('', '_blank');
+    if (!win) { swal('Hinweis', 'Bitte Popup-Blocker deaktivieren um zu exportieren.', 'info'); return; }
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${exportTitle}</title><style>
         body { font-family: sans-serif; font-size: 13px; padding: 24px; }
         h2 { margin-bottom: 16px; }
@@ -6699,8 +6703,6 @@ function renderPlanung() {
     const viewMode = AppState.planungViewMode || 'calendar';
     const listContainer = safeGetElement('planung-table-container');
     const calendarContainer = safeGetElement('planung-calendar-container');
-    const listBtn = safeGetElement('planung-view-list-btn');
-    const calendarBtn = safeGetElement('planung-view-calendar-btn');
 
     const p = AppState.planung || {};
     const startEl = safeGetElement('planung-start-date');
@@ -7015,6 +7017,7 @@ function exportPlanungCalendar() {
     const exportTitle = className ? `Planung (Kalender) - ${className}` : 'Planung (Kalender)';
 
     const win = window.open('', '_blank');
+    if (!win) { swal('Hinweis', 'Bitte Popup-Blocker deaktivieren um zu exportieren.', 'info'); return; }
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${exportTitle}</title><style>
         body { font-family: sans-serif; font-size: 11px; padding: 20px; background: #fff; color: #1e293b; }
         h2 { margin-bottom: 20px; text-align: center; font-size: 1.5rem; color: #0f172a; }
@@ -7698,6 +7701,9 @@ function copyPhoneNumber(number, btn) {
             btn.style.color = 'var(--primary-color)';
             btn.style.fontWeight = '500';
         }, 1500);
+    }).catch(() => {
+        btn.textContent = 'Fehler';
+        setTimeout(() => { btn.textContent = number; }, 1500);
     });
 }
 
@@ -7711,7 +7717,7 @@ function openPlanungOptionsSheet() {
     titleEl.textContent = 'Planung';
     container.innerHTML = '';
 
-    const viewMode = AppState.planungViewMode || 'list';
+    const viewMode = AppState.planungViewMode || 'calendar';
 
     if (viewMode === 'list') {
         const btnDays = document.createElement('button');
