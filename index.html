@@ -582,7 +582,7 @@
                                     <span style="color: var(--grey-color); font-weight: 500;">–</span>
                                     <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem; text-align: center;">
                                     <div id="calendar-day-add-btn-container" style="margin-left: auto;">
-                                        <button class="btn btn-success" onclick="addCalendarDayTermin()" style="min-height: 36px;">Hinzufügen</button>
+                                        <button class="btn btn-success btn-circle-sm" onclick="addCalendarDayTermin()" title="Hinzufügen"><i class="fas fa-check"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -608,41 +608,40 @@
             </div>
 
             <!-- Planung Optionen Modal -->
-            <div id="planung-optionen-modal" class="modal" style="display: none; max-width: 320px;">
-                <h2>Optionen</h2>
+            <div id="planung-optionen-modal" class="modal" style="display: none; width: 260px !important; max-width: 260px;">
+                <div class="wizard-header">
+                    <h2>Optionen</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
-                    <button class="btn btn-secondary btn-icon" onclick="hideModal(); showModal('unterrichtstage-modal');" style="justify-content: flex-start; padding: 12px 16px;">
-                        <i class="fas fa-calendar-week"></i> <span>Unterrichtstage</span>
-                    </button>
-                    <button class="btn btn-secondary btn-icon" onclick="hideModal(); showTermineModal();" style="justify-content: flex-start; padding: 12px 16px;">
-                        <i class="fas fa-calendar-alt"></i> <span>Termine ein/ausblenden</span>
-                    </button>
-                    <button class="btn btn-danger btn-icon" onclick="hideModal(); deletePlanungTable();" style="justify-content: flex-start; padding: 12px 16px;">
-                        <i class="fas fa-trash"></i> <span>Planung löschen</span>
-                    </button>
+                    <button class="btn btn-secondary" onclick="hideModal(); showModal('unterrichtstage-modal');" style="justify-content: flex-start; padding: 12px 16px; display: flex; align-items: center; gap: 10px;"><i class="fas fa-chalkboard"></i> Unterrichtstage</button>
+                    <button class="btn btn-secondary" onclick="hideModal(); showTermineModal();" style="justify-content: flex-start; padding: 12px 16px; display: flex; align-items: center; gap: 10px;"><i class="fas fa-toggle-on"></i> Termine ein/ausblenden</button>
+                    <button class="btn btn-danger" onclick="hideModal(); deletePlanungTable();" style="justify-content: flex-start; padding: 12px 16px; display: flex; align-items: center; gap: 10px;"><i class="fas fa-eraser"></i> Planung löschen</button>
                 </div>
             </div>
 
             <!-- Planung Export Modal -->
-            <div id="planung-export-modal" class="modal" style="display: none; max-width: 320px;">
-                <h2>Exportieren</h2>
+            <div id="planung-export-modal" class="modal" style="display: none; width: 260px !important; max-width: 260px;">
+                <div class="wizard-header">
+                    <h2>Exportieren</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
-                    <button class="btn btn-primary btn-icon" onclick="exportPlanungTable(); hideModal();" style="justify-content: flex-start; padding: 12px 16px;">
-                        <span>Ansicht als PDF</span>
-                    </button>
-                    <button class="btn btn-secondary btn-icon" onclick="exportAllTermineToICS(); hideModal();" style="justify-content: flex-start; padding: 12px 16px;">
-                        <i class="fas fa-calendar-download"></i> <span>Termine als .ics</span>
-                    </button>
+                    <button class="btn btn-primary" onclick="exportPlanungTable(); hideModal();" style="justify-content: flex-start; padding: 12px 16px; display: flex; align-items: center; gap: 10px;"><i class="fas fa-file-alt"></i> Ansicht als PDF</button>
+                    <button class="btn btn-secondary" onclick="exportAllTermineToICS(); hideModal();" style="justify-content: flex-start; padding: 12px 16px; display: flex; align-items: center; gap: 10px;"><i class="fas fa-calendar-alt"></i> Termine als .ics</button>
                 </div>
             </div>
 
             <!-- Planung Zeitraum Modal -->
-            <div id="planung-zeitraum-modal" class="modal" style="display: none; max-width: 300px;">
-                <h2 id="planung-zeitraum-modal-title">Zeitraum</h2>
-                <div style="display: flex; align-items: center; gap: 8px; margin-top: 16px;">
-                    <input type="date" id="planung-start-date" class="form-control planung-date-input" style="flex: 1; min-width: 0;">
+            <div id="planung-zeitraum-modal" class="modal" style="display: none; max-width: 300px; width: auto !important;">
+                <div class="wizard-header">
+                    <h2 id="planung-zeitraum-modal-title">Zeitraum</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px;">
+                    <input type="date" id="planung-start-date" class="form-control planung-date-input" style="flex: 1; min-width: 0; text-align: center;">
                     <span style="color: var(--grey-color); font-weight: 500; flex-shrink: 0;">–</span>
-                    <input type="date" id="planung-end-date" class="form-control planung-date-input" style="flex: 1; min-width: 0;">
+                    <input type="date" id="planung-end-date" class="form-control planung-date-input" style="flex: 1; min-width: 0; text-align: center;">
                 </div>
             </div>
 
@@ -715,18 +714,6 @@
                 </div>
                 
                 <div class="wizard-footer">
-                    <!-- Ziel-Textfeld und Vorschau -->
-                    <div class="wizard-footer-top">
-                        <div class="wizard-selection-summary">
-                            <strong>Auswahl:</strong> <span id="wizard-selected-count">0</span> Sätze ausgewählt
-                        </div>
-                    </div>
-                    
-                    <div class="wizard-preview-container" id="wizard-preview-container" style="display: none;">
-                        <strong>Vorschau der Sätze:</strong>
-                        <ul id="wizard-preview-list"></ul>
-                    </div>
-                    
                     <div class="wizard-buttons-row" style="justify-content: flex-end;">
                         <button class="btn btn-success" onclick="insertSelectedMitarbeitPhrases()">Auswählen & Einfügen</button>
                     </div>
@@ -743,7 +730,10 @@
 
             <!-- Kontakt hinzufügen/bearbeiten Modal -->
             <div id="contact-modal" class="modal" style="display: none;">
-                <h2 id="contact-modal-title">Kontakt hinzufügen</h2>
+                <div class="wizard-header">
+                    <h2 id="contact-modal-title">Kontakt hinzufügen</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
                 <input type="hidden" id="contact-edit-id" value="">
                 
                 <div class="form-group">

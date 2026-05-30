@@ -2666,7 +2666,7 @@ td.planung-col-inhalt {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     padding: 10px;
-    background-color: var(--light-color);
+    background-color: white;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -2697,8 +2697,11 @@ td.planung-col-inhalt {
     background-color: #dcfce7;
 }
 .wizard-sentence-item.level-green.selected {
-    background-color: #bbf7d0;
-    border-color: #22c55e;
+    background-color: #86efac;
+    border-color: #16a34a;
+    border-left-width: 8px;
+    box-shadow: 0 2px 8px rgba(34,197,94,0.25);
+    font-weight: 600;
 }
 
 .wizard-sentence-item.level-blue {
@@ -2709,8 +2712,11 @@ td.planung-col-inhalt {
     background-color: #dbeafe;
 }
 .wizard-sentence-item.level-blue.selected {
-    background-color: #bfdbfe;
-    border-color: #3b82f6;
+    background-color: #93c5fd;
+    border-color: #1d4ed8;
+    border-left-width: 8px;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.25);
+    font-weight: 600;
 }
 
 .wizard-sentence-item.level-orange {
@@ -2721,8 +2727,11 @@ td.planung-col-inhalt {
     background-color: #fef9c3;
 }
 .wizard-sentence-item.level-orange.selected {
-    background-color: #fef08a;
-    border-color: #eab308;
+    background-color: #fde047;
+    border-color: #ca8a04;
+    border-left-width: 8px;
+    box-shadow: 0 2px 8px rgba(234,179,8,0.25);
+    font-weight: 600;
 }
 
 .wizard-sentence-item.level-red {
@@ -2733,8 +2742,11 @@ td.planung-col-inhalt {
     background-color: #fee2e2;
 }
 .wizard-sentence-item.level-red.selected {
-    background-color: #fecaca;
-    border-color: #ef4444;
+    background-color: #fca5a5;
+    border-color: #dc2626;
+    border-left-width: 8px;
+    box-shadow: 0 2px 8px rgba(239,68,68,0.25);
+    font-weight: 600;
 }
 
 .wizard-sentence-item .wizard-item-actions {
@@ -2747,10 +2759,17 @@ td.planung-col-inhalt {
 
 .wizard-sentence-item .wizard-item-actions button {
     pointer-events: auto;
-    padding: 0.15rem 0.4rem;
-    min-height: 26px;
+    padding: 0;
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
+    border-radius: 50%;
     font-size: 0.75rem;
     margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .wizard-sentence-item input[type="checkbox"] {
@@ -3212,11 +3231,15 @@ body.modal-open {
 
 /* Kategorisierung der Formulierungshilfen */
 .wizard-category-group {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
+    padding-bottom: 28px;
+    border-bottom: 5px solid #94a3b8;
 }
 
 .wizard-category-group:last-child {
     margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 .wizard-category-header {
@@ -3224,7 +3247,7 @@ body.modal-open {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #64748b;
+    color: #1e293b;
     margin-bottom: 10px;
     margin-top: 8px;
     border-bottom: 1px solid #e2e8f0;
@@ -3564,7 +3587,6 @@ body.modal-open {
     }
 
     .mitarbeit-modal .wizard-header h2 {
-        font-size: 0.9rem !important;
         order: 1;
         flex: 1 1 100%;
         padding-right: 32px;
@@ -3592,7 +3614,6 @@ body.modal-open {
         position: absolute;
         top: 0;
         right: 0;
-        font-size: 1.4rem !important;
     }
 
     .mitarbeit-modal #wizard-new-phrase-input {

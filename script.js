@@ -6364,7 +6364,7 @@ function renderMitarbeitWizard() {
                                             <input type="checkbox" id="phrase-checkbox-${phrase.id}" ${isSelected ? 'checked' : ''}>
                                             <label class="wizard-sentence-label" for="phrase-checkbox-${phrase.id}">${phrase.text}</label>
                                             <div class="wizard-item-actions">
-                                                <button class="btn btn-sm btn-light" onclick="event.stopPropagation(); editCustomPhrase('${phrase.id}')" title="Bearbeiten">
+                                                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); editCustomPhrase('${phrase.id}')" title="Bearbeiten">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                                 <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteCustomPhrase('${phrase.id}')" title="Löschen">
@@ -6693,7 +6693,7 @@ function openPlanungExport() {
 function togglePlanungZeitraum() {
     const mode = AppState.planungViewMode || 'calendar';
     const title = document.getElementById('planung-zeitraum-modal-title');
-    if (title) title.textContent = mode === 'calendar' ? 'Zeitraum – Kalender' : 'Zeitraum – Planung';
+    if (title) title.textContent = 'Zeitraum';
     showModal('planung-zeitraum-modal');
 }
 
@@ -7237,7 +7237,7 @@ function updateCalendarDayFormUI() {
         `;
     } else {
         container.innerHTML = `
-            <button class="btn btn-success" onclick="addCalendarDayTermin()">Hinzufügen</button>
+            <button class="btn btn-success btn-circle-sm" onclick="addCalendarDayTermin()" title="Hinzufügen"><i class="fas fa-check"></i></button>
         `;
     }
 }
