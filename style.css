@@ -135,7 +135,7 @@ body {
 }
 
 #sitzplan-module .card-header {
-    margin-bottom: 0px;
+    margin-bottom: 8px;
 }
 
 .card-header h2 {
@@ -1455,7 +1455,6 @@ select.form-control {
 
 #sitzplan-module * {
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
 /* Restore FontAwesome font-family for icons inside sitzplan module */
@@ -1535,7 +1534,6 @@ select.form-control {
     justify-content: center;
     margin-bottom: 15px;
     padding: 10px 0;
-    border-bottom: 1px solid #eee;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
