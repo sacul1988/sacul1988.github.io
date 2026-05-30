@@ -3222,47 +3222,80 @@ function renderSitzplanModule() {
             existingPan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
         }
         
+        // Momentum helper
+        let momentumRaf = null;
+        const applyPan = (x, y) => {
+            const pan = document.getElementById('workspace-pan');
+            if (!pan) return;
+            workspace._panX = x;
+            workspace._panY = y;
+            AppState.sitzplanPanX = x;
+            AppState.sitzplanPanY = y;
+            pan.style.transform = `translate(${x}px, ${y}px)`;
+        };
+        const startMomentum = (vx, vy) => {
+            if (momentumRaf) cancelAnimationFrame(momentumRaf);
+            const decay = 0.96;
+            const step = () => {
+                vx *= decay;
+                vy *= decay;
+                if (Math.abs(vx) < 0.3 && Math.abs(vy) < 0.3) return;
+                applyPan(workspace._panX + vx, workspace._panY + vy);
+                momentumRaf = requestAnimationFrame(step);
+            };
+            momentumRaf = requestAnimationFrame(step);
+        };
+
         // Touch-Panning
         let isTouchPanning = false;
         let touchStartX, touchStartY, touchStartOffsetX, touchStartOffsetY;
+        let touchLastX, touchLastY, touchVX, touchVY;
 
         workspace.addEventListener('touchstart', (e) => {
             if (e.touches.length !== 1) return;
             if (e.target.closest('.desk') && cls.sitzplan.currentMode === 'edit') return;
+            if (momentumRaf) cancelAnimationFrame(momentumRaf);
             isTouchPanning = true;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
+            touchStartX = touchLastX = e.touches[0].clientX;
+            touchStartY = touchLastY = e.touches[0].clientY;
             touchStartOffsetX = workspace._panX || 0;
             touchStartOffsetY = workspace._panY || 0;
+            touchVX = touchVY = 0;
         }, { passive: true });
 
         workspace.addEventListener('touchmove', (e) => {
             if (!isTouchPanning || e.touches.length !== 1) return;
             e.preventDefault();
-            const pan = document.getElementById('workspace-pan');
-            if (!pan) return;
-            workspace._panX = touchStartOffsetX + (e.touches[0].clientX - touchStartX);
-            workspace._panY = touchStartOffsetY + (e.touches[0].clientY - touchStartY);
-            AppState.sitzplanPanX = workspace._panX;
-            AppState.sitzplanPanY = workspace._panY;
-            pan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
+            touchVX = e.touches[0].clientX - touchLastX;
+            touchVY = e.touches[0].clientY - touchLastY;
+            touchLastX = e.touches[0].clientX;
+            touchLastY = e.touches[0].clientY;
+            applyPan(
+                touchStartOffsetX + (e.touches[0].clientX - touchStartX),
+                touchStartOffsetY + (e.touches[0].clientY - touchStartY)
+            );
         }, { passive: false });
 
         workspace.addEventListener('touchend', () => {
+            if (!isTouchPanning) return;
             isTouchPanning = false;
+            startMomentum(touchVX, touchVY);
         });
 
-        // Maus-Pan (Drag-to-scroll)
+        // Maus-Pan
         let isPanning = false;
         let panStartX, panStartY, panStartOffsetX, panStartOffsetY;
+        let mouseLastX, mouseLastY, mouseVX, mouseVY;
 
         workspace.addEventListener('mousedown', (e) => {
             if (e.target.closest('.desk')) return;
+            if (momentumRaf) cancelAnimationFrame(momentumRaf);
             isPanning = true;
-            panStartX = e.clientX;
-            panStartY = e.clientY;
+            panStartX = mouseLastX = e.clientX;
+            panStartY = mouseLastY = e.clientY;
             panStartOffsetX = workspace._panX || 0;
             panStartOffsetY = workspace._panY || 0;
+            mouseVX = mouseVY = 0;
             workspace.style.cursor = 'grabbing';
             e.preventDefault();
         });
@@ -3272,19 +3305,20 @@ function renderSitzplanModule() {
 
         workspace._panMoveHandler = (e) => {
             if (!isPanning) return;
-            const pan = document.getElementById('workspace-pan');
-            if (!pan) return;
-            workspace._panX = panStartOffsetX + (e.clientX - panStartX);
-            workspace._panY = panStartOffsetY + (e.clientY - panStartY);
-            AppState.sitzplanPanX = workspace._panX;
-            AppState.sitzplanPanY = workspace._panY;
-            pan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
+            mouseVX = e.clientX - mouseLastX;
+            mouseVY = e.clientY - mouseLastY;
+            mouseLastX = e.clientX;
+            mouseLastY = e.clientY;
+            applyPan(
+                panStartOffsetX + (e.clientX - panStartX),
+                panStartOffsetY + (e.clientY - panStartY)
+            );
         };
         workspace._panUpHandler = () => {
-            if (isPanning) {
-                isPanning = false;
-                workspace.style.cursor = 'grab';
-            }
+            if (!isPanning) return;
+            isPanning = false;
+            workspace.style.cursor = 'grab';
+            startMomentum(mouseVX, mouseVY);
         };
 
         document.addEventListener('mousemove', workspace._panMoveHandler);
