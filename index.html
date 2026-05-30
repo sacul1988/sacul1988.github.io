@@ -469,7 +469,6 @@
             
             <!-- Modal für Bewertung im Sitzplan -->
             <div id="evaluation-modal" class="modal" style="display: none;">
-                <h2>Bewertung</h2>
                 <div id="evaluation-modal-content">
                     <!-- Bewertungsinhalte werden dynamisch eingefügt -->
                 </div>
@@ -562,7 +561,7 @@
             <!-- Kalender Tag-Details Modal -->
             <div id="calendar-day-modal" class="modal" style="display: none; max-width: 600px; width: 95%;">
                 <div class="wizard-header">
-                    <h2>Details für <span id="calendar-day-date-title">Datum</span></h2>
+                    <h2>Details für<span id="calendar-day-date-title"></span></h2>
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
                 <div class="wizard-body" style="padding-top: 10px;">
@@ -578,12 +577,12 @@
                             <h5 style="margin-top: 0; margin-bottom: 8px; font-size: 0.88rem; font-weight: 600;">Neuen Termin für diesen Tag hinzufügen</h5>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <input type="text" id="calendar-day-new-termin-title" class="form-control" placeholder="Terminbezeichnung" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addCalendarDayTermin(); }">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-                                    <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px;">
+                                    <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem; text-align: center;">
                                     <span style="color: var(--grey-color); font-weight: 500;">–</span>
-                                    <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem;">
+                                    <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem; text-align: center;">
                                     <div id="calendar-day-add-btn-container" style="margin-left: auto;">
-                                        <button class="btn btn-success" onclick="addCalendarDayTermin()">Hinzufügen</button>
+                                        <button class="btn btn-success" onclick="addCalendarDayTermin()" style="min-height: 36px;">Hinzufügen</button>
                                     </div>
                                 </div>
                             </div>
@@ -594,7 +593,10 @@
 
             <!-- Noten Projekt Modal -->
             <div id="noten-projekt-modal" class="modal" style="display: none; max-width: 320px;">
-                <h2>Projekt</h2>
+                <div class="wizard-header">
+                    <h2>Projekt</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
                     <button class="btn btn-primary" onclick="hideModal(); showAddProjectToAllModal();" style="justify-content: flex-start; padding: 12px 16px; gap: 12px; display: flex; align-items: center;">
                         <i class="fas fa-plus"></i> <span>Projekt hinzufügen</span>
@@ -662,8 +664,9 @@
                 </div>
                 
                 <!-- Sub-Modal: Formulierungshilfe hinzufügen -->
-                <div id="add-phrase-submodal" style="display: none; position: absolute; inset: 0; background: rgba(15,23,42,0.5); border-radius: inherit; z-index: 20; align-items: center; justify-content: center; padding: 20px;">
-                    <div style="background: white; border-radius: 12px; padding: 20px; width: 100%; max-width: 700px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); box-sizing: border-box;">
+                <div id="add-phrase-submodal" style="display: none; position: absolute; inset: 0; background: rgba(15,23,42,0.5); border-radius: inherit; z-index: 20; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target===this) closeAddPhraseSubmodal()">
+                    <div style="background: white; border-radius: 12px; padding: 20px; width: 100%; max-width: 700px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); box-sizing: border-box; position: relative;">
+                        <button class="wizard-close-btn" onclick="closeAddPhraseSubmodal()" style="position: absolute; top: 8px; right: 12px;">&times;</button>
                         <h3 id="add-phrase-submodal-title" style="margin-bottom: 12px; font-size: 1rem; font-weight: 700;">Formulierungshilfe hinzufügen</h3>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <input type="text" id="wizard-new-phrase-input" class="form-control" placeholder="Satz eingeben (z.B. Arbeitet stets konzentriert.)">
@@ -683,7 +686,6 @@
                                 </select>
                             </div>
                             <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; width: 100%; box-sizing: border-box;">
-                                <button class="btn btn-light" onclick="closeAddPhraseSubmodal()" style="min-height: 40px;">Schließen</button>
                                 <button class="btn btn-light" id="wizard-cancel-edit-btn" onclick="cancelEditPhrase()" style="min-height: 40px; display: none;">Abbrechen</button>
                                 <input type="hidden" id="wizard-edit-phrase-id" value="">
                                 <button class="btn btn-primary" id="wizard-add-phrase-btn" onclick="saveCustomPhrase()" style="min-height: 40px;">Speichern</button>
@@ -701,8 +703,8 @@
                             <button class="filter-circle-btn" data-color="orange" onclick="toggleColorFilter('orange')" title="Gelb filtern (3/4)">3/4</button>
                             <button class="filter-circle-btn" data-color="red" onclick="toggleColorFilter('red')" title="Rot filtern (4/5)">4/5</button>
                         </div>
-                        <button class="btn btn-primary btn-icon" onclick="openAddPhraseSubmodal()">
-                            <i class="fas fa-plus"></i> <span class="btn-text">Formulierung</span>
+                        <button class="btn btn-primary btn-circle-sm" onclick="openAddPhraseSubmodal()" title="Formulierung hinzufügen">
+                            <i class="fas fa-plus"></i>
                         </button>
                     </div>
 
@@ -732,7 +734,10 @@
             </div>
             <!-- Kontakt Telefonnummern Modal -->
             <div id="contact-phones-modal" class="modal" style="display: none;">
-                <h2 id="contact-phones-modal-title">Telefonnummern</h2>
+                <div class="wizard-header">
+                    <h2 id="contact-phones-modal-title">Telefonnummern</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
                 <div id="contact-phones-modal-content" style="margin-top: 10px;"></div>
             </div>
 
@@ -768,9 +773,7 @@
                 <div class="action-sheet-drag-handle"></div>
                 <h3 id="action-sheet-title">Aktionen</h3>
                 <div class="action-sheet-body" id="action-sheet-buttons-container"></div>
-                <div class="action-sheet-footer">
-                    <button class="btn btn-light btn-block cancel-btn" onclick="closeMobileActionSheet()">Abbrechen</button>
-                </div>
+                <div class="action-sheet-footer"></div>
             </div>
         </div>
     </div>

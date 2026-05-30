@@ -1147,6 +1147,23 @@ function initFlatpickr() {
     if (endEl) flatpickr(endEl, fpConfig);
 }
 
+// SweetAlert: X-Button automatisch in alle Dialoge injizieren
+(function() {
+    const observer = new MutationObserver(() => {
+        const modal = document.querySelector('.swal-modal');
+        if (modal && !modal.querySelector('.swal-close-btn')) {
+            const btn = document.createElement('button');
+            btn.className = 'swal-close-btn wizard-close-btn';
+            btn.innerHTML = '&times;';
+            btn.style.cssText = 'position:absolute;top:8px;right:12px;z-index:1;';
+            btn.onclick = () => swal.close ? swal.close() : document.querySelector('.swal-button--cancel, .swal-overlay')?.click();
+            modal.style.position = 'relative';
+            modal.appendChild(btn);
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisierungsfunktion rufen
     initFlatpickr();
@@ -4823,7 +4840,7 @@ function renderZeugnisModule() {
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
                     <button class="btn btn-sm btn-info" onclick="scrollToTopOfZeugnisModule()">Zurück</button>
-                    <button class="btn btn-sm btn-primary" onclick="openMitarbeitAssistant(${index})">Formulierungshilfen</button>
+                    <button class="btn btn-sm btn-primary btn-circle-sm" onclick="openMitarbeitAssistant(${index})" title="Formulierungshilfen"><i class="fas fa-lightbulb"></i></button>
                 </div>
             </div>
             <div class="card-body">
@@ -5031,15 +5048,27 @@ function selectZeugnisGrade(studentIndex, grade) {
     const currentGrade = student.zeugnisnote;
 
     if (currentGrade === grade) {
-        // Wenn man die bereits ausgewählte Note erneut anklickt, wird sie abgewählt
         student.zeugnisnote = '';
+        saveData(studentIndex);
+        renderZeugnisModule();
+    } else if (currentGrade) {
+        swal({
+            title: 'Note ändern?',
+            text: `${student.name}: ${currentGrade} → ${grade}`,
+            icon: 'warning',
+            buttons: [false, 'Ändern'],
+        }).then((confirmed) => {
+            if (confirmed) {
+                student.zeugnisnote = grade;
+                saveData(studentIndex);
+                renderZeugnisModule();
+            }
+        });
     } else {
-        // Direkt setzen
         student.zeugnisnote = grade;
+        saveData(studentIndex);
+        renderZeugnisModule();
     }
-    
-    saveData(studentIndex);
-    renderZeugnisModule();
 }
 window.selectZeugnisGrade = selectZeugnisGrade;
 
