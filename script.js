@@ -3217,12 +3217,13 @@ function renderSitzplanModule() {
 
         workspace.addEventListener('touchmove', (e) => {
             if (!isTouchPanning || e.touches.length !== 1) return;
+            e.preventDefault();
             const pan = document.getElementById('workspace-pan');
             if (!pan) return;
             workspace._panX = touchStartOffsetX + (e.touches[0].clientX - touchStartX);
             workspace._panY = touchStartOffsetY + (e.touches[0].clientY - touchStartY);
             pan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
-        }, { passive: true });
+        }, { passive: false });
 
         workspace.addEventListener('touchend', () => {
             isTouchPanning = false;
