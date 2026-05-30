@@ -1220,20 +1220,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Zeit-Schnellauswahl initialisieren
-    initTimeQuickSelect();
-    
-    // Event-Listener für manuelle Zeiteingabe
-    const timestartEl = document.getElementById('calendar-day-new-termin-timestart');
-    const timeendEl = document.getElementById('calendar-day-new-termin-timeend');
-    if (timestartEl) {
-        timestartEl.addEventListener('input', updateQuickSelectActiveStates);
-        timestartEl.addEventListener('change', updateQuickSelectActiveStates);
-    }
-    if (timeendEl) {
-        timeendEl.addEventListener('input', updateQuickSelectActiveStates);
-        timeendEl.addEventListener('change', updateQuickSelectActiveStates);
-    }
 });
 
 // ===== SCHÜLERLISTE MODUL =====
@@ -6833,12 +6819,10 @@ function openCalendarDayDetails(dateStr) {
     const timeEndEl = document.getElementById('calendar-day-new-termin-timeend');
     if (timeStartEl) timeStartEl.value = '';
     if (timeEndEl) timeEndEl.value = '';
-    
-    // Formularknöpfe und aktive Kreise zurücksetzen
+
     AppState.timeRangeStage = 1;
-    
+
     updateCalendarDayFormUI();
-    updateQuickSelectActiveStates();
     
     // Terminliste für diesen Tag rendern
     renderCalendarDayTermineList(dateStr);
@@ -6919,7 +6903,6 @@ function addCalendarDayTermin() {
     
     renderCalendarDayTermineList(dateStr);
     updateCalendarDayFormUI();
-    updateQuickSelectActiveStates();
     renderPlanung();
 }
 
@@ -6948,7 +6931,7 @@ function deleteCalendarDayTermin(id) {
                 if (startIn) startIn.value = '';
                 if (endIn) endIn.value = '';
             }
-            
+
             saveTermine();
             
             const dateStr = AppState.activeCalendarDay;
@@ -7308,12 +7291,11 @@ function editCalendarDayTermin(id) {
     if (titleInput) titleInput.value = termin.title || '';
     if (startInput) startInput.value = termin.timeStart || '';
     if (endInput) endInput.value = termin.timeEnd || '';
-    
+
     AppState.timeRangeStage = 1;
-    
+
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
-    updateQuickSelectActiveStates();
 }
 
 function updateCalendarDayFormUI() {
@@ -7324,19 +7306,13 @@ function updateCalendarDayFormUI() {
     if (isEditing) {
         container.innerHTML = `
             <div style="display: flex; gap: 6px;">
-                <button class="btn btn-secondary btn-circle" onclick="cancelEditCalendarDayTermin()" title="Abbrechen">
-                    <i class="fas fa-times"></i>
-                </button>
-                <button class="btn btn-success btn-circle" onclick="addCalendarDayTermin()" title="Speichern">
-                    <i class="fas fa-check"></i>
-                </button>
+                <button class="btn btn-secondary" onclick="cancelEditCalendarDayTermin()">Abbrechen</button>
+                <button class="btn btn-success" onclick="addCalendarDayTermin()">Speichern</button>
             </div>
         `;
     } else {
         container.innerHTML = `
-            <button class="btn btn-success btn-circle" onclick="addCalendarDayTermin()" title="Hinzufügen">
-                <i class="fas fa-check"></i>
-            </button>
+            <button class="btn btn-success" onclick="addCalendarDayTermin()">Hinzufügen</button>
         `;
     }
 }
@@ -7352,10 +7328,9 @@ function cancelEditCalendarDayTermin() {
     if (titleInput) titleInput.value = '';
     if (startInput) startInput.value = '';
     if (endInput) endInput.value = '';
-    
+
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
-    updateQuickSelectActiveStates();
 }
 
 function updateQuickSelectActiveStates() {

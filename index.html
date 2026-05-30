@@ -619,30 +619,18 @@
                         <div id="calendar-day-termine-list" class="termine-list-container" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; padding: 0; max-height: 180px;">
                             <!-- Termine werden hier dynamisch gelistet -->
                         </div>
-                        
+
                         <!-- Termin hinzufügen -->
                         <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-top: 10px;">
                             <h5 style="margin-top: 0; margin-bottom: 8px; font-size: 0.88rem; font-weight: 600;">Neuen Termin für diesen Tag hinzufügen</h5>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <input type="text" id="calendar-day-new-termin-title" class="form-control" placeholder="Terminbezeichnung" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addCalendarDayTermin(); }">
-                                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
-                                    <!-- Zeitraum-Schnellauswahl (Gemeinsame Kreise) -->
-                                    <div style="display: flex; flex-direction: column; gap: 4px; text-align: center;">
-                                        <div id="time-quick-range-container" class="time-quick-select-container" style="position: relative; margin-top: 6px;">
-                                            <div id="time-quick-active-track" class="time-quick-active-track" style="display: none;"></div>
-                                            <!-- Kreise werden hier eingefügt -->
-                                        </div>
-                                    </div>
-                                    <!-- Eingestellte Zeiten und Button -->
-                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
-                                        <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem;">
-                                        <span style="color: var(--grey-color); font-weight: 500;">–</span>
-                                        <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem;">
-                                        <div id="calendar-day-add-btn-container" style="margin-left: auto;">
-                                            <button class="btn btn-success btn-circle" onclick="addCalendarDayTermin()" title="Hinzufügen">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        </div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                                    <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem;">
+                                    <span style="color: var(--grey-color); font-weight: 500;">–</span>
+                                    <input type="time" id="calendar-day-new-termin-timeend" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem;">
+                                    <div id="calendar-day-add-btn-container" style="margin-left: auto;">
+                                        <button class="btn btn-success" onclick="addCalendarDayTermin()">Hinzufügen</button>
                                     </div>
                                 </div>
                             </div>
