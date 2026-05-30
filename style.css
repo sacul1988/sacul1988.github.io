@@ -1497,7 +1497,11 @@ select.form-control {
     border: 1px dashed #ccc;
     border-radius: 8px;
     position: relative;
-    background: #fafafa;
+    background-color: #fafafa;
+    background-image:
+        linear-gradient(#e2e8f0 1px, transparent 1px),
+        linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+    background-size: 30px 30px;
     overflow: hidden;
     cursor: grab;
 }
@@ -1650,18 +1654,6 @@ select.form-control {
     background-color: #e3f2fd;
 }
 
-#sitzplan-module .grid-lines {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 1500px; /* Kleinere Breite für kompakteres Feld */
-    height: 1200px; /* Kleinere Höhe für kompakteres Feld */
-    pointer-events: none;
-    background-image: 
-        linear-gradient(to right, #eee 1px, transparent 1px),
-        linear-gradient(to bottom, #eee 1px, transparent 1px);
-    background-size: 50px 50px;
-}
 
 /* Evaluation Modal Styles */
 #evaluation-modal .evaluation-item {

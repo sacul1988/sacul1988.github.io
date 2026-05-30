@@ -3214,24 +3214,54 @@ function renderSitzplanModule() {
     // Workspace für Tische vorbereiten
     const workspace = safeGetElement('workspace');
     if (workspace) {
-        workspace.innerHTML = '<div id="workspace-pan" style="position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; transform-origin: 0 0; will-change: transform;"><div class="grid-lines"></div></div>';
+        workspace.innerHTML = `<div id="workspace-pan" style="position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; transform-origin: 0 0; will-change: transform;"></div>`;
         workspace._panX = AppState.sitzplanPanX || 0;
         workspace._panY = AppState.sitzplanPanY || 0;
         const existingPan = document.getElementById('workspace-pan');
-        if (existingPan && (workspace._panX || workspace._panY)) {
+        if (existingPan) {
             existingPan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
         }
+        workspace.style.backgroundPosition = `${workspace._panX}px ${workspace._panY}px`;
         
         // Momentum helper
         let momentumRaf = null;
+        const computePanBounds = () => {
+            const desks = document.querySelectorAll('#workspace-pan .desk');
+            if (!desks.length) return null;
+            const buf = 120;
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            desks.forEach(d => {
+                const l = parseFloat(d.style.left) || 0;
+                const t = parseFloat(d.style.top) || 0;
+                const w = d.offsetWidth || 80;
+                const h = d.offsetHeight || 80;
+                minX = Math.min(minX, l);
+                minY = Math.min(minY, t);
+                maxX = Math.max(maxX, l + w);
+                maxY = Math.max(maxY, t + h);
+            });
+            const ws = workspace;
+            return {
+                minX: ws.clientWidth - (maxX + buf),
+                maxX: -(minX - buf),
+                minY: ws.clientHeight - (maxY + buf),
+                maxY: -(minY - buf),
+            };
+        };
         const applyPan = (x, y) => {
             const pan = document.getElementById('workspace-pan');
             if (!pan) return;
+            const b = computePanBounds();
+            if (b) {
+                x = Math.min(b.maxX, Math.max(b.minX, x));
+                y = Math.min(b.maxY, Math.max(b.minY, y));
+            }
             workspace._panX = x;
             workspace._panY = y;
             AppState.sitzplanPanX = x;
             AppState.sitzplanPanY = y;
             pan.style.transform = `translate(${x}px, ${y}px)`;
+            workspace.style.backgroundPosition = `${x}px ${y}px`;
         };
         const startMomentum = (vx, vy) => {
             if (momentumRaf) cancelAnimationFrame(momentumRaf);
