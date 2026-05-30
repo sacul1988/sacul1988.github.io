@@ -468,7 +468,6 @@
                     <input type="text" id="new-class-subject" class="form-control" placeholder="z.B. Mathematik, Englisch">
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="createClass()">Erstellen</button>
                 </div>
             </div>
@@ -485,7 +484,6 @@
                 </div>
                 
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="cloneClass()">Klonen</button>
                 </div>
             </div>
@@ -539,7 +537,6 @@
                     </select>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="exportStudentsList()">Exportieren</button>
                 </div>
             </div>
@@ -551,7 +548,6 @@
                     <input type="text" id="project-name-all" class="form-control" placeholder="z.B. Testarbeit 1">
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="addProjectToAll()">Hinzufügen</button>
                 </div>
             </div>
@@ -565,7 +561,6 @@
                     </select>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-danger" onclick="deleteProjectForAll()">Löschen</button>
                 </div>
             </div>
@@ -577,7 +572,6 @@
                     <input type="text" id="edit-class-input" class="form-control" placeholder="Klassenname">
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="saveEditedClass()">Speichern</button>
                 </div>
             </div>
@@ -589,7 +583,6 @@
                     <input type="text" id="edit-student-input" class="form-control" placeholder="Schülername">
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="saveEditedStudent()">Speichern</button>
                 </div>
             </div>
@@ -638,7 +631,6 @@
                     </div>
                 </div>
                 <div class="wizard-footer" style="justify-content: flex-end; display: flex; gap: 10px; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                    <button class="btn btn-secondary" onclick="hideModal()">Schließen</button>
                 </div>
             </div>
 
@@ -648,7 +640,6 @@
                 <p>Schüler: <span id="undo-student-name"></span></p>
                 <p>Letzte Eingabe: <span id="undo-type"></span></p>
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-danger" onclick="undoLastEntry()">Rückgängig machen</button>
                 </div>
             </div>
@@ -725,10 +716,7 @@
                     </div>
                     
                     <div class="wizard-buttons-row" style="justify-content: flex-end;">
-                        <div>
-                            <button class="btn btn-secondary" onclick="hideModal()">Abbrechen</button>
-                            <button class="btn btn-success" onclick="insertSelectedMitarbeitPhrases()">Auswählen & Einfügen</button>
-                        </div>
+                        <button class="btn btn-success" onclick="insertSelectedMitarbeitPhrases()">Auswählen & Einfügen</button>
                     </div>
                 </div>
             </div>
@@ -736,9 +724,6 @@
             <div id="contact-phones-modal" class="modal" style="display: none;">
                 <h2 id="contact-phones-modal-title">Telefonnummern</h2>
                 <div id="contact-phones-modal-content" style="margin-top: 10px;"></div>
-                <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-light" onclick="hideModal()">Schließen</button>
-                </div>
             </div>
 
             <!-- Kontakt hinzufügen/bearbeiten Modal -->
@@ -762,7 +747,6 @@
                 </div>
                 
                 <div style="text-align: right; margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
                     <button class="btn btn-primary" onclick="saveContact()">Speichern</button>
                 </div>
             </div>

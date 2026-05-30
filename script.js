@@ -1091,7 +1091,7 @@ function deleteClass(classId) {
         title: "Klasse löschen?",
         text: `Möchtest du die Klasse "${classes[classId].name}" wirklich löschen? Alle Daten gehen verloren.`,
         icon: "warning",
-        buttons: ["Abbrechen", "Löschen"],
+        buttons: [false, "Löschen"],
         dangerMode: true,
     })
     .then((willDelete) => {
@@ -1387,7 +1387,7 @@ function deleteStudent(studentIndex) {
         title: "Schüler löschen?",
         text: `Möchtest du ${student.name} wirklich löschen?`,
         icon: "warning",
-        buttons: ["Abbrechen", "Löschen"],
+        buttons: [false, "Löschen"],
         dangerMode: true,
     })
     .then((willDelete) => {
@@ -1458,7 +1458,7 @@ function toggleEseSupport(studentIndex, checkbox) {
             title: "Förderschwerpunkt deaktivieren?",
             text: `Möchtest du den Förderschwerpunkt "ESE" für ${student.name} wirklich deaktivieren?`,
             icon: "warning",
-            buttons: ["Abbrechen", "Deaktivieren"],
+            buttons: [false, "Deaktivieren"],
             dangerMode: true,
         })
         .then((willDisable) => {
@@ -1501,7 +1501,7 @@ function toggleLearningSupport(studentIndex, checkbox) {
             title: "Förderschwerpunkt deaktivieren?",
             text: `Möchtest du den Förderschwerpunkt "Lernen" für ${classes[activeClassId].students[originalIndex].name} wirklich deaktivieren?`,
             icon: "warning",
-            buttons: ["Abbrechen", "Deaktivieren"],
+            buttons: [false, "Deaktivieren"],
             dangerMode: true,
         })
         .then((willDisable) => {
@@ -1864,7 +1864,7 @@ function deleteHWHistoryEntry(studentIndex, entryId) {
             title: "Eintrag löschen?",
             text: "Möchtest du diesen Verlaufseintrag wirklich löschen?",
             icon: "warning",
-            buttons: ["Abbrechen", "Löschen"],
+            buttons: [false, "Löschen"],
             dangerMode: true,
         })
         .then((willDelete) => {
@@ -2547,7 +2547,7 @@ function deleteProjectForAll() {
         title: "Projekt löschen?",
         text: `Möchten Sie das Projekt "${projectName}" wirklich für alle Schüler löschen?`,
         icon: "warning",
-        buttons: ["Abbrechen", "Löschen"],
+        buttons: [false, "Löschen"],
         dangerMode: true,
     })
     .then((willDelete) => {
@@ -2793,7 +2793,6 @@ function deleteProject(studentIndex, projectIndex) {
         text: `Möchtest du das Projekt "${projectName}" löschen?`,
         icon: "warning",
         buttons: {
-            cancel: "Abbrechen",
             deleteOne: {
                 text: "Nur für diesen",
                 value: "one",
@@ -3132,7 +3131,7 @@ function importBackupFile(event) {
                 title: "Daten importieren?",
                 text: "Möchtest du die Daten wirklich importieren? Alle aktuellen Daten werden überschrieben.",
                 icon: "warning",
-                buttons: ["Abbrechen", "Importieren"],
+                buttons: [false, "Importieren"],
                 dangerMode: true,
             })
             .then((willImport) => {
@@ -5479,7 +5478,7 @@ function deleteTermin(terminId) {
         title: 'Termin löschen?',
         text: 'Möchtest du diesen Termin wirklich löschen?',
         icon: 'warning',
-        buttons: ['Abbrechen', 'Löschen'],
+        buttons: [false, 'Löschen'],
         dangerMode: true,
     }).then((willDelete) => {
         if (willDelete) {
@@ -5930,7 +5929,7 @@ function deletePlanungTable() {
         title: 'Planung löschen?',
         text: 'Der gesamte Inhalt der Planungstabelle wird unwiderruflich gelöscht. Zeitraum und Einstellungen bleiben erhalten.',
         icon: 'warning',
-        buttons: ['Abbrechen', 'Löschen'],
+        buttons: [false, 'Löschen'],
         dangerMode: true,
     }).then(willDelete => {
         if (!willDelete) return;
@@ -6503,7 +6502,7 @@ function deleteCustomPhrase(phraseId) {
             title: "Satz löschen?",
             text: "Möchtest du diese Formulierungshilfe wirklich löschen?",
             icon: "warning",
-            buttons: ["Abbrechen", "Löschen"],
+            buttons: [false, "Löschen"],
             dangerMode: true,
         }).then((willDelete) => {
             if (willDelete) {
@@ -6911,7 +6910,7 @@ function deleteCalendarDayTermin(id) {
         title: 'Termin löschen?',
         text: 'Möchtest du diesen Termin wirklich löschen?',
         icon: 'warning',
-        buttons: ['Abbrechen', 'Löschen'],
+        buttons: [false, 'Löschen'],
         dangerMode: true,
     }).then((willDelete) => {
         if (willDelete) {
@@ -7801,7 +7800,7 @@ function deleteContact(contactId) {
         title: "Kontakt löschen?",
         text: `Möchtest du den Kontakt für "${contact.childName}" wirklich löschen?`,
         icon: "warning",
-        buttons: ["Abbrechen", "Löschen"],
+        buttons: [false, "Löschen"],
         dangerMode: true,
     }).then((willDelete) => {
         if (willDelete) {
