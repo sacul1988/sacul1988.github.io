@@ -1499,12 +1499,8 @@ select.form-control {
     border-radius: 8px;
     position: relative;
     background: #fafafa;
-    overflow-x: auto; /* Horizontales Scrollen aktivieren */
-    overflow-y: auto; /* Vertikales Scrollen aktivieren */
-    touch-action: pan-x pan-y; /* Aktiviert Touch-Scrolling für horizontale und vertikale Bewegung */
-    -webkit-overflow-scrolling: touch; /* Glatteres Scrolling auf iOS */
-    cursor: grab; /* Visueller Hinweis, dass der Bereich scrollbar ist */
-    scroll-behavior: smooth; /* Sanftes Scrollen */
+    overflow: hidden;
+    cursor: grab;
 }
 
 /* Zusätzliche Scrollbar-Stile für bessere Sichtbarkeit */
@@ -3036,8 +3032,8 @@ div.notes-textarea:empty::before {
     display: flex;
     gap: 16px;
     overflow-x: auto;
-    padding: 10px 4px;
-    margin-top: 20px;
+    padding: 0 4px;
+    margin-top: 0;
     align-items: flex-start;
     scroll-behavior: smooth;
 }

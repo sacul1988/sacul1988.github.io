@@ -3199,32 +3199,73 @@ function renderSitzplanModule() {
     // Workspace für Tische vorbereiten
     const workspace = safeGetElement('workspace');
     if (workspace) {
-        workspace.innerHTML = '<div class="grid-lines"></div>';
+        workspace.innerHTML = '<div id="workspace-pan" style="position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; transform-origin: 0 0; will-change: transform;"><div class="grid-lines"></div></div>';
+        workspace._panX = 0;
+        workspace._panY = 0;
         
-        // Event-Listener für Touch-Scrolling hinzufügen
-        let isWorkspaceScrolling = false;
-        let scrollStartX, scrollStartY;
-        
+        // Touch-Panning
+        let isTouchPanning = false;
+        let touchStartX, touchStartY, touchStartOffsetX, touchStartOffsetY;
+
         workspace.addEventListener('touchstart', (e) => {
-            // Nur für Bewertungs- und Mündlich-Modus
-            if (cls.sitzplan.currentMode === 'edit') return;
-            
-            isWorkspaceScrolling = true;
-            scrollStartX = e.touches[0].clientX;
-            scrollStartY = e.touches[0].clientY;
+            if (e.touches.length !== 1) return;
+            if (e.target.closest('.desk') && cls.sitzplan.currentMode === 'edit') return;
+            isTouchPanning = true;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchStartOffsetX = workspace._panX || 0;
+            touchStartOffsetY = workspace._panY || 0;
         }, { passive: true });
-        
+
         workspace.addEventListener('touchmove', (e) => {
-            if (!isWorkspaceScrolling) return;
-            
-            // Erlaube natives Scrolling
-            // preventDefault wird nicht aufgerufen, damit das Scrollen funktioniert
+            if (!isTouchPanning || e.touches.length !== 1) return;
+            const pan = document.getElementById('workspace-pan');
+            if (!pan) return;
+            workspace._panX = touchStartOffsetX + (e.touches[0].clientX - touchStartX);
+            workspace._panY = touchStartOffsetY + (e.touches[0].clientY - touchStartY);
+            pan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
         }, { passive: true });
-        
+
         workspace.addEventListener('touchend', () => {
-            isWorkspaceScrolling = false;
+            isTouchPanning = false;
         });
-        
+
+        // Maus-Pan (Drag-to-scroll)
+        let isPanning = false;
+        let panStartX, panStartY, panStartOffsetX, panStartOffsetY;
+
+        workspace.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.desk')) return;
+            isPanning = true;
+            panStartX = e.clientX;
+            panStartY = e.clientY;
+            panStartOffsetX = workspace._panX || 0;
+            panStartOffsetY = workspace._panY || 0;
+            workspace.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+
+        if (workspace._panMoveHandler) document.removeEventListener('mousemove', workspace._panMoveHandler);
+        if (workspace._panUpHandler) document.removeEventListener('mouseup', workspace._panUpHandler);
+
+        workspace._panMoveHandler = (e) => {
+            if (!isPanning) return;
+            const pan = document.getElementById('workspace-pan');
+            if (!pan) return;
+            workspace._panX = panStartOffsetX + (e.clientX - panStartX);
+            workspace._panY = panStartOffsetY + (e.clientY - panStartY);
+            pan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
+        };
+        workspace._panUpHandler = () => {
+            if (isPanning) {
+                isPanning = false;
+                workspace.style.cursor = 'grab';
+            }
+        };
+
+        document.addEventListener('mousemove', workspace._panMoveHandler);
+        document.addEventListener('mouseup', workspace._panUpHandler);
+
         // Bestehende Tische rendern
         cls.sitzplan.desks.forEach(desk => {
             renderDesk(desk);
@@ -3704,7 +3745,8 @@ function renderDesk(desk) {
         }
     });
     
-    workspace.appendChild(deskElement);
+    const pan = document.getElementById('workspace-pan');
+    (pan || workspace).appendChild(deskElement);
 }
 
 // Tisch für Bewertung auswählen
@@ -6633,6 +6675,26 @@ function setPlanungViewMode(mode) {
     renderPlanung();
 }
 
+function togglePlanungView() {
+    const current = AppState.planungViewMode || 'calendar';
+    setPlanungViewMode(current === 'calendar' ? 'list' : 'calendar');
+}
+
+function openPlanungExport() {
+    if ((AppState.planungViewMode || 'calendar') === 'list') {
+        exportPlanungTable();
+    } else {
+        showModal('planung-export-modal');
+    }
+}
+
+function togglePlanungZeitraum() {
+    const mode = AppState.planungViewMode || 'calendar';
+    const title = document.getElementById('planung-zeitraum-modal-title');
+    if (title) title.textContent = mode === 'calendar' ? 'Zeitraum – Kalender' : 'Zeitraum – Planung';
+    showModal('planung-zeitraum-modal');
+}
+
 function renderPlanung() {
     const viewMode = AppState.planungViewMode || 'calendar';
     const listContainer = safeGetElement('planung-table-container');
@@ -6655,31 +6717,20 @@ function renderPlanung() {
         else endEl.value = currentEnd;
     }
     
-    if (listBtn && calendarBtn) {
+    const toggleBtn = safeGetElement('planung-view-toggle-btn');
+    if (toggleBtn) {
         if (viewMode === 'calendar') {
-            calendarBtn.classList.remove('btn-primary', 'btn-light', 'btn-secondary');
-            calendarBtn.classList.add('btn-warning');
-            
-            listBtn.classList.remove('btn-warning', 'btn-light', 'btn-secondary');
-            listBtn.classList.add('btn-primary');
+            toggleBtn.innerHTML = '<i class="fas fa-list"></i> <span class="btn-text">Ansicht</span>';
         } else {
-            listBtn.classList.remove('btn-primary', 'btn-light', 'btn-secondary');
-            listBtn.classList.add('btn-warning');
-            
-            calendarBtn.classList.remove('btn-warning', 'btn-light', 'btn-secondary');
-            calendarBtn.classList.add('btn-primary');
+            toggleBtn.innerHTML = '<i class="fas fa-calendar-alt"></i> <span class="btn-text">Ansicht</span>';
         }
     }
+
+    const listButtons = safeGetElement('planung-list-buttons');
+    if (listButtons) {
+        listButtons.style.display = viewMode === 'list' ? 'inline-flex' : 'none';
+    }
     
-    const isMobile = window.innerWidth <= 768;
-    const daysGroup = safeGetElement('planung-setup-days-group');
-    if (daysGroup) {
-        daysGroup.style.display = isMobile ? 'none' : (viewMode === 'calendar' ? 'none' : 'flex');
-    }
-    const exportGroup = safeGetElement('planung-setup-export-group');
-    if (exportGroup) {
-        exportGroup.style.display = isMobile ? 'none' : (viewMode === 'calendar' ? 'flex' : 'none');
-    }
     
     if (viewMode === 'calendar') {
         if (listContainer) listContainer.style.display = 'none';
@@ -7431,16 +7482,17 @@ function openMobileActionSheet(title, sourceButtonsSelector) {
     if (sourceContainer) {
         const buttons = sourceContainer.querySelectorAll('button');
         buttons.forEach(btn => {
+            if (btn.style.display === 'none') return;
+
             const clonedBtn = btn.cloneNode(true);
-            
-            // Clean up button ID to prevent duplicate IDs in the DOM
             clonedBtn.removeAttribute('id');
-            
+            clonedBtn.style.display = '';
+
             const originalOnClick = clonedBtn.getAttribute('onclick');
             if (originalOnClick) {
                 clonedBtn.setAttribute('onclick', `${originalOnClick}; closeMobileActionSheet();`);
             }
-            
+
             container.appendChild(clonedBtn);
         });
     }
