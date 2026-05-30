@@ -1673,13 +1673,6 @@ select.form-control {
     color: #333;
 }
 
-#evaluation-modal .participation-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    width: 100%;
-}
-
 #evaluation-modal .homework-controls {
     display: flex;
     gap: 10px;
@@ -1687,29 +1680,13 @@ select.form-control {
     width: 100%;
 }
 
-#evaluation-modal .participation-btn, #evaluation-modal .homework-btn {
+#evaluation-modal .homework-btn {
     flex: 1;
     min-height: 44px;
 }
 
-#evaluation-modal .participation-btn i, #evaluation-modal .homework-btn i {
+#evaluation-modal .homework-btn i {
     margin-right: 8px;
-}
-
-#evaluation-modal .positive {
-    background: #4CAF50;
-}
-
-#evaluation-modal .positive:hover, #evaluation-modal .positive:active {
-    background: #45a049;
-}
-
-#evaluation-modal .negative {
-    background: #f44336;
-}
-
-#evaluation-modal .negative:hover, #evaluation-modal .negative:active {
-    background: #d32f2f;
 }
 
 /* Homework buttons - individual colors */
@@ -1851,9 +1828,6 @@ select.form-control {
         gap: 10px;
     }
     
-    #sitzplan-module .participation-controls {
-        flex-direction: column;
-    }
 }
 
 
@@ -2353,47 +2327,6 @@ select.form-control {
 
 /* ── Planung ──────────────────────────────────────────────────────────────── */
 
-.planung-setup {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: var(--border-radius);
-    margin: 16px 0 8px;
-    padding: 12px 16px;
-}
-
-.planung-setup-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 4px 0;
-}
-
-.planung-setup-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--grey-color);
-    white-space: nowrap;
-    min-width: 90px;
-}
-
-.planung-setup-group:last-child {
-    margin-left: auto;
-}
-
-#planung-setup-controls-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    margin-left: auto;
-    gap: 6px;
-}
-
 
 .planung-date-range {
     display: flex;
@@ -2660,42 +2593,6 @@ td.planung-col-inhalt {
     color: var(--dark-color);
 }
 
-.wizard-steps-indicator {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border-color);
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.wizard-step-indicator-item {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--grey-color);
-    background-color: var(--light-color);
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: var(--transition);
-    cursor: pointer;
-}
-
-.wizard-step-indicator-item.active {
-    color: white;
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.wizard-step-indicator-item.completed {
-    color: var(--success-color);
-    border-color: var(--success-color);
-    background-color: #f0fdf4;
-}
 
 .wizard-category-title-row {
     margin-bottom: 12px;
@@ -2888,11 +2785,6 @@ td.planung-col-inhalt {
     gap: 10px;
 }
 
-.wizard-target-container {
-    display: flex;
-    align-items: center;
-    font-size: 0.88rem;
-}
 
 .wizard-selection-summary {
     font-size: 0.88rem;
@@ -3703,21 +3595,6 @@ body.modal-open {
         font-size: 1.4rem !important;
     }
 
-    .mitarbeit-modal .wizard-add-phrase-form {
-        padding: 8px !important;
-        margin-bottom: 8px !important;
-    }
-
-    .mitarbeit-modal .wizard-add-phrase-form h4 {
-        font-size: 0.82rem !important;
-        margin-bottom: 6px !important;
-    }
-
-    .mitarbeit-modal .wizard-add-phrase-form > div {
-        flex-direction: column !important;
-        gap: 6px !important;
-    }
-
     .mitarbeit-modal #wizard-new-phrase-input {
         min-width: 0 !important;
         width: 100% !important;
@@ -3777,14 +3654,6 @@ body.modal-open {
 @media (max-width: 600px) {
     .desktop-header-buttons {
         display: none !important; /* Hide inline buttons on mobile */
-    }
-
-    #planung-setup-controls-wrapper {
-        display: none !important;
-    }
-
-    .planung-setup > .planung-setup-group:first-child {
-        width: 100%;
     }
 
     #planung-table-container {

@@ -1141,14 +1141,10 @@ function initFlatpickr() {
         }
     };
     const terminConfig = Object.assign({}, fpConfig);
-    delete terminConfig.onChange;
-
     const startEl = document.getElementById('planung-start-date');
     const endEl = document.getElementById('planung-end-date');
-    const terminEl = document.getElementById('termin-date-input');
     if (startEl) flatpickr(startEl, fpConfig);
     if (endEl) flatpickr(endEl, fpConfig);
-    if (terminEl) flatpickr(terminEl, terminConfig);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -5400,12 +5396,6 @@ function saveTermine() {
 
 function showTermineModal() {
     loadTermine();
-    const dateInput = safeGetElement('termin-date-input');
-    if (dateInput && !dateInput.value) {
-        const today = localDateStr(new Date());
-        if (dateInput._flatpickr) dateInput._flatpickr.setDate(today, false);
-        else dateInput.value = today;
-    }
     renderTermineList();
     showModal('termine-modal');
 }
@@ -5487,36 +5477,6 @@ function renderTermineList() {
         container.appendChild(item);
     });
 }
-
-function addTermin() {
-    const titleInput = safeGetElement('termin-title-input');
-    const dateInput = safeGetElement('termin-date-input');
-
-    if (!titleInput || !dateInput) return;
-
-    const title = titleInput.value.trim();
-    const date = dateInput.value;
-
-    if (!title) {
-        swal('Fehler', 'Bitte eine Bezeichnung eingeben', 'error');
-        return;
-    }
-    if (!date) {
-        swal('Fehler', 'Bitte ein Datum eingeben', 'error');
-        return;
-    }
-
-    if (!AppState.termine) AppState.termine = [];
-
-    const newId = Date.now().toString();
-    AppState.termine.push({ id: newId, title: title, date: date });
-    saveTermine();
-
-    titleInput.value = '';
-    renderTermineList();
-    renderPlanung();
-}
-
 
 function deleteTermin(terminId) {
     swal({
@@ -7205,132 +7165,6 @@ window.exportPlanungCalendar = exportPlanungCalendar;
 
 // ===== CALENDAR TIME QUICK SELECT =====
 
-function initTimeQuickSelect() {
-    const rangeContainer = document.getElementById('time-quick-range-container');
-    if (!rangeContainer) return;
-    
-    // Wir behalten das Track-Div und fügen die Kreise hinzu
-    let trackHtml = '<div id="time-quick-active-track" class="time-quick-active-track" style="display: none;"></div>';
-    let circlesHtml = '';
-    for (let h = 7; h <= 19; h++) {
-        circlesHtml += `<button type="button" class="time-quick-circle" data-hour="${h}" onclick="handleTimeRangeClick(event, ${h})">${h}</button>`;
-    }
-    rangeContainer.innerHTML = trackHtml + circlesHtml;
-}
-
-function handleTimeRangeClick(event, hour) {
-    if (!AppState.timeRangeStage) {
-        AppState.timeRangeStage = 1;
-    }
-    
-    const startIn = document.getElementById('calendar-day-new-termin-timestart');
-    const endIn = document.getElementById('calendar-day-new-termin-timeend');
-    
-    if (AppState.timeRangeStage === 1) {
-        // Startzeit festlegen
-        const formattedHour = String(hour).padStart(2, '0');
-        if (startIn) startIn.value = `${formattedHour}:00`;
-        if (endIn) endIn.value = '';
-        
-        AppState.timeRangeStage = 2;
-        updateQuickSelectActiveStates();
-        openTimeMinutesPopup(event, hour, 'start');
-    } else {
-        // Endzeit festlegen
-        const startVal = startIn ? startIn.value : '';
-        const startHour = startVal ? parseInt(startVal.split(':')[0]) : null;
-        
-        if (startHour === null) {
-            // Falls aus irgendeinem Grund kein Start da ist, behandeln wir es als Start
-            const formattedHour = String(hour).padStart(2, '0');
-            if (startIn) startIn.value = `${formattedHour}:00`;
-            AppState.timeRangeStage = 2;
-            updateQuickSelectActiveStates();
-            openTimeMinutesPopup(event, hour, 'start');
-        } else {
-            let finalStartHour = startHour;
-            let finalEndHour = hour;
-            let targetType = 'end';
-            
-            // Wenn die geklickte Endzeit vor der Startzeit liegt, vertauschen wir die Rollen
-            if (hour < startHour) {
-                finalStartHour = hour;
-                finalEndHour = startHour;
-                
-                const startMins = startVal.split(':')[1] || '00';
-                if (startIn) startIn.value = `${String(finalStartHour).padStart(2, '0')}:00`;
-                if (endIn) endIn.value = `${String(finalEndHour).padStart(2, '0')}:${startMins}`;
-                targetType = 'start'; // Wir passen die Minuten der Startzeit an, weil das der neu geklickte Kreis ist!
-            } else {
-                if (endIn) endIn.value = `${String(finalEndHour).padStart(2, '0')}:00`;
-            }
-            
-            AppState.timeRangeStage = 1;
-            updateQuickSelectActiveStates();
-            openTimeMinutesPopup(event, hour, targetType);
-        }
-    }
-}
-
-function openTimeMinutesPopup(event, hour, type) {
-    event.stopPropagation();
-    const btn = event.currentTarget;
-    const popover = document.getElementById('time-minutes-popover');
-    if (!popover) return;
-    
-    const formattedHour = String(hour).padStart(2, '0');
-    
-    // Vier kleine Kreise für 00, 15, 30, 45 generieren
-    const mins = ['00', '15', '30', '45'];
-    popover.innerHTML = mins.map(m => {
-        const timeVal = `${formattedHour}:${m}`;
-        return `<button type="button" class="time-minute-circle" onclick="selectTimeQuick('${timeVal}', '${type}')" title=":${m}">${m}</button>`;
-    }).join('');
-    
-    // Popover anzeigen
-    popover.style.display = 'flex';
-    const rect = btn.getBoundingClientRect();
-    
-    // Position relativ zum Dokument berechnen
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-    
-    // Dynamisch die Breite des Popovers ermitteln, um es perfekt zu zentrieren
-    const popoverWidth = popover.offsetWidth;
-    const btnWidth = rect.width || 34; // Fallback auf Standardkreisbreite
-    
-    popover.style.top = `${rect.bottom + scrollTop + 6}px`;
-    popover.style.left = `${rect.left + scrollLeft + (btnWidth / 2) - (popoverWidth / 2)}px`;
-    
-    // Schließen, wenn man woanders hin klickt
-    const closeListener = () => {
-        popover.style.display = 'none';
-        updateQuickSelectActiveStates();
-        document.removeEventListener('click', closeListener);
-    };
-    
-    setTimeout(() => {
-        document.addEventListener('click', closeListener);
-    }, 0);
-}
-
-function selectTimeQuick(timeVal, type) {
-    const inputId = type === 'start' ? 'calendar-day-new-termin-timestart' : 'calendar-day-new-termin-timeend';
-    const input = document.getElementById(inputId);
-    if (input) {
-        input.value = timeVal;
-    }
-    const popover = document.getElementById('time-minutes-popover');
-    if (popover) {
-        popover.style.display = 'none';
-    }
-    updateQuickSelectActiveStates();
-}
-
-window.openTimeMinutesPopup = openTimeMinutesPopup;
-window.selectTimeQuick = selectTimeQuick;
-window.handleTimeRangeClick = handleTimeRangeClick;
-
 function editCalendarDayTermin(id) {
     const termin = (AppState.termine || []).find(t => t.id === id);
     if (!termin) return;
@@ -7386,88 +7220,9 @@ function cancelEditCalendarDayTermin() {
     updateCalendarDayFormUI();
 }
 
-function updateQuickSelectActiveStates() {
-    const startIn = document.getElementById('calendar-day-new-termin-timestart');
-    const endIn = document.getElementById('calendar-day-new-termin-timeend');
-    if (!startIn || !endIn) return;
-    
-    const startVal = startIn.value;
-    const startHour = startVal ? parseInt(startVal.split(':')[0]) : null;
-    
-    const endVal = endIn.value;
-    const endHour = endVal ? parseInt(endVal.split(':')[0]) : null;
-    
-    const circles = document.querySelectorAll('#time-quick-range-container .time-quick-circle');
-    
-    circles.forEach(c => {
-        c.classList.remove('active-start', 'active-end', 'in-range');
-        const h = parseInt(c.getAttribute('data-hour') || c.textContent);
-        
-        if (startHour !== null && endHour !== null) {
-            const minH = Math.min(startHour, endHour);
-            const maxH = Math.max(startHour, endHour);
-            if (h === startHour && h === endHour) {
-                c.classList.add('active-start', 'active-end');
-                c.innerHTML = h;
-            } else if (h === startHour) {
-                c.classList.add('active-start');
-                c.innerHTML = h;
-            } else if (h === endHour) {
-                c.classList.add('active-end');
-                c.innerHTML = h;
-            } else if (h > minH && h < maxH) {
-                c.classList.add('in-range');
-                c.innerHTML = h;
-            } else {
-                c.innerHTML = h;
-            }
-        } else if (startHour !== null) {
-            if (h === startHour) {
-                c.classList.add('active-start');
-                c.innerHTML = h;
-            } else {
-                c.innerHTML = h;
-            }
-        } else if (endHour !== null) {
-            if (h === endHour) {
-                c.classList.add('active-end');
-                c.innerHTML = h;
-            } else {
-                c.innerHTML = h;
-            }
-        } else {
-            c.innerHTML = h;
-        }
-    });
-    
-    const track = document.getElementById('time-quick-active-track');
-    if (!track) return;
-    
-    if (startHour !== null && endHour !== null) {
-        const startCircle = [...circles].find(c => parseInt(c.getAttribute('data-hour') || c.textContent) === startHour);
-        const endCircle = [...circles].find(c => parseInt(c.getAttribute('data-hour') || c.textContent) === endHour);
-        
-        if (startCircle && endCircle) {
-            const startLeft = startCircle.offsetLeft + 16; // center (32px / 2)
-            const endLeft = endCircle.offsetLeft + 16; // center
-            const left = Math.min(startLeft, endLeft);
-            const width = Math.abs(endLeft - startLeft);
-            
-            track.style.left = `${left}px`;
-            track.style.width = `${width}px`;
-            track.style.display = 'block';
-        } else {
-            track.style.display = 'none';
-        }
-    } else {
-        track.style.display = 'none';
-    }
-}
-
 window.editCalendarDayTermin = editCalendarDayTermin;
 window.updateCalendarDayFormUI = updateCalendarDayFormUI;
 window.cancelEditCalendarDayTermin = cancelEditCalendarDayTermin;
-window.updateQuickSelectActiveStates = updateQuickSelectActiveStates;
 
 // ===== MOBILE BOTTOM SHEET (ACTION SHEET) =====
 
