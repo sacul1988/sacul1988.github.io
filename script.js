@@ -3215,8 +3215,12 @@ function renderSitzplanModule() {
     const workspace = safeGetElement('workspace');
     if (workspace) {
         workspace.innerHTML = '<div id="workspace-pan" style="position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; transform-origin: 0 0; will-change: transform;"><div class="grid-lines"></div></div>';
-        workspace._panX = 0;
-        workspace._panY = 0;
+        workspace._panX = AppState.sitzplanPanX || 0;
+        workspace._panY = AppState.sitzplanPanY || 0;
+        const existingPan = document.getElementById('workspace-pan');
+        if (existingPan && (workspace._panX || workspace._panY)) {
+            existingPan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
+        }
         
         // Touch-Panning
         let isTouchPanning = false;
@@ -3239,6 +3243,8 @@ function renderSitzplanModule() {
             if (!pan) return;
             workspace._panX = touchStartOffsetX + (e.touches[0].clientX - touchStartX);
             workspace._panY = touchStartOffsetY + (e.touches[0].clientY - touchStartY);
+            AppState.sitzplanPanX = workspace._panX;
+            AppState.sitzplanPanY = workspace._panY;
             pan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
         }, { passive: false });
 
@@ -3270,6 +3276,8 @@ function renderSitzplanModule() {
             if (!pan) return;
             workspace._panX = panStartOffsetX + (e.clientX - panStartX);
             workspace._panY = panStartOffsetY + (e.clientY - panStartY);
+            AppState.sitzplanPanX = workspace._panX;
+            AppState.sitzplanPanY = workspace._panY;
             pan.style.transform = `translate(${workspace._panX}px, ${workspace._panY}px)`;
         };
         workspace._panUpHandler = () => {
