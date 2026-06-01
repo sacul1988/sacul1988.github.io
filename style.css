@@ -65,7 +65,6 @@ body {
 
 /* Layout containers */
 .container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 16px;
 }
@@ -240,7 +239,9 @@ body {
 /* Home page - Class grid */
 .classes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    /* min(calc(50% - 8px), 280px) garantiert immer mind. 2 Spalten,
+       füllt aber auf breiten Bildschirmen die volle Breite */
+    grid-template-columns: repeat(auto-fit, minmax(min(calc(50% - 8px), 280px), 1fr));
     gap: 15px;
     margin-top: 15px;
 }
@@ -2940,8 +2941,7 @@ div.notes-textarea:empty::before {
 }
 
 .calendar-month-column {
-    width: 220px;
-    flex-shrink: 0;
+    flex: 1 0 220px;
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
