@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schulverwaltung – Für Lehrer, von Lehrern</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --radius: 14px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--white);
+            line-height: 1.6;
+        }
+
+        /* NAV */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .nav-logo i { font-size: 1.4rem; }
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            transition: all 0.15s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-outline:hover { background: var(--primary-light); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+        }
+        .btn-ghost:hover { color: var(--text); }
+        .btn-lg { padding: 14px 28px; font-size: 1.05rem; border-radius: 10px; }
+        .btn-disabled {
+            background: #94a3b8;
+            color: white;
+            cursor: not-allowed;
+        }
+        .btn-disabled:hover { background: #94a3b8; transform: none; }
+
+        /* HERO */
+        .hero {
+            text-align: center;
+            padding: 100px 24px 80px;
+            background: linear-gradient(160deg, #eff6ff 0%, #f8fafc 60%, #f0fdf4 100%);
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid #bfdbfe;
+            border-radius: 100px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 28px;
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        .hero h1 span { color: var(--primary); }
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 580px;
+            margin: 0 auto 40px;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hero-note {
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* MOCKUP */
+        .mockup-section {
+            padding: 20px 24px 80px;
+            display: flex;
+            justify-content: center;
+        }
+        .mockup {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.06);
+            overflow: hidden;
+            max-width: 860px;
+            width: 100%;
+        }
+        .mockup-bar {
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mockup-dots { display: flex; gap: 6px; }
+        .mockup-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+        }
+        .mockup-dot:nth-child(1) { background: #fc5c5c; }
+        .mockup-dot:nth-child(2) { background: #fdbc40; }
+        .mockup-dot:nth-child(3) { background: #34c759; }
+        .mockup-url {
+            flex: 1;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .mockup-body {
+            padding: 32px;
+            background: var(--bg);
+            min-height: 280px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .mockup-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .mockup-card-icon {
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+        .mockup-card-title { font-weight: 700; font-size: 1rem; }
+        .mockup-card-sub { font-size: 0.8rem; color: var(--text-muted); }
+        .mockup-card-bar {
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 4px;
+        }
+
+        /* FEATURES */
+        section { padding: 80px 24px; }
+        .section-label {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            text-align: center;
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+        .section-sub {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 520px;
+            margin: 0 auto 56px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .feature-card:hover {
+            box-shadow: 0 8px 32px rgba(37,99,235,0.10);
+            transform: translateY(-2px);
+        }
+        .feature-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+        .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+        .feature-card p { font-size: 0.93rem; color: var(--text-muted); line-height: 1.6; }
+
+        /* HOW IT WORKS */
+        .how-section { background: var(--bg); }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 32px;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .step-number {
+            width: 52px; height: 52px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin: 0 auto 16px;
+        }
+        .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+        .step p { font-size: 0.9rem; color: var(--text-muted); }
+
+        /* PRICING */
+        .pricing-grid {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .pricing-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px 32px;
+            width: 320px;
+            position: relative;
+        }
+        .pricing-card.featured {
+            border-color: var(--primary);
+            box-shadow: 0 8px 40px rgba(37,99,235,0.15);
+        }
+        .pricing-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 16px;
+            border-radius: 100px;
+            white-space: nowrap;
+        }
+        .pricing-name { font-weight: 700; font-size: 1rem; color: var(--text-muted); margin-bottom: 8px; }
+        .pricing-price {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .pricing-price span { font-size: 1rem; font-weight: 500; color: var(--text-muted); }
+        .pricing-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
+        .pricing-features { list-style: none; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+        .pricing-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.93rem;
+        }
+        .pricing-features li i { color: #22c55e; font-size: 0.85rem; }
+        .coming-soon-note {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* CTA */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 24px;
+        }
+        .cta-section h2 {
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+        .cta-section p { font-size: 1.1rem; opacity: 0.85; margin-bottom: 36px; }
+        .btn-white {
+            background: white;
+            color: var(--primary);
+        }
+        .btn-white:hover { background: #f0f4ff; transform: translateY(-1px); }
+
+        /* FOOTER */
+        footer {
+            background: var(--text);
+            color: #94a3b8;
+            text-align: center;
+            padding: 32px 24px;
+            font-size: 0.875rem;
+        }
+        footer a { color: #94a3b8; text-decoration: none; }
+        footer a:hover { color: white; }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .mockup-body { grid-template-columns: 1fr 1fr; }
+            .mockup-body .mockup-card:last-child { display: none; }
+            nav .btn-outline { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <a href="landing.html" class="nav-logo">
+        <i class="fas fa-school"></i>
+        Schulverwaltung
+    </a>
+    <div class="nav-actions">
+        <a href="index.html" class="btn btn-ghost">Zur App <i class="fas fa-arrow-right"></i></a>
+        <a href="#preise" class="btn btn-outline">Preise</a>
+        <a href="#" class="btn btn-primary btn-disabled" title="Registrierung demnächst verfügbar">
+            <i class="fas fa-user-plus"></i> Registrieren
+        </a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-badge">
+        <i class="fas fa-star"></i> Für Lehrerinnen und Lehrer
+    </div>
+    <h1>Dein Unterricht.<br><span>Perfekt organisiert.</span></h1>
+    <p>Schulverwaltung bündelt alles, was du täglich brauchst — Noten, Sitzplan, Zeugnis-Notizen und mehr. Läuft im Browser, auch offline.</p>
+    <div class="hero-actions">
+        <a href="index.html" class="btn btn-primary btn-lg">
+            <i class="fas fa-play"></i> App öffnen
+        </a>
+        <a href="#funktionen" class="btn btn-outline btn-lg">
+            Mehr erfahren
+        </a>
+    </div>
+    <p class="hero-note"><i class="fas fa-lock" style="font-size:0.8rem"></i> Deine Daten bleiben bei dir — keine Weitergabe an Dritte</p>
+</section>
+
+<!-- MOCKUP -->
+<div class="mockup-section">
+    <div class="mockup">
+        <div class="mockup-bar">
+            <div class="mockup-dots">
+                <div class="mockup-dot"></div>
+                <div class="mockup-dot"></div>
+                <div class="mockup-dot"></div>
+            </div>
+            <div class="mockup-url">schulverwaltung.de</div>
+        </div>
+        <div class="mockup-body">
+            <div class="mockup-card">
+                <div class="mockup-card-icon" style="background:#eff6ff; color:#2563eb"><i class="fas fa-user-graduate"></i></div>
+                <div class="mockup-card-title">Klasse 8b</div>
+                <div class="mockup-card-sub">24 Schüler · Mathe</div>
+                <div class="mockup-card-bar" style="background:#bfdbfe; width:80%"></div>
+            </div>
+            <div class="mockup-card">
+                <div class="mockup-card-icon" style="background:#f0fdf4; color:#16a34a"><i class="fas fa-th"></i></div>
+                <div class="mockup-card-title">Sitzplan</div>
+                <div class="mockup-card-sub">Interaktiv · Bewertung</div>
+                <div class="mockup-card-bar" style="background:#bbf7d0; width:65%"></div>
+            </div>
+            <div class="mockup-card">
+                <div class="mockup-card-icon" style="background:#fef9c3; color:#ca8a04"><i class="fas fa-star"></i></div>
+                <div class="mockup-card-title">Noten</div>
+                <div class="mockup-card-sub">Projekte · Ø 2,4</div>
+                <div class="mockup-card-bar" style="background:#fef08a; width:70%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FEATURES -->
+<section id="funktionen">
+    <div class="section-label">Funktionen</div>
+    <div class="section-title">Alles was du brauchst</div>
+    <p class="section-sub">Sechs Module, die den Schulalltag wirklich erleichtern.</p>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#eff6ff; color:#2563eb">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <h3>Schüler</h3>
+            <p>Klassen anlegen, Schüler verwalten, Förderbedarf markieren und Daten importieren & exportieren.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#f0fdf4; color:#16a34a">
+                <i class="fas fa-th"></i>
+            </div>
+            <h3>Sitzplan</h3>
+            <p>Tische frei anordnen, Schüler zuweisen und direkt im Sitzplan Noten und Mitarbeit erfassen.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#fef9c3; color:#ca8a04">
+                <i class="fas fa-star"></i>
+            </div>
+            <h3>Noten</h3>
+            <p>Projekte und Leistungen pro Schüler dokumentieren, Durchschnitte berechnen lassen.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#fdf4ff; color:#9333ea">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <h3>Zeugnis</h3>
+            <p>Zeugnis-Notizen pro Schüler mit Formulierungshilfen und automatisch zusammengefassten Daten.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#fff7ed; color:#ea580c">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <h3>Planung</h3>
+            <p>Unterrichtsplanung im Kalender, Stundenvorbereitung und Terminübersicht auf einen Blick.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#f0fdfa; color:#0d9488">
+                <i class="fas fa-address-book"></i>
+            </div>
+            <h3>Kontakte</h3>
+            <p>Elternkontakte zentral speichern und schnell die richtige Nummer finden.</p>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+    <div class="section-label">So einfach</div>
+    <div class="section-title">In 3 Schritten startklar</div>
+    <p class="section-sub">Keine Installation, keine IT-Abteilung nötig.</p>
+
+    <div class="steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Registrieren</h3>
+            <p>Konto erstellen mit E-Mail und Passwort. Dauert weniger als eine Minute.</p>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Klassen anlegen</h3>
+            <p>Klassen und Schüler eingeben oder aus einer Datei importieren.</p>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Loslegen</h3>
+            <p>Sofort nutzbar — im Browser, auf dem Handy, auch offline.</p>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
+<section id="preise">
+    <div class="section-label">Preise</div>
+    <div class="section-title">Einfach und fair</div>
+    <p class="section-sub">Kein Abo-Dschungel. Ein Preis, alle Funktionen.</p>
+
+    <div class="pricing-grid">
+        <div class="pricing-card">
+            <div class="pricing-name">Kostenlos testen</div>
+            <div class="pricing-price">0 €</div>
+            <div class="pricing-sub">30 Tage, alle Funktionen</div>
+            <ul class="pricing-features">
+                <li><i class="fas fa-check-circle"></i> Alle 6 Module</li>
+                <li><i class="fas fa-check-circle"></i> Unbegrenzte Klassen</li>
+                <li><i class="fas fa-check-circle"></i> Offline-Nutzung</li>
+                <li><i class="fas fa-check-circle"></i> Cloud-Synchronisierung</li>
+            </ul>
+            <a href="#" class="btn btn-outline btn-disabled" style="width:100%; justify-content:center;" title="Demnächst verfügbar">
+                Demnächst verfügbar
+            </a>
+        </div>
+        <div class="pricing-card featured">
+            <div class="pricing-badge">Empfohlen</div>
+            <div class="pricing-name">Jahresabo</div>
+            <div class="pricing-price">29 € <span>/ Jahr</span></div>
+            <div class="pricing-sub">entspricht 2,40 € / Monat</div>
+            <ul class="pricing-features">
+                <li><i class="fas fa-check-circle"></i> Alle 6 Module</li>
+                <li><i class="fas fa-check-circle"></i> Unbegrenzte Klassen</li>
+                <li><i class="fas fa-check-circle"></i> Offline-Nutzung</li>
+                <li><i class="fas fa-check-circle"></i> Cloud-Synchronisierung</li>
+                <li><i class="fas fa-check-circle"></i> Updates inklusive</li>
+            </ul>
+            <a href="#" class="btn btn-primary btn-disabled" style="width:100%; justify-content:center;" title="Demnächst verfügbar">
+                Demnächst verfügbar
+            </a>
+        </div>
+    </div>
+    <p class="coming-soon-note"><i class="fas fa-clock"></i> Registrierung und Zahlung werden in Kürze freigeschaltet</p>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <h2>Jetzt schon nutzen</h2>
+    <p>Du hast bereits einen Zugang? Direkt zur App — ohne Umwege.</p>
+    <a href="index.html" class="btn btn-white btn-lg">
+        <i class="fas fa-arrow-right"></i> Zur App
+    </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2025 Schulverwaltung &nbsp;·&nbsp; <a href="#">Impressum</a> &nbsp;·&nbsp; <a href="#">Datenschutz</a></p>
+</footer>
+
+</body>
+</html>
