@@ -451,7 +451,10 @@
             
             <!-- Modal für Verlauf in der Hausaufgaben-Ansicht -->
             <div id="hw-history-modal" class="modal" style="display: none;">
-                <h2>Verlauf</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <h2 style="margin:0;">Verlauf</h2>
+                    <button class="btn btn-sm btn-light btn-circle-sm" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+                </div>
                 <p id="hw-history-student-name">Schüler: </p>
                 <div class="hw-history-container">
                     <div id="hw-history-list" class="hw-history-list">

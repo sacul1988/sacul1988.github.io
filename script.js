@@ -3882,7 +3882,10 @@ function showEvaluationPanel(desk) {
         
         content.innerHTML = `
             <div class="evaluation-item">
-                <h4>Schüler: ${student.name}</h4>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <h4 style="margin:0;">Schüler: ${student.name}</h4>
+                    <button class="btn btn-sm btn-light btn-circle-sm" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+                </div>
                 <div class="homework-controls">
                     <button class="homework-btn btn btn-purple hausaufgaben-btn" onclick="increaseHomeworkCounter(${desk.studentIndex}, 'homework')">
                         Hausaufgaben
@@ -3910,7 +3913,10 @@ function showEvaluationPanel(desk) {
     } else {
         content.innerHTML = `
             <div class="evaluation-item">
-                <h4>Dieser Tisch ist leer</h4>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h4 style="margin:0;">Dieser Tisch ist leer</h4>
+                    <button class="btn btn-sm btn-light btn-circle-sm" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+                </div>
             </div>
         `;
         // Setze die globale Variable zurück, wenn kein Schüler ausgewählt
