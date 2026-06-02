@@ -1645,7 +1645,7 @@ function increaseHomeworkCounter(studentIndex, counterType) {
             swal({
                 title: `${student.name}: ${newValue}x ${counterName} vergessen`,
                 text: `Soll ein Eintrag für ${student.name} gegeben werden?`,
-                icon: "question",
+                icon: "warning",
                 buttons: ["Nein", "Ja"],
                 dangerMode: false,
             }).then((willGiveEntry) => {
@@ -3989,7 +3989,7 @@ function showAbschreibtextModal(studentIndex) {
     swal({
         title: "Störungen",
         text: `Möchten Sie ${student.name} eine Konsequenz geben?`,
-        icon: "question",
+        icon: "warning",
         buttons: ["Nein", "Ja"],
         dangerMode: false,
     }).then((willGiveAbschreibtext) => {
@@ -4011,7 +4011,7 @@ function showNachsitzenModal(studentIndex) {
     swal({
         title: "Störungen",
         text: `Möchten Sie ${student.name} eine Konsequenz geben?`,
-        icon: "question",
+        icon: "warning",
         buttons: ["Nein", "Ja"],
         dangerMode: false,
     }).then((willGiveNachsitzen) => {
