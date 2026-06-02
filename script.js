@@ -190,8 +190,8 @@ const Localization = {
         'homework': 'Hausaufgaben',
         'materials': 'Material',
         'planner': 'Eintrag',
-        'forgottenHomework': 'Hausaufgaben vergessen',
-        'forgottenMaterials': 'Material vergessen',
+        'forgottenHomework': 'Hausaufgaben',
+        'forgottenMaterials': 'Material',
         'forgottenPlanner': 'Einträge in den Schulplaner',
         'noEntries': 'Keine Einträge',
         'notes': 'Notizen',
@@ -4911,7 +4911,7 @@ function renderZeugnisModule() {
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button class="btn btn-sm btn-info" onclick="scrollToTopOfZeugnisModule()">Zurück</button>
+                    <button class="btn btn-sm btn-info btn-circle-sm" onclick="scrollToTopOfZeugnisModule()" title="Zurück"><i class="fas fa-arrow-up"></i></button>
                     <button class="btn btn-sm btn-primary btn-circle-sm" onclick="openMitarbeitAssistant(${index})" title="Formulierungshilfen"><i class="fas fa-lightbulb"></i></button>
                 </div>
             </div>
@@ -4924,9 +4924,9 @@ function renderZeugnisModule() {
                     <div class="zeugnis-section">
                         <h4>Sonstiges</h4>
                         <div class="stats">
-                            <div>Hausaufgaben vergessen: ${homework}</div>
-                            <div>Material vergessen: ${materials}</div>
-                            <div>Negative Beteiligung: ${negative}</div>
+                            <div>Hausaufgaben: ${homework}</div>
+                            <div>Material: ${materials}</div>
+                            <div>Störung: ${negative}</div>
                             ${konsequenzCount > 0 ? `<div>Konsequenz: ${konsequenzCount}</div>` : ''}
                         </div>
                     </div>
@@ -5413,9 +5413,9 @@ function exportAllStudentCards() {
                 <div class="section">
                     <h2>Sonstiges</h2>
                     <ul>
-                        <li>Hausaufgaben vergessen: ${homework}</li>
-                        <li>Material vergessen: ${materials}</li>
-                        <li>Negative Beteiligung: ${negative}</li>
+                        <li>Hausaufgaben: ${homework}</li>
+                        <li>Material: ${materials}</li>
+                        <li>Störung: ${negative}</li>
                         ${printKonsequenzCount > 0 ? `<li>Konsequenz: ${printKonsequenzCount}</li>` : ''}
                     </ul>
                 </div>
