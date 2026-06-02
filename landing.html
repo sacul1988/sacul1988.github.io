@@ -176,38 +176,9 @@
             font-size: 0.8rem;
             color: var(--text-muted);
         }
-        .mockup-body {
-            padding: 32px;
-            background: var(--bg);
-            min-height: 280px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-        .mockup-card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .mockup-card-icon {
-            width: 40px; height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            margin-bottom: 4px;
-        }
-        .mockup-card-title { font-weight: 700; font-size: 1rem; }
-        .mockup-card-sub { font-size: 0.8rem; color: var(--text-muted); }
-        .mockup-card-bar {
-            height: 6px;
-            border-radius: 3px;
-            margin-top: 4px;
+        .mockup-body-screenshot {
+            overflow: hidden;
+            border-radius: 0 0 18px 18px;
         }
 
         /* FEATURES */
@@ -383,8 +354,6 @@
 
         /* RESPONSIVE */
         @media (max-width: 600px) {
-            .mockup-body { grid-template-columns: 1fr 1fr; }
-            .mockup-body .mockup-card:last-child { display: none; }
             nav .btn-outline { display: none; }
         }
     </style>
@@ -435,25 +404,8 @@
             </div>
             <div class="mockup-url">schulverwaltung.de</div>
         </div>
-        <div class="mockup-body">
-            <div class="mockup-card">
-                <div class="mockup-card-icon" style="background:#eff6ff; color:#2563eb"><i class="fas fa-user-graduate"></i></div>
-                <div class="mockup-card-title">Klasse 8b</div>
-                <div class="mockup-card-sub">24 Schüler · Mathe</div>
-                <div class="mockup-card-bar" style="background:#bfdbfe; width:80%"></div>
-            </div>
-            <div class="mockup-card">
-                <div class="mockup-card-icon" style="background:#f0fdf4; color:#16a34a"><i class="fas fa-th"></i></div>
-                <div class="mockup-card-title">Sitzplan</div>
-                <div class="mockup-card-sub">Interaktiv · Bewertung</div>
-                <div class="mockup-card-bar" style="background:#bbf7d0; width:65%"></div>
-            </div>
-            <div class="mockup-card">
-                <div class="mockup-card-icon" style="background:#fef9c3; color:#ca8a04"><i class="fas fa-star"></i></div>
-                <div class="mockup-card-title">Noten</div>
-                <div class="mockup-card-sub">Projekte · Ø 2,4</div>
-                <div class="mockup-card-bar" style="background:#fef08a; width:70%"></div>
-            </div>
+        <div class="mockup-body-screenshot">
+            <img src="Startseite.png" alt="Schulverwaltung Startseite" style="width:100%; display:block; border-radius: 0 0 18px 18px;">
         </div>
     </div>
 </div>
