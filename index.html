@@ -20,40 +20,16 @@
     <!-- Login Modal -->
     <div id="login-container" class="login-overlay" style="display: none;">
         <div class="login-card">
-            <h2><i class="fas fa-school"></i> Schulverwaltung</h2>
-
-            <!-- Tabs (Registrierung deaktiviert) -->
-            <div style="display:flex; gap:0; margin-bottom:20px; border-bottom:2px solid #e2e8f0;">
-                <button id="tab-login" onclick="switchAuthTab('login')" style="flex:1; background:none; border:none; padding:10px; font-size:0.95rem; font-weight:600; color:#2563eb; border-bottom:2px solid #2563eb; margin-bottom:-2px; cursor:pointer;">Einloggen</button>
-                <button id="tab-register" onclick="switchAuthTab('register')" style="flex:1; background:none; border:none; padding:10px; font-size:0.95rem; font-weight:600; color:#94a3b8; border-bottom:2px solid transparent; margin-bottom:-2px; cursor:not-allowed; opacity:0.4;" disabled>Registrieren</button>
+            <h2><i class="fas fa-lock"></i> Lehrer-Login</h2>
+            <p>Bitte loggen Sie sich ein, um Ihre Daten zu synchronisieren.</p>
+            <div class="form-group">
+                <input type="email" id="login-email" class="form-control" placeholder="E-Mail">
             </div>
-
-            <!-- Login-Formular -->
-            <div id="form-login">
-                <div class="form-group">
-                    <input type="email" id="login-email" class="form-control" placeholder="E-Mail">
-                </div>
-                <div class="form-group">
-                    <input type="password" id="login-password" class="form-control" placeholder="Passwort">
-                </div>
-                <button class="btn btn-primary btn-block" onclick="handleLogin()">Einloggen</button>
+            <div class="form-group">
+                <input type="password" id="login-password" class="form-control" placeholder="Passwort">
             </div>
-
-            <!-- Registrier-Formular -->
-            <div id="form-register" style="display:none;">
-                <div class="form-group">
-                    <input type="email" id="register-email" class="form-control" placeholder="E-Mail">
-                </div>
-                <div class="form-group">
-                    <input type="password" id="register-password" class="form-control" placeholder="Passwort (mind. 6 Zeichen)">
-                </div>
-                <div class="form-group">
-                    <input type="password" id="register-password2" class="form-control" placeholder="Passwort wiederholen">
-                </div>
-                <button class="btn btn-primary btn-block" onclick="handleRegister()">Konto erstellen</button>
-            </div>
-
-            <div id="login-status" style="margin-top: 10px; font-size: 0.9em; display: none;"></div>
+            <button class="btn btn-primary btn-block" onclick="handleLogin()">Einloggen</button>
+            <div id="login-status" class="text-danger" style="margin-top: 10px; font-size: 0.9em; display: none;"></div>
         </div>
     </div>
 
@@ -813,7 +789,7 @@
 
     <script type="module">
         import { initializeApp } from "firebase/app";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
         import { initializeFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
         // ===== DEINE FIREBASE KONFIGURATION =====
@@ -854,56 +830,6 @@
                 document.getElementById('cloud-status-bar').style.display = 'flex';
             } catch (error) {
                 status.textContent = 'Login fehlgeschlagen: ' + error.message;
-                status.className = 'text-danger';
-                status.style.display = 'block';
-            }
-        };
-
-        window.switchAuthTab = (tab) => {
-            const isLogin = tab === 'login';
-            document.getElementById('form-login').style.display = isLogin ? 'block' : 'none';
-            document.getElementById('form-register').style.display = isLogin ? 'none' : 'block';
-            document.getElementById('tab-login').style.color = isLogin ? '#2563eb' : '#94a3b8';
-            document.getElementById('tab-login').style.borderBottomColor = isLogin ? '#2563eb' : 'transparent';
-            document.getElementById('tab-register').style.color = isLogin ? '#94a3b8' : '#2563eb';
-            document.getElementById('tab-register').style.borderBottomColor = isLogin ? 'transparent' : '#2563eb';
-            document.getElementById('login-status').style.display = 'none';
-        };
-
-        window.handleRegister = async () => {
-            const email = document.getElementById('register-email').value.trim();
-            const password = document.getElementById('register-password').value;
-            const password2 = document.getElementById('register-password2').value;
-            const status = document.getElementById('login-status');
-            status.style.display = 'none';
-
-            if (!email || !password) {
-                status.textContent = 'Bitte E-Mail und Passwort eingeben.';
-                status.className = 'text-danger';
-                status.style.display = 'block';
-                return;
-            }
-            if (password !== password2) {
-                status.textContent = 'Passwörter stimmen nicht überein.';
-                status.className = 'text-danger';
-                status.style.display = 'block';
-                return;
-            }
-            if (password.length < 6) {
-                status.textContent = 'Passwort muss mindestens 6 Zeichen haben.';
-                status.className = 'text-danger';
-                status.style.display = 'block';
-                return;
-            }
-            try {
-                status.textContent = 'Konto wird erstellt...';
-                status.className = 'text-info';
-                status.style.display = 'block';
-                await createUserWithEmailAndPassword(auth, email, password);
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('cloud-status-bar').style.display = 'flex';
-            } catch (error) {
-                status.textContent = 'Registrierung fehlgeschlagen: ' + error.message;
                 status.className = 'text-danger';
                 status.style.display = 'block';
             }
