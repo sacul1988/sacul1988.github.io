@@ -3884,7 +3884,7 @@ function showEvaluationPanel(desk) {
             <div class="evaluation-item">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <h4 style="margin:0;">Schüler: ${student.name}</h4>
-                    <button class="btn btn-sm btn-light btn-circle-sm" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
                 <div class="homework-controls">
                     <button class="homework-btn btn btn-purple hausaufgaben-btn" onclick="increaseHomeworkCounter(${desk.studentIndex}, 'homework')">
@@ -3915,7 +3915,7 @@ function showEvaluationPanel(desk) {
             <div class="evaluation-item">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h4 style="margin:0;">Dieser Tisch ist leer</h4>
-                    <button class="btn btn-sm btn-light btn-circle-sm" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
             </div>
         `;
