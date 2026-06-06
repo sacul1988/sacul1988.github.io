@@ -361,6 +361,20 @@ function showPage(page, classId = null) {
 
 // Modul wechseln
 function showModule(module) {
+    // Suchfelder bei Modulwechsel schließen und zurücksetzen
+    document.querySelectorAll('.search-container').forEach(container => {
+        container.style.display = 'none';
+        const input = container.querySelector('.search-input');
+        if (input) {
+            input.value = '';
+        }
+        const suggestions = container.querySelector('.search-suggestions');
+        if (suggestions) {
+            suggestions.innerHTML = '';
+            suggestions.style.display = 'none';
+        }
+    });
+
     // Vor dem Modulwechsel offene Zeugnis-Eingaben sichern.
     saveFocusedZeugnisTextarea();
 
