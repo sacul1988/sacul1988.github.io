@@ -2125,7 +2125,7 @@ function renderGradesModule() {
                     <i id="notentoggleIcon-${studentIndex}" class="fas fa-chevron-down toggle-icon ${student.notenExpanded ? 'rotate' : ''}"></i>
                 </div>
                 <div class="student-header-actions" style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
-                    <button style="background: none; border: none; color: var(--dark-color); cursor: pointer; padding: 0; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; height: 36px; width: 36px;" onclick="event.stopPropagation(); scrollToTopAndFocusSearch('noten')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
+                    <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); scrollToTopAndFocusSearch('noten')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
                 </div>
             </div>
         `;
@@ -2999,6 +2999,12 @@ function showProjectGradesInCollapsedView() {
                         gradesPreview.appendChild(separator);
                     }
                 });
+                
+                // Add a separator after the last badge (between the last grade circle and the back-to-top button)
+                const endSeparator = document.createElement('span');
+                endSeparator.className = 'grade-separator';
+                endSeparator.textContent = '•';
+                gradesPreview.appendChild(endSeparator);
             }
         }
         
@@ -3032,14 +3038,14 @@ function addProjectGradesPreviewStyles() {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 28px;
-            height: 28px;
+            min-width: 32px;
+            height: 32px;
             aspect-ratio: 1;
             text-align: center;
             border-radius: 50%;
             color: black;
             font-weight: bold;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             padding: 0;
         }
         
@@ -4924,8 +4930,8 @@ function renderZeugnisModule() {
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button class="btn btn-sm btn-primary btn-circle-sm" onclick="openMitarbeitAssistant(${index})" title="Formulierungshilfen"><i class="fas fa-lightbulb"></i></button>
-                    <button style="background: none; border: none; color: var(--dark-color); cursor: pointer; padding: 0; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; height: 36px; width: 36px;" onclick="scrollToTopAndFocusSearch('zeugnis')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
+                    <button class="btn-circle-outline-black" onclick="openMitarbeitAssistant(${index})" title="Formulierungshilfen"><i class="fas fa-lightbulb"></i></button>
+                    <button class="btn-back-to-top-circle" onclick="scrollToTopAndFocusSearch('zeugnis')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
                 </div>
             </div>
             <div class="card-body">
