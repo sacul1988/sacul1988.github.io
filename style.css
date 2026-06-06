@@ -2075,9 +2075,12 @@ select.form-control {
     transition: background-color 0.2s ease;
 }
 
-.search-suggestions li:hover,
-.search-suggestions li.highlighted {
+.search-suggestions li:hover {
     background-color: #f8f9fa;
+}
+
+.search-suggestions li.highlighted {
+    background-color: #e3f2fd;
 }
 
 .search-suggestions li:last-child {

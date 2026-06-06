@@ -4386,16 +4386,51 @@ function toggleSearch(module) {
 }
 
 function handleSearchInputKeydown(module, event) {
-    if (event.key !== 'Enter') return;
-
-    event.preventDefault();
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Enter') return;
 
     const suggestions = document.getElementById(`search-suggestions-${module}`);
     if (!suggestions) return;
 
-    const firstMatch = suggestions.querySelector('li:not(.no-results)');
-    if (firstMatch) {
-        firstMatch.click();
+    const items = Array.from(suggestions.querySelectorAll('li:not(.no-results)'));
+    if (items.length === 0) return;
+
+    const currentIndex = items.findIndex(item => item.classList.contains('highlighted'));
+
+    if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        let nextIndex = currentIndex + 1;
+        if (nextIndex >= items.length) {
+            nextIndex = 0;
+        }
+        
+        if (currentIndex !== -1) {
+            items[currentIndex].classList.remove('highlighted');
+        }
+        items[nextIndex].classList.add('highlighted');
+        
+        // Scroll target item into view
+        items[nextIndex].scrollIntoView({ block: 'nearest' });
+    } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        let prevIndex = currentIndex - 1;
+        if (prevIndex < 0) {
+            prevIndex = items.length - 1;
+        }
+        
+        if (currentIndex !== -1) {
+            items[currentIndex].classList.remove('highlighted');
+        }
+        items[prevIndex].classList.add('highlighted');
+        
+        // Scroll target item into view
+        items[prevIndex].scrollIntoView({ block: 'nearest' });
+    } else if (event.key === 'Enter') {
+        event.preventDefault();
+        if (currentIndex !== -1) {
+            items[currentIndex].click();
+        } else if (items[0]) {
+            items[0].click();
+        }
     }
 }
 
