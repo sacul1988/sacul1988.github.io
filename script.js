@@ -3005,7 +3005,7 @@ function showProjectGradesInCollapsedView() {
         // Add the preview to the student header
         const actions = studentHeader.querySelector('.student-header-actions');
         if (actions) {
-            actions.appendChild(gradesPreview);
+            actions.insertBefore(gradesPreview, actions.firstChild);
         } else {
             studentHeader.appendChild(gradesPreview);
         }
@@ -4924,8 +4924,8 @@ function renderZeugnisModule() {
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button style="background: none; border: none; color: var(--dark-color); cursor: pointer; padding: 0; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; height: 36px; width: 36px;" onclick="scrollToTopAndFocusSearch('zeugnis')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
                     <button class="btn btn-sm btn-primary btn-circle-sm" onclick="openMitarbeitAssistant(${index})" title="Formulierungshilfen"><i class="fas fa-lightbulb"></i></button>
+                    <button style="background: none; border: none; color: var(--dark-color); cursor: pointer; padding: 0; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; height: 36px; width: 36px;" onclick="scrollToTopAndFocusSearch('zeugnis')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
                 </div>
             </div>
             <div class="card-body">
