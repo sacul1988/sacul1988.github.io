@@ -2125,7 +2125,7 @@ function renderGradesModule() {
                     <i id="notentoggleIcon-${studentIndex}" class="fas fa-chevron-down toggle-icon ${student.notenExpanded ? 'rotate' : ''}"></i>
                 </div>
                 <div class="student-header-actions" style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
-                    <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); scrollToTopAndFocusSearch('noten')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
+                    <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); collapseStudentAndScrollToTop('noten', ${studentIndex})" title="Zurück"><i class="fas fa-arrow-up"></i></button>
                 </div>
             </div>
         `;
@@ -5009,6 +5009,20 @@ function renderZeugnisModule() {
 
 
 
+function collapseStudentAndScrollToTop(module, studentIndex) {
+    if (module === 'noten' && classes[activeClassId] && classes[activeClassId].students) {
+        const studentsArray = getSortedStudents();
+        if (studentIndex >= 0 && studentIndex < studentsArray.length) {
+            const student = studentsArray[studentIndex];
+            const originalIndex = classes[activeClassId].students.findIndex(s => s.name === student.name);
+            if (originalIndex !== -1 && classes[activeClassId].students[originalIndex].notenExpanded) {
+                toggleStudentDetails('noten', studentIndex);
+            }
+        }
+    }
+    scrollToTopAndFocusSearch(module);
+}
+
 function scrollToTopAndFocusSearch(module) {
     console.log(`Scroll to top and focus search for ${module} called`);
     document.documentElement.scrollTop = 0; // Für Chrome, Firefox, IE und Opera
@@ -7805,5 +7819,6 @@ window.deleteContact = deleteContact;
 window.toggleSearchContacts = toggleSearchContacts;
 window.addPhoneRowInModal = addPhoneRowInModal;
 window.scrollToTopAndFocusSearch = scrollToTopAndFocusSearch;
+window.collapseStudentAndScrollToTop = collapseStudentAndScrollToTop;
 
 
