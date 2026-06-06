@@ -505,9 +505,12 @@
             
             <!-- Modal für Projekt zu allen Schülern hinzufügen -->
             <div id="add-project-to-all-modal" class="modal" style="display: none;">
-                <h2>Projekt zu allen Schülern hinzufügen</h2>
+                <div class="wizard-header">
+                    <h2>Projekt zu allen Schülern hinzufügen</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
                 <div class="form-group">
-                    <input type="text" id="project-name-all" class="form-control" placeholder="z.B. Testarbeit 1">
+                    <input type="text" id="project-name-all" class="form-control" placeholder="z.B. Testarbeit 1" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addProjectToAll(); }">
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-primary" onclick="addProjectToAll()">Hinzufügen</button>
@@ -516,7 +519,10 @@
             
             <!-- Modal für Projekt für alle Schüler löschen -->
             <div id="delete-project-for-all-modal" class="modal" style="display: none;">
-                <h2>Projekt für alle Schüler löschen</h2>
+                <div class="wizard-header">
+                    <h2>Projekt für alle Schüler löschen</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
                 <div class="form-group">
                     <select id="delete-project-select" class="form-control">
                         <!-- Optionen werden dynamisch eingefügt -->

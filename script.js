@@ -2124,9 +2124,11 @@ function renderGradesModule() {
                     <i class="fas fa-user"></i> ${student.name}
                     <i id="notentoggleIcon-${studentIndex}" class="fas fa-chevron-down toggle-icon ${student.notenExpanded ? 'rotate' : ''}"></i>
                 </div>
+                <div class="student-header-actions" style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+                    <button style="background: none; border: none; color: var(--dark-color); cursor: pointer; padding: 0; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; height: 36px; width: 36px;" onclick="event.stopPropagation(); scrollToTopAndFocusSearch('noten')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
+                </div>
+            </div>
         `;
-        
-        studentHeader += `</div>`;
         
         // Details-Bereich - Nur noch Projekte
         let studentDetails = `
@@ -3001,7 +3003,12 @@ function showProjectGradesInCollapsedView() {
         }
         
         // Add the preview to the student header
-        studentHeader.appendChild(gradesPreview);
+        const actions = studentHeader.querySelector('.student-header-actions');
+        if (actions) {
+            actions.appendChild(gradesPreview);
+        } else {
+            studentHeader.appendChild(gradesPreview);
+        }
     });
 }
 
@@ -4917,7 +4924,7 @@ function renderZeugnisModule() {
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button class="btn btn-sm btn-info btn-circle-sm" onclick="scrollToTopOfZeugnisModule()" title="Zurück"><i class="fas fa-arrow-up"></i></button>
+                    <button style="background: none; border: none; color: var(--dark-color); cursor: pointer; padding: 0; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; height: 36px; width: 36px;" onclick="scrollToTopAndFocusSearch('zeugnis')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
                     <button class="btn btn-sm btn-primary btn-circle-sm" onclick="openMitarbeitAssistant(${index})" title="Formulierungshilfen"><i class="fas fa-lightbulb"></i></button>
                 </div>
             </div>
@@ -4961,11 +4968,24 @@ function renderZeugnisModule() {
 
 
 
-function scrollToTopOfZeugnisModule() {
-    console.log("Scroll to top called");
+function scrollToTopAndFocusSearch(module) {
+    console.log(`Scroll to top and focus search for ${module} called`);
     document.documentElement.scrollTop = 0; // Für Chrome, Firefox, IE und Opera
     document.body.scrollTop = 0; // Für Safari
     window.scrollTo({ top: 0, behavior: 'auto' }); 
+
+    // Gewünschtes Suchfeld anzeigen und fokussieren
+    const searchContainer = document.getElementById(`search-container-${module}`);
+    if (searchContainer) {
+        searchContainer.style.display = 'block';
+        const input = searchContainer.querySelector('.search-input');
+        if (input) {
+            input.onkeydown = (event) => handleSearchInputKeydown(module, event);
+            input.focus();
+            input.value = '';
+            filterStudents(module);
+        }
+    }
 }
 
 // Spantext bei Tastatureingabe aufteilen, damit der neu getippte Text immer in Standardschriftart (schwarz) ist
@@ -7743,5 +7763,6 @@ window.saveContact = saveContact;
 window.deleteContact = deleteContact;
 window.toggleSearchContacts = toggleSearchContacts;
 window.addPhoneRowInModal = addPhoneRowInModal;
+window.scrollToTopAndFocusSearch = scrollToTopAndFocusSearch;
 
 
