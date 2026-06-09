@@ -1284,7 +1284,16 @@
     <script src="script.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js');
+            if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                        console.log('Lokaler Service Worker deinstalliert (Entwicklungsmodus).');
+                    }
+                });
+            } else {
+                navigator.serviceWorker.register('./sw.js');
+            }
         }
     </script>
 </body>
