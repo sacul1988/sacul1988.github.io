@@ -3390,7 +3390,6 @@ function renderSitzplanModule() {
     // UI für den aktuellen Modus aktualisieren
     const editBtn = safeGetElement('edit-mode-btn');
     const evaluationBtn = safeGetElement('evaluation-mode-btn');
-    const oralBtn = safeGetElement('oral-mode-btn');
     const workBtn = safeGetElement('work-mode-btn');
     
     const currentMode = cls.sitzplan.currentMode || 'evaluation';
@@ -3423,10 +3422,6 @@ function renderSitzplanModule() {
         evaluationBtn.classList.toggle('active', currentMode === 'evaluation');
     }
     
-    if (oralBtn) {
-        oralBtn.classList.toggle('active', currentMode === 'oral');
-    }
-
     if (workBtn) {
         workBtn.classList.toggle('active', currentMode === 'work');
     }
@@ -3505,7 +3500,6 @@ function setMode(mode) {
     const workspace = safeGetElement('workspace');
     const editBtn = safeGetElement('edit-mode-btn');
     const evaluationBtn = safeGetElement('evaluation-mode-btn');
-    const oralBtn = safeGetElement('oral-mode-btn');
     const workBtn = safeGetElement('work-mode-btn');
     
     if (workspace) {
@@ -3536,10 +3530,6 @@ function setMode(mode) {
         evaluationBtn.classList.toggle('active', mode === 'evaluation');
     }
     
-    if (oralBtn) {
-        oralBtn.classList.toggle('active', mode === 'oral');
-    }
-
     if (workBtn) {
         workBtn.classList.toggle('active', mode === 'work');
     }
@@ -6032,9 +6022,11 @@ function exportPlanungTable() {
     }
 
     // Unterrichtstage aufbauen
+    const todayStr = localDateStr(new Date());
+    const visibleStartDate = p.startDate < todayStr ? todayStr : p.startDate;
     const teachingDates = new Set();
     const rows = [];
-    const current = new Date(p.startDate + 'T00:00:00');
+    const current = new Date(visibleStartDate + 'T00:00:00');
     const end = new Date(p.endDate + 'T00:00:00');
 
     while (current <= end) {
@@ -6052,7 +6044,7 @@ function exportPlanungTable() {
     const hiddenTermine = new Set(p.hiddenTermine || []);
     termine.forEach(termin => {
         if (hiddenTermine.has(termin.id)) return;
-        if (termin.date < p.startDate || termin.date > p.endDate) return;
+        if (termin.date < visibleStartDate || termin.date > p.endDate) return;
         if (teachingDates.has(termin.date)) {
             const row = rows.find(r => r.date === termin.date);
             if (row) row.termins.push(termin);
@@ -6218,9 +6210,11 @@ function renderPlanungTable() {
     }
 
     // Unterrichtstage aufbauen
+    const todayStr = localDateStr(new Date());
+    const visibleStartDate = p.startDate < todayStr ? todayStr : p.startDate;
     const teachingDates = new Set();
     const rows = [];
-    const current = new Date(p.startDate + 'T00:00:00');
+    const current = new Date(visibleStartDate + 'T00:00:00');
     const end = new Date(p.endDate + 'T00:00:00');
 
     while (current <= end) {
@@ -6238,7 +6232,7 @@ function renderPlanungTable() {
     const hiddenTermine = new Set(p.hiddenTermine || []);
     termine.forEach(termin => {
         if (hiddenTermine.has(termin.id)) return;
-        if (termin.date < p.startDate || termin.date > p.endDate) return;
+        if (termin.date < visibleStartDate || termin.date > p.endDate) return;
         if (teachingDates.has(termin.date)) {
             rows.find(r => r.date === termin.date).termins.push(termin);
         } else {
@@ -6255,19 +6249,17 @@ function renderPlanungTable() {
     }
 
     let nr = 0;
-    const todayStr = localDateStr(new Date());
     const tableRows = rows.map(row => {
         if (row.isTeaching) nr++;
         const formattedDate = new Date(row.date + 'T00:00:00').toLocaleDateString('de-DE', {
             day: '2-digit', month: '2-digit', year: 'numeric'
         });
         const inhalt = (p.entries && p.entries[row.date]) ? escapeHtml(p.entries[row.date]) : '';
-        const isPast = row.date < todayStr;
 
         const terminText = row.termins.map(t => escapeHtml(t.title)).join(', ');
 
         if (row.isTeaching) {
-            return `<tr class="planung-row${terminText ? ' planung-row-termin' : ''} ${isPast ? 'planung-row-past' : ''}" data-date="${row.date}">
+            return `<tr class="planung-row${terminText ? ' planung-row-termin' : ''}" data-date="${row.date}">
                 <td class="planung-col-nr">${nr}</td>
                 <td class="planung-col-tag">${PLANUNG_DAY_NAMES[row.dow]}</td>
                 <td class="planung-col-datum">${formattedDate}</td>
@@ -6279,7 +6271,7 @@ function renderPlanungTable() {
                 </td>
             </tr>`;
         } else {
-            return `<tr class="planung-row planung-row-termin ${isPast ? 'planung-row-past' : ''}" data-date="${row.date}">
+            return `<tr class="planung-row planung-row-termin" data-date="${row.date}">
                 <td class="planung-col-nr">—</td>
                 <td class="planung-col-tag">${ALL_DAY_NAMES[row.dow]}</td>
                 <td class="planung-col-datum">${formattedDate}</td>
@@ -6924,8 +6916,15 @@ function renderPlanungCalendar() {
     const todayObj = new Date();
     const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
     
-    // Monatssuche startet ab calendarStartDate
-    const start = new Date(p.calendarStartDate + 'T00:00:00');
+    // Die Anzeige startet nie vor heute, auch wenn ein alter Zeitraum gespeichert ist.
+    const visibleStartDate = p.calendarStartDate < todayStr ? todayStr : p.calendarStartDate;
+    if (visibleStartDate > p.calendarEndDate) {
+        container.innerHTML = '<p class="planung-empty" style="text-align: center; padding: 40px;">Keine zukünftigen Tage im gewählten Zeitraum.</p>';
+        return;
+    }
+
+    // Monatssuche startet ab dem sichtbaren Startdatum.
+    const start = new Date(visibleStartDate + 'T00:00:00');
     const end = new Date(p.calendarEndDate + 'T00:00:00');
     
     // Zu rendernde Monate bestimmen
@@ -6950,8 +6949,8 @@ function renderPlanungCalendar() {
         
         for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            // Prüfen, ob der Tag im Zeitraum liegt (ab Startdatum bis Enddatum)
-            const isWithinRange = dateStr >= p.calendarStartDate && dateStr <= p.calendarEndDate;
+            // Prüfen, ob der Tag im sichtbaren Zeitraum liegt (heute bis Enddatum)
+            const isWithinRange = dateStr >= visibleStartDate && dateStr <= p.calendarEndDate;
             
             if (isWithinRange) {
                 const dateObj = new Date(dateStr + 'T00:00:00');
@@ -6963,8 +6962,6 @@ function renderPlanungCalendar() {
                 
                 const isToday = dateStr === todayStr;
                 if (isToday) rowClasses.push('today');
-                const isPast = dateStr < todayStr;
-                if (isPast) rowClasses.push('calendar-day-past');
                 // Termine sammeln (alle Termine des Tages, keine Ausblendung im Kalender)
                 const termine = AppState.termine || [];
                 const dayTermine = termine.filter(t => t.date === dateStr);
@@ -7834,5 +7831,3 @@ window.toggleSearchContacts = toggleSearchContacts;
 window.addPhoneRowInModal = addPhoneRowInModal;
 window.scrollToTopAndFocusSearch = scrollToTopAndFocusSearch;
 window.collapseStudentAndScrollToTop = collapseStudentAndScrollToTop;
-
-
