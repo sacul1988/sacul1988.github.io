@@ -505,6 +505,9 @@ function renderModuleContent() {
         case 'kontakte':
             renderContactsModule();
             break;
+        case 'zeugnis-texte':
+            renderZeugnisTTexteModule();
+            break;
     }
 }
 
@@ -7831,3 +7834,212 @@ window.toggleSearchContacts = toggleSearchContacts;
 window.addPhoneRowInModal = addPhoneRowInModal;
 window.scrollToTopAndFocusSearch = scrollToTopAndFocusSearch;
 window.collapseStudentAndScrollToTop = collapseStudentAndScrollToTop;
+
+// ===== ZEUGNIS TEXTE MODUL =====
+
+const ZtState = {
+    currentTyp: 'nebenfach',
+    currentText: '',
+    currentLabel: '',
+    history: [],
+    initialized: false
+};
+
+function renderZeugnisTTexteModule() {
+    if (ZtState.initialized) return;
+    ZtState.initialized = true;
+    setZtTyp('nebenfach');
+
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && activeModule === 'zeugnis-texte') {
+            ztGenerate();
+        }
+    });
+}
+
+function setZtTyp(typ, el) {
+    ZtState.currentTyp = typ;
+    document.querySelectorAll('.zt-tab').forEach(t => t.classList.remove('active'));
+    if (el) {
+        el.classList.add('active');
+    } else {
+        const tabs = document.querySelectorAll('.zt-tab');
+        const idx = { nebenfach: 0, hauptfach: 1, sozialverhalten: 2 }[typ] ?? 0;
+        if (tabs[idx]) tabs[idx].classList.add('active');
+    }
+    const isSozial = typ === 'sozialverhalten';
+    document.querySelectorAll('.zt-fach-field, .zt-halbjahr-field, .zt-themen-field').forEach(field => {
+        field.style.display = isSozial ? 'none' : '';
+    });
+}
+
+async function ztCallAPI(messages) {
+    if (typeof window.callGenerateZeugnistext !== 'function') {
+        throw new Error('Firebase Functions nicht initialisiert. Bitte einloggen.');
+    }
+    return await window.callGenerateZeugnistext(ZtState.currentTyp, messages);
+}
+
+async function ztGenerate() {
+    const name = (document.getElementById('zt-name')?.value || '').trim();
+    const fach = (document.getElementById('zt-fach')?.value || '').trim();
+    const halbjahr = document.getElementById('zt-halbjahr')?.value || 'ersten';
+    const themen = (document.getElementById('zt-themen')?.value || '').trim();
+    const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
+
+    if (!name || !beob) {
+        swal('Bitte mindestens Name und Beobachtungen ausfüllen.', { icon: 'warning', button: 'OK' });
+        return;
+    }
+    if (ZtState.currentTyp !== 'sozialverhalten' && (!fach || !themen)) {
+        swal('Bitte Fach und Themen ausfüllen.', { icon: 'warning', button: 'OK' });
+        return;
+    }
+
+    ztSetLoading(true);
+    const userMsg = `Schüler/in: ${name}\n${fach ? 'Fach: ' + fach + '\n' : ''}${fach ? 'Halbjahr: ' + halbjahr + '\n' : ''}${themen ? 'Themen: ' + themen + '\n' : ''}Beobachtungen: ${beob}`;
+    ZtState.currentLabel = ZtState.currentTyp === 'sozialverhalten' ? name : `${name} · ${fach}`;
+
+    try {
+        ZtState.currentText = await ztCallAPI([{ role: 'user', content: userMsg }]);
+        ztShowResult();
+        ztAddHistory(ZtState.currentLabel, ZtState.currentText);
+    } catch(e) {
+        ztSetLoading(false);
+        swal('Fehler beim Generieren. Bitte erneut versuchen.', { icon: 'error', button: 'OK' });
+    }
+}
+
+async function ztRegenerate() {
+    const name = (document.getElementById('zt-name')?.value || '').trim();
+    const fach = (document.getElementById('zt-fach')?.value || '').trim();
+    const halbjahr = document.getElementById('zt-halbjahr')?.value || 'ersten';
+    const themen = (document.getElementById('zt-themen')?.value || '').trim();
+    const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
+    const userMsg = `Schüler/in: ${name}\n${fach ? 'Fach: ' + fach + '\n' : ''}${fach ? 'Halbjahr: ' + halbjahr + '\n' : ''}${themen ? 'Themen: ' + themen + '\n' : ''}Beobachtungen: ${beob}`;
+
+    ztSetLoading(true);
+    try {
+        ZtState.currentText = await ztCallAPI([
+            { role: 'user', content: userMsg },
+            { role: 'assistant', content: ZtState.currentText },
+            { role: 'user', content: 'Schreibe einen neuen, anders formulierten Text mit denselben Inhalten.' }
+        ]);
+        ztShowResult();
+        ztAddHistory(ZtState.currentLabel, ZtState.currentText);
+    } catch(e) {
+        ztSetLoading(false);
+        swal('Fehler beim Generieren.', { icon: 'error', button: 'OK' });
+    }
+}
+
+async function ztShortenText() {
+    ztSetLoading(true);
+    try {
+        ZtState.currentText = await ztCallAPI([
+            { role: 'user', content: ZtState.currentText },
+            { role: 'user', content: 'Kürze diesen Text um ca. zwei Sätze. Behalte den Stil und alle wichtigen Informationen bei.' }
+        ]);
+        ztShowResult();
+    } catch(e) {
+        ztSetLoading(false);
+        swal('Fehler.', { icon: 'error', button: 'OK' });
+    }
+}
+
+async function ztLengthenText() {
+    ztSetLoading(true);
+    try {
+        ZtState.currentText = await ztCallAPI([
+            { role: 'user', content: ZtState.currentText },
+            { role: 'user', content: 'Verlängere diesen Text um ca. zwei Sätze. Füge sinnvolle, passende Informationen hinzu und behalte den Stil bei.' }
+        ]);
+        ztShowResult();
+    } catch(e) {
+        ztSetLoading(false);
+        swal('Fehler.', { icon: 'error', button: 'OK' });
+    }
+}
+
+function ztSetLoading(loading) {
+    const btn = document.getElementById('zt-gen-btn');
+    const resultDiv = document.getElementById('zt-result');
+    if (loading) {
+        if (btn) btn.disabled = true;
+        if (resultDiv) {
+            resultDiv.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px;gap:16px;color:var(--grey-color);">
+                    <div class="zt-spinner"></div>
+                    <p>Text wird erstellt…</p>
+                </div>`;
+        }
+    } else {
+        if (btn) btn.disabled = false;
+    }
+}
+
+function ztShowResult() {
+    const btn = document.getElementById('zt-gen-btn');
+    if (btn) btn.disabled = false;
+    const resultDiv = document.getElementById('zt-result');
+    if (!resultDiv) return;
+
+    resultDiv.innerHTML = `
+        <div class="zt-result-card">
+            <div class="zt-result-header">
+                <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ZtState.currentLabel}</span>
+                <button class="btn btn-light btn-icon" onclick="ztCopyText(this)" style="padding:6px 12px;font-size:12px;">
+                    <i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span>
+                </button>
+            </div>
+            <div class="zt-result-text">${ZtState.currentText}</div>
+            <div class="zt-result-actions">
+                <button class="btn btn-primary btn-icon" onclick="ztRegenerate()">
+                    <i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span>
+                </button>
+                <button class="btn btn-secondary btn-icon" onclick="ztShortenText()">
+                    <i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span>
+                </button>
+                <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()">
+                    <i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span>
+                </button>
+            </div>
+        </div>`;
+}
+
+function ztCopyText(btn) {
+    navigator.clipboard.writeText(ZtState.currentText);
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> <span class="btn-text">Kopiert!</span>';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+}
+
+function ztAddHistory(label, text) {
+    ZtState.history.unshift({ label, text });
+    if (ZtState.history.length > 5) ZtState.history.pop();
+    const section = document.getElementById('zt-history-section');
+    const list = document.getElementById('zt-history-list');
+    if (section) section.style.display = 'block';
+    if (list) {
+        list.innerHTML = ZtState.history.map((h, i) => `
+            <div class="zt-history-item" onclick="ztLoadHistory(${i})">
+                <span class="zt-history-dot"></span>
+                <span>${h.label}</span>
+            </div>`).join('');
+    }
+}
+
+function ztLoadHistory(i) {
+    const h = ZtState.history[i];
+    ZtState.currentText = h.text;
+    ZtState.currentLabel = h.label;
+    ztShowResult();
+}
+
+window.setZtTyp = setZtTyp;
+window.ztGenerate = ztGenerate;
+window.ztRegenerate = ztRegenerate;
+window.ztShortenText = ztShortenText;
+window.ztLengthenText = ztLengthenText;
+window.ztCopyText = ztCopyText;
+window.ztLoadHistory = ztLoadHistory;

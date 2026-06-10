@@ -2,3 +2,9 @@
 *.json
 !/.vscode/settings.json
 !/manifest.json
+!/firebase.json
+!/.firebaserc
+!/functions/package.json
+
+# Firebase
+functions/node_modules/

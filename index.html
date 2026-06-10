@@ -122,6 +122,11 @@
                             <i class="fas fa-address-book"></i>
                         </button>
                     </div>
+                    <div class="module-nav-item" data-module="zeugnis-texte">
+                        <button class="btn btn-light" onclick="showModule('zeugnis-texte')">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Container für Module -->
@@ -358,6 +363,71 @@
                         </div>
                     </div>
                     
+                    <!-- Zeugnis Texte Modul -->
+                    <div id="zeugnis-texte-module" class="module" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Zeugnistexte</h2>
+                            </div>
+                            <div class="zt-layout">
+                                <!-- Linke Spalte: Formular -->
+                                <div class="zt-sidebar">
+                                    <div class="zt-tabs">
+                                        <button class="zt-tab active" onclick="setZtTyp('nebenfach', this)">Nebenfach</button>
+                                        <button class="zt-tab" onclick="setZtTyp('hauptfach', this)">Hauptfach</button>
+                                        <button class="zt-tab" onclick="setZtTyp('sozialverhalten', this)">Arb. &amp; Sozial</button>
+                                    </div>
+
+                                    <div class="zt-row">
+                                        <div class="form-group">
+                                            <label for="zt-name">Name</label>
+                                            <input type="text" id="zt-name" class="form-control" placeholder="Schülername">
+                                        </div>
+                                        <div class="form-group zt-fach-field">
+                                            <label for="zt-fach">Fach</label>
+                                            <input type="text" id="zt-fach" class="form-control" placeholder="z.B. Musik">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group zt-halbjahr-field">
+                                        <label for="zt-halbjahr">Halbjahr</label>
+                                        <select id="zt-halbjahr" class="form-control">
+                                            <option value="ersten">1. Halbjahr</option>
+                                            <option value="zweiten">2. Halbjahr</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group zt-themen-field">
+                                        <label for="zt-themen">Behandelte Themen</label>
+                                        <input type="text" id="zt-themen" class="form-control" placeholder="z.B. Noten, Rhythmus, ...">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="zt-beobachtungen">Beobachtungen &amp; Gedanken</label>
+                                        <textarea id="zt-beobachtungen" class="form-control zt-textarea"></textarea>
+                                    </div>
+
+                                    <button class="btn btn-primary btn-icon" id="zt-gen-btn" onclick="ztGenerate()">
+                                        <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Text generieren</span>
+                                    </button>
+
+                                    <div id="zt-history-section" style="display: none; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                                        <p class="zt-section-label">Zuletzt erstellt</p>
+                                        <div id="zt-history-list"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Rechte Spalte: Ergebnis -->
+                                <div class="zt-result" id="zt-result">
+                                    <div class="empty-state" style="min-height: 220px;">
+                                        <i class="fas fa-file-alt" style="font-size: 2rem;"></i>
+                                        <p>Typ auswählen, Formular ausfüllen<br>und auf „Text generieren" klicken.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Kontakte Modul -->
                     <div id="kontakte-module" class="module" style="display: none;">
                         <div class="card">
@@ -791,7 +861,8 @@
       "imports": {
         "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
         "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js",
+        "firebase/functions": "https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js"
       }
     }
     </script>
@@ -800,6 +871,7 @@
         import { initializeApp } from "firebase/app";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
         import { initializeFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+        import { getFunctions, httpsCallable } from "firebase/functions";
 
         // ===== DEINE FIREBASE KONFIGURATION =====
         const firebaseConfig = {
@@ -822,6 +894,14 @@
 
         window.firebaseDb = db;
         window.firebaseAuth = auth;
+
+        // Firebase Functions: Zeugnistext-Generator
+        const functions = getFunctions(app);
+        const _generateZeugnistextFn = httpsCallable(functions, 'generateZeugnistext');
+        window.callGenerateZeugnistext = async (typ, messages) => {
+            const result = await _generateZeugnistextFn({ typ, messages });
+            return result.data.text;
+        };
 
         // AUTH-FLOW
         window.handleLogin = async () => {
