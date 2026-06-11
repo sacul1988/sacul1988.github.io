@@ -368,41 +368,50 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2>Zeugnistexte (Inklusion)</h2>
+                                <div class="card-header-actions">
+                                    <div class="desktop-header-buttons">
+                                        <button class="btn btn-warning btn-icon" id="zt-btn-nebenfach" onclick="setZtTyp('nebenfach', this)">Nebenfach</button>
+                                        <button class="btn btn-primary btn-icon" id="zt-btn-hauptfach" onclick="setZtTyp('hauptfach', this)">Hauptfach</button>
+                                        <button class="btn btn-primary btn-icon" id="zt-btn-sozialverhalten" onclick="setZtTyp('sozialverhalten', this)">Arb. &amp; Sozial</button>
+                                    </div>
+                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Zeugnistexte', '#zeugnis-texte-module .desktop-header-buttons')">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="zt-layout">
                                 <!-- Linke Spalte: Formular -->
                                 <div class="zt-sidebar">
-                                    <div class="zt-tabs">
-                                        <button class="zt-tab active" onclick="setZtTyp('nebenfach', this)">Nebenfach</button>
-                                        <button class="zt-tab" onclick="setZtTyp('hauptfach', this)">Hauptfach</button>
-                                        <button class="zt-tab" onclick="setZtTyp('sozialverhalten', this)">Arb. &amp; Sozial</button>
-                                    </div>
 
                                     <div class="zt-row">
                                         <div class="form-group">
                                             <label for="zt-name">Name</label>
-                                            <input type="text" id="zt-name" class="form-control" placeholder="Schülername">
+                                            <input type="text" id="zt-name" class="form-control">
                                         </div>
                                         <div class="form-group zt-fach-field">
                                             <label for="zt-fach">Fach</label>
-                                            <input type="text" id="zt-fach" class="form-control" placeholder="z.B. Musik">
+                                            <input type="text" id="zt-fach" class="form-control">
                                         </div>
                                     </div>
 
                                     <div class="form-group zt-halbjahr-field">
-                                        <label for="zt-halbjahr">Halbjahr</label>
-                                        <select id="zt-halbjahr" class="form-control">
-                                            <option value="ersten">1. Halbjahr</option>
-                                            <option value="zweiten">2. Halbjahr</option>
-                                        </select>
+                                        <div class="zt-radio-group">
+                                            <span class="zt-radio-inline-label">Halbjahr:</span>
+                                            <label class="zt-radio-label">
+                                                <input type="radio" name="zt-halbjahr" id="zt-halbjahr" value="ersten" checked> 1. Halbj.
+                                            </label>
+                                            <label class="zt-radio-label">
+                                                <input type="radio" name="zt-halbjahr" value="zweiten"> 2. Halbj.
+                                            </label>
+                                        </div>
                                     </div>
 
                                     <div class="form-group zt-themen-field">
                                         <label for="zt-themen">Behandelte Themen</label>
-                                        <input type="text" id="zt-themen" class="form-control" placeholder="z.B. Noten, Rhythmus, ...">
+                                        <textarea id="zt-themen" class="form-control zt-themen-textarea"></textarea>
                                     </div>
 
-                                    <div class="form-group">
+                                    <div class="form-group zt-textarea-group">
                                         <label for="zt-beobachtungen">Beobachtungen &amp; Gedanken</label>
                                         <textarea id="zt-beobachtungen" class="form-control zt-textarea"></textarea>
                                     </div>
@@ -734,70 +743,6 @@
                 </div>
             </div>
 
-            <!-- Modal für Formulierungshilfen -->
-            <div id="mitarbeit-wizard-modal" class="modal mitarbeit-modal" style="display: none; max-width: 800px; width: 95%;">
-                <div class="wizard-header">
-                    <h2>Formulierungshilfen: <span id="wizard-student-name">Schüler</span></h2>
-                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
-                </div>
-                
-                <!-- Sub-Modal: Formulierungshilfe hinzufügen -->
-                <div id="add-phrase-submodal" style="display: none; position: absolute; inset: 0; background: rgba(15,23,42,0.5); border-radius: inherit; z-index: 20; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target===this) closeAddPhraseSubmodal()">
-                    <div style="background: white; border-radius: 12px; padding: 20px; width: 100%; max-width: 700px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); box-sizing: border-box; position: relative;">
-                        <button class="wizard-close-btn" onclick="closeAddPhraseSubmodal()" style="position: absolute; top: 8px; right: 12px;">&times;</button>
-                        <h3 id="add-phrase-submodal-title" style="margin-bottom: 12px; font-size: 1rem; font-weight: 700;">Formulierungshilfe hinzufügen</h3>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <input type="text" id="wizard-new-phrase-input" class="form-control" placeholder="Satz eingeben (z.B. Arbeitet stets konzentriert.)">
-                            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                                <select id="wizard-new-phrase-category" class="form-control" style="flex: 1; min-width: 140px;">
-                                    <option value="mitarbeit">Mündliche Mitarbeit</option>
-                                    <option value="arbeitsverhalten">Arbeitsverhalten</option>
-                                    <option value="sozialverhalten">Sozialverhalten</option>
-                                    <option value="stoerungen">Störungen</option>
-                                    <option value="sonstiges">Sonstiges</option>
-                                </select>
-                                <select id="wizard-new-phrase-color" class="form-control" style="width: auto; min-width: 90px;">
-                                    <option value="blue">1 / 2</option>
-                                    <option value="green">2 / 3</option>
-                                    <option value="orange">3 / 4</option>
-                                    <option value="red">4 / 5</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; width: 100%; box-sizing: border-box;">
-                                <button class="btn btn-light" id="wizard-cancel-edit-btn" onclick="cancelEditPhrase()" style="min-height: 40px; display: none;">Abbrechen</button>
-                                <input type="hidden" id="wizard-edit-phrase-id" value="">
-                                <button class="btn btn-primary" id="wizard-add-phrase-btn" onclick="saveCustomPhrase()" style="min-height: 40px;">Speichern</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="wizard-body">
-                    <!-- Filter-Kreise + Button-Zeile -->
-                    <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; box-sizing: border-box;">
-                        <div class="wizard-header-filters" style="margin: 0;">
-                            <button class="filter-circle-btn" data-color="blue" onclick="toggleColorFilter('blue')" title="Blau filtern (1/2)">1/2</button>
-                            <button class="filter-circle-btn" data-color="green" onclick="toggleColorFilter('green')" title="Grün filtern (2/3)">2/3</button>
-                            <button class="filter-circle-btn" data-color="orange" onclick="toggleColorFilter('orange')" title="Gelb filtern (3/4)">3/4</button>
-                            <button class="filter-circle-btn" data-color="red" onclick="toggleColorFilter('red')" title="Rot filtern (4/5)">4/5</button>
-                        </div>
-                        <button class="btn btn-primary btn-circle-sm" onclick="openAddPhraseSubmodal()" title="Formulierung hinzufügen">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-
-                    <!-- Sätze-Liste -->
-                    <div class="wizard-sentences-list" id="wizard-sentences-list" style="max-height: 380px;">
-                        <!-- Hier werden die eigenen Sätze dynamisch eingefügt -->
-                    </div>
-                </div>
-                
-                <div class="wizard-footer">
-                    <div class="wizard-buttons-row" style="justify-content: flex-end;">
-                        <button class="btn btn-success" onclick="insertSelectedMitarbeitPhrases()">Auswählen & Einfügen</button>
-                    </div>
-                </div>
-            </div>
             <!-- Kontakt Telefonnummern Modal -->
             <div id="contact-phones-modal" class="modal" style="display: none;">
                 <div class="wizard-header">

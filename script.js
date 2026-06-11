@@ -1236,23 +1236,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { passive: false });
     }
 
-    // Auto-Kategorisierung während des Tippens im Formulierungshilfen-Modal
-    const newPhraseInput = document.getElementById('wizard-new-phrase-input');
-    const newPhraseCategory = document.getElementById('wizard-new-phrase-category');
-    if (newPhraseInput && newPhraseCategory) {
-        newPhraseInput.addEventListener('input', function() {
-            if (!window.isCategoryManuallySelected) {
-                const detected = autoDetectCategory(newPhraseInput.value);
-                newPhraseCategory.value = detected;
-            }
-        });
-        
-        newPhraseCategory.addEventListener('change', function() {
-            window.isCategoryManuallySelected = true;
-        });
-    }
-    
 });
+
 
 // ===== SCHÜLERLISTE MODUL =====
 
@@ -3189,12 +3174,6 @@ function importBackupFile(event) {
                     // In localStorage speichern
                     localStorage.setItem('classes', JSON.stringify(classes));
                     
-                    // Formulierungshilfen wiederherstellen, falls im Backup vorhanden
-                    if (importData.formulierungshilfen && Array.isArray(importData.formulierungshilfen)) {
-                        customPhrases = importData.formulierungshilfen;
-                        localStorage.setItem('formulierungshilfen', JSON.stringify(customPhrases));
-                    }
-                    
                     // UI aktualisieren und Cloud-Sync triggern
                     renderClassesGrid();
                     
@@ -4802,16 +4781,16 @@ function toggleZeugnisView() {
 // Hilfsfunktion zur Generierung des HTML für die Zeugnisnoten-Auswahl mit integriertem Notenvorschlag
 function getGradesSelectorHtml(student, index) {
     const selectedGrade = student.zeugnisnote || '';
-    const suggestedGradeWithTendency = getSuggestedGradeWithTendency(student);
-    
+    const suggestedGradeWithTendency = getSuggestedGradeWithTendency(student, index);
+
     const allSelectableGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5"];
     const hasActiveSelection = allSelectableGrades.includes(selectedGrade);
-    
+
     return allSelectableGrades.map(g => {
         const isSelected = selectedGrade === g;
         const isSuggested = suggestedGradeWithTendency === g;
         const colorClass = Utils.getGradeColorClass(g);
-        
+
         const colorMap = {
             'grade-excellent': '#007bff',
             'grade-good': '#28a745',
@@ -4821,7 +4800,7 @@ function getGradesSelectorHtml(student, index) {
             'grade-very-bad': '#6c757d'
         };
         const bgColor = colorMap[colorClass] || '#6c757d';
-        
+
         let btnStyle = `
             display: inline-flex;
             align-items: center;
@@ -4836,12 +4815,12 @@ function getGradesSelectorHtml(student, index) {
             border: 2px solid transparent;
             margin: 0;
         `;
-        
+
         let titleAttr = '';
         if (isSuggested) {
             titleAttr = ' title="Vorgeschlagene Note (Notenvorschlag)"';
         }
-        
+
         if (hasActiveSelection) {
             if (isSelected) {
                 const textColor = 'white';
@@ -4874,7 +4853,7 @@ function getGradesSelectorHtml(student, index) {
                 btnStyle += `background-color: ${bgColor} !important; color: ${textColor} !important;`;
             }
         }
-        
+
         return `<button style="${btnStyle}"${titleAttr} onclick="selectZeugnisGrade(${index}, '${g}')">${g}</button>`;
     }).join('');
 }
@@ -4972,7 +4951,6 @@ function renderZeugnisModule() {
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button class="btn-circle-outline-black" onclick="openMitarbeitAssistant(${index})" title="Formulierungshilfen"><i class="fas fa-lightbulb"></i></button>
                     <button class="btn-back-to-top-circle" onclick="scrollToTopAndFocusSearch('zeugnis')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
                 </div>
             </div>
@@ -4993,9 +4971,41 @@ function renderZeugnisModule() {
                     </div>
                 </div>
                 <div class="zeugnis-section">
-                    <h4>Notizen für ${student.name}</h4>
                     <div class="zeugnis-notes-container">
-                        <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
+                        <div class="zeugnis-notes-wrapper">
+                            <h4>Notizen für ${student.name}</h4>
+                            <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
+                        </div>
+                        <div class="zeugnis-slider-wrapper">
+                            <h4>Sonstige Mitarbeit</h4>
+                        <div class="zeugnis-slider-panel">
+                            <div class="zeugnis-slider-item">
+                                <span class="zeugnis-slider-label">Mündliche Beteiligung</span>
+                                <div class="zeugnis-slider-row">
+                                    <input type="range" min="1" max="5" step="1" value="3" class="zeugnis-slider" id="slider-muendlich-${index}" oninput="updateSonstigeNote(${index})">
+                                    <span class="zeugnis-slider-value" id="slider-muendlich-val-${index}">3</span>
+                                </div>
+                            </div>
+                            <div class="zeugnis-slider-item">
+                                <span class="zeugnis-slider-label">Arbeitsphase</span>
+                                <div class="zeugnis-slider-row">
+                                    <input type="range" min="1" max="5" step="1" value="3" class="zeugnis-slider" id="slider-arbeitsphase-${index}" oninput="updateSonstigeNote(${index})">
+                                    <span class="zeugnis-slider-value" id="slider-arbeitsphase-val-${index}">3</span>
+                                </div>
+                            </div>
+                            <div class="zeugnis-slider-item">
+                                <span class="zeugnis-slider-label">Störungen</span>
+                                <div class="zeugnis-slider-row">
+                                    <input type="range" min="1" max="5" step="1" value="3" class="zeugnis-slider" id="slider-stoerungen-${index}" oninput="updateSonstigeNote(${index})">
+                                    <span class="zeugnis-slider-value" id="slider-stoerungen-val-${index}">3</span>
+                                </div>
+                            </div>
+                            <div class="zeugnis-sonstige-avg" id="sonstige-avg-${index}">
+                                <span class="zeugnis-sonstige-avg-label">Ø Sonstige Mitarbeit:</span>
+                                <span class="zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">3,0</span>
+                            </div>
+                        </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -5166,6 +5176,18 @@ function splitSpanAtCaret(event) {
 window.splitSpanAtCaret = splitSpanAtCaret;
 
 // Notizen speichern
+function updateSonstigeNote(index) {
+    const v1 = parseInt(document.getElementById(`slider-muendlich-${index}`)?.value || 3);
+    const v2 = parseInt(document.getElementById(`slider-arbeitsphase-${index}`)?.value || 3);
+    const v3 = parseInt(document.getElementById(`slider-stoerungen-${index}`)?.value || 3);
+    document.getElementById(`slider-muendlich-val-${index}`).textContent = v1;
+    document.getElementById(`slider-arbeitsphase-val-${index}`).textContent = v2;
+    document.getElementById(`slider-stoerungen-val-${index}`).textContent = v3;
+    const avg = ((v1 + v2 + v3) / 3).toFixed(1).replace('.', ',');
+    document.getElementById(`sonstige-avg-val-${index}`).textContent = avg;
+    updateZeugnisNoteVorschlag(index);
+}
+
 function saveStudentNotes(studentIndex, isDebounced = false) {
     const leftTextarea = safeGetElement(`notes-left-${studentIndex}`);
     if (!leftTextarea) return;
@@ -5232,86 +5254,44 @@ function selectZeugnisGrade(studentIndex, grade) {
 }
 window.selectZeugnisGrade = selectZeugnisGrade;
 
-// Hilfsfunktion zum Zählen der Farben aus den Notizen
-function countPhraseColors(student) {
-    const counts = { blue: 0, green: 0, orange: 0, red: 0 };
-    const combinedNotes = (student.leftNotes || '') + ' ' + (student.rightNotes || '');
-    
-    const regex = /phrase-color-(blue|green|orange|red)\b/g;
-    let match;
-    while ((match = regex.exec(combinedNotes)) !== null) {
-        counts[match[1]]++;
-    }
-    return counts;
-}
-
 // Berechnungsvorschlag für die Zeugnisnote
-function calculateSuggestedGrade(student) {
-    let writtenAvg = null;
-    if (student.projects && student.projects.length > 0) {
-        const average = calculateProjectAverage(student.projects);
-        if (average) {
-            writtenAvg = parseFloat(average.exact);
-        }
+function calculateSuggestedGrade(student, studentIndex) {
+    const projects = student.projects || {};
+    const grades = Object.values(projects).map(p => p.grade).filter(g => g !== null && g !== undefined && g > 0);
+    const writtenAvg = grades.length > 0 ? grades.reduce((a, b) => a + b, 0) / grades.length : null;
+
+    let sonstigeAvg = null;
+    if (studentIndex !== undefined) {
+        const v1 = parseInt(document.getElementById(`slider-muendlich-${studentIndex}`)?.value || 3);
+        const v2 = parseInt(document.getElementById(`slider-arbeitsphase-${studentIndex}`)?.value || 3);
+        const v3 = parseInt(document.getElementById(`slider-stoerungen-${studentIndex}`)?.value || 3);
+        sonstigeAvg = (v1 + v2 + v3) / 3;
     }
-    
-    const counts = countPhraseColors(student);
-    const totalPhrases = counts.blue + counts.green + counts.orange + counts.red;
-    let formulationAvg = null;
-    if (totalPhrases > 0) {
-        // Notenbereiche: blue(1/2) -> 1.5, green(2/3) -> 2.5, orange(3/4) -> 3.5, red(4/5) -> 5.0 (höhere Gewichtung für negative Sätze)
-        formulationAvg = (counts.blue * 1.5 + counts.green * 2.5 + counts.orange * 3.5 + counts.red * 5.0) / totalPhrases;
-    }
-    
-    let finalValue = null;
-    if (writtenAvg !== null && formulationAvg !== null) {
-        // Gewichtung: 50% schriftliche Durchschnittsnote, 50% Formulierungen aus den Notizen
-        finalValue = writtenAvg * 0.5 + formulationAvg * 0.5;
+
+    let finalValue;
+    if (writtenAvg !== null && sonstigeAvg !== null) {
+        finalValue = (writtenAvg + sonstigeAvg) / 2;
     } else if (writtenAvg !== null) {
         finalValue = writtenAvg;
-    } else if (formulationAvg !== null) {
-        finalValue = formulationAvg;
+    } else if (sonstigeAvg !== null) {
+        finalValue = sonstigeAvg;
     } else {
         return null;
     }
-    
-    // Ermittle den vorläufigen Vorschlag basierend auf den Schwellenwerten
-    const gradesList = ["sehr gut", "gut", "befriedigend", "ausreichend", "mangelhaft", "ungenügend"];
-    let suggestedIndex = 5; // Standard: ungenügend
-    
-    if (finalValue <= 1.5) suggestedIndex = 0; // "sehr gut"
-    else if (finalValue <= 2.75) suggestedIndex = 1; // "gut"
-    else if (finalValue <= 3.75) suggestedIndex = 2; // "befriedigend"
-    else if (finalValue <= 4.75) suggestedIndex = 3; // "ausreichend"
-    else if (finalValue <= 5.5) suggestedIndex = 4; // "mangelhaft"
-    else suggestedIndex = 5; // "ungenügend"
-    
-    // Begrenzung: Die Note darf maximal um eine Stufe vom schriftlichen Durchschnitt abweichen
-    if (writtenAvg !== null) {
-        // Bestimme die Note der schriftlichen Leistung (gleiche Schwellenwerte)
-        let writtenIndex = 3; // Standard: ausreichend
-        if (writtenAvg <= 1.5) writtenIndex = 0; // sehr gut
-        else if (writtenAvg <= 2.75) writtenIndex = 1; // gut
-        else if (writtenAvg <= 3.75) writtenIndex = 2; // befriedigend
-        else if (writtenAvg <= 4.75) writtenIndex = 3; // ausreichend
-        else if (writtenAvg <= 5.5) writtenIndex = 4; // mangelhaft
-        else writtenIndex = 5; // ungenügend
-        
-        // Erlaube maximale Abweichung von +/- 1 Note
-        const minAllowedIndex = Math.max(0, writtenIndex - 1); // Ein Schritt besser
-        const maxAllowedIndex = Math.min(gradesList.length - 1, writtenIndex + 1); // Ein Schritt schlechter
-        
-        suggestedIndex = Math.min(Math.max(suggestedIndex, minAllowedIndex), maxAllowedIndex);
-    }
-    
-    return gradesList[suggestedIndex];
+
+    if (finalValue <= 1.5) return 'sehr gut';
+    if (finalValue <= 2.5) return 'gut';
+    if (finalValue <= 3.5) return 'befriedigend';
+    if (finalValue <= 4.5) return 'ausreichend';
+    if (finalValue <= 5.5) return 'mangelhaft';
+    return 'ungenügend';
 }
 
 // Funktion zur Bestimmung des Notenvorschlags inklusive Tendenz (+/-) in Kurzform (z.B. "2-", "3")
-function getSuggestedGradeWithTendency(student) {
-    const suggestedGrade = calculateSuggestedGrade(student);
+function getSuggestedGradeWithTendency(student, studentIndex) {
+    const suggestedGrade = calculateSuggestedGrade(student, studentIndex);
     if (!suggestedGrade) return null;
-    
+
     // Konvertiere Textnote in numerische Basisnote (z.B. "gut" -> "2")
     const wholeGradesMap = {
         "sehr gut": "1",
@@ -5321,36 +5301,34 @@ function getSuggestedGradeWithTendency(student) {
         "mangelhaft": "5",
         "ungenügend": "6"
     };
-    
+
     const N_label = wholeGradesMap[suggestedGrade];
     if (!N_label) return suggestedGrade;
-    
-    let writtenAvg = null;
-    if (student.projects && student.projects.length > 0) {
-        const average = calculateProjectAverage(student.projects);
-        if (average) {
-            writtenAvg = parseFloat(average.exact);
-        }
+
+    // Compute finalValue the same way calculateSuggestedGrade does, for tendency detection
+    const projects = student.projects || {};
+    const grades = Object.values(projects).map(p => p.grade).filter(g => g !== null && g !== undefined && g > 0);
+    const writtenAvg = grades.length > 0 ? grades.reduce((a, b) => a + b, 0) / grades.length : null;
+
+    let sonstigeAvg = null;
+    if (studentIndex !== undefined) {
+        const v1 = parseInt(document.getElementById(`slider-muendlich-${studentIndex}`)?.value || 3);
+        const v2 = parseInt(document.getElementById(`slider-arbeitsphase-${studentIndex}`)?.value || 3);
+        const v3 = parseInt(document.getElementById(`slider-stoerungen-${studentIndex}`)?.value || 3);
+        sonstigeAvg = (v1 + v2 + v3) / 3;
     }
-    
-    const counts = countPhraseColors(student);
-    const totalPhrases = counts.blue + counts.green + counts.orange + counts.red;
-    let formulationAvg = null;
-    if (totalPhrases > 0) {
-        formulationAvg = (counts.blue * 1.5 + counts.green * 2.5 + counts.orange * 3.5 + counts.red * 5.0) / totalPhrases;
-    }
-    
+
     let finalValue = null;
-    if (writtenAvg !== null && formulationAvg !== null) {
-        finalValue = writtenAvg * 0.5 + formulationAvg * 0.5;
+    if (writtenAvg !== null && sonstigeAvg !== null) {
+        finalValue = (writtenAvg + sonstigeAvg) / 2;
     } else if (writtenAvg !== null) {
         finalValue = writtenAvg;
-    } else if (formulationAvg !== null) {
-        finalValue = formulationAvg;
+    } else if (sonstigeAvg !== null) {
+        finalValue = sonstigeAvg;
     } else {
         return N_label;
     }
-    
+
     const N = parseFloat(N_label);
     if (N) {
         const diff = finalValue - N;
@@ -5366,7 +5344,7 @@ function getSuggestedGradeWithTendency(student) {
             }
         }
     }
-    
+
     return N_label;
 }
 
@@ -6380,447 +6358,6 @@ function escapeHtml(str) {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ===== FORMULIERUNGSHILFEN (EHEMALS MITARBEIT-ASSISTENT) =====
-
-let customPhrases = JSON.parse(localStorage.getItem('formulierungshilfen') || '[]');
-
-const PhraseCategories = {
-    mitarbeit: { name: 'Mündliche Mitarbeit', keywords: ['meldet', 'beteiligung', 'mündlich', 'beiträge', 'beitrag', 'äußert', 'gespräch', 'unterricht', 'wortmeldung', 'antworten', 'beteiligt'] },
-    arbeitsverhalten: { name: 'Arbeitsverhalten', keywords: ['arbeitet', 'konzentriert', 'hausaufgaben', 'sorgfalt', 'ordentlich', 'heft', 'aufgaben', 'tempo', 'ausdauer', 'ausdauernd', 'arbeitsplatz', 'material', 'selbstständig', 'selbständig', 'allein', 'hilfe', 'eigeninitiative', 'struktur', 'organisiert', 'planung', 'eigenständig', 'motiviert', 'interesse', 'interessiert', 'eifer', 'fleißig', 'bereitwillig', 'anstrengung', 'engagiert', 'freude', 'aktiv', 'aufmerksam', 'aufmerksamkeit', 'bei der sache', 'fokussiert'] },
-    sozialverhalten: { name: 'Sozialverhalten', keywords: ['gruppe', 'partner', 'mitschüler', 'sozial', 'hilfsbereit', 'rücksichtsvoll', 'regeln', 'verhalten', 'umgang', 'freundlich', 'team', 'fair'] },
-    stoerungen: { name: 'Störungen', keywords: ['stört', 'störungen', 'ablenken', 'ablenkung', 'ablenkungen', 'störung', 'stören', 'reinrufen', 'unterbrechen', 'unruhe', 'dazwischen', 'geschwätz', 'schwatzen', 'toilettengänge', 'ablenken', 'stör'] },
-    sonstiges: { name: 'Sonstiges', keywords: [] }
-};
-
-function autoDetectCategory(text) {
-    const textLower = (text || '').toLowerCase();
-    const priorityOrder = ['stoerungen', 'mitarbeit', 'arbeitsverhalten', 'sozialverhalten'];
-    for (const key of priorityOrder) {
-        const cat = PhraseCategories[key];
-        if (cat.keywords.some(kw => textLower.includes(kw))) {
-            return key;
-        }
-    }
-    return 'sonstiges';
-}
-
-window.setFormulierungshilfen = function(newPhrases) {
-    if (Array.isArray(newPhrases)) {
-        customPhrases = newPhrases;
-        localStorage.setItem('formulierungshilfen', JSON.stringify(newPhrases));
-        // Falls das Modal offen ist, neu rendern
-        const modal = document.getElementById('mitarbeit-wizard-modal');
-        if (modal && modal.style.display !== 'none') {
-            renderMitarbeitWizard();
-        }
-    }
-};
-
-const AppMitarbeitWizardState = {
-    studentIndex: null,
-    selectedPhrases: [] // Array von IDs ausgewählter Sätze
-};
-
-function openMitarbeitAssistant(studentIndex) {
-    if (activeModule !== 'zeugnis') return;
-    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
-    
-    AppMitarbeitWizardState.studentIndex = studentIndex;
-    AppMitarbeitWizardState.selectedPhrases = [];
-    
-    const student = classes[activeClassId].students[studentIndex];
-    document.getElementById('wizard-student-name').textContent = student.name;
-    
-    // Eingabefelder zurücksetzen
-    document.getElementById('wizard-new-phrase-input').value = '';
-    document.getElementById('wizard-new-phrase-color').value = 'blue';
-    if (document.getElementById('wizard-new-phrase-category')) {
-        document.getElementById('wizard-new-phrase-category').value = 'mitarbeit';
-    }
-    document.getElementById('wizard-edit-phrase-id').value = '';
-    document.getElementById('wizard-cancel-edit-btn').style.display = 'none';
-    window.isCategoryManuallySelected = false;
-    
-    // Farbefilter zurücksetzen (keine aktiv)
-    window.activeWizardColorFilters = [];
-    document.querySelectorAll('.filter-circle-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    renderMitarbeitWizard();
-    showModal('mitarbeit-wizard-modal');
-}
-
-function renderMitarbeitWizard() {
-    const listContainer = document.getElementById('wizard-sentences-list');
-    if (!listContainer) return;
-    
-    if (customPhrases.length === 0) {
-        listContainer.innerHTML = `
-            <div class="empty-state" style="padding: 20px;">
-                <i class="fas fa-comment-slash"></i>
-                <p>Keine Formulierungshilfen vorhanden.</p>
-                <p>Füge oben eigene Sätze hinzu, um zu beginnen.</p>
-            </div>
-        `;
-    } else {
-        // Sätze farblich sortieren (blau, grün, orange, rot) und alphabetisch
-        const colorOrder = { blue: 1, green: 2, orange: 3, red: 4 };
-        const sortedPhrases = [...customPhrases].sort((a, b) => {
-            const orderA = colorOrder[a.color] || 99;
-            const orderB = colorOrder[b.color] || 99;
-            if (orderA !== orderB) return orderA - orderB;
-            return a.text.localeCompare(b.text, 'de');
-        });
-        
-        // Filter anwenden (falls keine Filter aktiv, zeige alle)
-        const filteredPhrases = window.activeWizardColorFilters.length === 0
-            ? sortedPhrases
-            : sortedPhrases.filter(phrase => window.activeWizardColorFilters.includes(phrase.color));
-        
-        if (filteredPhrases.length === 0) {
-            listContainer.innerHTML = `
-                <div class="empty-state" style="padding: 20px;">
-                    <i class="fas fa-filter"></i>
-                    <p>Keine Formulierungshilfen für die ausgewählten Filter vorhanden.</p>
-                </div>
-            `;
-        } else {
-            // Nach Kategorien gruppieren
-            const categoriesOrder = ['mitarbeit', 'arbeitsverhalten', 'sozialverhalten', 'stoerungen', 'sonstiges'];
-            const grouped = {};
-            categoriesOrder.forEach(catKey => {
-                grouped[catKey] = [];
-            });
-            
-            filteredPhrases.forEach(phrase => {
-                const cat = phrase.category || autoDetectCategory(phrase.text);
-                if (grouped[cat]) {
-                    grouped[cat].push(phrase);
-                } else {
-                    grouped['sonstiges'].push(phrase);
-                }
-            });
-            
-            let html = '';
-            categoriesOrder.forEach(catKey => {
-                const phrasesInCat = grouped[catKey];
-                if (phrasesInCat.length > 0) {
-                    const catName = PhraseCategories[catKey].name;
-                    html += `
-                        <div class="wizard-category-group">
-                            <div class="wizard-category-header">${catName}</div>
-                            <div class="wizard-category-body">
-                                ${phrasesInCat.map(phrase => {
-                                    const isSelected = AppMitarbeitWizardState.selectedPhrases.includes(phrase.id);
-                                    return `
-                                        <div class="wizard-sentence-item level-${phrase.color} ${isSelected ? 'selected' : ''}" onclick="toggleMitarbeitPhraseById('${phrase.id}')">
-                                            <input type="checkbox" id="phrase-checkbox-${phrase.id}" ${isSelected ? 'checked' : ''}>
-                                            <label class="wizard-sentence-label" for="phrase-checkbox-${phrase.id}">${phrase.text}</label>
-                                            <div class="wizard-item-actions">
-                                                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); editCustomPhrase('${phrase.id}')" title="Bearbeiten">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteCustomPhrase('${phrase.id}')" title="Löschen">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-            listContainer.innerHTML = html;
-        }
-    }
-    
-    // Vorschau aktualisieren
-    const previewContainer = document.getElementById('wizard-preview-container');
-    const previewList = document.getElementById('wizard-preview-list');
-    const selectedCountSpan = document.getElementById('wizard-selected-count');
-    
-    if (selectedCountSpan) {
-        selectedCountSpan.textContent = AppMitarbeitWizardState.selectedPhrases.length;
-    }
-    
-    if (AppMitarbeitWizardState.selectedPhrases.length > 0) {
-        if (previewContainer) previewContainer.style.display = 'block';
-        if (previewList) {
-            previewList.innerHTML = AppMitarbeitWizardState.selectedPhrases.map(id => {
-                const phrase = customPhrases.find(p => p.id === id);
-                return phrase ? `<li>${phrase.text}</li>` : '';
-            }).join('');
-        }
-    } else {
-        if (previewContainer) previewContainer.style.display = 'none';
-        if (previewList) previewList.innerHTML = '';
-    }
-}
-
-function saveCustomPhrase() {
-    const inputEl = document.getElementById('wizard-new-phrase-input');
-    const colorEl = document.getElementById('wizard-new-phrase-color');
-    const categoryEl = document.getElementById('wizard-new-phrase-category');
-    const editIdEl = document.getElementById('wizard-edit-phrase-id');
-    
-    if (!inputEl || !colorEl) return;
-    
-    const textVal = inputEl.value.trim();
-    const colorVal = colorEl.value;
-    const categoryVal = categoryEl ? categoryEl.value : autoDetectCategory(textVal);
-    const editId = editIdEl.value;
-    
-    if (textVal === '') {
-        if (typeof swal !== 'undefined') {
-            swal('Fehler', 'Bitte gib einen Satz ein.', 'error');
-        } else {
-            alert('Bitte gib einen Satz ein.');
-        }
-        return;
-    }
-    
-    if (editId === '') {
-        // Neuen Satz hinzufügen
-        const newPhrase = {
-            id: 'phrase_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            text: textVal,
-            color: colorVal,
-            category: categoryVal
-        };
-        customPhrases.push(newPhrase);
-    } else {
-        // Bestehenden Satz bearbeiten
-        const phrase = customPhrases.find(p => p.id === editId);
-        if (phrase) {
-            phrase.text = textVal;
-            phrase.color = colorVal;
-            phrase.category = categoryVal;
-        }
-        
-        // Editor-Modus zurücksetzen
-        editIdEl.value = '';
-        const cancelBtn = document.getElementById('wizard-cancel-edit-btn');
-        if (cancelBtn) cancelBtn.style.display = 'none';
-    }
-    
-    // In localStorage speichern
-    localStorage.setItem('formulierungshilfen', JSON.stringify(customPhrases));
-    localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
-    
-    // Formular zurücksetzen
-    inputEl.value = '';
-    colorEl.value = 'blue';
-    if (categoryEl) categoryEl.value = 'mitarbeit';
-    window.isCategoryManuallySelected = false;
-    
-    // Cloud-Sync synchronisieren
-    saveData();
-
-    // Sub-Modal schließen
-    const sub = document.getElementById('add-phrase-submodal');
-    if (sub) sub.style.display = 'none';
-
-    // Ansicht neu rendern
-    renderMitarbeitWizard();
-}
-
-function editCustomPhrase(phraseId) {
-    const phrase = customPhrases.find(p => p.id === phraseId);
-    if (!phrase) return;
-    
-    const inputEl = document.getElementById('wizard-new-phrase-input');
-    const colorEl = document.getElementById('wizard-new-phrase-color');
-    const categoryEl = document.getElementById('wizard-new-phrase-category');
-    const editIdEl = document.getElementById('wizard-edit-phrase-id');
-    const cancelBtn = document.getElementById('wizard-cancel-edit-btn');
-    
-    if (inputEl) {
-        inputEl.value = phrase.text;
-        inputEl.focus();
-    }
-    if (colorEl) colorEl.value = phrase.color;
-    if (categoryEl) {
-        categoryEl.value = phrase.category || autoDetectCategory(phrase.text);
-    }
-    if (editIdEl) editIdEl.value = phrase.id;
-    if (cancelBtn) cancelBtn.style.display = 'inline-block';
-
-    window.isCategoryManuallySelected = true;
-
-    // Sub-Modal öffnen
-    const titleEl = document.getElementById('add-phrase-submodal-title');
-    if (titleEl) titleEl.textContent = 'Formulierungshilfe bearbeiten';
-    openAddPhraseSubmodal();
-}
-
-function cancelEditPhrase() {
-    const inputEl = document.getElementById('wizard-new-phrase-input');
-    const colorEl = document.getElementById('wizard-new-phrase-color');
-    const categoryEl = document.getElementById('wizard-new-phrase-category');
-    const editIdEl = document.getElementById('wizard-edit-phrase-id');
-    const cancelBtn = document.getElementById('wizard-cancel-edit-btn');
-    
-    if (inputEl) inputEl.value = '';
-    if (colorEl) colorEl.value = 'blue';
-    if (categoryEl) categoryEl.value = 'mitarbeit';
-    if (editIdEl) editIdEl.value = '';
-    if (cancelBtn) cancelBtn.style.display = 'none';
-    window.isCategoryManuallySelected = false;
-    const titleEl = document.getElementById('add-phrase-submodal-title');
-    if (titleEl) titleEl.textContent = 'Formulierungshilfe hinzufügen';
-}
-
-function deleteCustomPhrase(phraseId) {
-    const performDelete = (id) => {
-        customPhrases = customPhrases.filter(p => p.id !== id);
-        AppMitarbeitWizardState.selectedPhrases = AppMitarbeitWizardState.selectedPhrases.filter(sid => sid !== id);
-        
-        // In localStorage speichern
-        localStorage.setItem('formulierungshilfen', JSON.stringify(customPhrases));
-        localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
-        
-        // Falls wir gerade diesen bearbeiteten, Editor zurücksetzen
-        const editIdEl = document.getElementById('wizard-edit-phrase-id');
-        if (editIdEl && editIdEl.value === id) {
-            cancelEditPhrase();
-        }
-        
-        // Cloud-Sync synchronisieren
-        saveData();
-        
-        // Ansicht neu rendern
-        renderMitarbeitWizard();
-    };
-
-    if (typeof swal !== 'undefined') {
-        swal({
-            title: "Satz löschen?",
-            text: "Möchtest du diese Formulierungshilfe wirklich löschen?",
-            icon: "warning",
-            buttons: [false, "Löschen"],
-            dangerMode: true,
-        }).then((willDelete) => {
-            if (willDelete) {
-                performDelete(phraseId);
-            }
-        });
-    } else {
-        if (confirm("Möchtest du diesen Satz wirklich löschen?")) {
-            performDelete(phraseId);
-        }
-    }
-}
-
-function toggleMitarbeitPhraseById(phraseId) {
-    const idx = AppMitarbeitWizardState.selectedPhrases.indexOf(phraseId);
-    if (idx > -1) {
-        AppMitarbeitWizardState.selectedPhrases.splice(idx, 1);
-    } else {
-        AppMitarbeitWizardState.selectedPhrases.push(phraseId);
-    }
-    renderMitarbeitWizard();
-}
-
-function insertSelectedMitarbeitPhrases() {
-    const studentIndex = AppMitarbeitWizardState.studentIndex;
-    const textareaId = `notes-left-${studentIndex}`;
-    const textarea = document.getElementById(textareaId);
-    if (!textarea) return;
-    
-    let currentHtml = textarea.innerHTML || '';
-    if (currentHtml === '<br>' || currentHtml === '<div><br></div>') {
-        currentHtml = '';
-    }
-    
-    // Gemappte Texte und Farben der ausgewählten Sätze holen
-    const selectedPhrasesData = AppMitarbeitWizardState.selectedPhrases
-        .map(id => {
-            const phrase = customPhrases.find(p => p.id === id);
-            return phrase ? { text: phrase.text, color: phrase.color } : null;
-        })
-        .filter(Boolean);
-    
-    if (selectedPhrasesData.length > 0) {
-        // Als Aufzählungspunkte mit Spiegelstrich, aber ohne leere Absätze anhängen
-        selectedPhrasesData.forEach(phrase => {
-            currentHtml = currentHtml.trim();
-            // Eventuelle Zeilenumbrüche am Ende entfernen
-            currentHtml = currentHtml.replace(/(?:<br\s*\/?>\s*)+$/gi, '').trim();
-            
-            const coloredHtml = `<span class="phrase-color-${phrase.color}">${phrase.text}</span>`;
-            if (currentHtml === '' || currentHtml === '- ') {
-                currentHtml = `- ${coloredHtml}`;
-            } else {
-                currentHtml += `<br>- ${coloredHtml}`;
-            }
-        });
-        
-        textarea.innerHTML = currentHtml;
-        
-        // Speichern und Cloud-Sync anstoßen
-        saveStudentNotes(studentIndex);
-    }
-    
-    hideModal();
-}
-
-// Wizard-Funktionen global binden
-window.openMitarbeitAssistant = openMitarbeitAssistant;
-window.saveCustomPhrase = saveCustomPhrase;
-window.editCustomPhrase = editCustomPhrase;
-window.cancelEditPhrase = cancelEditPhrase;
-window.deleteCustomPhrase = deleteCustomPhrase;
-window.toggleMitarbeitPhraseById = toggleMitarbeitPhraseById;
-window.insertSelectedMitarbeitPhrases = insertSelectedMitarbeitPhrases;
-
-// Wizard-Filter global binden
-window.activeWizardColorFilters = [];
-window.toggleColorFilter = function(color) {
-    if (!window.activeWizardColorFilters) {
-        window.activeWizardColorFilters = [];
-    }
-    const idx = window.activeWizardColorFilters.indexOf(color);
-    if (idx > -1) {
-        window.activeWizardColorFilters.splice(idx, 1);
-    } else {
-        window.activeWizardColorFilters.push(color);
-    }
-    
-    const btn = document.querySelector(`.filter-circle-btn[data-color="${color}"]`);
-    if (btn) {
-        btn.classList.toggle('active');
-    }
-    
-    renderMitarbeitWizard();
-};
-window.resetColorFilter = function() {
-    const allColors = ['blue', 'green', 'orange', 'red'];
-    if (!window.activeWizardColorFilters) {
-        window.activeWizardColorFilters = [];
-    }
-    
-    if (window.activeWizardColorFilters.length === allColors.length) {
-        window.activeWizardColorFilters = [];
-    } else {
-        window.activeWizardColorFilters = [...allColors];
-    }
-    
-    allColors.forEach(color => {
-        const btn = document.querySelector(`.filter-circle-btn[data-color="${color}"]`);
-        if (btn) {
-            if (window.activeWizardColorFilters.includes(color)) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        }
-    });
-    
-    renderMitarbeitWizard();
-};
 
 
 // ===== SPALTENKALENDER-ANSICHT (PLANUNG) =====
@@ -7627,21 +7164,6 @@ function openContactPhonesModal(id) {
     showModal('contact-phones-modal');
 }
 
-function openAddPhraseSubmodal() {
-    const sub = document.getElementById('add-phrase-submodal');
-    if (sub) {
-        sub.style.display = 'flex';
-        const input = document.getElementById('wizard-new-phrase-input');
-        if (input) setTimeout(() => input.focus(), 50);
-    }
-}
-
-function closeAddPhraseSubmodal() {
-    const sub = document.getElementById('add-phrase-submodal');
-    if (sub) sub.style.display = 'none';
-    cancelEditPhrase();
-}
-
 function copyPhoneNumber(number, btn) {
     navigator.clipboard.writeText(number).then(() => {
         const original = btn.textContent.trim();
@@ -7842,7 +7364,8 @@ const ZtState = {
     currentText: '',
     currentLabel: '',
     history: [],
-    initialized: false
+    initialized: false,
+    sidebarHeight: 0
 };
 
 function renderZeugnisTTexteModule() {
@@ -7857,20 +7380,25 @@ function renderZeugnisTTexteModule() {
     });
 }
 
-function setZtTyp(typ, el) {
+function setZtTyp(typ) {
     ZtState.currentTyp = typ;
-    document.querySelectorAll('.zt-tab').forEach(t => t.classList.remove('active'));
-    if (el) {
-        el.classList.add('active');
-    } else {
-        const tabs = document.querySelectorAll('.zt-tab');
-        const idx = { nebenfach: 0, hauptfach: 1, sozialverhalten: 2 }[typ] ?? 0;
-        if (tabs[idx]) tabs[idx].classList.add('active');
-    }
+    ['nebenfach', 'hauptfach', 'sozialverhalten'].forEach(t => {
+        const btn = document.getElementById(`zt-btn-${t}`);
+        if (!btn) return;
+        btn.classList.remove('btn-warning', 'btn-primary');
+        btn.classList.add(t === typ ? 'btn-warning' : 'btn-primary');
+    });
     const isSozial = typ === 'sozialverhalten';
+    const sidebar = document.querySelector('#zeugnis-texte-module .zt-sidebar');
+    if (isSozial && sidebar && !ZtState.sidebarHeight) {
+        ZtState.sidebarHeight = sidebar.offsetHeight;
+    }
     document.querySelectorAll('.zt-fach-field, .zt-halbjahr-field, .zt-themen-field').forEach(field => {
         field.style.display = isSozial ? 'none' : '';
     });
+    if (sidebar) {
+        sidebar.style.minHeight = (isSozial && ZtState.sidebarHeight) ? ZtState.sidebarHeight + 'px' : '';
+    }
 }
 
 async function ztCallAPI(messages) {
@@ -7883,7 +7411,7 @@ async function ztCallAPI(messages) {
 async function ztGenerate() {
     const name = (document.getElementById('zt-name')?.value || '').trim();
     const fach = (document.getElementById('zt-fach')?.value || '').trim();
-    const halbjahr = document.getElementById('zt-halbjahr')?.value || 'ersten';
+    const halbjahr = document.querySelector('input[name="zt-halbjahr"]:checked')?.value || 'ersten';
     const themen = (document.getElementById('zt-themen')?.value || '').trim();
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
 
@@ -7913,7 +7441,7 @@ async function ztGenerate() {
 async function ztRegenerate() {
     const name = (document.getElementById('zt-name')?.value || '').trim();
     const fach = (document.getElementById('zt-fach')?.value || '').trim();
-    const halbjahr = document.getElementById('zt-halbjahr')?.value || 'ersten';
+    const halbjahr = document.querySelector('input[name="zt-halbjahr"]:checked')?.value || 'ersten';
     const themen = (document.getElementById('zt-themen')?.value || '').trim();
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
     const userMsg = `Schüler/in: ${name}\n${fach ? 'Fach: ' + fach + '\n' : ''}${fach ? 'Halbjahr: ' + halbjahr + '\n' : ''}${themen ? 'Themen: ' + themen + '\n' : ''}Beobachtungen: ${beob}`;
