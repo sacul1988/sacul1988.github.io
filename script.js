@@ -5362,30 +5362,23 @@ function numericToGradeWithTendency(value) {
 
 // Berechnungsvorschlag für die Zeugnisnote
 function calculateSuggestedGrade(student, studentIndex) {
-    const projects = student.projects || {};
-    const grades = Object.values(projects).map(p => p.grade).filter(g => g !== null && g !== undefined && g > 0);
-    const writtenAvg = grades.length > 0 ? grades.reduce((a, b) => a + b, 0) / grades.length : null;
+    const average = calculateProjectAverage(student.projects);
+    const writtenAvg = average ? parseFloat(average.exact) : null;
 
-    let sonstigeAvg = null;
-    if (studentIndex !== undefined) {
-        const v1 = parseInt(document.getElementById(`slider-muendlich-${studentIndex}`)?.value || 3);
-        const v2 = parseInt(document.getElementById(`slider-arbeitsphase-${studentIndex}`)?.value || 3);
-        const v3 = parseInt(document.getElementById(`slider-stoerungen-${studentIndex}`)?.value || 3);
-        sonstigeAvg = (v1 + v2 + v3) / 3;
-    }
+    const sl = student.sonstigeSlider || {};
+    const sv1 = sl.muendlich ?? 3;
+    const sv2 = sl.arbeitsphase ?? 3;
+    const sv3 = sl.stoerungen ?? 3;
+    const sonstigeAvg = (sv1 + sv2 + sv3) / 3;
 
     let finalValue;
-    if (writtenAvg !== null && sonstigeAvg !== null) {
+    if (writtenAvg !== null) {
         const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
         const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
         const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
         finalValue = writtenAvg * wSchrift + sonstigeAvg * wSonstig;
-    } else if (writtenAvg !== null) {
-        finalValue = writtenAvg;
-    } else if (sonstigeAvg !== null) {
-        finalValue = sonstigeAvg;
     } else {
-        return null;
+        finalValue = sonstigeAvg;
     }
 
     if (finalValue <= 1.5) return 'sehr gut';
@@ -5415,27 +5408,22 @@ function getSuggestedGradeWithTendency(student, studentIndex) {
     if (!N_label) return suggestedGrade;
 
     // Compute finalValue the same way calculateSuggestedGrade does, for tendency detection
-    const projects = student.projects || {};
-    const grades = Object.values(projects).map(p => p.grade).filter(g => g !== null && g !== undefined && g > 0);
-    const writtenAvg = grades.length > 0 ? grades.reduce((a, b) => a + b, 0) / grades.length : null;
+    const average2 = calculateProjectAverage(student.projects);
+    const writtenAvg = average2 ? parseFloat(average2.exact) : null;
+    const sl2 = student.sonstigeSlider || {};
+    const sv1 = sl2.muendlich ?? 3;
+    const sv2 = sl2.arbeitsphase ?? 3;
+    const sv3 = sl2.stoerungen ?? 3;
+    const sonstigeAvg = (sv1 + sv2 + sv3) / 3;
 
-    let sonstigeAvg = null;
-    if (studentIndex !== undefined) {
-        const v1 = parseInt(document.getElementById(`slider-muendlich-${studentIndex}`)?.value || 3);
-        const v2 = parseInt(document.getElementById(`slider-arbeitsphase-${studentIndex}`)?.value || 3);
-        const v3 = parseInt(document.getElementById(`slider-stoerungen-${studentIndex}`)?.value || 3);
-        sonstigeAvg = (v1 + v2 + v3) / 3;
-    }
-
-    let finalValue = null;
-    if (writtenAvg !== null && sonstigeAvg !== null) {
-        finalValue = (writtenAvg + sonstigeAvg) / 2;
-    } else if (writtenAvg !== null) {
-        finalValue = writtenAvg;
-    } else if (sonstigeAvg !== null) {
-        finalValue = sonstigeAvg;
+    let finalValue;
+    if (writtenAvg !== null) {
+        const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
+        const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
+        const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
+        finalValue = writtenAvg * wSchrift + sonstigeAvg * wSonstig;
     } else {
-        return N_label;
+        finalValue = sonstigeAvg;
     }
 
     const N = parseFloat(N_label);
@@ -7628,7 +7616,7 @@ function ztSetLoading(loading) {
         if (btn) btn.disabled = true;
         if (resultDiv) {
             resultDiv.innerHTML = `
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px;gap:16px;color:var(--grey-color);">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;color:var(--grey-color);">
                     <div class="zt-spinner"></div>
                     <p>Text wird erstellt…</p>
                 </div>`;

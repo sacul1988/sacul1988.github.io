@@ -709,6 +709,10 @@ select.form-control {
     font-size: 1.55rem;
 }
 
+.module-nav-item .btn .fa-wand-magic-sparkles {
+    font-size: 1.35rem;
+}
+
 .module-nav-item .btn span {
     display: none;
 }
