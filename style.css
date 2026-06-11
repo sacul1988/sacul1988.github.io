@@ -3886,7 +3886,7 @@ body.modal-open {
 }
 
 #zeugnis-texte-module .card-header {
-    min-height: 36px;
+    padding-top: 4px;
 }
 
 @media (max-width: 800px) {
