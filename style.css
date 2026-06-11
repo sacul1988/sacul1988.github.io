@@ -1428,6 +1428,29 @@ select.form-control {
     box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
 }
 
+/* Blaues X zum Schließen in SweetAlert-Dialogen (per JS injiziert) */
+.swal-modal { position: relative; }
+.swal-close-x {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    line-height: 1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s;
+}
+.swal-close-x:hover { background: var(--light-color); }
+
 .swal-icon {
     margin: 10px auto 20px auto;
 }
@@ -2290,14 +2313,14 @@ select.form-control {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: var(--grey-color);
+    color: var(--primary-color);
     font-size: 1rem;
     transition: background 0.15s, color 0.15s;
 }
 
 .termin-modal-close:hover {
     background: #f0f2f5;
-    color: var(--dark-color);
+    color: var(--primary-color);
 }
 
 .termin-add-form {
@@ -2696,7 +2719,7 @@ td.planung-col-inhalt {
     background: none;
     border: none;
     font-size: 1.8rem;
-    color: var(--grey-color);
+    color: var(--primary-color);
     cursor: pointer;
     line-height: 1;
     padding: 0 4px;
@@ -2704,7 +2727,8 @@ td.planung-col-inhalt {
 }
 
 .wizard-close-btn:hover {
-    color: var(--dark-color);
+    color: var(--primary-color);
+    opacity: 0.7;
 }
 
 /* Color Highlighted Sätze in Notes */
@@ -3590,48 +3614,61 @@ body.modal-open {
 
 /* ===== ZEUGNIS TEXTE MODUL ===== */
 
-.zt-layout {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 20px;
-    align-items: stretch;
-}
-
-@media (max-width: 800px) {
-    .zt-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
-.zt-sidebar {
+/* Zeugnistexte – einspaltig gestapelt, einheitliche Karten */
+.zt-stack {
     display: flex;
     flex-direction: column;
+    gap: 16px;
+}
+
+.zt-panel {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.zt-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
+    padding: 12px 18px;
+    background: var(--light-color);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dark-color);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-.zt-textarea-group {
-    flex: 1;
+.zt-panel-head i { color: var(--primary-color); }
+
+.zt-panel-body {
+    padding: 18px;
     display: flex;
     flex-direction: column;
+    gap: 14px;
 }
-
 
 .zt-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 12px;
 }
 
 .zt-radio-group {
     display: flex;
     gap: 16px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .zt-radio-inline-label {
     font-size: 0.9rem;
     color: var(--dark-color);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .zt-radio-label {
@@ -3645,59 +3682,46 @@ body.modal-open {
 }
 
 .zt-themen-textarea {
-    min-height: 140px;
-    resize: none;
+    min-height: 90px;
+    resize: vertical;
     line-height: 1.6;
 }
 
 .zt-textarea {
-    flex: 1;
-    min-height: 280px;
-    resize: none;
+    min-height: 150px;
+    resize: vertical;
     line-height: 1.6;
 }
 
-.zt-section-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--grey-color);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 6px;
+.zt-generate-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 15px;
 }
 
-.zt-result {
-    min-height: 220px;
-    display: flex;
-    flex-direction: column;
-}
+/* Ergebnis */
+.zt-result { display: block; }
 
-.zt-result > .empty-state {
-    flex: 1;
+.zt-result-empty,
+.zt-result-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    max-width: none;
-    width: 100%;
+    gap: 14px;
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--grey-color);
 }
 
-.zt-result-card {
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-}
+.zt-result-empty i { font-size: 2rem; opacity: 0.5; }
+.zt-result-empty p,
+.zt-result-loading p { margin: 0; }
 
-.zt-result-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--light-color);
-    gap: 10px;
+.zt-result-head {
+    text-transform: none;
+    letter-spacing: 0;
     flex-wrap: wrap;
 }
 
@@ -3705,21 +3729,24 @@ body.modal-open {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 20px;
     background: #eef2ff;
     color: var(--primary-color);
+    text-transform: none;
+    letter-spacing: 0;
 }
 
+.zt-copy-btn { padding: 6px 12px; font-size: 12px; }
+
 .zt-result-text {
-    padding: 20px 24px;
+    padding: 22px 24px;
     font-size: 15px;
-    line-height: 1.85;
+    line-height: 1.9;
     color: var(--dark-color);
-    min-height: 180px;
-    white-space: pre-wrap;
+    min-height: 120px;
 }
 
 .zt-result-actions {
@@ -3742,27 +3769,194 @@ body.modal-open {
 
 @keyframes zt-spin { to { transform: rotate(360deg); } }
 
-.zt-history-item {
+/* Archiv */
+.zt-archive-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--grey-color);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.zt-archive-list { display: flex; flex-direction: column; }
+
+.zt-archive-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.zt-archive-item:last-child { border-bottom: none; }
+
+.zt-archive-main { flex: 1; min-width: 0; cursor: pointer; }
+
+.zt-archive-row1 {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--grey-color);
-    transition: background 0.1s;
+    flex-wrap: wrap;
+    margin-bottom: 3px;
 }
 
-.zt-history-item:hover { background: var(--bg-color); }
+.zt-archive-name { font-weight: 600; color: var(--dark-color); font-size: 14px; }
 
-.zt-history-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--primary-color);
-    opacity: 0.4;
+.zt-archive-typ {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--primary-color);
+    background: #eef2ff;
+    padding: 2px 7px;
+    border-radius: 10px;
+}
+
+.zt-archive-date { font-size: 12px; color: var(--grey-color); margin-left: auto; }
+
+.zt-archive-preview {
+    font-size: 13px;
+    color: var(--grey-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.zt-archive-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+.zt-archive-btn {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    border-radius: 8px;
+    color: var(--grey-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+}
+
+.zt-archive-btn:hover { background: var(--light-color); color: var(--primary-color); border-color: var(--primary-color); }
+.zt-archive-del:hover { color: #e74c3c; border-color: #e74c3c; background: #fef2f2; }
+
+/* ===== Zeugnistext-Modals (Ergebnis + Archiv) ===== */
+.zt-modal {
+    max-width: 640px;
+    width: 92%;
+}
+
+.zt-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dark-color);
+}
+
+.zt-modal-head i { color: var(--primary-color); }
+
+.zt-modal-close {
+    border: none;
+    background: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    transition: background 0.12s, color 0.12s;
+}
+.zt-modal-close:hover { background: var(--light-color); color: var(--primary-color); }
+
+/* Ergebnis im Modal */
+.zt-modal .zt-result-text {
+    padding: 16px 18px;
+    background: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--dark-color);
+    min-height: 0;
+    white-space: normal;
+}
+
+.zt-modal .zt-result-actions {
+    padding: 0;
+    border: none;
+    background: none;
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.zt-result-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 40px 16px;
+    color: var(--grey-color);
+}
+.zt-result-loading p { margin: 0; }
+
+/* Eigene Anweisung zum Verbessern */
+.zt-refine {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-color);
+}
+.zt-refine-input { flex: 1; min-width: 0; }
+.zt-refine-btn { flex-shrink: 0; }
+
+/* Archiv-Modal */
+.zt-modal .zt-archive-list {
+    max-height: 60vh;
+    overflow-y: auto;
+    margin: 0 -4px;
+}
+.zt-modal .zt-archive-item { padding: 12px 4px; }
+
+.zt-archive-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 16px;
+    text-align: center;
+    color: var(--grey-color);
+}
+.zt-archive-empty i { font-size: 2rem; opacity: 0.4; }
+.zt-archive-empty p { margin: 0; }
+
+/* Zähler-Badge am Archiv-Button in der Titelleiste */
+.zt-archive-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--primary-color);
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 2px;
 }
 
 

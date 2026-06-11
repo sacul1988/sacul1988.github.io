@@ -370,40 +370,43 @@
                             <div class="card-header">
                                 <h2>Zeugnistexte (Inklusion)</h2>
                                 <div class="card-header-actions">
-                                    <div class="desktop-header-buttons">
-                                        <button class="btn btn-warning btn-icon" id="zt-btn-nebenfach" onclick="setZtTyp('nebenfach', this)">Nebenfach</button>
-                                        <button class="btn btn-primary btn-icon" id="zt-btn-hauptfach" onclick="setZtTyp('hauptfach', this)">Hauptfach</button>
-                                        <button class="btn btn-primary btn-icon" id="zt-btn-sozialverhalten" onclick="setZtTyp('sozialverhalten', this)">Arbeits- / Sozialverhalten</button>
-                                    </div>
-                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Zeugnistexte', '#zeugnis-texte-module .desktop-header-buttons')">
-                                        <i class="fas fa-ellipsis-h"></i>
+                                    <button class="btn btn-primary btn-icon" onclick="ztOpenArchiveModal()">
+                                        <i class="fas fa-box-archive"></i> <span class="btn-text">Archiv</span>
+                                        <span class="zt-archive-badge" id="zt-archive-badge" style="display:none;"></span>
                                     </button>
                                 </div>
                             </div>
-                            <div class="zt-layout">
-                                <!-- Linke Spalte: Formular -->
-                                <div class="zt-sidebar">
+                            <div class="zt-stack">
+                                <!-- Eingaben-Panel -->
+                                <div class="zt-panel">
+                                    <div class="zt-panel-body">
 
                                     <div class="zt-row">
                                         <div class="form-group">
                                             <label for="zt-name">Name</label>
                                             <input type="text" id="zt-name" class="form-control">
                                         </div>
-                                        <div class="form-group zt-fach-field">
-                                            <label for="zt-fach">Fach</label>
-                                            <input type="text" id="zt-fach" class="form-control">
+                                        <div class="form-group">
+                                            <label for="zt-typ">Art</label>
+                                            <select id="zt-typ" class="form-control" onchange="setZtTyp(this.value)">
+                                                <option value="nebenfach">Nebenfach</option>
+                                                <option value="hauptfach">Hauptfach</option>
+                                                <option value="sozialverhalten">Arbeits- / Sozialverhalten</option>
+                                            </select>
                                         </div>
                                     </div>
 
-                                    <div class="form-group zt-halbjahr-field">
-                                        <div class="zt-radio-group">
-                                            <span class="zt-radio-inline-label">Halbjahr:</span>
-                                            <label class="zt-radio-label">
-                                                <input type="radio" name="zt-halbjahr" id="zt-halbjahr" value="ersten" checked> 1. Halbj.
-                                            </label>
-                                            <label class="zt-radio-label">
-                                                <input type="radio" name="zt-halbjahr" value="zweiten"> 2. Halbj.
-                                            </label>
+                                    <div class="zt-row zt-row-2">
+                                        <div class="form-group zt-halbjahr-field">
+                                            <label for="zt-halbjahr">Halbjahr</label>
+                                            <select id="zt-halbjahr" class="form-control">
+                                                <option value="ersten">1. Halbjahr</option>
+                                                <option value="zweiten">2. Halbjahr</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group zt-fach-field">
+                                            <label for="zt-fach">Fach</label>
+                                            <input type="text" id="zt-fach" class="form-control">
                                         </div>
                                     </div>
 
@@ -417,21 +420,10 @@
                                         <textarea id="zt-beobachtungen" class="form-control zt-textarea"></textarea>
                                     </div>
 
-                                    <button class="btn btn-primary btn-icon" id="zt-gen-btn" onclick="ztGenerate()">
+                                    <button class="btn btn-primary btn-icon zt-generate-btn" id="zt-gen-btn" onclick="ztGenerate()">
                                         <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Text generieren</span>
                                     </button>
 
-                                    <div id="zt-history-section" style="display: none; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
-                                        <p class="zt-section-label">Zuletzt erstellt</p>
-                                        <div id="zt-history-list"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Rechte Spalte: Ergebnis -->
-                                <div class="zt-result" id="zt-result">
-                                    <div class="empty-state" style="min-height: 220px;">
-                                        <i class="fas fa-file-alt" style="font-size: 2rem;"></i>
-                                        <p>Typ auswählen, Formular ausfüllen<br>und auf „Text generieren" klicken.</p>
                                     </div>
                                 </div>
                             </div>
@@ -483,6 +475,12 @@
         
         <!-- Modals -->
         <div id="modal-container" style="display: none;" onclick="closeModalOnOutsideClick(event)" role="dialog" aria-modal="true" aria-hidden="true">
+            <!-- Zeugnistext Ergebnis Modal (dynamisch befüllt) -->
+            <div id="zt-result-modal" class="modal zt-modal" style="display: none;"></div>
+
+            <!-- Zeugnistext Archiv Modal (dynamisch befüllt) -->
+            <div id="zt-archive-modal" class="modal zt-modal" style="display: none;"></div>
+
             <!-- Unterrichtstage Modal -->
             <div id="unterrichtstage-modal" class="modal" style="display: none;">
                 <h2>Unterrichtstage</h2>
@@ -1142,6 +1140,14 @@
                 }
             }
 
+            // Zeugnistext-Archiv synchronisieren
+            if (shouldApplyFormulierungen && Array.isArray(cloudData.zeugnistexteArchiv)) {
+                localStorage.setItem('zeugnistexteArchiv', JSON.stringify(cloudData.zeugnistexteArchiv));
+                if (typeof window.setZeugnistexteArchiv === 'function') {
+                    window.setZeugnistexteArchiv(cloudData.zeugnistexteArchiv);
+                }
+            }
+
             // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
             // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
             if (Array.isArray(cloudData.termine)) {
@@ -1212,6 +1218,7 @@
                     planung: planungObj,
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
                     formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]'),
+                    zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
                     contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
                 };

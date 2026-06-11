@@ -13,7 +13,7 @@ Regeln:
 - Sachlicher, professioneller Schreibstil
 - Beginne immer mit einer Einleitung zu den behandelten Themen des Halbjahres
 - Vermeide Wiederholungen von Wörtern in aufeinanderfolgenden Sätzen
-- Fließtext ohne Aufzählungen
+- WICHTIG: Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze, OHNE Leerzeilen und ohne doppelte Zeilenumbrüche. Auch zwischen Einleitung und restlichem Text kein Absatz – alles fließt in einem zusammenhängenden Text. Keine Aufzählungen.
 - Ca. 100-130 Wörter
 - Geschlechtergerechte Sprache (z.B. "Mitschülerinnen und Mitschüler", "Lehrkräfte")
 - Gib NUR den fertigen Zeugnistext aus, ohne Kommentare oder Erklärungen`,
@@ -31,7 +31,7 @@ Regeln:
 - Gehe auf Materialien, Beteiligung und Lernfortschritt ein
 - Ordne die Informationen thematisch sinnvoll an
 - Vermeide Wiederholungen von Wörtern in aufeinanderfolgenden Sätzen
-- Fließtext ohne Aufzählungen
+- WICHTIG: Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze, OHNE Leerzeilen und ohne doppelte Zeilenumbrüche. Auch zwischen Einleitung und restlichem Text kein Absatz – alles fließt in einem zusammenhängenden Text. Keine Aufzählungen.
 - Ca. 150-180 Wörter
 - Geschlechtergerechte Sprache
 - Gib NUR den fertigen Zeugnistext aus, ohne Kommentare oder Erklärungen`,
@@ -50,7 +50,7 @@ Regeln:
 - Beschreibe beim Sozialverhalten: Integration, Konflikte, Regelverhalten, Ausdrucksfähigkeit
 - Ordne die Informationen thematisch sinnvoll an
 - Vermeide Wiederholungen von Wörtern in aufeinanderfolgenden Sätzen
-- Fließtext ohne Aufzählungen
+- WICHTIG: Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze, OHNE Leerzeilen und ohne doppelte Zeilenumbrüche. Auch zwischen Einleitung und restlichem Text kein Absatz – alles fließt in einem zusammenhängenden Text. Keine Aufzählungen.
 - Ca. 200-250 Wörter
 - Geschlechtergerechte Sprache
 - Gib NUR den fertigen Text aus, ohne Kommentare oder Erklärungen`

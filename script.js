@@ -7483,15 +7483,16 @@ const ZtState = {
     currentTyp: 'nebenfach',
     currentText: '',
     currentLabel: '',
-    history: [],
-    initialized: false,
-    sidebarHeight: 0
+    currentId: null,
+    archive: [],
+    initialized: false
 };
 
 function renderZeugnisTTexteModule() {
     if (ZtState.initialized) return;
     ZtState.initialized = true;
     setZtTyp('nebenfach');
+    ztInitArchive();
 
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && activeModule === 'zeugnis-texte') {
@@ -7502,23 +7503,13 @@ function renderZeugnisTTexteModule() {
 
 function setZtTyp(typ) {
     ZtState.currentTyp = typ;
-    ['nebenfach', 'hauptfach', 'sozialverhalten'].forEach(t => {
-        const btn = document.getElementById(`zt-btn-${t}`);
-        if (!btn) return;
-        btn.classList.remove('btn-warning', 'btn-primary');
-        btn.classList.add(t === typ ? 'btn-warning' : 'btn-primary');
-    });
+    const sel = document.getElementById('zt-typ');
+    if (sel && sel.value !== typ) sel.value = typ;
+    // Bei Arbeits-/Sozialverhalten entfallen Halbjahr, Fach und Themen
     const isSozial = typ === 'sozialverhalten';
-    const sidebar = document.querySelector('#zeugnis-texte-module .zt-sidebar');
-    if (isSozial && sidebar && !ZtState.sidebarHeight) {
-        ZtState.sidebarHeight = sidebar.offsetHeight;
-    }
-    document.querySelectorAll('.zt-fach-field, .zt-halbjahr-field, .zt-themen-field').forEach(field => {
-        field.style.display = isSozial ? 'none' : '';
+    document.querySelectorAll('.zt-row-2, .zt-themen-field').forEach(el => {
+        el.style.display = isSozial ? 'none' : '';
     });
-    if (sidebar) {
-        sidebar.style.minHeight = (isSozial && ZtState.sidebarHeight) ? ZtState.sidebarHeight + 'px' : '';
-    }
 }
 
 async function ztCallAPI(messages) {
@@ -7528,10 +7519,25 @@ async function ztCallAPI(messages) {
     return await window.callGenerateZeugnistext(ZtState.currentTyp, messages);
 }
 
+// Macht aus dem KI-Text einen durchgehenden Fließtext: Zeilenumbrüche und
+// Leerzeilen werden zu einem einzelnen Leerzeichen zusammengezogen.
+function ztNormalizeText(text) {
+    if (!text) return '';
+    return String(text).replace(/\s*\n\s*/g, ' ').replace(/[ \t]{2,}/g, ' ').trim();
+}
+
+function ztBuildUserMsg() {
+    const name = (document.getElementById('zt-name')?.value || '').trim();
+    const fach = (document.getElementById('zt-fach')?.value || '').trim();
+    const halbjahr = document.getElementById('zt-halbjahr')?.value || 'ersten';
+    const themen = (document.getElementById('zt-themen')?.value || '').trim();
+    const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
+    return `Schüler/in: ${name}\n${fach ? 'Fach: ' + fach + '\n' : ''}${fach ? 'Halbjahr: ' + halbjahr + '\n' : ''}${themen ? 'Themen: ' + themen + '\n' : ''}Beobachtungen: ${beob}`;
+}
+
 async function ztGenerate() {
     const name = (document.getElementById('zt-name')?.value || '').trim();
     const fach = (document.getElementById('zt-fach')?.value || '').trim();
-    const halbjahr = document.querySelector('input[name="zt-halbjahr"]:checked')?.value || 'ersten';
     const themen = (document.getElementById('zt-themen')?.value || '').trim();
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
 
@@ -7544,114 +7550,133 @@ async function ztGenerate() {
         return;
     }
 
-    ztSetLoading(true);
-    const userMsg = `Schüler/in: ${name}\n${fach ? 'Fach: ' + fach + '\n' : ''}${fach ? 'Halbjahr: ' + halbjahr + '\n' : ''}${themen ? 'Themen: ' + themen + '\n' : ''}Beobachtungen: ${beob}`;
+    const userMsg = ztBuildUserMsg();
     ZtState.currentLabel = ZtState.currentTyp === 'sozialverhalten' ? name : `${name} · ${fach}`;
+    ZtState.currentId = null;
+
+    ztSetModalLoading();
+    showModal('zt-result-modal');
 
     try {
-        ZtState.currentText = await ztCallAPI([{ role: 'user', content: userMsg }]);
-        ztShowResult();
-        ztAddHistory(ZtState.currentLabel, ZtState.currentText);
+        ZtState.currentText = ztNormalizeText(await ztCallAPI([{ role: 'user', content: userMsg }]));
+        ztCreateArchiveEntry();
+        ztRenderResultModal();
     } catch(e) {
-        ztSetLoading(false);
+        hideModal();
         swal('Fehler beim Generieren. Bitte erneut versuchen.', { icon: 'error', button: 'OK' });
     }
 }
 
 async function ztRegenerate() {
-    const name = (document.getElementById('zt-name')?.value || '').trim();
-    const fach = (document.getElementById('zt-fach')?.value || '').trim();
-    const halbjahr = document.querySelector('input[name="zt-halbjahr"]:checked')?.value || 'ersten';
-    const themen = (document.getElementById('zt-themen')?.value || '').trim();
-    const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
-    const userMsg = `Schüler/in: ${name}\n${fach ? 'Fach: ' + fach + '\n' : ''}${fach ? 'Halbjahr: ' + halbjahr + '\n' : ''}${themen ? 'Themen: ' + themen + '\n' : ''}Beobachtungen: ${beob}`;
-
-    ztSetLoading(true);
+    const userMsg = ztBuildUserMsg();
+    ztSetModalLoading();
     try {
-        ZtState.currentText = await ztCallAPI([
+        ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: userMsg },
             { role: 'assistant', content: ZtState.currentText },
             { role: 'user', content: 'Schreibe einen neuen, anders formulierten Text mit denselben Inhalten.' }
-        ]);
-        ztShowResult();
-        ztAddHistory(ZtState.currentLabel, ZtState.currentText);
+        ]));
+        ztUpdateCurrentEntry();
+        ztRenderResultModal();
     } catch(e) {
-        ztSetLoading(false);
+        ztRenderResultModal();
         swal('Fehler beim Generieren.', { icon: 'error', button: 'OK' });
     }
 }
 
 async function ztShortenText() {
-    ztSetLoading(true);
+    ztSetModalLoading();
     try {
-        ZtState.currentText = await ztCallAPI([
+        ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: ZtState.currentText },
             { role: 'user', content: 'Kürze diesen Text um ca. zwei Sätze. Behalte den Stil und alle wichtigen Informationen bei.' }
-        ]);
-        ztShowResult();
+        ]));
+        ztUpdateCurrentEntry();
+        ztRenderResultModal();
     } catch(e) {
-        ztSetLoading(false);
+        ztRenderResultModal();
         swal('Fehler.', { icon: 'error', button: 'OK' });
     }
 }
 
 async function ztLengthenText() {
-    ztSetLoading(true);
+    ztSetModalLoading();
     try {
-        ZtState.currentText = await ztCallAPI([
+        ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: ZtState.currentText },
             { role: 'user', content: 'Verlängere diesen Text um ca. zwei Sätze. Füge sinnvolle, passende Informationen hinzu und behalte den Stil bei.' }
-        ]);
-        ztShowResult();
+        ]));
+        ztUpdateCurrentEntry();
+        ztRenderResultModal();
     } catch(e) {
-        ztSetLoading(false);
+        ztRenderResultModal();
         swal('Fehler.', { icon: 'error', button: 'OK' });
     }
 }
 
-function ztSetLoading(loading) {
-    const btn = document.getElementById('zt-gen-btn');
-    const resultDiv = document.getElementById('zt-result');
-    if (loading) {
-        if (btn) btn.disabled = true;
-        if (resultDiv) {
-            resultDiv.innerHTML = `
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;color:var(--grey-color);">
-                    <div class="zt-spinner"></div>
-                    <p>Text wird erstellt…</p>
-                </div>`;
-        }
-    } else {
-        if (btn) btn.disabled = false;
+// Eigene Anweisung zum Verbessern (z.B. nur einen Satz ändern)
+async function ztRefineText() {
+    const input = document.getElementById('zt-refine-input');
+    const instruction = (input?.value || '').trim();
+    if (!instruction) return;
+    ztSetModalLoading();
+    try {
+        ZtState.currentText = ztNormalizeText(await ztCallAPI([
+            { role: 'user', content: ZtState.currentText },
+            { role: 'user', content: 'Überarbeite den vorigen Zeugnistext nach dieser Anweisung und gib den vollständigen, überarbeiteten Text zurück: ' + instruction }
+        ]));
+        ztUpdateCurrentEntry();
+        ztRenderResultModal();
+    } catch(e) {
+        ztRenderResultModal();
+        swal('Fehler. Bitte erneut versuchen.', { icon: 'error', button: 'OK' });
     }
 }
 
-function ztShowResult() {
-    const btn = document.getElementById('zt-gen-btn');
-    if (btn) btn.disabled = false;
-    const resultDiv = document.getElementById('zt-result');
-    if (!resultDiv) return;
+function ztEsc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 
-    resultDiv.innerHTML = `
-        <div class="zt-result-card">
-            <div class="zt-result-header">
-                <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ZtState.currentLabel}</span>
-                <button class="btn btn-light btn-icon" onclick="ztCopyText(this)" style="padding:6px 12px;font-size:12px;">
-                    <i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span>
-                </button>
-            </div>
-            <div class="zt-result-text">${ZtState.currentText}</div>
-            <div class="zt-result-actions">
-                <button class="btn btn-primary btn-icon" onclick="ztRegenerate()">
-                    <i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span>
-                </button>
-                <button class="btn btn-secondary btn-icon" onclick="ztShortenText()">
-                    <i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span>
-                </button>
-                <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()">
-                    <i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span>
-                </button>
-            </div>
+function ztTypLabel(typ) {
+    if (typ === 'hauptfach') return 'Hauptfach';
+    if (typ === 'sozialverhalten') return 'Arbeits-/Sozialverhalten';
+    if (typ === 'nebenfach') return 'Nebenfach';
+    return '';
+}
+
+function ztSetModalLoading() {
+    const modal = document.getElementById('zt-result-modal');
+    if (!modal) return;
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ztEsc(ZtState.currentLabel || 'Zeugnistext')}</span>
+            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="zt-result-loading">
+            <div class="zt-spinner"></div>
+            <p>Text wird erstellt…</p>
+        </div>`;
+}
+
+function ztRenderResultModal() {
+    const modal = document.getElementById('zt-result-modal');
+    if (!modal) return;
+    ZtState.currentText = ztNormalizeText(ZtState.currentText);
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ztEsc(ZtState.currentLabel)}</span>
+            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="zt-result-text">${ztEsc(ZtState.currentText)}</div>
+        <div class="zt-result-actions">
+            <button class="btn btn-primary btn-icon" onclick="ztRegenerate()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
+            <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
+            <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
+            <button class="btn btn-light btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
+        </div>
+        <div class="zt-refine">
+            <input type="text" id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter'){event.preventDefault();ztRefineText();}">
+            <button class="btn btn-primary btn-icon zt-refine-btn" onclick="ztRefineText()"><i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Anwenden</span></button>
         </div>`;
 }
 
@@ -7662,32 +7687,179 @@ function ztCopyText(btn) {
     setTimeout(() => { btn.innerHTML = orig; }, 2000);
 }
 
-function ztAddHistory(label, text) {
-    ZtState.history.unshift({ label, text });
-    if (ZtState.history.length > 5) ZtState.history.pop();
-    const section = document.getElementById('zt-history-section');
-    const list = document.getElementById('zt-history-list');
-    if (section) section.style.display = 'block';
-    if (list) {
-        list.innerHTML = ZtState.history.map((h, i) => `
-            <div class="zt-history-item" onclick="ztLoadHistory(${i})">
-                <span class="zt-history-dot"></span>
-                <span>${h.label}</span>
-            </div>`).join('');
+// ===== Archiv (dauerhaft, Cloud-synchronisiert, sofort gespeichert) =====
+function ztInitArchive() {
+    try {
+        const raw = localStorage.getItem('zeugnistexteArchiv');
+        ZtState.archive = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(ZtState.archive)) ZtState.archive = [];
+    } catch (e) { ZtState.archive = []; }
+    ztUpdateArchiveBadge();
+}
+
+function ztUpdateArchiveBadge() {
+    const badge = document.getElementById('zt-archive-badge');
+    if (!badge) return;
+    if (ZtState.archive.length) {
+        badge.textContent = ZtState.archive.length;
+        badge.style.display = '';
+    } else {
+        badge.style.display = 'none';
     }
 }
 
-function ztLoadHistory(i) {
-    const h = ZtState.history[i];
-    ZtState.currentText = h.text;
-    ZtState.currentLabel = h.label;
-    ztShowResult();
+function ztPersistArchive() {
+    try {
+        localStorage.setItem('zeugnistexteArchiv', JSON.stringify(ZtState.archive));
+        localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+    } catch (e) {}
+    ztUpdateArchiveBadge();
+    if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.saveDataToCloud === 'function') {
+        window.saveDataToCloud();
+    }
 }
+
+// Neue Generierung -> sofort einen Archiv-Eintrag anlegen
+function ztCreateArchiveEntry() {
+    const entry = {
+        id: 'zt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        label: ZtState.currentLabel || 'Zeugnistext',
+        typ: ZtState.currentTyp,
+        text: ZtState.currentText,
+        date: new Date().toISOString()
+    };
+    ZtState.archive.unshift(entry);
+    if (ZtState.archive.length > 50) ZtState.archive = ZtState.archive.slice(0, 50);
+    ZtState.currentId = entry.id;
+    ztPersistArchive();
+}
+
+// Bearbeitung (Kürzen/Verlängern/Anweisung/Neu) -> bestehenden Eintrag aktualisieren
+function ztUpdateCurrentEntry() {
+    if (!ZtState.currentId) { ztCreateArchiveEntry(); return; }
+    const entry = ZtState.archive.find(a => a.id === ZtState.currentId);
+    if (!entry) { ztCreateArchiveEntry(); return; }
+    entry.text = ZtState.currentText;
+    entry.label = ZtState.currentLabel;
+    entry.typ = ZtState.currentTyp;
+    entry.date = new Date().toISOString();
+    ztPersistArchive();
+}
+
+function ztOpenArchiveModal() {
+    ztRenderArchiveModal();
+    showModal('zt-archive-modal');
+}
+
+function ztRenderArchiveModal() {
+    const modal = document.getElementById('zt-archive-modal');
+    if (!modal) return;
+    const items = ZtState.archive;
+    const countLabel = items.length ? items.length + (items.length === 1 ? ' Eintrag' : ' Einträge') : '';
+    const body = !items.length
+        ? ''
+        : '<div class="zt-archive-list">' + items.map(item => {
+            const d = item.date ? new Date(item.date) : null;
+            const dateStr = d ? d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+            const full = item.text || '';
+            const preview = full.length > 90 ? full.slice(0, 90) + '…' : full;
+            const typLabel = ztTypLabel(item.typ);
+            return `
+                <div class="zt-archive-item">
+                    <div class="zt-archive-main" onclick="ztOpenArchive('${item.id}')">
+                        <div class="zt-archive-row1">
+                            <span class="zt-archive-name">${ztEsc(item.label)}</span>
+                            ${typLabel ? `<span class="zt-archive-typ">${typLabel}</span>` : ''}
+                            <span class="zt-archive-date">${dateStr}</span>
+                        </div>
+                        <div class="zt-archive-preview">${ztEsc(preview)}</div>
+                    </div>
+                    <div class="zt-archive-actions">
+                        <button class="zt-archive-btn" title="Öffnen" onclick="ztOpenArchive('${item.id}')"><i class="fas fa-up-right-from-square"></i></button>
+                        <button class="zt-archive-btn zt-archive-del" title="Löschen" onclick="ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
+        }).join('') + '</div>';
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            ${countLabel ? `<span class="zt-archive-count">${countLabel}</span>` : '<span></span>'}
+            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        ${body}`;
+}
+
+function ztOpenArchive(id) {
+    const item = ZtState.archive.find(a => a.id === id);
+    if (!item) return;
+    ZtState.currentText = item.text;
+    ZtState.currentLabel = item.label;
+    ZtState.currentId = item.id;
+    if (item.typ) setZtTyp(item.typ);
+    ztRenderResultModal();
+    showModal('zt-result-modal');
+}
+
+function ztDeleteArchive(id) {
+    const item = ZtState.archive.find(a => a.id === id);
+    if (!item) return;
+    swal({
+        title: 'Eintrag löschen?',
+        text: `„${item.label}" wird dauerhaft aus dem Archiv entfernt.`,
+        icon: 'warning',
+        buttons: [false, 'Löschen'],
+        dangerMode: true
+    }).then(willDelete => {
+        if (!willDelete) return;
+        ZtState.archive = ZtState.archive.filter(a => a.id !== id);
+        if (ZtState.currentId === id) ZtState.currentId = null;
+        ztPersistArchive();
+        ztRenderArchiveModal();
+    });
+}
+
+// Wird vom Cloud-Sync (index.html) aufgerufen, wenn das Archiv von einem
+// anderen Gerät aktualisiert wurde.
+window.setZeugnistexteArchiv = function(arr) {
+    ZtState.archive = Array.isArray(arr) ? arr : [];
+    ztUpdateArchiveBadge();
+    const am = document.getElementById('zt-archive-modal');
+    if (am && am.style.display !== 'none') ztRenderArchiveModal();
+};
 
 window.setZtTyp = setZtTyp;
 window.ztGenerate = ztGenerate;
 window.ztRegenerate = ztRegenerate;
 window.ztShortenText = ztShortenText;
 window.ztLengthenText = ztLengthenText;
+window.ztRefineText = ztRefineText;
 window.ztCopyText = ztCopyText;
-window.ztLoadHistory = ztLoadHistory;
+window.ztOpenArchiveModal = ztOpenArchiveModal;
+window.ztOpenArchive = ztOpenArchive;
+window.ztDeleteArchive = ztDeleteArchive;
+
+// Fügt jedem SweetAlert-Dialog ein blaues X zum Schließen hinzu (Konsistenz mit den Modals).
+// SweetAlert 2.1.2 hat von Haus aus kein X; wir injizieren es global via Observer.
+(function setupSwalCloseX() {
+    function injectSwalCloseX(modal) {
+        if (!modal || modal.querySelector('.swal-close-x')) return;
+        const x = document.createElement('button');
+        x.type = 'button';
+        x.className = 'swal-close-x';
+        x.setAttribute('aria-label', 'Schließen');
+        x.innerHTML = '<i class="fas fa-times"></i>';
+        x.addEventListener('click', function() {
+            if (window.swal && typeof window.swal.close === 'function') {
+                window.swal.close();
+            } else {
+                const ov = document.querySelector('.swal-overlay');
+                if (ov) ov.click();
+            }
+        });
+        modal.appendChild(x);
+    }
+    const obs = new MutationObserver(function() {
+        const modal = document.querySelector('.swal-modal');
+        if (modal) injectSwalCloseX(modal);
+    });
+    if (document.body) obs.observe(document.body, { childList: true, subtree: true });
+})();
