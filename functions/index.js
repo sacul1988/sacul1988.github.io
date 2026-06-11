@@ -57,7 +57,7 @@ Regeln:
 };
 
 exports.generateZeugnistext = onCall(
-  { secrets: [anthropicApiKey], invoker: "public" },
+  { secrets: [anthropicApiKey], invoker: "public", cors: true },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
