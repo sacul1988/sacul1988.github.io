@@ -1,3 +1,6 @@
+# macOS system files
+.DS_Store
+
 # Exclude local data backups containing student grades/names
 *.json
 !/.vscode/settings.json
