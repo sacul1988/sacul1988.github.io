@@ -4778,6 +4778,23 @@ function toggleZeugnisView() {
     renderZeugnisModule();
 }
 
+function calculateFinalNumericValue(student) {
+    const average = calculateProjectAverage(student.projects);
+    const writtenAvg = average ? parseFloat(average.exact) : null;
+    const sl = student.sonstigeSlider || {};
+    const v1 = sl.muendlich ?? 3;
+    const v2 = sl.arbeitsphase ?? 3;
+    const v3 = sl.stoerungen ?? 3;
+    const sonstigeAvg = (v1 + v2 + v3) / 3;
+    if (writtenAvg !== null) {
+        const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
+        const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
+        const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
+        return writtenAvg * wSchrift + sonstigeAvg * wSonstig;
+    }
+    return sonstigeAvg;
+}
+
 // Hilfsfunktion zur Generierung des HTML für die Zeugnisnoten-Auswahl mit integriertem Notenvorschlag
 function getGradesSelectorHtml(student, index) {
     const selectedGrade = student.zeugnisnote || '';
@@ -4855,7 +4872,10 @@ function getGradesSelectorHtml(student, index) {
         }
 
         return `<button style="${btnStyle}"${titleAttr} onclick="selectZeugnisGrade(${index}, '${g}')">${g}</button>`;
-    }).join('');
+    }).join('') + (() => {
+        const fv = calculateFinalNumericValue(student);
+        return `<span style="font-size:1rem;font-weight:700;color:var(--dark-color);margin-left:10px;">(${fv.toFixed(2)})</span>`;
+    })();
 }
 
 function renderZeugnisModule() {
@@ -4915,7 +4935,7 @@ function renderZeugnisModule() {
                 if (average) {
                     const avgGradeValue = Utils.convertGrade(average.rounded);
                     const avgGradeClass = Utils.getGradeColorClass(avgGradeValue);
-                    averageHtml = `<div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;"><strong>Durchschnittsnote: <span class="grade-badge ${avgGradeClass}">${average.rounded}</span> (${average.exact})</strong></div>`;
+                    averageHtml = `<div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;"><strong>Durchschnitt (Schriftlich): <span class="grade-badge ${avgGradeClass}">${average.rounded}</span> (${average.exact})</strong></div>`;
                 }
             }
         } else {
@@ -4977,11 +4997,11 @@ function renderZeugnisModule() {
                 <div class="zeugnis-section">
                     <div class="zeugnis-notes-container">
                         <div class="zeugnis-notes-wrapper">
-                            <h4>Notizen für ${student.name}</h4>
+                            <h4>Notizen (${student.name})</h4>
                             <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
                         </div>
                         <div class="zeugnis-slider-wrapper">
-                            <h4>Sonstige Mitarbeit</h4>
+                            <h4>Mündlich (${student.name})</h4>
                         <div class="zeugnis-slider-panel">
                             ${(() => { const sl = student.sonstigeSlider || {}; const s1 = sl.muendlich ?? 3; const s2 = sl.arbeitsphase ?? 3; const s3 = sl.stoerungen ?? 3; const avgN = (s1+s2+s3)/3; const avgLabel = numericToGradeWithTendency(avgN); const avgBase = parseInt(avgLabel); const cmap={1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad',6:'grade-very-bad'}; return `
                             <div class="zeugnis-slider-item">
@@ -5009,8 +5029,11 @@ function renderZeugnisModule() {
                                 <span class="zeugnis-slider-text" id="slider-stoerungen-text-${index}">${ZeugnisSliderTexte.stoerungen[s3-1]}</span>
                             </div>
                             <div class="zeugnis-sonstige-avg" id="sonstige-avg-${index}">
-                                <span class="zeugnis-sonstige-avg-label">Sonstige Mitarbeit:</span>
-                                <span class="grade-badge ${cmap[avgBase] || 'grade-average'} zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">${avgLabel}</span>
+                                <span class="zeugnis-sonstige-avg-label">Durchschnitt (Mündlich):</span>
+                                <div class="zeugnis-sonstige-avg-right">
+                                    <span class="grade-badge ${cmap[avgBase] || 'grade-average'} zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">${avgLabel}</span>
+                                    <span class="zeugnis-sonstige-avg-num" id="sonstige-avg-num-${index}">(${avgN.toFixed(2)})</span>
+                                </div>
                             </div>`; })()}
                         </div>
                         </div>
@@ -5186,25 +5209,25 @@ window.splitSpanAtCaret = splitSpanAtCaret;
 // Notizen speichern
 const ZeugnisSliderTexte = {
     muendlich: [
-        'Häufige Meldungen; inhaltsbezogene Beiträge zeigen vernetztes Denken und eigenständige Schlussfolgerungen.',
-        'Regelmäßige Beiträge zeigen inhaltsbezogenes Verständnis und sicheres Grundwissen.',
-        'Gelegentliche Beteiligung; Beiträge sind korrekt, werden aber insgesamt zu selten von sich aus eingebracht.',
-        'Seltene Meldungen; Beiträge teilweise nur auf direkte Aufforderung und meist kurz und oberflächlich.',
-        'Kaum oder keine mündliche Beteiligung; auch auf Nachfrage keine verwertbaren Beiträge.'
+        'Beteiligt sich häufig am Unterrichtsgespräch. Die Beiträge zeigen eine vernetzte Denkweise und eigenständige Schlussfolgerungen.',
+        'Beteiligt sich regelmäßig am Unterricht. Die Beiträge zeigen ein sicheres inhaltsbezogenes Verständnis und ein gutes Grundwissen.',
+        'Beteiligt sich gelegentlich am Unterricht. Die Beiträge sind inhaltlich korrekt, werden jedoch noch zu selten eingebracht.',
+        'Meldet sich eher selten. Die mündliche Beteiligung ist insgesamt zu gering.',
+        'Beteiligt sich kaum oder gar nicht am Unterricht. Auch auf Nachfrage können teilweise keine verwertbaren Beiträge erbracht werden.'
     ],
     arbeitsphase: [
-        'Konzentrierte, selbstständige und zügige Arbeitsweise; Aufgaben werden vollständig und sorgfältig erledigt.',
-        'Überwiegend selbstständige Arbeitsweise; Aufgaben werden meistens zuverlässig und ordentlich bearbeitet.',
-        'Benötigt gelegentliche Aufforderungen zur Arbeit; Aufgaben werden nicht immer vollständig erledigt.',
-        'Benötigt häufige Aufforderungen zur Weiterarbeit; Aufgaben werden häufig nur unvollständig oder unkonzentriert bearbeitet.',
-        'Arbeitet kaum produktiv; Aufgaben werden selten oder gar nicht erledigt.'
+        'Zeigt eine vorbildliche Arbeitsweise: zielgerichtet, vollkommen selbstständig und sehr zügig. Aufgaben werden ausnahmslos vollständig, äußerst sorgfältig und fehlerfrei erledigt.',
+        'Arbeitet überwiegend selbstständig und konzentriert. Aufgaben werden zuverlässig, vollständig und ordentlich bearbeitet.',
+        'Benötigt gelegentlich Aufforderungen zur Weiterarbeit. Nach einer Aufforderung wird die Arbeit zuverlässig fortgesetzt; Aufgaben werden meistens vollständig bearbeitet.',
+        'Benötigt häufig Aufforderungen zur Weiterarbeit. Aufgaben werden dabei teilweise nur unvollständig oder unkonzentriert bearbeitet.',
+        'Selbstständiges Arbeiten gelingt kaum. Trotz wiederholter Aufforderung werden Aufgaben oft nur unvollständig, sehr oberflächlich oder gar nicht bearbeitet.'
     ],
     stoerungen: [
-        'Keine Störungen; verhält sich vorbildlich und unterstützt ein positives Lernklima.',
-        'Vereinzelte Ablenkungen; verhält sich überwiegend ruhig und aufmerksam.',
-        'Gelegentliche Störungen, die den Unterrichtsablauf leicht beeinträchtigen.',
-        'Häufige Störungen, die den Unterricht teilweise beeinträchtigen.',
-        'Wiederkehrende ernsthafte Störungen, die den Unterricht erheblich belasten.'
+        'Verhält sich durchgehend vorbildlich und trägt aktiv zu einem positiven Lernklima bei.',
+        'Verhält sich überwiegend ruhig. Seltene Ablenkungen oder Störungen unterbrechen die Arbeitsruhe allenfalls sehr kurzfristig.',
+        'Gelegentliche Störungen beeinträchtigen die Arbeitsruhe der Klasse oder die eigene Konzentration zeitweise.',
+        'Verhält sich häufig störend. Störungen und Ablenkungen beeinträchtigen den Unterricht und die eigene Arbeit regelmäßig.',
+        'Massive, wiederkehrende Störungen belasten den Unterricht für alle Beteiligten erheblich.'
     ]
 };
 
@@ -5228,6 +5251,8 @@ function updateSonstigeNote(index) {
         avgEl.textContent = avgLabel;
         avgEl.className = `grade-badge zeugnis-sonstige-avg-value ${avgColorMap[avgBase] || 'grade-average'}`;
     }
+    const avgNumEl = document.getElementById(`sonstige-avg-num-${index}`);
+    if (avgNumEl) avgNumEl.textContent = `(${avgNum.toFixed(2)})`;
     const t = document.getElementById(`slider-muendlich-text-${index}`);
     if (t) t.textContent = ZeugnisSliderTexte.muendlich[v1 - 1];
     const t2 = document.getElementById(`slider-arbeitsphase-text-${index}`);
@@ -5279,9 +5304,7 @@ function selectZeugnisGrade(studentIndex, grade) {
     const currentGrade = student.zeugnisnote;
 
     if (currentGrade === grade) {
-        student.zeugnisnote = '';
-        saveData(studentIndex);
-        renderZeugnisModule();
+        return;
     } else if (currentGrade) {
         swal({
             title: 'Note ändern?',
@@ -5313,14 +5336,19 @@ function setZeugnisGewichtung(typ) {
 }
 
 function _applyZeugnisGewichtungButtons(typ) {
-    ['hauptfach', 'nebenfach'].forEach(t => {
-        const btn = document.getElementById(`gewichtung-${t}-btn`);
-        if (!btn) return;
-        btn.classList.remove('btn-warning', 'btn-primary');
-        btn.classList.add(t === typ ? 'btn-warning' : 'btn-primary');
-    });
+    const btn = document.getElementById('gewichtung-toggle-btn');
+    if (!btn) return;
+    btn.textContent = typ === 'nebenfach' ? 'Gewichtung: 30 / 70' : 'Gewichtung: 50 / 50';
+    btn.classList.remove('btn-warning', 'btn-primary');
+    btn.classList.add(typ === 'nebenfach' ? 'btn-warning' : 'btn-primary');
+}
+
+function toggleZeugnisGewichtung() {
+    const current = classes[activeClassId]?.gewichtung || 'hauptfach';
+    setZeugnisGewichtung(current === 'hauptfach' ? 'nebenfach' : 'hauptfach');
 }
 window.setZeugnisGewichtung = setZeugnisGewichtung;
+window.toggleZeugnisGewichtung = toggleZeugnisGewichtung;
 
 function numericToGradeWithTendency(value) {
     const base = value <= 1.5 ? 1 : value <= 2.5 ? 2 : value <= 3.5 ? 3 : value <= 4.5 ? 4 : value <= 5.5 ? 5 : 6;
@@ -5443,30 +5471,16 @@ function updateZeugnisNoteVorschlag(studentIndex) {
 
 
 
-// Hilfsfunktion zur Umwandlung von Kurznoten (z.B. "3+") in Textform für den Export (z.B. "befriedigend +")
+// Hilfsfunktion zur Umwandlung von Kurznoten (z.B. "3+") in Textform für den Export (z.B. "befriedigend (plus)")
 function getExportGradeWord(gradeCode) {
     if (!gradeCode) return '-';
-    
-    const baseGradesMap = {
-        "1": "sehr gut",
-        "2": "gut",
-        "3": "befriedigend",
-        "4": "ausreichend",
-        "5": "mangelhaft",
-        "6": "ungenügend"
-    };
-    
-    const baseNumber = gradeCode.charAt(0);
+    const baseGradesMap = { "1": "sehr gut", "2": "gut", "3": "befriedigend", "4": "ausreichend", "5": "mangelhaft", "6": "ungenügend" };
+    const base = gradeCode.charAt(0);
     const suffix = gradeCode.slice(1);
-    
-    const word = baseGradesMap[baseNumber];
+    const word = baseGradesMap[base];
     if (!word) return gradeCode;
-    
-    if (suffix === "+") {
-        return `${word} +`;
-    } else if (suffix === "-") {
-        return `${word} -`;
-    }
+    if (suffix === "+") return `${word} (plus)`;
+    if (suffix === "-") return `${word} (minus)`;
     return word;
 }
 
@@ -5484,36 +5498,41 @@ function exportAllStudentCards() {
             <title>Zeugnisse - Alle Schüler</title>
             <style>
                 @media print {
-                    @page { 
-                        margin: 0;
-                    }
-                    body { 
-                        margin: 0; 
-                        padding: 0;
-                    }
-                    .student-page {
-                        padding: 1.5cm;
-                        page-break-after: always;
-                    }
+                    @page { margin: 1.5cm; }
+                    body { margin: 0; padding: 0; }
+                    .student-page { page-break-after: always; }
                 }
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                .student-page { page-break-after: always; margin-bottom: 40px; }
-                h1 { text-align: left; margin-bottom: 10px; }
-                .section { margin-bottom: 5px; }
-                .section h2 { border-bottom: 1px solid #ccc; padding-bottom: 2px; }
-                h3 { margin-top: 5px; margin-bottom: 5px; }
-                ul { list-style-type: none; padding: 0; }
-                .notes { white-space: pre-wrap; }
-                .notes span { color: #000000 !important; }
-                .grade-badge { font-weight: bold; }
+                body { font-family: Arial, sans-serif; margin: 20px; color: #1e293b; }
+                .student-page { margin-bottom: 60px; }
+                h1 { font-size: 1.4rem; margin-bottom: 4px; border-bottom: 2px solid #1e293b; padding-bottom: 6px; }
+                .section { margin-bottom: 0; padding: 14px 0; border-bottom: 1px solid #cbd5e1; }
+                .section:last-child { border-bottom: none; }
+                .section h2 { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; margin-top: 0; }
+                ul { list-style: none; padding: 0; margin: 0; }
+                ul li { padding: 2px 0; font-size: 0.9rem; }
+                .notes { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; }
+                .notes span { color: #000 !important; }
+                .grade-badge { display: inline-block; font-weight: 700; font-size: 0.8rem; padding: 2px 7px; border-radius: 12px; color: white; }
                 .grade-text { font-weight: bold; }
+                .slider-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+                .slider-circle { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; color: white; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; margin-top: 1px; }
+                .slider-content { flex: 1; }
+                .slider-label { font-weight: 700; font-size: 0.9rem; display: block; }
+                .slider-desc { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
+                .avg-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-weight: 700; font-size: 0.9rem; }
+                .avg-num { font-size: 0.85rem; color: #64748b; font-weight: 400; }
+                .zeugnisnote-row { font-size: 1.1rem; font-weight: 700; }
+                .final-num { font-size: 0.9rem; color: #64748b; font-weight: 400; margin-left: 6px; }
             </style>
         </head>
         <body>
     `;
     
+    const exportSliderColors = {1:'#007bff', 2:'#28a745', 3:'#e6a817', 4:'#fd7e14', 5:'#dc143c'};
+    const exportGradeColors = {'grade-excellent':'#007bff','grade-good':'#28a745','grade-average':'#e6a817','grade-poor':'#fd7e14','grade-bad':'#dc143c','grade-very-bad':'#6c757d'};
+
     classes[activeClassId].students.forEach(student => {
-        // Sammle Daten für jeden Schüler
+        // Schriftlich
         let gradesHtml = '';
         let averageText = '';
         if (student.projects && student.projects.length > 0) {
@@ -5522,40 +5541,76 @@ function exportAllStudentCards() {
                 if (grade !== '-') {
                     const gradeValue = convertGrade(grade);
                     const gradeClass = getGradeColorClass(gradeValue);
-                    return `<li>${project.name}: <span class="grade-badge ${gradeClass}">${grade}</span></li>`;
-                } else {
-                    return `<li>${project.name}: <span class="grade-text">${grade}</span></li>`;
+                    const color = exportGradeColors[gradeClass] || '#6c757d';
+                    return `<li>${project.name}: <span class="grade-badge" style="background:${color}">${grade}</span></li>`;
                 }
+                return `<li>${project.name}: -</li>`;
             }).join('');
-            
-            // Durchschnittsnote berechnen
-            if (AppState.zeugnisViewMode === 'average') {
-                const average = calculateProjectAverage(student.projects);
-                if (average) {
-                    averageText = `<li><strong>Durchschnittsnote: <span class="grade-text">${average.rounded} (${average.exact})</span></strong></li>`;
-                }
+            const average = calculateProjectAverage(student.projects);
+            if (average) {
+                const avgVal = convertGrade(average.rounded);
+                const avgClass = getGradeColorClass(avgVal);
+                const avgColor = exportGradeColors[avgClass] || '#6c757d';
+                averageText = `<li style="margin-top:8px;"><strong>Durchschnitt (Schriftlich): <span class="grade-badge" style="background:${avgColor}">${average.rounded}</span> <span style="color:#64748b;font-weight:400">(${average.exact})</span></strong></li>`;
             }
         } else {
             gradesHtml = '<li>Keine Noten vorhanden</li>';
         }
-        
+
+        // Mündlich
+        const sl = student.sonstigeSlider || {};
+        const sv1 = sl.muendlich ?? 3;
+        const sv2 = sl.arbeitsphase ?? 3;
+        const sv3 = sl.stoerungen ?? 3;
+        const avgN = (sv1 + sv2 + sv3) / 3;
+        const avgLabel = numericToGradeWithTendency(avgN);
+        const avgBase = parseInt(avgLabel);
+        const avgColorClass = {1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad',6:'grade-very-bad'}[avgBase] || 'grade-average';
+        const avgColor = exportGradeColors[avgColorClass] || '#e6a817';
+        const sliderLabels = ['Mündliche Beteiligung', 'Arbeitsphase', 'Ruhe'];
+        const sliderTexts = [ZeugnisSliderTexte.muendlich[sv1-1], ZeugnisSliderTexte.arbeitsphase[sv2-1], ZeugnisSliderTexte.stoerungen[sv3-1]];
+        const sliderVals = [sv1, sv2, sv3];
+        const muendlichHtml = sliderLabels.map((label, i) => {
+            const val = sliderVals[i];
+            const color = exportSliderColors[val] || '#6c757d';
+            return `<div class="slider-item">
+                <span class="slider-circle" style="background:${color}">${val}</span>
+                <div class="slider-content">
+                    <span class="slider-label">${label}</span>
+                    <div class="slider-desc">${sliderTexts[i]}</div>
+                </div>
+            </div>`;
+        }).join('') + `
+        <div class="avg-row">
+            <span>Durchschnitt (Mündlich):</span>
+            <span class="grade-badge" style="background:${avgColor}">${avgLabel}</span>
+            <span class="avg-num">(${avgN.toFixed(2)})</span>
+        </div>`;
+
+        // Sonstiges
         const homework = student.homework || 0;
         const materials = student.materials || 0;
-        const positive = student.participation ? student.participation.positive || 0 : 0;
         const negative = student.participation ? student.participation.negative || 0 : 0;
-        const printKonsequenzCount = student.hwHistory ? student.hwHistory.filter(entry => entry.type === 'abschreibtext' || entry.type === 'nachsitzen').length : 0;
-        
+        const printKonsequenzCount = student.hwHistory ? student.hwHistory.filter(e => e.type === 'abschreibtext' || e.type === 'nachsitzen').length : 0;
+
+        // Notizen
         const leftNotes = student.leftNotes || '';
-        const rightNotes = student.rightNotes || '';
+
+        // Zeugnisnote
         const rawZeugnisnote = student.zeugnisnote || '';
         const zeugnisnote = getExportGradeWord(rawZeugnisnote);
-        
+        const finalVal = calculateFinalNumericValue(student);
+
         allPrintHtml += `
             <div class="student-page">
                 <h1>${student.name}</h1>
                 <div class="section">
                     <h2>Schriftlich</h2>
                     <ul>${gradesHtml}${averageText}</ul>
+                </div>
+                <div class="section">
+                    <h2>Mündlich</h2>
+                    ${muendlichHtml}
                 </div>
                 <div class="section">
                     <h2>Sonstiges</h2>
@@ -5566,14 +5621,10 @@ function exportAllStudentCards() {
                         ${printKonsequenzCount > 0 ? `<li>Konsequenz: ${printKonsequenzCount}</li>` : ''}
                     </ul>
                 </div>
-                <div class="section">
-                    <h2>Notizen</h2>
-                    <div class="notes">${leftNotes}</div>
-                    ${rightNotes ? `<div class="notes" style="margin-top: 20px;">${rightNotes}</div>` : ''}
-                </div>
+                ${leftNotes ? `<div class="section"><h2>Notizen</h2><div class="notes">${leftNotes}</div></div>` : ''}
                 <div class="section">
                     <h2>Zeugnisnote</h2>
-                    <div class="notes">${zeugnisnote || '-'}</div>
+                    <div class="zeugnisnote-row">${zeugnisnote || '-'}<span class="final-num">${rawZeugnisnote && finalVal ? `(${finalVal.toFixed(2)})` : ''}</span></div>
                 </div>
             </div>
         `;

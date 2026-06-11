@@ -2116,6 +2116,10 @@ select.form-control {
 
 .zeugnis-notes-wrapper > .notes-textarea {
     flex: 1;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: none;
 }
 
 .zeugnis-slider-wrapper {
@@ -2134,7 +2138,7 @@ select.form-control {
     flex-direction: column;
     gap: 14px;
     padding: 16px;
-    background: var(--bg-color);
+    background: #fff;
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
 }
@@ -2204,6 +2208,18 @@ select.form-control {
     padding: 0 8px;
     border-radius: 16px;
     font-size: 0.8rem;
+}
+
+.zeugnis-sonstige-avg-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.zeugnis-sonstige-avg-num {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dark-color);
 }
 
 /* Summary section spacing */
