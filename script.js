@@ -7836,30 +7836,3 @@ window.ztCopyText = ztCopyText;
 window.ztOpenArchiveModal = ztOpenArchiveModal;
 window.ztOpenArchive = ztOpenArchive;
 window.ztDeleteArchive = ztDeleteArchive;
-
-// Fügt jedem SweetAlert-Dialog ein blaues X zum Schließen hinzu (Konsistenz mit den Modals).
-// SweetAlert 2.1.2 hat von Haus aus kein X; wir injizieren es global via Observer.
-(function setupSwalCloseX() {
-    function injectSwalCloseX(modal) {
-        if (!modal || modal.querySelector('.swal-close-x')) return;
-        const x = document.createElement('button');
-        x.type = 'button';
-        x.className = 'swal-close-x';
-        x.setAttribute('aria-label', 'Schließen');
-        x.innerHTML = '<i class="fas fa-times"></i>';
-        x.addEventListener('click', function() {
-            if (window.swal && typeof window.swal.close === 'function') {
-                window.swal.close();
-            } else {
-                const ov = document.querySelector('.swal-overlay');
-                if (ov) ov.click();
-            }
-        });
-        modal.appendChild(x);
-    }
-    const obs = new MutationObserver(function() {
-        const modal = document.querySelector('.swal-modal');
-        if (modal) injectSwalCloseX(modal);
-    });
-    if (document.body) obs.observe(document.body, { childList: true, subtree: true });
-})();
