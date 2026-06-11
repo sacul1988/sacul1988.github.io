@@ -3398,6 +3398,20 @@ body.modal-open {
         display: none !important; /* Hide inline buttons on mobile */
     }
 
+    /* Startseite: Kacheln einzeln untereinander */
+    .classes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Zeugnis-Tab: Notizen und Mündlich untereinander */
+    .zeugnis-notes-container {
+        flex-direction: column;
+    }
+
+    .zeugnis-notes-wrapper {
+        width: 100%;
+    }
+
     #planung-table-container {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;

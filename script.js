@@ -5338,7 +5338,7 @@ function setZeugnisGewichtung(typ) {
 function _applyZeugnisGewichtungButtons(typ) {
     const btn = document.getElementById('gewichtung-toggle-btn');
     if (!btn) return;
-    btn.textContent = typ === 'nebenfach' ? 'Gewichtung: 30 / 70' : 'Gewichtung: 50 / 50';
+    btn.innerHTML = typ === 'nebenfach' ? '<i class="fas fa-scale-balanced"></i> Gewichtung: 30 / 70' : '<i class="fas fa-scale-balanced"></i> Gewichtung: 50 / 50';
     btn.classList.remove('btn-warning', 'btn-primary');
     btn.classList.add(typ === 'nebenfach' ? 'btn-warning' : 'btn-primary');
 }
