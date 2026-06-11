@@ -3889,6 +3889,7 @@ body.modal-open {
     color: var(--dark-color);
     min-height: 0;
     white-space: normal;
+    text-align: justify;
 }
 
 .zt-modal .zt-result-actions {
@@ -3899,6 +3900,11 @@ body.modal-open {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+.zt-modal .zt-result-actions .btn {
+    flex: 1 1 130px;
+    justify-content: center;
 }
 
 .zt-result-loading {

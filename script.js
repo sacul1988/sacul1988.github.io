@@ -7672,7 +7672,7 @@ function ztRenderResultModal() {
             <button class="btn btn-primary btn-icon" onclick="ztRegenerate()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
             <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
             <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
-            <button class="btn btn-light btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
+            <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
         </div>
         <div class="zt-refine">
             <input type="text" id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter'){event.preventDefault();ztRefineText();}">
@@ -7775,8 +7775,8 @@ function ztRenderArchiveModal() {
                         <div class="zt-archive-preview">${ztEsc(preview)}</div>
                     </div>
                     <div class="zt-archive-actions">
-                        <button class="zt-archive-btn" title="Öffnen" onclick="ztOpenArchive('${item.id}')"><i class="fas fa-up-right-from-square"></i></button>
-                        <button class="zt-archive-btn zt-archive-del" title="Löschen" onclick="ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm btn-primary btn-circle-sm" title="Öffnen" onclick="ztOpenArchive('${item.id}')"><i class="fas fa-up-right-from-square"></i></button>
+                        <button class="btn btn-sm btn-danger btn-circle-sm" title="Löschen" onclick="ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>`;
         }).join('') + '</div>';
