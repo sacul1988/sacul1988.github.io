@@ -4983,7 +4983,7 @@ function renderZeugnisModule() {
                         <div class="zeugnis-slider-wrapper">
                             <h4>Sonstige Mitarbeit</h4>
                         <div class="zeugnis-slider-panel">
-                            ${(() => { const sl = student.sonstigeSlider || {}; const s1 = sl.muendlich ?? 3; const s2 = sl.arbeitsphase ?? 3; const s3 = sl.stoerungen ?? 3; const avgN = (s1+s2+s3)/3; const avgG = avgN<=1.5?1:avgN<=2.5?2:avgN<=3.5?3:avgN<=4.5?4:5; const cmap={1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad'}; return `
+                            ${(() => { const sl = student.sonstigeSlider || {}; const s1 = sl.muendlich ?? 3; const s2 = sl.arbeitsphase ?? 3; const s3 = sl.stoerungen ?? 3; const avgN = (s1+s2+s3)/3; const avgLabel = numericToGradeWithTendency(avgN); const avgBase = parseInt(avgLabel); const cmap={1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad',6:'grade-very-bad'}; return `
                             <div class="zeugnis-slider-item">
                                 <span class="zeugnis-slider-label">Mündliche Beteiligung</span>
                                 <div class="zeugnis-slider-row">
@@ -5010,7 +5010,7 @@ function renderZeugnisModule() {
                             </div>
                             <div class="zeugnis-sonstige-avg" id="sonstige-avg-${index}">
                                 <span class="zeugnis-sonstige-avg-label">Sonstige Mitarbeit:</span>
-                                <span class="grade-badge ${cmap[avgG]} zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">${avgG}</span>
+                                <span class="grade-badge ${cmap[avgBase] || 'grade-average'} zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">${avgLabel}</span>
                             </div>`; })()}
                         </div>
                         </div>
@@ -5189,14 +5189,14 @@ const ZeugnisSliderTexte = {
         'Häufige Meldungen; inhaltsbezogene Beiträge zeigen vernetztes Denken und eigenständige Schlussfolgerungen.',
         'Regelmäßige Beiträge zeigen inhaltsbezogenes Verständnis und sicheres Grundwissen.',
         'Gelegentliche Beteiligung; Beiträge sind korrekt, werden aber insgesamt zu selten von sich aus eingebracht.',
-        'Seltene Meldungen; Beiträge nur auf direkte Aufforderung und meist kurz und oberflächlich.',
+        'Seltene Meldungen; Beiträge teilweise nur auf direkte Aufforderung und meist kurz und oberflächlich.',
         'Kaum oder keine mündliche Beteiligung; auch auf Nachfrage keine verwertbaren Beiträge.'
     ],
     arbeitsphase: [
         'Konzentrierte, selbstständige und zügige Arbeitsweise; Aufgaben werden vollständig und sorgfältig erledigt.',
         'Überwiegend selbstständige Arbeitsweise; Aufgaben werden meistens zuverlässig und ordentlich bearbeitet.',
-        'Arbeitet mit gelegentlicher Unterstützung; Aufgaben werden meist erledigt.',
-        'Benötigt häufige Hilfestellung; Aufgaben werden unvollständig oder unkonzentriert bearbeitet.',
+        'Benötigt gelegentliche Aufforderungen zur Arbeit; Aufgaben werden nicht immer vollständig erledigt.',
+        'Benötigt häufige Aufforderungen zur Weiterarbeit; Aufgaben werden häufig nur unvollständig oder unkonzentriert bearbeitet.',
         'Arbeitet kaum produktiv; Aufgaben werden selten oder gar nicht erledigt.'
     ],
     stoerungen: [
@@ -5220,12 +5220,13 @@ function updateSonstigeNote(index) {
         saveData(index);
     }
     const avgNum = (v1 + v2 + v3) / 3;
-    const avgGrade = avgNum <= 1.5 ? 1 : avgNum <= 2.5 ? 2 : avgNum <= 3.5 ? 3 : avgNum <= 4.5 ? 4 : 5;
-    const avgColorMap = { 1: 'grade-excellent', 2: 'grade-good', 3: 'grade-average', 4: 'grade-poor', 5: 'grade-bad' };
+    const avgLabel = numericToGradeWithTendency(avgNum);
+    const avgBase = parseInt(avgLabel);
+    const avgColorMap = { 1: 'grade-excellent', 2: 'grade-good', 3: 'grade-average', 4: 'grade-poor', 5: 'grade-bad', 6: 'grade-very-bad' };
     const avgEl = document.getElementById(`sonstige-avg-val-${index}`);
     if (avgEl) {
-        avgEl.textContent = avgGrade;
-        avgEl.className = `grade-badge ${avgColorMap[avgGrade]}`;
+        avgEl.textContent = avgLabel;
+        avgEl.className = `grade-badge zeugnis-sonstige-avg-value ${avgColorMap[avgBase] || 'grade-average'}`;
     }
     const t = document.getElementById(`slider-muendlich-text-${index}`);
     if (t) t.textContent = ZeugnisSliderTexte.muendlich[v1 - 1];
@@ -5320,6 +5321,16 @@ function _applyZeugnisGewichtungButtons(typ) {
     });
 }
 window.setZeugnisGewichtung = setZeugnisGewichtung;
+
+function numericToGradeWithTendency(value) {
+    const base = value <= 1.5 ? 1 : value <= 2.5 ? 2 : value <= 3.5 ? 3 : value <= 4.5 ? 4 : value <= 5.5 ? 5 : 6;
+    const diff = value - base;
+    const plus  = String(base) + '+';
+    const minus = String(base) + '-';
+    if (diff <= -0.15 && gradeConversion[plus]  !== undefined) return plus;
+    if (diff >=  0.15 && gradeConversion[minus] !== undefined) return minus;
+    return String(base);
+}
 
 // Berechnungsvorschlag für die Zeugnisnote
 function calculateSuggestedGrade(student, studentIndex) {

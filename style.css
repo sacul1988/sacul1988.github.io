@@ -2198,6 +2198,12 @@ select.form-control {
 
 .zeugnis-sonstige-avg-value {
     margin-right: 0;
+    width: auto;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 16px;
+    font-size: 0.8rem;
 }
 
 /* Summary section spacing */
