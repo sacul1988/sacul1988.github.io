@@ -5001,7 +5001,7 @@ function renderZeugnisModule() {
                                 <span class="zeugnis-slider-text" id="slider-arbeitsphase-text-${index}">${ZeugnisSliderTexte.arbeitsphase[s2-1]}</span>
                             </div>
                             <div class="zeugnis-slider-item">
-                                <span class="zeugnis-slider-label">Störungen</span>
+                                <span class="zeugnis-slider-label">Ruhe</span>
                                 <div class="zeugnis-slider-row">
                                     <input type="range" min="1" max="5" step="1" value="${s3}" class="zeugnis-slider" id="slider-stoerungen-${index}" oninput="updateSonstigeNote(${index})">
                                     <span class="zeugnis-slider-value" id="slider-stoerungen-val-${index}">${s3}</span>
@@ -5009,7 +5009,7 @@ function renderZeugnisModule() {
                                 <span class="zeugnis-slider-text" id="slider-stoerungen-text-${index}">${ZeugnisSliderTexte.stoerungen[s3-1]}</span>
                             </div>
                             <div class="zeugnis-sonstige-avg" id="sonstige-avg-${index}">
-                                <span class="zeugnis-sonstige-avg-label">Ø Sonstige Mitarbeit:</span>
+                                <span class="zeugnis-sonstige-avg-label">Sonstige Mitarbeit:</span>
                                 <span class="grade-badge ${cmap[avgG]} zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">${avgG}</span>
                             </div>`; })()}
                         </div>
@@ -5188,13 +5188,13 @@ const ZeugnisSliderTexte = {
     muendlich: [
         'Häufige Meldungen; inhaltsbezogene Beiträge zeigen vernetztes Denken und eigenständige Schlussfolgerungen.',
         'Regelmäßige Beiträge zeigen inhaltsbezogenes Verständnis und sicheres Grundwissen.',
-        'Gelegentliche Beteiligung; Beiträge sind korrekt, werden aber selten von sich aus eingebracht.',
+        'Gelegentliche Beteiligung; Beiträge sind korrekt, werden aber insgesamt zu selten von sich aus eingebracht.',
         'Seltene Meldungen; Beiträge nur auf direkte Aufforderung und meist kurz und oberflächlich.',
         'Kaum oder keine mündliche Beteiligung; auch auf Nachfrage keine verwertbaren Beiträge.'
     ],
     arbeitsphase: [
         'Konzentrierte, selbstständige und zügige Arbeitsweise; Aufgaben werden vollständig und sorgfältig erledigt.',
-        'Überwiegend selbstständige Arbeitsweise; Aufgaben werden zuverlässig und ordentlich bearbeitet.',
+        'Überwiegend selbstständige Arbeitsweise; Aufgaben werden meistens zuverlässig und ordentlich bearbeitet.',
         'Arbeitet mit gelegentlicher Unterstützung; Aufgaben werden meist erledigt.',
         'Benötigt häufige Hilfestellung; Aufgaben werden unvollständig oder unkonzentriert bearbeitet.',
         'Arbeitet kaum produktiv; Aufgaben werden selten oder gar nicht erledigt.'
@@ -5203,7 +5203,7 @@ const ZeugnisSliderTexte = {
         'Keine Störungen; verhält sich vorbildlich und unterstützt ein positives Lernklima.',
         'Vereinzelte Ablenkungen; verhält sich überwiegend ruhig und aufmerksam.',
         'Gelegentliche Störungen, die den Unterrichtsablauf leicht beeinträchtigen.',
-        'Häufige Störungen, die den Unterricht merklich beeinträchtigen und Konsequenzen erfordern.',
+        'Häufige Störungen, die den Unterricht teilweise beeinträchtigen.',
         'Wiederkehrende ernsthafte Störungen, die den Unterricht erheblich belasten.'
     ]
 };
