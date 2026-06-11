@@ -4859,6 +4859,10 @@ function getGradesSelectorHtml(student, index) {
 }
 
 function renderZeugnisModule() {
+    // Gewichtung-Buttons für diese Klasse setzen
+    const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
+    _applyZeugnisGewichtungButtons(gewichtung);
+
     // Update button styling based on persisted state
     const btn = safeGetElement('zeugnis-view-toggle');
     if (btn) {
@@ -4979,31 +4983,35 @@ function renderZeugnisModule() {
                         <div class="zeugnis-slider-wrapper">
                             <h4>Sonstige Mitarbeit</h4>
                         <div class="zeugnis-slider-panel">
+                            ${(() => { const sl = student.sonstigeSlider || {}; const s1 = sl.muendlich ?? 3; const s2 = sl.arbeitsphase ?? 3; const s3 = sl.stoerungen ?? 3; const avgN = (s1+s2+s3)/3; const avgG = avgN<=1.5?1:avgN<=2.5?2:avgN<=3.5?3:avgN<=4.5?4:5; const cmap={1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad'}; return `
                             <div class="zeugnis-slider-item">
                                 <span class="zeugnis-slider-label">Mündliche Beteiligung</span>
                                 <div class="zeugnis-slider-row">
-                                    <input type="range" min="1" max="5" step="1" value="3" class="zeugnis-slider" id="slider-muendlich-${index}" oninput="updateSonstigeNote(${index})">
-                                    <span class="zeugnis-slider-value" id="slider-muendlich-val-${index}">3</span>
+                                    <input type="range" min="1" max="5" step="1" value="${s1}" class="zeugnis-slider" id="slider-muendlich-${index}" oninput="updateSonstigeNote(${index})">
+                                    <span class="zeugnis-slider-value" id="slider-muendlich-val-${index}">${s1}</span>
                                 </div>
+                                <span class="zeugnis-slider-text" id="slider-muendlich-text-${index}">${ZeugnisSliderTexte.muendlich[s1-1]}</span>
                             </div>
                             <div class="zeugnis-slider-item">
                                 <span class="zeugnis-slider-label">Arbeitsphase</span>
                                 <div class="zeugnis-slider-row">
-                                    <input type="range" min="1" max="5" step="1" value="3" class="zeugnis-slider" id="slider-arbeitsphase-${index}" oninput="updateSonstigeNote(${index})">
-                                    <span class="zeugnis-slider-value" id="slider-arbeitsphase-val-${index}">3</span>
+                                    <input type="range" min="1" max="5" step="1" value="${s2}" class="zeugnis-slider" id="slider-arbeitsphase-${index}" oninput="updateSonstigeNote(${index})">
+                                    <span class="zeugnis-slider-value" id="slider-arbeitsphase-val-${index}">${s2}</span>
                                 </div>
+                                <span class="zeugnis-slider-text" id="slider-arbeitsphase-text-${index}">${ZeugnisSliderTexte.arbeitsphase[s2-1]}</span>
                             </div>
                             <div class="zeugnis-slider-item">
                                 <span class="zeugnis-slider-label">Störungen</span>
                                 <div class="zeugnis-slider-row">
-                                    <input type="range" min="1" max="5" step="1" value="3" class="zeugnis-slider" id="slider-stoerungen-${index}" oninput="updateSonstigeNote(${index})">
-                                    <span class="zeugnis-slider-value" id="slider-stoerungen-val-${index}">3</span>
+                                    <input type="range" min="1" max="5" step="1" value="${s3}" class="zeugnis-slider" id="slider-stoerungen-${index}" oninput="updateSonstigeNote(${index})">
+                                    <span class="zeugnis-slider-value" id="slider-stoerungen-val-${index}">${s3}</span>
                                 </div>
+                                <span class="zeugnis-slider-text" id="slider-stoerungen-text-${index}">${ZeugnisSliderTexte.stoerungen[s3-1]}</span>
                             </div>
                             <div class="zeugnis-sonstige-avg" id="sonstige-avg-${index}">
                                 <span class="zeugnis-sonstige-avg-label">Ø Sonstige Mitarbeit:</span>
-                                <span class="zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">3,0</span>
-                            </div>
+                                <span class="grade-badge ${cmap[avgG]} zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">${avgG}</span>
+                            </div>`; })()}
                         </div>
                         </div>
                     </div>
@@ -5176,6 +5184,30 @@ function splitSpanAtCaret(event) {
 window.splitSpanAtCaret = splitSpanAtCaret;
 
 // Notizen speichern
+const ZeugnisSliderTexte = {
+    muendlich: [
+        'Häufige Meldungen; inhaltsbezogene Beiträge zeigen vernetztes Denken und eigenständige Schlussfolgerungen.',
+        'Regelmäßige Beiträge zeigen inhaltsbezogenes Verständnis und sicheres Grundwissen.',
+        'Gelegentliche Beteiligung; Beiträge sind korrekt, werden aber selten von sich aus eingebracht.',
+        'Seltene Meldungen; Beiträge nur auf direkte Aufforderung und meist kurz und oberflächlich.',
+        'Kaum oder keine mündliche Beteiligung; auch auf Nachfrage keine verwertbaren Beiträge.'
+    ],
+    arbeitsphase: [
+        'Konzentrierte, selbstständige und zügige Arbeitsweise; Aufgaben werden vollständig und sorgfältig erledigt.',
+        'Überwiegend selbstständige Arbeitsweise; Aufgaben werden zuverlässig und ordentlich bearbeitet.',
+        'Arbeitet mit gelegentlicher Unterstützung; Aufgaben werden meist erledigt.',
+        'Benötigt häufige Hilfestellung; Aufgaben werden unvollständig oder unkonzentriert bearbeitet.',
+        'Arbeitet kaum produktiv; Aufgaben werden selten oder gar nicht erledigt.'
+    ],
+    stoerungen: [
+        'Keine Störungen; verhält sich vorbildlich und unterstützt ein positives Lernklima.',
+        'Vereinzelte Ablenkungen; verhält sich überwiegend ruhig und aufmerksam.',
+        'Gelegentliche Störungen, die den Unterrichtsablauf leicht beeinträchtigen.',
+        'Häufige Störungen, die den Unterricht merklich beeinträchtigen und Konsequenzen erfordern.',
+        'Wiederkehrende ernsthafte Störungen, die den Unterricht erheblich belasten.'
+    ]
+};
+
 function updateSonstigeNote(index) {
     const v1 = parseInt(document.getElementById(`slider-muendlich-${index}`)?.value || 3);
     const v2 = parseInt(document.getElementById(`slider-arbeitsphase-${index}`)?.value || 3);
@@ -5183,8 +5215,24 @@ function updateSonstigeNote(index) {
     document.getElementById(`slider-muendlich-val-${index}`).textContent = v1;
     document.getElementById(`slider-arbeitsphase-val-${index}`).textContent = v2;
     document.getElementById(`slider-stoerungen-val-${index}`).textContent = v3;
-    const avg = ((v1 + v2 + v3) / 3).toFixed(1).replace('.', ',');
-    document.getElementById(`sonstige-avg-val-${index}`).textContent = avg;
+    if (activeClassId !== null && classes[activeClassId]?.students?.[index]) {
+        classes[activeClassId].students[index].sonstigeSlider = { muendlich: v1, arbeitsphase: v2, stoerungen: v3 };
+        saveData(index);
+    }
+    const avgNum = (v1 + v2 + v3) / 3;
+    const avgGrade = avgNum <= 1.5 ? 1 : avgNum <= 2.5 ? 2 : avgNum <= 3.5 ? 3 : avgNum <= 4.5 ? 4 : 5;
+    const avgColorMap = { 1: 'grade-excellent', 2: 'grade-good', 3: 'grade-average', 4: 'grade-poor', 5: 'grade-bad' };
+    const avgEl = document.getElementById(`sonstige-avg-val-${index}`);
+    if (avgEl) {
+        avgEl.textContent = avgGrade;
+        avgEl.className = `grade-badge ${avgColorMap[avgGrade]}`;
+    }
+    const t = document.getElementById(`slider-muendlich-text-${index}`);
+    if (t) t.textContent = ZeugnisSliderTexte.muendlich[v1 - 1];
+    const t2 = document.getElementById(`slider-arbeitsphase-text-${index}`);
+    if (t2) t2.textContent = ZeugnisSliderTexte.arbeitsphase[v2 - 1];
+    const t3 = document.getElementById(`slider-stoerungen-text-${index}`);
+    if (t3) t3.textContent = ZeugnisSliderTexte.stoerungen[v3 - 1];
     updateZeugnisNoteVorschlag(index);
 }
 
@@ -5254,6 +5302,25 @@ function selectZeugnisGrade(studentIndex, grade) {
 }
 window.selectZeugnisGrade = selectZeugnisGrade;
 
+function setZeugnisGewichtung(typ) {
+    if (activeClassId === null || !classes[activeClassId]) return;
+    classes[activeClassId].gewichtung = typ;
+    saveData();
+    _applyZeugnisGewichtungButtons(typ);
+    const students = classes[activeClassId]?.students || [];
+    students.forEach((_, i) => updateZeugnisNoteVorschlag(i));
+}
+
+function _applyZeugnisGewichtungButtons(typ) {
+    ['hauptfach', 'nebenfach'].forEach(t => {
+        const btn = document.getElementById(`gewichtung-${t}-btn`);
+        if (!btn) return;
+        btn.classList.remove('btn-warning', 'btn-primary');
+        btn.classList.add(t === typ ? 'btn-warning' : 'btn-primary');
+    });
+}
+window.setZeugnisGewichtung = setZeugnisGewichtung;
+
 // Berechnungsvorschlag für die Zeugnisnote
 function calculateSuggestedGrade(student, studentIndex) {
     const projects = student.projects || {};
@@ -5270,7 +5337,10 @@ function calculateSuggestedGrade(student, studentIndex) {
 
     let finalValue;
     if (writtenAvg !== null && sonstigeAvg !== null) {
-        finalValue = (writtenAvg + sonstigeAvg) / 2;
+        const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
+        const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
+        const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
+        finalValue = writtenAvg * wSchrift + sonstigeAvg * wSonstig;
     } else if (writtenAvg !== null) {
         finalValue = writtenAvg;
     } else if (sonstigeAvg !== null) {

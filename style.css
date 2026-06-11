@@ -2173,6 +2173,14 @@ select.form-control {
     text-align: center;
 }
 
+.zeugnis-slider-text {
+    font-size: 0.78rem;
+    color: var(--grey-color);
+    line-height: 1.4;
+    margin-top: 4px;
+    display: block;
+}
+
 .zeugnis-sonstige-avg {
     margin-top: auto;
     padding-top: 12px;
@@ -2189,9 +2197,7 @@ select.form-control {
 }
 
 .zeugnis-sonstige-avg-value {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary-color);
+    margin-right: 0;
 }
 
 /* Summary section spacing */
