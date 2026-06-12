@@ -11,13 +11,13 @@
     --light-color: #f8fafc;
     --dark-color: #1e293b;
     --grey-color: #64748b;
-    --border-radius: 10px;
-    --border-radius-lg: 14px;
-    --box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.05);
-    --box-shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+    --border-radius: 12px;
+    --border-radius-lg: 16px;
+    --box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 6px 20px rgba(15,23,42,0.05);
+    --box-shadow-md: 0 6px 24px rgba(15,23,42,0.09);
     --transition: all 0.2s ease;
-    --border-color: #e2e8f0;
-    --bg-color: #f1f5f9;
+    --border-color: #e5e9f2;
+    --bg-color: #f2f4fa;
 }
 
 * {
@@ -43,6 +43,9 @@ body {
     line-height: 1.6;
     color: var(--dark-color);
     background-color: var(--bg-color);
+    /* Sehr dezenter Farbverlauf von oben, fest verankert */
+    background-image: linear-gradient(180deg, rgba(67, 97, 238, 0.045) 0%, rgba(67, 97, 238, 0) 320px);
+    background-attachment: fixed;
     margin: 0;
     padding: 0;
     font-size: 15px;
@@ -59,43 +62,6 @@ body {
 .container {
     margin: 0 auto;
     padding: 16px;
-}
-
-/* Breadcrumb navigation */
-.breadcrumb {
-    background-color: white;
-    padding: 10px 18px;
-    border-radius: var(--border-radius);
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    font-size: 0.88rem;
-    overflow-x: auto;
-    white-space: nowrap;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--box-shadow);
-}
-
-.breadcrumb a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.breadcrumb a:hover {
-    color: var(--primary-hover);
-    text-decoration: none;
-}
-
-.breadcrumb .separator {
-    margin: 0 8px;
-    color: #cbd5e1;
-    font-size: 0.8rem;
 }
 
 /* Card components */
@@ -662,9 +628,9 @@ select.form-control {
     flex-wrap: nowrap;
     gap: 6px;
     margin-bottom: 16px;
-    padding: 6px;
+    padding: 7px;
     background-color: white;
-    border-radius: var(--border-radius-lg);
+    border-radius: 18px;
     box-shadow: var(--box-shadow);
     border: 1px solid var(--border-color);
     overflow-x: auto;
@@ -691,7 +657,7 @@ select.form-control {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 12px;
     transition: var(--transition);
     gap: 4px;
     margin: 0;
@@ -716,13 +682,13 @@ select.form-control {
 }
 
 .module-nav-item .btn-primary {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, #4361ee, #5b77f0);
     color: white;
-    box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.35);
 }
 
 .module-nav-item .btn-primary:hover {
-    background-color: var(--primary-hover);
+    background: linear-gradient(135deg, #3451d1, #4361ee);
     color: white;
 }
 
@@ -1086,10 +1052,35 @@ select.form-control {
     z-index: 10000;
 }
 
+/* Dezente Glow-Akzente im Login-Hintergrund */
+.login-overlay::before,
+.login-overlay::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+}
+.login-overlay::before {
+    width: 420px;
+    height: 420px;
+    top: -120px;
+    right: -80px;
+    background: rgba(67, 97, 238, 0.35);
+}
+.login-overlay::after {
+    width: 360px;
+    height: 360px;
+    bottom: -100px;
+    left: -80px;
+    background: rgba(112, 72, 232, 0.28);
+}
+
 .login-card {
+    position: relative;
     background: white;
     padding: 40px 36px;
-    border-radius: 18px;
+    border-radius: 22px;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
     width: 100%;
     max-width: 400px;
@@ -3191,12 +3182,6 @@ body.modal-open {
         justify-content: flex-end !important;
     }
     
-    /* 2. Breadcrumb */
-    .breadcrumb {
-        padding: 8px 12px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-    }
     
     /* 4. Compact Module Navigation Tabs for iPhone 17 Pro Max */
     .module-nav {
@@ -3330,6 +3315,13 @@ body.modal-open {
     .desktop-header-buttons {
         display: none !important; /* Hide inline buttons on mobile */
     }
+
+    /* Kopfzeile: kompakter, damit alle Werkzeuge in eine Zeile passen */
+    .app-topbar { gap: 6px; }
+    .topbar-btn { width: 38px; height: 38px; }
+    .topbar-tools { gap: 5px; }
+    .topbar-sep { margin: 0 4px; height: 26px; }
+    .topbar-title { font-size: 1.05rem; }
 
     /* Startseite: Kacheln einzeln untereinander */
     .classes-grid {
@@ -3874,128 +3866,95 @@ body.modal-open {
     margin-left: 2px;
 }
 
-/* ===== Globale Werkzeuge: Startleisten-Symbole + Tool-Fenster ===== */
-/* Kopfzeile: Startseite-Leiste füllt bis zu den Werkzeug-Kreisen, Kreise rechts daneben */
-.topbar-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
-}
-/* Breadcrumb ohne weiße Leiste – Home wird zum Kreis, Klassenname als Text daneben */
-.topbar-row .breadcrumb {
-    flex: 1;
-    min-width: 0;
-    margin-bottom: 0;
-    background: none;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    border-radius: 0;
-    overflow: visible;
-    gap: 4px;
-}
-.tool-launchers {
+/* ===== Kopfzeile über dem Inhalt ===== */
+.app-topbar {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-shrink: 0;
+    margin-bottom: 14px;
+    min-height: 44px;
 }
-/* Einzelne, „schwebende" runde Werkzeug-Buttons (rechts) */
-.tool-launcher-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
+.topbar-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
     border: 1px solid var(--border-color);
     background: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     color: var(--primary-color);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.05rem;
+    font-size: 1rem;
     flex-shrink: 0;
-    transition: background 0.15s, color 0.15s, transform 0.12s, box-shadow 0.15s, border-color 0.15s;
+    transition: background 0.15s, color 0.15s, transform 0.12s;
 }
-/* Home: runder Kreis-Button mit Haus; Klassenname erscheint als Text daneben */
-.topbar-row .home-circle {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid var(--border-color);
-    background: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    color: var(--primary-color);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.05rem;
-    flex-shrink: 0;
-    transition: background 0.15s, color 0.15s, transform 0.12s, box-shadow 0.15s, border-color 0.15s;
-}
-.topbar-row .breadcrumb-active {
-    display: inline-flex;
-    align-items: center;
-    min-width: 0;
-    color: var(--dark-color);
-    font-size: 0.95rem;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.tool-launcher-btn:hover,
-.topbar-row .home-circle:hover {
+.topbar-btn:hover {
     background: var(--primary-color);
     color: #fff;
     border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
-    transform: translateY(-1px);
 }
-.tool-launcher-btn:active,
-.topbar-row .home-circle:active {
-    transform: translateY(0) scale(0.95);
+.topbar-btn:active { transform: scale(0.95); }
+.topbar-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.topbar-title .separator { display: none; }
+.topbar-title:empty::before {
+    content: 'Startseite';
 }
 
-/* Trenner zwischen Werkzeug-Kreisen und Status/Abmelden */
-.launcher-sep {
-    width: 1px;
-    height: 26px;
-    background: var(--border-color);
+/* Globale Werkzeuge rechtsbündig in der Kopfzeile */
+.topbar-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex-shrink: 0;
-    margin: 0 2px;
+}
+.topbar-sep {
+    width: 2px;
+    height: 30px;
+    background: #94a3b8;
+    border-radius: 1px;
+    margin: 0 8px;
+    flex-shrink: 0;
 }
 
-/* Sync-Status-Kreis: Symbol/Farbe spiegelt den Live-Zustand */
-.tool-launchers .sync-circle[data-state="synced"] { color: var(--success-color); }
-.tool-launchers .sync-circle[data-state="syncing"] { color: var(--primary-color); }
-.tool-launchers .sync-circle[data-state="error"] { color: #e74c3c; }
-.tool-launchers .sync-circle[data-state="error"] {
+/* Sync-Status-Button: Symbol/Farbe spiegelt den Live-Zustand */
+.topbar-tools .sync-btn[data-state="synced"] { color: var(--success-color); }
+.topbar-tools .sync-btn[data-state="syncing"] { color: var(--primary-color); }
+.topbar-tools .sync-btn[data-state="error"] {
+    color: #e74c3c;
     border-color: #f5b7b1;
     background: #fef5f4;
 }
-/* Hover: neutraler Lift, Zustandsfarbe bleibt sichtbar */
-.tool-launchers .sync-circle:hover {
+/* Hover: neutraler Lift, Zustandsfarbe bleibt erhalten */
+.topbar-tools .sync-btn:hover {
     background: var(--light-color);
     border-color: var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
 }
-.tool-launchers .sync-circle[data-state="error"]:hover {
+.topbar-tools .sync-btn[data-state="error"]:hover {
     background: #fdecea;
     border-color: #f5b7b1;
 }
 
-/* Abmelden-Kreis */
-.tool-launchers .account-circle { color: var(--grey-color); }
-.tool-launchers .account-circle:hover {
+/* Abmelden-Button: rötlicher Hover */
+.topbar-tools .logout-btn { color: var(--grey-color); }
+.topbar-tools .logout-btn:hover {
     background: #fef2f2;
     color: #e74c3c;
     border-color: #e74c3c;
-    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.22);
-    transform: translateY(-1px);
 }
 
 /* Inhalt des Sync-Status-Modals */
@@ -4113,9 +4072,6 @@ body.modal-open {
         border-radius: 0;
         min-height: 100vh;
     }
-    .tool-launchers { gap: 8px; }
-    .tool-launcher-btn { width: 40px; height: 40px; }
-    .topbar-row .home-circle { width: 40px; height: 40px; }
 }
 
 

@@ -827,8 +827,10 @@ function reflectSyncStatus() {
 
     if (circle) {
         circle.dataset.state = state;
-        if (circle.innerHTML !== SYNC_CIRCLE_ICONS[state]) {
-            circle.innerHTML = SYNC_CIRCLE_ICONS[state];
+        // Symbol im inneren Icon-Span tauschen (Label im Button bleibt erhalten)
+        const iconHost = document.getElementById('sync-status-icon') || circle;
+        if (iconHost.innerHTML !== SYNC_CIRCLE_ICONS[state]) {
+            iconHost.innerHTML = SYNC_CIRCLE_ICONS[state];
         }
     }
     // Falls das Modal gerade offen ist, live mitaktualisieren
@@ -873,8 +875,8 @@ function renderSyncModalBody() {
             <div class="sync-modal-row"><span class="label">Letzte Aktualisierung</span><span class="value">${timeStr}</span></div>
         </div>
         ${state === 'error'
-            ? '<p style="margin:16px 2px 0; color:#991b1b; font-size:0.88rem;"><i class="fas fa-circle-info"></i> Prüfe deine Internetverbindung. Deine Eingaben bleiben lokal gespeichert und werden automatisch hochgeladen, sobald die Verbindung wieder steht.</p>'
-            : '<p style="margin:16px 2px 0; color: var(--grey-color); font-size:0.88rem;"><i class="fas fa-circle-info"></i> Alle Änderungen werden automatisch mit der Cloud synchronisiert.</p>'}
+            ? '<p style="margin:16px 2px 0; color:#991b1b; font-size:0.88rem; text-align:center;"><i class="fas fa-circle-info"></i> Prüfe deine Internetverbindung. Deine Eingaben bleiben lokal gespeichert und werden automatisch hochgeladen, sobald die Verbindung wieder steht.</p>'
+            : '<p style="margin:16px 2px 0; color: var(--grey-color); font-size:0.88rem; text-align:center;"><i class="fas fa-circle-info"></i> Alle Änderungen werden automatisch mit der Cloud synchronisiert.</p>'}
     `;
 }
 
@@ -904,6 +906,7 @@ window.reflectSyncStatus = reflectSyncStatus;
 window.initSyncStatusMirror = initSyncStatusMirror;
 window.openSyncModal = openSyncModal;
 window.confirmLogout = confirmLogout;
+
 
 // Modal anzeigen/verstecken
 function showModal(modalId) {
@@ -5774,15 +5777,15 @@ window.splitSpanAtCaret = splitSpanAtCaret;
 const ZeugnisSliderTexte = {
     muendlich: [
         'Beteiligt sich häufig am Unterrichtsgespräch. Die Beiträge zeigen eine vernetzte Denkweise und eigenständige Schlussfolgerungen.',
-        'Beteiligt sich regelmäßig am Unterricht. Die Beiträge zeigen ein sicheres inhaltsbezogenes Verständnis und ein gutes Grundwissen.',
+        'Beteiligt sich regelmäßig am Unterricht. Die Beiträge zeigen ein inhaltsbezogenes Verständnis und ein gutes Grundwissen.',
         'Beteiligt sich gelegentlich am Unterricht. Die Beiträge sind inhaltlich korrekt, werden jedoch noch zu selten eingebracht.',
         'Meldet sich eher selten. Die mündliche Beteiligung ist insgesamt zu gering.',
-        'Beteiligt sich kaum oder gar nicht am Unterricht. Auch auf Nachfrage können teilweise keine verwertbaren Beiträge erbracht werden.'
+        'Beteiligt sich durch Meldungen kaum oder gar nicht an Unterrichtsgesprächen.'
     ],
     arbeitsphase: [
         'Zeigt eine vorbildliche Arbeitsweise: zielgerichtet, selbstständig und sehr zügig. Aufgaben werden vollständig, sorgfältig und fehlerfrei erledigt.',
         'Arbeitet überwiegend selbstständig und konzentriert. Aufgaben werden zuverlässig, vollständig und ordentlich bearbeitet.',
-        'Benötigt gelegentlich Aufforderungen zur Weiterarbeit. Nach einer Aufforderung wird die Arbeit zuverlässig fortgesetzt. Aufgaben werden noch überwiegend vollständig und korrekt bearbeitet.',
+        'Benötigt gelegentlich Aufforderungen zur Weiterarbeit. Nach einer Aufforderung wird die Arbeit zuverlässig fortgesetzt. Aufgaben werden überwiegend vollständig und korrekt bearbeitet.',
         'Benötigt regelmäßig Aufforderungen zur Weiterarbeit. Aufgaben werden teilweise nur unvollständig oder unkonzentriert bearbeitet.',
         'Selbstständiges Arbeiten gelingt überwiegend nicht. Trotz Aufforderung werden Aufgaben oft nur unvollständig, sehr oberflächlich oder nicht bearbeitet.'
     ],

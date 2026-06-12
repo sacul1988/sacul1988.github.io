@@ -49,32 +49,32 @@
             </div>
         </div>
 
-        <!-- Pfadnavigation + globale Werkzeuge -->
-        <div class="topbar-row">
-            <div class="breadcrumb">
-                <a href="#" id="home-link" class="home-circle" title="Startseite" aria-label="Startseite"><i class="fas fa-home"></i></a>
-                <span class="breadcrumb-active" id="breadcrumb-active"></span>
-            </div>
-            <!-- Globale Werkzeuge: einzelne schwebende Kreise, immer erreichbar -->
-            <div class="tool-launchers" id="tool-launchers" style="display: none;">
-                <button class="tool-launcher-btn" type="button" data-tool="kalender" title="Kalender (zentrale Termine)" aria-label="Kalender" onclick="openToolWindow('kalender')">
+        <!-- Kopfzeile: Startseite links, Titel, globale Werkzeuge rechts -->
+        <header class="app-topbar">
+            <button class="topbar-btn topbar-home-btn" type="button" id="home-link" title="Startseite" aria-label="Startseite">
+                <i class="fas fa-home"></i>
+            </button>
+            <div class="topbar-title" id="breadcrumb-active"></div>
+            <!-- Globale Werkzeuge: rechtsbündige Buttons (gleiche Form wie Startseite) -->
+            <div class="topbar-tools" id="tool-launchers" style="display: none;">
+                <button class="topbar-btn" type="button" data-tool="kalender" title="Kalender (zentrale Termine)" aria-label="Kalender" onclick="openToolWindow('kalender')">
                     <i class="fas fa-calendar-alt"></i>
                 </button>
-                <button class="tool-launcher-btn" type="button" data-tool="kontakte" title="Adressbuch" aria-label="Adressbuch" onclick="openToolWindow('kontakte')">
+                <button class="topbar-btn" type="button" data-tool="kontakte" title="Adressbuch" aria-label="Adressbuch" onclick="openToolWindow('kontakte')">
                     <i class="fas fa-address-book"></i>
                 </button>
-                <button class="tool-launcher-btn" type="button" data-tool="zeugnis-texte" title="Zeugnistextgenerator" aria-label="Zeugnistextgenerator" onclick="openToolWindow('zeugnis-texte')">
+                <button class="topbar-btn" type="button" data-tool="zeugnis-texte" title="Zeugnistextgenerator" aria-label="Zeugnistextgenerator" onclick="openToolWindow('zeugnis-texte')">
                     <i class="fas fa-wand-magic-sparkles"></i>
                 </button>
-                <span class="launcher-sep" aria-hidden="true"></span>
-                <button class="tool-launcher-btn sync-circle" type="button" id="sync-status-circle" data-state="synced" title="Synchronisierung" aria-label="Synchronisierung" onclick="openSyncModal()">
-                    <i class="fas fa-circle-check"></i>
+                <span class="topbar-sep" aria-hidden="true"></span>
+                <button class="topbar-btn sync-btn" type="button" id="sync-status-circle" data-state="synced" title="Synchronisierung" aria-label="Synchronisierung" onclick="openSyncModal()">
+                    <span id="sync-status-icon"><i class="fas fa-circle-check"></i></span>
                 </button>
-                <button class="tool-launcher-btn account-circle" type="button" title="Abmelden" aria-label="Abmelden" onclick="confirmLogout()">
+                <button class="topbar-btn logout-btn" type="button" title="Abmelden" aria-label="Abmelden" onclick="confirmLogout()">
                     <i class="fas fa-right-from-bracket"></i>
                 </button>
             </div>
-        </div>
+        </header>
         
         <!-- Seitencontainer -->
         <div id="pages-container">
