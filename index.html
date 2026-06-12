@@ -89,10 +89,10 @@
                                     <i class="fas fa-plus"></i> <span class="btn-text">Klasse hinzufügen</span>
                                 </button>
                                 <button class="btn btn-primary btn-icon" onclick="exportAllData(event)" title="Alle Daten als Datei exportieren">
-                                    <i class="fas fa-arrow-down"></i> <span class="btn-text">Exportieren</span>
+                                    <i class="fas fa-file-export"></i> <span class="btn-text">Exportieren</span>
                                 </button>
                                 <button class="btn btn-secondary btn-icon" onclick="handleImportButtonClick(event)" title="Daten aus Datei importieren">
-                                    <i class="fas fa-arrow-up"></i> <span class="btn-text">Importieren</span>
+                                    <i class="fas fa-file-import"></i> <span class="btn-text">Importieren</span>
                                 </button>
                             </div>
                             <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Klassen', '#home-page .desktop-header-buttons')">
@@ -150,9 +150,7 @@
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
                                         <button class="btn btn-secondary btn-icon" onclick="showExportStudentsModal()">
-                                            <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                            </svg>
+                                            <i class="fas fa-file-export"></i>
                                             <span class="btn-text">Schülerliste exportieren</span>
                                         </button>
                                     </div>
@@ -199,9 +197,7 @@
                                     <div class="card-header-actions">
                                         <div class="desktop-header-buttons">
                                             <button class="btn btn-secondary btn-icon" onclick="exportSitzplanAsJPEG()" title="Sitzplan exportieren">
-                                                <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                                </svg>
+                                                <i class="fas fa-file-export"></i>
                                                 <span class="btn-text">Sitzplan exportieren</span>
                                             </button>
                                         </div>
@@ -248,9 +244,7 @@
                                             <i class="fas fa-folder"></i> <span class="btn-text">Projekt</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" onclick="exportGrades()">
-                                            <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                            </svg>
+                                            <i class="fas fa-file-export"></i>
                                             <span class="btn-text">Noten exportieren</span>
                                         </button>
                                         <button class="btn btn-info btn-icon" onclick="toggleSearch('noten')">
@@ -347,9 +341,7 @@
                                         </button>
                                         <button class="btn btn-primary btn-icon" id="gewichtung-toggle-btn" onclick="toggleZeugnisGewichtung()"><i class="fas fa-scale-balanced"></i> Gewichtung: 50 / 50</button>
                                         <button class="btn btn-primary btn-icon" onclick="exportAllStudentCards()">
-                                            <svg class="btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M12 3v14M19 10l-7 7-7-7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                            </svg>
+                                            <i class="fas fa-file-export"></i>
                                             <span class="btn-text">Zeugnisse exportieren</span>
                                         </button>
                                         <button class="btn btn-info btn-icon" onclick="toggleSearch('zeugnis')">
@@ -644,7 +636,7 @@
                     </select>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="exportStudentsList()">Exportieren</button>
+                    <button class="btn btn-primary" onclick="exportStudentsList()"><i class="fas fa-file-export"></i> Exportieren</button>
                 </div>
             </div>
             

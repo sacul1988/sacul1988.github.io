@@ -5776,25 +5776,25 @@ window.splitSpanAtCaret = splitSpanAtCaret;
 // Notizen speichern
 const ZeugnisSliderTexte = {
     muendlich: [
-        'Beteiligt sich häufig am Unterrichtsgespräch. Die Beiträge zeigen eine vernetzte Denkweise und eigenständige Schlussfolgerungen.',
-        'Beteiligt sich regelmäßig am Unterricht. Die Beiträge zeigen ein inhaltsbezogenes Verständnis und ein gutes Grundwissen.',
-        'Beteiligt sich gelegentlich am Unterricht. Die Beiträge sind inhaltlich korrekt, werden jedoch noch zu selten eingebracht.',
-        'Meldet sich eher selten. Die mündliche Beteiligung ist insgesamt zu gering.',
-        'Beteiligt sich durch Meldungen kaum oder gar nicht an Unterrichtsgesprächen.'
+        'Beteiligt sich häufig und aktiv am Unterrichtsgespräch. Die Beiträge zeigen eine vernetzte Denkweise und eigenständige Schlussfolgerungen.',
+        'Beteiligt sich regelmäßig am Unterricht. Die Beiträge zeigen ein inhaltsbezogenes Verständnis.',
+        'Beteiligt sich gelegentlich am Unterricht. Mündliche Beiträge werden jedoch insgesamt etwas zu selten eingebracht.',
+        'Beteiligt sich nur sehr selten am Unterricht. Die mündliche Beteiligung ist insgesamt deutlich zu gering.',
+        'Eine mündliche Mitarbeit im Unterricht ist im Wesentlichen nicht vorhanden.'
     ],
     arbeitsphase: [
-        'Zeigt eine vorbildliche Arbeitsweise: zielgerichtet, selbstständig und sehr zügig. Aufgaben werden vollständig, sorgfältig und fehlerfrei erledigt.',
-        'Arbeitet überwiegend selbstständig und konzentriert. Aufgaben werden zuverlässig, vollständig und ordentlich bearbeitet.',
+        'Vorbildliche Arbeitsweise: zielgerichtet, selbstständig, vollständig, sorgfältig und zügig.',
+        'Überwiegend selbstständig und konzentriert. Aufgaben werden zuverlässig, vollständig und ordentlich bearbeitet.',
         'Benötigt gelegentlich Aufforderungen zur Weiterarbeit. Nach einer Aufforderung wird die Arbeit zuverlässig fortgesetzt. Aufgaben werden überwiegend vollständig und korrekt bearbeitet.',
-        'Benötigt regelmäßig Aufforderungen zur Weiterarbeit. Aufgaben werden teilweise nur unvollständig oder unkonzentriert bearbeitet.',
-        'Selbstständiges Arbeiten gelingt überwiegend nicht. Trotz Aufforderung werden Aufgaben oft nur unvollständig, sehr oberflächlich oder nicht bearbeitet.'
+        'Benötigt regelmäßig Aufforderungen zur Weiterarbeit. Aufgaben werden teilweise nur unvollständig oder oberflächlich bearbeitet.',
+        'Selbstständiges Arbeiten gelingt überwiegend nicht. Trotz Aufforderung werden Aufgaben oft nur unvollständig oder nicht bearbeitet.'
     ],
     stoerungen: [
-        'Verhält sich durchgehend vorbildlich und trägt aktiv zu einem positiven Lernklima bei.',
-        'Verhält sich überwiegend ruhig. Seltene Ablenkungen oder Störungen unterbrechen die Arbeitsruhe allenfalls sehr kurzfristig.',
+        'Verhält sich durchgehend ruhig und trägt aktiv zu einem positiven Lernklima bei.',
+        'Verhält sich überwiegend ruhig. Sehr seltene Ablenkungen oder Störungen unterbrechen die Arbeitsruhe allenfalls nur sehr kurzfristig.',
         'Gelegentliche Störungen beeinträchtigen die Arbeitsruhe der Klasse oder die eigene Konzentration zeitweise.',
         'Regelmäßige Störungen und Ablenkungen beeinträchtigen den Unterricht und die eigene Arbeit.',
-        'Massive, wiederkehrende Störungen belasten den Unterricht für alle Beteiligten erheblich.'
+        'Massive, wiederkehrende Störungen belasten teilweise den Unterricht für alle Beteiligten so erheblich, dass Maßnahmen getroffen werden müssen.'
     ]
 };
 
