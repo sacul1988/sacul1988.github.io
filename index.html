@@ -414,12 +414,13 @@
 
                                     <div class="form-group zt-textarea-group">
                                         <label for="zt-beobachtungen">Beobachtungen &amp; Gedanken</label>
-                                        <textarea id="zt-beobachtungen" class="form-control zt-textarea"></textarea>
+                                        <div class="zt-textarea-wrap">
+                                            <textarea id="zt-beobachtungen" class="form-control zt-textarea"></textarea>
+                                            <button class="btn btn-primary btn-icon zt-generate-btn" id="zt-gen-btn" onclick="ztGenerate()">
+                                                <i class="fas fa-wand-magic-sparkles"></i>
+                                            </button>
+                                        </div>
                                     </div>
-
-                                    <button class="btn btn-primary btn-icon zt-generate-btn" id="zt-gen-btn" onclick="ztGenerate()">
-                                        <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Text generieren</span>
-                                    </button>
 
                                     </div>
                                 </div>
@@ -508,6 +509,31 @@
                     </div>
                     <!-- Adressbuch- und Zeugnistexte-Module werden per JS hierher verschoben -->
                 </div>
+            </div>
+        </div>
+
+        <!-- Mündliche Note: Vollbild-Fenster mit Textbausteinen -->
+        <div id="muendlich-overlay" class="muendlich-overlay">
+            <div class="muendlich-window">
+                <div class="muendlich-topbar">
+                    <button class="topbar-btn" type="button" title="Schließen" aria-label="Schließen" onclick="closeMuendlichWindow()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="muendlich-title">
+                        <span class="muendlich-title-label">Mündliche Note</span>
+                        <span class="muendlich-student-name" id="muendlich-student-name"></span>
+                    </div>
+                    <div class="muendlich-nav">
+                        <button class="topbar-btn" type="button" id="muendlich-prev-btn" title="Vorheriger Schüler" aria-label="Vorheriger Schüler" onclick="muendlichNav(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="topbar-btn" type="button" id="muendlich-next-btn" title="Nächster Schüler" aria-label="Nächster Schüler" onclick="muendlichNav(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="muendlich-summary" id="muendlich-summary"></div>
+                <div class="muendlich-body" id="muendlich-body"></div>
             </div>
         </div>
 
@@ -1232,6 +1258,11 @@
                 }
             }
 
+            // Eigene Bausteine für die mündliche Note synchronisieren
+            if (shouldApplyFormulierungen && Array.isArray(cloudData.muendlichBausteine)) {
+                localStorage.setItem('muendlichBausteine', JSON.stringify(cloudData.muendlichBausteine));
+            }
+
             // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
             // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
             if (Array.isArray(cloudData.termine)) {
@@ -1303,6 +1334,7 @@
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
                     formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]'),
                     zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
+                    muendlichBausteine: JSON.parse(localStorage.getItem('muendlichBausteine') || '[]'),
                     contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
                 };

@@ -2002,99 +2002,461 @@ select.form-control {
     box-shadow: none;
 }
 
-.zeugnis-slider-wrapper {
+/* ===== Mündliche Note: Panel auf der Zeugnis-Karte ===== */
+.zeugnis-muendlich-wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
 }
 
-.zeugnis-slider-wrapper > h4 {
+.zeugnis-muendlich-wrapper > h4 {
     margin-bottom: 10px;
 }
 
-.zeugnis-slider-panel {
+.zeugnis-muendlich-panel {
+    position: relative;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     padding: 16px;
     background: #fff;
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
 
+.zeugnis-muendlich-panel:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 3px 12px rgba(67, 97, 238, 0.12);
+}
 
+/* Leerer Zustand: einladender Hinweis exakt in der Mitte */
+.muendlich-panel-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+    color: var(--grey-color);
+}
 
-.zeugnis-slider-item {
+.muendlich-panel-empty i {
+    font-size: 1.8rem;
+    color: #c7d2fe;
+    margin-bottom: 4px;
+}
+
+.muendlich-panel-empty span {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.muendlich-panel-empty small {
+    font-size: 0.78rem;
+    color: var(--grey-color);
+}
+
+.muendlich-mini-chips {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.zeugnis-slider-label {
-    font-size: 0.85rem;
-    font-weight: 600;
+.muendlich-mini-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.78rem;
     color: var(--dark-color);
+    line-height: 1.4;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--chip-color, #6c757d);
+    border-radius: 8px;
+    padding: 6px 10px;
 }
 
-.zeugnis-slider-row {
+.muendlich-mini-note {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--chip-color, #6c757d);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.muendlich-empty-hint {
+    font-size: 0.82rem;
+    color: var(--grey-color);
+    font-style: italic;
+    margin: 0;
+}
+
+.muendlich-manuell-hint {
+    font-size: 0.75rem;
+    color: var(--grey-color);
+    font-weight: 400;
+}
+
+/* ===== Mündliche Note: Vollbild-Fenster ===== */
+.muendlich-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg-color);
+    background-image: linear-gradient(180deg, rgba(67, 97, 238, 0.045) 0%, rgba(67, 97, 238, 0) 320px);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+}
+.muendlich-overlay.open { display: flex; }
+
+.muendlich-window {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.muendlich-topbar {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 16px 16px 10px;
+    flex-shrink: 0;
 }
 
-/* Wrapper für Slider + Trennstrich */
-.zeugnis-slider-wrap {
+.muendlich-title {
     flex: 1;
-    position: relative;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+
+.muendlich-title-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--grey-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.muendlich-student-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.muendlich-nav {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.muendlich-nav .topbar-btn:disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+/* Zusammenfassung: Note + manuelle Anpassung */
+.muendlich-summary {
+    flex-shrink: 0;
+    margin: 0 16px 12px;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.muendlich-summary-row {
     display: flex;
     align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.zeugnis-slider {
-    width: 100%;
-    accent-color: var(--primary-color);
-    cursor: pointer;
-}
-
-/* Kein senkrechter Trenner – nur die Schraffur-Zone unten */
-.zeugnis-off-sep {
-    display: none;
-}
-
-/* Schraffur-Hintergrund für die "Aus"-Zone (rechts des Trenners) */
-.zeugnis-slider-wrap::before {
-    content: '';
-    position: absolute;
-    left: calc(80% + 3px);
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 3px;
-    background: repeating-linear-gradient(
-        90deg,
-        #94a3b8 0px, #94a3b8 2px,
-        transparent 2px, transparent 5px
-    );
-    border-radius: 0 2px 2px 0;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.zeugnis-slider-value {
-    font-size: 0.9rem;
+.muendlich-summary-label {
+    font-size: 0.95rem;
     font-weight: 700;
-    color: var(--primary-color);
-    min-width: 16px;
-    text-align: center;
+    color: var(--dark-color);
 }
 
-.zeugnis-slider-text {
-    font-size: 0.78rem;
+.muendlich-summary-badge {
+    margin-right: 0;
+    width: auto;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 17px;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.muendlich-summary-num {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--dark-color);
+}
+
+.muendlich-override-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #7c3aed;
+    background: #f3e8ff;
+    border: 1px solid #d8b4fe;
+    border-radius: 12px;
+    padding: 2px 6px 2px 8px;
+}
+
+.muendlich-override-tag button {
+    border: none;
+    background: none;
+    color: #7c3aed;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+}
+
+.muendlich-override-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.muendlich-override-label {
+    font-size: 0.8rem;
+    font-weight: 600;
     color: var(--grey-color);
-    line-height: 1.4;
-    margin-top: 4px;
-    display: block;
+    flex-shrink: 0;
+}
+
+.muendlich-override-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.muendlich-override-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border-color);
+    background: #fff;
+    color: var(--grey-color);
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.muendlich-override-pill:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.muendlich-override-pill.active {
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+.muendlich-override-pill.active.grade-excellent { background-color: #007bff; }
+.muendlich-override-pill.active.grade-good { background-color: #28a745; }
+.muendlich-override-pill.active.grade-average { background-color: #e6a817; }
+.muendlich-override-pill.active.grade-poor { background-color: #fd7e14; }
+.muendlich-override-pill.active.grade-bad { background-color: #dc143c; }
+
+/* Scrollbarer Inhalt: Kategorien mit Chips */
+.muendlich-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 4px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.muendlich-cat {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow);
+    padding: 16px;
+}
+
+.muendlich-cat h4 {
+    margin: 0 0 12px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--dark-color);
+}
+
+.muendlich-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.muendlich-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px 8px 8px;
+    border-radius: 20px;
+    background: #fff;
+    border: 1.5px solid;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.muendlich-chip-note {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.muendlich-chip.note-1 { border-color: #007bff; color: #0b5ed7; }
+.muendlich-chip.note-1 .muendlich-chip-note { background: #007bff; }
+.muendlich-chip.note-2 { border-color: #28a745; color: #1e7e34; }
+.muendlich-chip.note-2 .muendlich-chip-note { background: #28a745; }
+.muendlich-chip.note-3 { border-color: #e6a817; color: #b3820f; }
+.muendlich-chip.note-3 .muendlich-chip-note { background: #e6a817; }
+.muendlich-chip.note-4 { border-color: #fd7e14; color: #ca630d; }
+.muendlich-chip.note-4 .muendlich-chip-note { background: #fd7e14; }
+.muendlich-chip.note-5 { border-color: #dc143c; color: #b01030; }
+.muendlich-chip.note-5 .muendlich-chip-note { background: #dc143c; }
+
+.muendlich-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.muendlich-chip.selected { color: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18); }
+.muendlich-chip.selected .muendlich-chip-note { background: rgba(255, 255, 255, 0.25); }
+.muendlich-chip.selected.note-1 { background: #007bff; }
+.muendlich-chip.selected.note-2 { background: #28a745; }
+.muendlich-chip.selected.note-3 { background: #e6a817; }
+.muendlich-chip.selected.note-4 { background: #fd7e14; }
+.muendlich-chip.selected.note-5 { background: #dc143c; }
+
+.muendlich-chip-del {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    line-height: 1;
+    opacity: 0.55;
+    flex-shrink: 0;
+}
+.muendlich-chip-del:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.12);
+}
+
+/* Eigener Baustein: Eingabezeile */
+.muendlich-add-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.muendlich-add-row .form-control {
+    flex: 1;
+    min-width: 180px;
+}
+
+.muendlich-note-picker {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.muendlich-note-pick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--pick-color);
+    background: #fff;
+    color: var(--pick-color);
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.muendlich-note-pick.active {
+    background: var(--pick-color);
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.muendlich-add-btn {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .muendlich-summary { margin: 0 10px 10px; }
+    .muendlich-body { padding: 4px 10px 20px; }
+    .muendlich-chip { font-size: 0.78rem; }
 }
 
 .zeugnis-sonstige-avg {
@@ -2132,21 +2494,6 @@ select.form-control {
     font-size: 1rem;
     font-weight: 700;
     color: var(--dark-color);
-}
-
-/* Slider im "Aus"-Zustand (Wert 6) */
-.zeugnis-slider-item.is-off {
-    opacity: 0.4;
-}
-.zeugnis-slider-item.is-off .zeugnis-slider {
-    accent-color: var(--grey-color);
-}
-.zeugnis-slider-item.is-off .zeugnis-slider-value {
-    color: var(--grey-color);
-    font-size: 0.8rem;
-}
-.zeugnis-slider-item.is-off .zeugnis-slider-text {
-    display: none;
 }
 
 /* Summary section spacing */
@@ -3524,7 +3871,6 @@ body.modal-open {
 
 .zt-panel {
     background: #fff;
-    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-lg);
     overflow: hidden;
 }
@@ -3588,17 +3934,55 @@ body.modal-open {
     line-height: 1.6;
 }
 
+.zt-textarea-wrap {
+    position: relative;
+}
+
 .zt-textarea {
     min-height: 150px;
     resize: vertical;
     line-height: 1.6;
+    padding-bottom: 12px;
 }
 
 .zt-generate-btn {
-    width: 100%;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 42px;
+    height: 42px;
+    min-height: unset;
+    padding: 0;
+    margin: 0;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    background: var(--primary-color);
+    color: #fff;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 12px;
-    font-size: 15px;
+    gap: 0;
+    line-height: 1;
+    font-size: 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.zt-generate-btn:hover {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+.zt-generate-btn i {
+    line-height: 1;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.zt-generate-btn .btn-text {
+    display: none;
 }
 
 /* Ergebnis */
@@ -3999,14 +4383,13 @@ body.modal-open {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
 }
 .tool-window-topbar {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 16px;
-    flex-shrink: 0;
 }
 .tool-window-title {
     flex: 1;
@@ -4021,7 +4404,7 @@ body.modal-open {
 }
 .tool-window-body {
     flex: 1 1 auto;
-    overflow-y: auto;
+    overflow-y: visible;
     padding: 0 16px 16px;
 }
 /* Reparentete Module/Panels: Anzeige wird per JS gesteuert */
