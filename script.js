@@ -361,6 +361,10 @@ function showPage(page, classId = null) {
 
 // Modul wechseln
 function showModule(module) {
+    // Beim Verlassen des Noten-Tabs alle Schüler einklappen
+    if (activeModule === 'noten' && module !== 'noten') {
+        collapseAllStudents();
+    }
 
     // Suchfelder bei Modulwechsel schließen und zurücksetzen
     document.querySelectorAll('.search-container').forEach(container => {
@@ -451,13 +455,6 @@ function showModule(module) {
     activeModule = module;
     localStorage.setItem('activeModule', module);
     renderModuleContent();
-    // Nach dem Rendern scrollen – requestAnimationFrame stellt sicher,
-    // dass der Browser den neuen DOM bereits verarbeitet hat
-    requestAnimationFrame(() => {
-        window.scrollTo(0, 0);
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-    });
 }
 
 function isZeugnisNotesTextarea(element) {
@@ -2898,15 +2895,29 @@ function toggleStudentDetails(modul, studentIndex) {
     
     if (originalIndex === -1) return;
     
+    const isExpanded = classes[activeClassId].students[originalIndex].notenExpanded;
+
+    // Akkordeon: vor dem Aufklappen alle anderen einklappen
+    if (!isExpanded) {
+        const sortedStudents = getSortedStudents();
+        classes[activeClassId].students.forEach(s => { s.notenExpanded = false; });
+        sortedStudents.forEach((s, idx) => {
+            const d = safeGetElement(`${modul}studentDetails-${idx}`);
+            const ic = safeGetElement(`${modul}toggleIcon-${idx}`);
+            if (d) d.classList.remove('show');
+            if (ic) ic.classList.remove('rotate');
+        });
+    }
+
     // Zustand umschalten
-    classes[activeClassId].students[originalIndex].notenExpanded = !classes[activeClassId].students[originalIndex].notenExpanded;
-    
+    classes[activeClassId].students[originalIndex].notenExpanded = !isExpanded;
+
     // UI aktualisieren
     const detailsDiv = safeGetElement(`${modul}studentDetails-${studentIndex}`);
     const toggleIcon = safeGetElement(`${modul}toggleIcon-${studentIndex}`);
-    
+
     if (detailsDiv && toggleIcon) {
-        if (detailsDiv.classList.contains('show')) {
+        if (isExpanded) {
             detailsDiv.classList.remove('show');
             toggleIcon.classList.remove('rotate');
         } else {
@@ -5650,6 +5661,7 @@ function renderZeugnisModule() {
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                    <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);" title="Nach oben"><i class="fas fa-arrow-up"></i></button>
                     <button class="btn-back-to-top-circle" onclick="openSearchModal('zeugnis')" title="Suchen"><i class="fas fa-search"></i></button>
                 </div>
             </div>

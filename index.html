@@ -112,7 +112,6 @@
             <!-- Klassendetail-Seite -->
             <div id="class-page" class="page" style="display: none;">
                 <!-- Modulnavigation -->
-                <div class="module-nav-wrapper">
                 <div class="module-nav" id="module-nav">
                     <div class="module-nav-item" data-module="schueler">
                         <button class="btn btn-light" onclick="showModule('schueler')">
@@ -140,7 +139,6 @@
                         </button>
                     </div>
                 </div>
-                </div><!-- end module-nav-wrapper -->
 
                 <!-- Container für Module -->
                 <div id="modules-container">
@@ -239,10 +237,7 @@
                                 <h2>Schriftlich</h2>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
-                                        <button class="btn btn-primary btn-icon" id="collapse-all-btn" onclick="collapseAllStudents()">
-                                            <i class="fas fa-compress-alt"></i> <span class="btn-text">Einklappen</span>
-                                        </button>
-                                        <button class="btn btn-primary btn-icon" onclick="showModal('noten-projekt-modal')">
+<button class="btn btn-primary btn-icon" onclick="showModal('noten-projekt-modal')">
                                             <i class="fas fa-folder"></i> <span class="btn-text">Projekt</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" onclick="exportGrades()">

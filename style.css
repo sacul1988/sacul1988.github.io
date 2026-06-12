@@ -61,7 +61,7 @@ body {
 /* Layout containers */
 .container {
     margin: 0 auto;
-    padding: 0 16px 16px;
+    padding: 16px;
 }
 
 /* Card components */
@@ -642,29 +642,6 @@ select.form-control {
 .module-nav::-webkit-scrollbar {
     height: 0;
     display: none;
-}
-.module-nav-wrapper {
-    position: sticky;
-    top: 74px;
-    z-index: 101;
-}
-/* Deckt die oberen Rundungs-Ecken der Tab-Leiste mit App-Hintergrund ab,
-   damit beim Scrollen oben kein Inhalt durchscheint – ohne Balken unten.
-   Ragt leicht in den Topbar hinein, damit keine Naht entsteht. */
-.module-nav-wrapper::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: -16px;
-    right: -16px;
-    height: 30px;
-    z-index: -1;
-    background-color: var(--bg-color);
-    background-image: linear-gradient(180deg, rgba(67, 97, 238, 0.045) 0%, rgba(67, 97, 238, 0) 320px);
-    background-attachment: fixed;
-}
-.module-nav-wrapper .module-nav {
-    margin-bottom: 16px;
 }
 
 .module-nav-item {
@@ -3894,16 +3871,8 @@ body.modal-open {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 0;
-    padding-bottom: 14px;
+    margin-bottom: 14px;
     min-height: 44px;
-    padding-top: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background-color: var(--bg-color);
-    background-image: linear-gradient(180deg, rgba(67, 97, 238, 0.045) 0%, rgba(67, 97, 238, 0) 320px);
-    background-attachment: fixed;
 }
 .topbar-btn {
     width: 42px;
