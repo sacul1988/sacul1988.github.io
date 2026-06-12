@@ -5317,21 +5317,25 @@ function toggleZeugnisView() {
     renderZeugnisModule();
 }
 
+// Durchschnitt der aktiven (nicht auf "Aus" gestellten) Slider berechnen
+function calcSonstigeAvg(sl) {
+    const active = [sl.muendlich ?? 3, sl.arbeitsphase ?? 3, sl.stoerungen ?? 3].filter(v => v !== 6);
+    if (active.length === 0) return null;
+    return active.reduce((a, b) => a + b, 0) / active.length;
+}
+
 function calculateFinalNumericValue(student) {
     const average = calculateProjectAverage(student.projects);
     const writtenAvg = average ? parseFloat(average.exact) : null;
-    const sl = student.sonstigeSlider || {};
-    const v1 = sl.muendlich ?? 3;
-    const v2 = sl.arbeitsphase ?? 3;
-    const v3 = sl.stoerungen ?? 3;
-    const sonstigeAvg = (v1 + v2 + v3) / 3;
-    if (writtenAvg !== null) {
+    const sonstigeAvg = calcSonstigeAvg(student.sonstigeSlider || {});
+    if (writtenAvg !== null && sonstigeAvg !== null) {
         const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
         const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
         const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
         return writtenAvg * wSchrift + sonstigeAvg * wSonstig;
     }
-    return sonstigeAvg;
+    if (writtenAvg !== null) return writtenAvg;
+    return sonstigeAvg; // kann null sein wenn alle Slider "Aus"
 }
 
 // Hilfsfunktion zur Generierung des HTML für die Zeugnisnoten-Auswahl mit integriertem Notenvorschlag
@@ -5542,36 +5546,57 @@ function renderZeugnisModule() {
                         <div class="zeugnis-slider-wrapper">
                             <h4>Mündlich (${student.name})</h4>
                         <div class="zeugnis-slider-panel">
-                            ${(() => { const sl = student.sonstigeSlider || {}; const s1 = sl.muendlich ?? 3; const s2 = sl.arbeitsphase ?? 3; const s3 = sl.stoerungen ?? 3; const avgN = (s1+s2+s3)/3; const avgLabel = numericToGradeWithTendency(avgN); const avgBase = parseInt(avgLabel); const cmap={1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad',6:'grade-very-bad'}; return `
-                            <div class="zeugnis-slider-item">
+                            ${(() => {
+                                const sl = student.sonstigeSlider || {};
+                                const s1 = sl.muendlich ?? 3;
+                                const s2 = sl.arbeitsphase ?? 3;
+                                const s3 = sl.stoerungen ?? 3;
+                                const active = [s1, s2, s3].filter(v => v !== 6);
+                                const avgN = active.length > 0 ? active.reduce((a,b)=>a+b,0)/active.length : null;
+                                const avgLabel = avgN !== null ? numericToGradeWithTendency(avgN) : '–';
+                                const avgBase = parseInt(avgLabel);
+                                const cmap = {1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad',6:'grade-very-bad'};
+                                const avgBadgeCls = avgN !== null ? (cmap[avgBase] || 'grade-average') : 'grade-average';
+                                const avgNumText = avgN !== null ? `(${avgN.toFixed(2)})` : '';
+                                return `
+                            <div class="zeugnis-slider-item${s1===6?' is-off':''}">
                                 <span class="zeugnis-slider-label">Mündliche Beteiligung</span>
                                 <div class="zeugnis-slider-row">
-                                    <input type="range" min="1" max="5" step="1" value="${s1}" class="zeugnis-slider" id="slider-muendlich-${index}" oninput="updateSonstigeNote(${index})">
-                                    <span class="zeugnis-slider-value" id="slider-muendlich-val-${index}">${s1}</span>
+                                    <div class="zeugnis-slider-wrap">
+                                        <input type="range" min="1" max="6" step="1" value="${s1}" class="zeugnis-slider" id="slider-muendlich-${index}" oninput="updateSonstigeNote(${index})">
+                                        <span class="zeugnis-off-sep" aria-hidden="true"></span>
+                                    </div>
+                                    <span class="zeugnis-slider-value" id="slider-muendlich-val-${index}">${s1===6?'Aus':s1}</span>
                                 </div>
-                                <span class="zeugnis-slider-text" id="slider-muendlich-text-${index}">${ZeugnisSliderTexte.muendlich[s1-1]}</span>
+                                <span class="zeugnis-slider-text" id="slider-muendlich-text-${index}">${s1===6?'':ZeugnisSliderTexte.muendlich[s1-1]}</span>
                             </div>
-                            <div class="zeugnis-slider-item">
-                                <span class="zeugnis-slider-label">Arbeitsphase</span>
+                            <div class="zeugnis-slider-item${s2===6?' is-off':''}">
+                                <span class="zeugnis-slider-label">Selbstständigkeit</span>
                                 <div class="zeugnis-slider-row">
-                                    <input type="range" min="1" max="5" step="1" value="${s2}" class="zeugnis-slider" id="slider-arbeitsphase-${index}" oninput="updateSonstigeNote(${index})">
-                                    <span class="zeugnis-slider-value" id="slider-arbeitsphase-val-${index}">${s2}</span>
+                                    <div class="zeugnis-slider-wrap">
+                                        <input type="range" min="1" max="6" step="1" value="${s2}" class="zeugnis-slider" id="slider-arbeitsphase-${index}" oninput="updateSonstigeNote(${index})">
+                                        <span class="zeugnis-off-sep" aria-hidden="true"></span>
+                                    </div>
+                                    <span class="zeugnis-slider-value" id="slider-arbeitsphase-val-${index}">${s2===6?'Aus':s2}</span>
                                 </div>
-                                <span class="zeugnis-slider-text" id="slider-arbeitsphase-text-${index}">${ZeugnisSliderTexte.arbeitsphase[s2-1]}</span>
+                                <span class="zeugnis-slider-text" id="slider-arbeitsphase-text-${index}">${s2===6?'':ZeugnisSliderTexte.arbeitsphase[s2-1]}</span>
                             </div>
-                            <div class="zeugnis-slider-item">
-                                <span class="zeugnis-slider-label">Ruhe</span>
+                            <div class="zeugnis-slider-item${s3===6?' is-off':''}">
+                                <span class="zeugnis-slider-label">Störungen</span>
                                 <div class="zeugnis-slider-row">
-                                    <input type="range" min="1" max="5" step="1" value="${s3}" class="zeugnis-slider" id="slider-stoerungen-${index}" oninput="updateSonstigeNote(${index})">
-                                    <span class="zeugnis-slider-value" id="slider-stoerungen-val-${index}">${s3}</span>
+                                    <div class="zeugnis-slider-wrap">
+                                        <input type="range" min="1" max="6" step="1" value="${s3}" class="zeugnis-slider" id="slider-stoerungen-${index}" oninput="updateSonstigeNote(${index})">
+                                        <span class="zeugnis-off-sep" aria-hidden="true"></span>
+                                    </div>
+                                    <span class="zeugnis-slider-value" id="slider-stoerungen-val-${index}">${s3===6?'Aus':s3}</span>
                                 </div>
-                                <span class="zeugnis-slider-text" id="slider-stoerungen-text-${index}">${ZeugnisSliderTexte.stoerungen[s3-1]}</span>
+                                <span class="zeugnis-slider-text" id="slider-stoerungen-text-${index}">${s3===6?'':ZeugnisSliderTexte.stoerungen[s3-1]}</span>
                             </div>
                             <div class="zeugnis-sonstige-avg" id="sonstige-avg-${index}">
                                 <span class="zeugnis-sonstige-avg-label">Durchschnitt (Mündlich):</span>
                                 <div class="zeugnis-sonstige-avg-right">
-                                    <span class="grade-badge ${cmap[avgBase] || 'grade-average'} zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">${avgLabel}</span>
-                                    <span class="zeugnis-sonstige-avg-num" id="sonstige-avg-num-${index}">(${avgN.toFixed(2)})</span>
+                                    <span class="grade-badge ${avgBadgeCls} zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">${avgLabel}</span>
+                                    <span class="zeugnis-sonstige-avg-num" id="sonstige-avg-num-${index}">${avgNumText}</span>
                                 </div>
                             </div>`; })()}
                         </div>
@@ -5755,17 +5780,17 @@ const ZeugnisSliderTexte = {
         'Beteiligt sich kaum oder gar nicht am Unterricht. Auch auf Nachfrage können teilweise keine verwertbaren Beiträge erbracht werden.'
     ],
     arbeitsphase: [
-        'Zeigt eine vorbildliche Arbeitsweise: zielgerichtet, vollkommen selbstständig und sehr zügig. Aufgaben werden ausnahmslos vollständig, äußerst sorgfältig und fehlerfrei erledigt.',
+        'Zeigt eine vorbildliche Arbeitsweise: zielgerichtet, selbstständig und sehr zügig. Aufgaben werden vollständig, sorgfältig und fehlerfrei erledigt.',
         'Arbeitet überwiegend selbstständig und konzentriert. Aufgaben werden zuverlässig, vollständig und ordentlich bearbeitet.',
-        'Benötigt gelegentlich Aufforderungen zur Weiterarbeit. Nach einer Aufforderung wird die Arbeit zuverlässig fortgesetzt; Aufgaben werden meistens vollständig bearbeitet.',
-        'Benötigt häufig Aufforderungen zur Weiterarbeit. Aufgaben werden dabei teilweise nur unvollständig oder unkonzentriert bearbeitet.',
-        'Selbstständiges Arbeiten gelingt kaum. Trotz wiederholter Aufforderung werden Aufgaben oft nur unvollständig, sehr oberflächlich oder gar nicht bearbeitet.'
+        'Benötigt gelegentlich Aufforderungen zur Weiterarbeit. Nach einer Aufforderung wird die Arbeit zuverlässig fortgesetzt. Aufgaben werden noch überwiegend vollständig und korrekt bearbeitet.',
+        'Benötigt regelmäßig Aufforderungen zur Weiterarbeit. Aufgaben werden teilweise nur unvollständig oder unkonzentriert bearbeitet.',
+        'Selbstständiges Arbeiten gelingt überwiegend nicht. Trotz Aufforderung werden Aufgaben oft nur unvollständig, sehr oberflächlich oder nicht bearbeitet.'
     ],
     stoerungen: [
         'Verhält sich durchgehend vorbildlich und trägt aktiv zu einem positiven Lernklima bei.',
         'Verhält sich überwiegend ruhig. Seltene Ablenkungen oder Störungen unterbrechen die Arbeitsruhe allenfalls sehr kurzfristig.',
         'Gelegentliche Störungen beeinträchtigen die Arbeitsruhe der Klasse oder die eigene Konzentration zeitweise.',
-        'Verhält sich häufig störend. Störungen und Ablenkungen beeinträchtigen den Unterricht und die eigene Arbeit regelmäßig.',
+        'Regelmäßige Störungen und Ablenkungen beeinträchtigen den Unterricht und die eigene Arbeit.',
         'Massive, wiederkehrende Störungen belasten den Unterricht für alle Beteiligten erheblich.'
     ]
 };
@@ -5774,30 +5799,51 @@ function updateSonstigeNote(index) {
     const v1 = parseInt(document.getElementById(`slider-muendlich-${index}`)?.value || 3);
     const v2 = parseInt(document.getElementById(`slider-arbeitsphase-${index}`)?.value || 3);
     const v3 = parseInt(document.getElementById(`slider-stoerungen-${index}`)?.value || 3);
-    document.getElementById(`slider-muendlich-val-${index}`).textContent = v1;
-    document.getElementById(`slider-arbeitsphase-val-${index}`).textContent = v2;
-    document.getElementById(`slider-stoerungen-val-${index}`).textContent = v3;
+
+    // Wert-Anzeige: "Aus" wenn 6, sonst Ziffer
+    const valEl1 = document.getElementById(`slider-muendlich-val-${index}`);
+    const valEl2 = document.getElementById(`slider-arbeitsphase-val-${index}`);
+    const valEl3 = document.getElementById(`slider-stoerungen-val-${index}`);
+    if (valEl1) valEl1.textContent = v1 === 6 ? 'Aus' : v1;
+    if (valEl2) valEl2.textContent = v2 === 6 ? 'Aus' : v2;
+    if (valEl3) valEl3.textContent = v3 === 6 ? 'Aus' : v3;
+
+    // is-off-Klasse setzen/entfernen
+    [['slider-muendlich-', v1], ['slider-arbeitsphase-', v2], ['slider-stoerungen-', v3]].forEach(([pfx, val]) => {
+        const item = document.getElementById(`${pfx}${index}`)?.closest('.zeugnis-slider-item');
+        if (item) item.classList.toggle('is-off', val === 6);
+    });
+
+    // Speichern
     if (activeClassId !== null && classes[activeClassId]?.students?.[index]) {
         classes[activeClassId].students[index].sonstigeSlider = { muendlich: v1, arbeitsphase: v2, stoerungen: v3 };
         saveData(index);
     }
-    const avgNum = (v1 + v2 + v3) / 3;
-    const avgLabel = numericToGradeWithTendency(avgNum);
-    const avgBase = parseInt(avgLabel);
-    const avgColorMap = { 1: 'grade-excellent', 2: 'grade-good', 3: 'grade-average', 4: 'grade-poor', 5: 'grade-bad', 6: 'grade-very-bad' };
+
+    // Durchschnitt nur aus aktiven Slidern
+    const active = [v1, v2, v3].filter(v => v !== 6);
     const avgEl = document.getElementById(`sonstige-avg-val-${index}`);
-    if (avgEl) {
-        avgEl.textContent = avgLabel;
-        avgEl.className = `grade-badge zeugnis-sonstige-avg-value ${avgColorMap[avgBase] || 'grade-average'}`;
-    }
     const avgNumEl = document.getElementById(`sonstige-avg-num-${index}`);
-    if (avgNumEl) avgNumEl.textContent = `(${avgNum.toFixed(2)})`;
+    if (active.length === 0) {
+        if (avgEl) { avgEl.textContent = '–'; avgEl.className = 'grade-badge zeugnis-sonstige-avg-value grade-average'; }
+        if (avgNumEl) avgNumEl.textContent = '';
+    } else {
+        const avgNum = active.reduce((a, b) => a + b, 0) / active.length;
+        const avgLabel = numericToGradeWithTendency(avgNum);
+        const avgBase = parseInt(avgLabel);
+        const avgColorMap = { 1: 'grade-excellent', 2: 'grade-good', 3: 'grade-average', 4: 'grade-poor', 5: 'grade-bad', 6: 'grade-very-bad' };
+        if (avgEl) { avgEl.textContent = avgLabel; avgEl.className = `grade-badge zeugnis-sonstige-avg-value ${avgColorMap[avgBase] || 'grade-average'}`; }
+        if (avgNumEl) avgNumEl.textContent = `(${avgNum.toFixed(2)})`;
+    }
+
+    // Beschreibungstexte
     const t = document.getElementById(`slider-muendlich-text-${index}`);
-    if (t) t.textContent = ZeugnisSliderTexte.muendlich[v1 - 1];
+    if (t) t.textContent = v1 === 6 ? '' : ZeugnisSliderTexte.muendlich[v1 - 1];
     const t2 = document.getElementById(`slider-arbeitsphase-text-${index}`);
-    if (t2) t2.textContent = ZeugnisSliderTexte.arbeitsphase[v2 - 1];
+    if (t2) t2.textContent = v2 === 6 ? '' : ZeugnisSliderTexte.arbeitsphase[v2 - 1];
     const t3 = document.getElementById(`slider-stoerungen-text-${index}`);
-    if (t3) t3.textContent = ZeugnisSliderTexte.stoerungen[v3 - 1];
+    if (t3) t3.textContent = v3 === 6 ? '' : ZeugnisSliderTexte.stoerungen[v3 - 1];
+
     updateZeugnisNoteVorschlag(index);
 }
 
@@ -5904,20 +5950,20 @@ function calculateSuggestedGrade(student, studentIndex) {
     const average = calculateProjectAverage(student.projects);
     const writtenAvg = average ? parseFloat(average.exact) : null;
 
-    const sl = student.sonstigeSlider || {};
-    const sv1 = sl.muendlich ?? 3;
-    const sv2 = sl.arbeitsphase ?? 3;
-    const sv3 = sl.stoerungen ?? 3;
-    const sonstigeAvg = (sv1 + sv2 + sv3) / 3;
+    const sonstigeAvg = calcSonstigeAvg(student.sonstigeSlider || {});
 
     let finalValue;
-    if (writtenAvg !== null) {
+    if (writtenAvg !== null && sonstigeAvg !== null) {
         const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
         const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
         const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
         finalValue = writtenAvg * wSchrift + sonstigeAvg * wSonstig;
-    } else {
+    } else if (writtenAvg !== null) {
+        finalValue = writtenAvg;
+    } else if (sonstigeAvg !== null) {
         finalValue = sonstigeAvg;
+    } else {
+        return null;
     }
 
     if (finalValue <= 1.5) return 'sehr gut';
@@ -5949,18 +5995,16 @@ function getSuggestedGradeWithTendency(student, studentIndex) {
     // Compute finalValue the same way calculateSuggestedGrade does, for tendency detection
     const average2 = calculateProjectAverage(student.projects);
     const writtenAvg = average2 ? parseFloat(average2.exact) : null;
-    const sl2 = student.sonstigeSlider || {};
-    const sv1 = sl2.muendlich ?? 3;
-    const sv2 = sl2.arbeitsphase ?? 3;
-    const sv3 = sl2.stoerungen ?? 3;
-    const sonstigeAvg = (sv1 + sv2 + sv3) / 3;
+    const sonstigeAvg = calcSonstigeAvg(student.sonstigeSlider || {});
 
     let finalValue;
-    if (writtenAvg !== null) {
+    if (writtenAvg !== null && sonstigeAvg !== null) {
         const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
         const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
         const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
         finalValue = writtenAvg * wSchrift + sonstigeAvg * wSonstig;
+    } else if (writtenAvg !== null) {
+        finalValue = writtenAvg;
     } else {
         finalValue = sonstigeAvg;
     }
@@ -6089,16 +6133,18 @@ function exportAllStudentCards() {
         const sv1 = sl.muendlich ?? 3;
         const sv2 = sl.arbeitsphase ?? 3;
         const sv3 = sl.stoerungen ?? 3;
-        const avgN = (sv1 + sv2 + sv3) / 3;
-        const avgLabel = numericToGradeWithTendency(avgN);
+        const activeVals = [sv1, sv2, sv3].filter(v => v !== 6);
+        const avgN = activeVals.length > 0 ? activeVals.reduce((a,b)=>a+b,0)/activeVals.length : null;
+        const avgLabel = avgN !== null ? numericToGradeWithTendency(avgN) : '–';
         const avgBase = parseInt(avgLabel);
         const avgColorClass = {1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad',6:'grade-very-bad'}[avgBase] || 'grade-average';
         const avgColor = exportGradeColors[avgColorClass] || '#e6a817';
-        const sliderLabels = ['Mündliche Beteiligung', 'Arbeitsphase', 'Ruhe'];
-        const sliderTexts = [ZeugnisSliderTexte.muendlich[sv1-1], ZeugnisSliderTexte.arbeitsphase[sv2-1], ZeugnisSliderTexte.stoerungen[sv3-1]];
+        const sliderLabels = ['Mündliche Beteiligung', 'Selbstständigkeit', 'Störungen'];
+        const sliderTexts = [ZeugnisSliderTexte.muendlich[sv1-1] || '', ZeugnisSliderTexte.arbeitsphase[sv2-1] || '', ZeugnisSliderTexte.stoerungen[sv3-1] || ''];
         const sliderVals = [sv1, sv2, sv3];
         const muendlichHtml = sliderLabels.map((label, i) => {
             const val = sliderVals[i];
+            if (val === 6) return ''; // "Aus"-Slider nicht exportieren
             const color = exportSliderColors[val] || '#6c757d';
             return `<div class="slider-item">
                 <span class="slider-circle" style="background:${color}">${val}</span>
@@ -6107,12 +6153,12 @@ function exportAllStudentCards() {
                     <div class="slider-desc">${sliderTexts[i]}</div>
                 </div>
             </div>`;
-        }).join('') + `
+        }).join('') + (avgN !== null ? `
         <div class="avg-row">
             <span>Durchschnitt (Mündlich):</span>
             <span class="grade-badge" style="background:${avgColor}">${avgLabel}</span>
             <span class="avg-num">(${avgN.toFixed(2)})</span>
-        </div>`;
+        </div>` : '');
 
         // Sonstiges
         const homework = student.homework || 0;

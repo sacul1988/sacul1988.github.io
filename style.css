@@ -2052,10 +2052,42 @@ select.form-control {
     gap: 10px;
 }
 
-.zeugnis-slider {
+/* Wrapper für Slider + Trennstrich */
+.zeugnis-slider-wrap {
     flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.zeugnis-slider {
+    width: 100%;
     accent-color: var(--primary-color);
     cursor: pointer;
+}
+
+/* Kein senkrechter Trenner – nur die Schraffur-Zone unten */
+.zeugnis-off-sep {
+    display: none;
+}
+
+/* Schraffur-Hintergrund für die "Aus"-Zone (rechts des Trenners) */
+.zeugnis-slider-wrap::before {
+    content: '';
+    position: absolute;
+    left: calc(80% + 3px);
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 3px;
+    background: repeating-linear-gradient(
+        90deg,
+        #94a3b8 0px, #94a3b8 2px,
+        transparent 2px, transparent 5px
+    );
+    border-radius: 0 2px 2px 0;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .zeugnis-slider-value {
@@ -2109,6 +2141,21 @@ select.form-control {
     font-size: 1rem;
     font-weight: 700;
     color: var(--dark-color);
+}
+
+/* Slider im "Aus"-Zustand (Wert 6) */
+.zeugnis-slider-item.is-off {
+    opacity: 0.4;
+}
+.zeugnis-slider-item.is-off .zeugnis-slider {
+    accent-color: var(--grey-color);
+}
+.zeugnis-slider-item.is-off .zeugnis-slider-value {
+    color: var(--grey-color);
+    font-size: 0.8rem;
+}
+.zeugnis-slider-item.is-off .zeugnis-slider-text {
+    display: none;
 }
 
 /* Summary section spacing */
