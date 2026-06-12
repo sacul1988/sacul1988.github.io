@@ -361,6 +361,7 @@ function showPage(page, classId = null) {
 
 // Modul wechseln
 function showModule(module) {
+
     // Suchfelder bei Modulwechsel schließen und zurücksetzen
     document.querySelectorAll('.search-container').forEach(container => {
         container.style.display = 'none';
@@ -450,6 +451,13 @@ function showModule(module) {
     activeModule = module;
     localStorage.setItem('activeModule', module);
     renderModuleContent();
+    // Nach dem Rendern scrollen – requestAnimationFrame stellt sicher,
+    // dass der Browser den neuen DOM bereits verarbeitet hat
+    requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    });
 }
 
 function isZeugnisNotesTextarea(element) {
@@ -564,6 +572,14 @@ function openToolWindow(which) {
 
     panel.classList.add('active');
     window._activeToolWindow = which;
+    window._toolWindowOrigin = currentPage;
+
+    const titleEl = document.getElementById('tool-window-title');
+    if (titleEl) {
+        const titles = { kalender: 'Kalender', kontakte: 'Adressbuch', 'zeugnis-texte': 'Zeugnistextgenerator (Inklusion)' };
+        titleEl.textContent = titles[which] || '';
+    }
+
     overlay.classList.add('open');
     document.body.classList.add('modal-open');
 
@@ -593,6 +609,114 @@ function closeToolWindow() {
 function closeToolWindowOnBackdrop(event) {
     if (event && event.target && event.target.id === 'tool-window-overlay') {
         closeToolWindow();
+    }
+}
+
+function closeToolWindowBack() {
+    closeToolWindow();
+    if (window._toolWindowOrigin !== 'class') {
+        showPage('home');
+    }
+}
+
+// ===== Such-Modal =====
+let _searchModalModule = null;
+
+function openSearchModal(module) {
+    _searchModalModule = module;
+    const titles = { noten: 'Schüler suchen', zeugnis: 'Schüler suchen', kontakte: 'Kontakt suchen' };
+    const titleEl = document.getElementById('search-modal-title');
+    if (titleEl) titleEl.textContent = titles[module] || 'Suchen';
+    const input = document.getElementById('search-modal-input');
+    const suggestions = document.getElementById('search-modal-suggestions');
+    if (input) input.value = '';
+    if (suggestions) { suggestions.innerHTML = ''; suggestions.style.display = 'none'; }
+    showModal('search-modal');
+    requestAnimationFrame(() => { if (input) input.focus(); });
+}
+
+function handleSearchModalInput() {
+    const module = _searchModalModule;
+    const input = document.getElementById('search-modal-input');
+    const suggestions = document.getElementById('search-modal-suggestions');
+    if (!module || !input || !suggestions) return;
+    const query = input.value.toLowerCase().trim();
+    suggestions.innerHTML = '';
+    if (!query) { suggestions.style.display = 'none'; return; }
+
+    let items = [];
+    if (module === 'kontakte') {
+        items = contacts
+            .map((c, i) => ({ label: c.childName || '', index: i }))
+            .filter(c => c.label.toLowerCase().includes(query));
+    } else {
+        const students = (classes[activeClassId] && classes[activeClassId].students) ? classes[activeClassId].students : [];
+        items = students
+            .map((s, i) => ({ label: s.name, index: i }))
+            .filter(s => s.label.toLowerCase().includes(query));
+    }
+
+    if (items.length === 0) {
+        const li = document.createElement('li');
+        li.className = 'no-results';
+        li.textContent = module === 'kontakte' ? 'Keine Kontakte gefunden' : 'Keine Schüler gefunden';
+        suggestions.appendChild(li);
+    } else {
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item.label;
+            li.onclick = () => selectFromSearchModal(item.index);
+            suggestions.appendChild(li);
+        });
+    }
+    suggestions.style.display = 'block';
+}
+
+function handleSearchModalKeydown(event) {
+    const suggestions = document.getElementById('search-modal-suggestions');
+    if (!suggestions) return;
+    const items = Array.from(suggestions.querySelectorAll('li:not(.no-results)'));
+    if (items.length === 0) return;
+    const currentIndex = items.findIndex(li => li.classList.contains('highlighted'));
+    if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const next = currentIndex + 1 < items.length ? currentIndex + 1 : 0;
+        if (currentIndex !== -1) items[currentIndex].classList.remove('highlighted');
+        items[next].classList.add('highlighted');
+        items[next].scrollIntoView({ block: 'nearest' });
+    } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prev = currentIndex - 1 >= 0 ? currentIndex - 1 : items.length - 1;
+        if (currentIndex !== -1) items[currentIndex].classList.remove('highlighted');
+        items[prev].classList.add('highlighted');
+        items[prev].scrollIntoView({ block: 'nearest' });
+    } else if (event.key === 'Enter') {
+        event.preventDefault();
+        const target = currentIndex !== -1 ? items[currentIndex] : items[0];
+        if (target) target.click();
+    }
+}
+
+function selectFromSearchModal(index) {
+    const module = _searchModalModule;
+    _searchModalModule = null;
+    hideModal();
+    if (module === 'kontakte') {
+        setTimeout(() => {
+            const contact = contacts[index];
+            if (!contact) return;
+            const rows = document.querySelectorAll('#contacts-table-body tr');
+            for (const row of rows) {
+                if (row.textContent.includes(contact.childName || '')) {
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    row.style.backgroundColor = '#e3f2fd';
+                    setTimeout(() => { row.style.backgroundColor = ''; }, 2000);
+                    break;
+                }
+            }
+        }, 200);
+    } else {
+        selectStudent(module, index);
     }
 }
 
@@ -798,6 +922,11 @@ window.importIcsFile = importIcsFile;
 window.openToolWindow = openToolWindow;
 window.closeToolWindow = closeToolWindow;
 window.closeToolWindowOnBackdrop = closeToolWindowOnBackdrop;
+window.closeToolWindowBack = closeToolWindowBack;
+window.openSearchModal = openSearchModal;
+window.handleSearchModalInput = handleSearchModalInput;
+window.handleSearchModalKeydown = handleSearchModalKeydown;
+window.selectFromSearchModal = selectFromSearchModal;
 window.initToolWindows = initToolWindows;
 
 /* ============================================================
@@ -2669,7 +2798,7 @@ function renderGradesModule() {
                     <i id="notentoggleIcon-${studentIndex}" class="fas fa-chevron-down toggle-icon ${student.notenExpanded ? 'rotate' : ''}"></i>
                 </div>
                 <div class="student-header-actions" style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
-                    <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); collapseStudentAndScrollToTop('noten', ${studentIndex})" title="Zurück"><i class="fas fa-arrow-up"></i></button>
+                    <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); collapseStudentAndScrollToTop('noten', ${studentIndex})" title="Suchen"><i class="fas fa-search"></i></button>
                 </div>
             </div>
         `;
@@ -5521,7 +5650,7 @@ function renderZeugnisModule() {
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button class="btn-back-to-top-circle" onclick="scrollToTopAndFocusSearch('zeugnis')" title="Zurück"><i class="fas fa-arrow-up"></i></button>
+                    <button class="btn-back-to-top-circle" onclick="openSearchModal('zeugnis')" title="Suchen"><i class="fas fa-search"></i></button>
                 </div>
             </div>
             <div class="card-body">
@@ -5639,23 +5768,7 @@ function collapseStudentAndScrollToTop(module, studentIndex) {
 }
 
 function scrollToTopAndFocusSearch(module) {
-    console.log(`Scroll to top and focus search for ${module} called`);
-    document.documentElement.scrollTop = 0; // Für Chrome, Firefox, IE und Opera
-    document.body.scrollTop = 0; // Für Safari
-    window.scrollTo({ top: 0, behavior: 'auto' }); 
-
-    // Gewünschtes Suchfeld anzeigen und fokussieren
-    const searchContainer = document.getElementById(`search-container-${module}`);
-    if (searchContainer) {
-        searchContainer.style.display = 'block';
-        const input = searchContainer.querySelector('.search-input');
-        if (input) {
-            input.onkeydown = (event) => handleSearchInputKeydown(module, event);
-            input.focus();
-            input.value = '';
-            filterStudents(module);
-        }
-    }
+    openSearchModal(module);
 }
 
 // Spantext bei Tastatureingabe aufteilen, damit der neu getippte Text immer in Standardschriftart (schwarz) ist

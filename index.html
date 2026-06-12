@@ -112,6 +112,7 @@
             <!-- Klassendetail-Seite -->
             <div id="class-page" class="page" style="display: none;">
                 <!-- Modulnavigation -->
+                <div class="module-nav-wrapper">
                 <div class="module-nav" id="module-nav">
                     <div class="module-nav-item" data-module="schueler">
                         <button class="btn btn-light" onclick="showModule('schueler')">
@@ -139,7 +140,8 @@
                         </button>
                     </div>
                 </div>
-                
+                </div><!-- end module-nav-wrapper -->
+
                 <!-- Container für Module -->
                 <div id="modules-container">
                     <!-- Schüler Modul -->
@@ -247,7 +249,7 @@
                                             <i class="fas fa-file-export"></i>
                                             <span class="btn-text">Noten exportieren</span>
                                         </button>
-                                        <button class="btn btn-info btn-icon" onclick="toggleSearch('noten')">
+                                        <button class="btn btn-info btn-icon" onclick="openSearchModal('noten')">
                                             <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
                                         </button>
                                     </div>
@@ -344,7 +346,7 @@
                                             <i class="fas fa-file-export"></i>
                                             <span class="btn-text">Zeugnisse exportieren</span>
                                         </button>
-                                        <button class="btn btn-info btn-icon" onclick="toggleSearch('zeugnis')">
+                                        <button class="btn btn-info btn-icon" onclick="openSearchModal('zeugnis')">
                                             <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
                                         </button>
                                     </div>
@@ -440,7 +442,7 @@
                                         <button class="btn btn-primary btn-icon" onclick="openAddContactModal()">
                                             <i class="fas fa-plus"></i> <span class="btn-text">Kontakt hinzufügen</span>
                                         </button>
-                                        <button class="btn btn-info btn-icon" onclick="toggleSearchContacts()">
+                                        <button class="btn btn-info btn-icon" onclick="openSearchModal('kontakte')">
                                             <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
                                         </button>
                                     </div>
@@ -474,10 +476,13 @@
         </div>
         
         <!-- Globale Werkzeuge: Tool-Fenster (eigenständige Fenster über die Startleisten-Symbole) -->
-        <div id="tool-window-overlay" class="tool-window-overlay" onclick="closeToolWindowOnBackdrop(event)">
-            <div class="tool-window" onclick="event.stopPropagation()">
+        <div id="tool-window-overlay" class="tool-window-overlay">
+            <div class="tool-window">
                 <div class="tool-window-topbar">
-                    <button class="tool-window-close" type="button" title="Schließen" aria-label="Schließen" onclick="closeToolWindow()"><i class="fas fa-times"></i></button>
+                    <button class="topbar-btn" type="button" title="Startseite" aria-label="Startseite" onclick="closeToolWindowBack();">
+                        <i class="fas fa-home"></i>
+                    </button>
+                    <div class="tool-window-title" id="tool-window-title"></div>
                 </div>
                 <div class="tool-window-body" id="tool-window-body">
                     <!-- Kalender-Panel: die Kalenderansicht wird per JS hier eingehängt -->
@@ -817,6 +822,20 @@
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
                 <div id="contact-phones-modal-content" style="margin-top: 10px;"></div>
+            </div>
+
+            <!-- Such-Modal (gemeinsam für Noten, Zeugnis und Kontakte) -->
+            <div id="search-modal" class="modal" style="display: none; max-width: 480px; width: 95%;">
+                <div class="wizard-header">
+                    <h2 id="search-modal-title">Suchen</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
+                <input type="text" id="search-modal-input" class="form-control"
+                       placeholder="Name eingeben..."
+                       style="margin-top: 12px;"
+                       oninput="handleSearchModalInput()"
+                       onkeydown="handleSearchModalKeydown(event)">
+                <ul id="search-modal-suggestions" class="search-suggestions" style="position: static; border-radius: 8px; margin-top: 8px; max-height: 280px; overflow-y: auto; display: none;"></ul>
             </div>
 
             <!-- Kontakt hinzufügen/bearbeiten Modal -->
