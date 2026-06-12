@@ -50,17 +50,9 @@ body {
 }
 
 /* Cloud status bar */
+/* Grüne Status-Leiste entfernt: bleibt unsichtbarer Daten-Träger für den Sync-Status-Kreis */
 .cloud-status-bar {
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    border-radius: var(--border-radius);
-    padding: 7px 14px;
-    margin-bottom: 12px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: #166534;
-    justify-content: space-between;
-    align-items: center;
+    display: none !important;
 }
 
 /* Layout containers */
@@ -1306,148 +1298,99 @@ select.form-control {
     color: var(--primary-color);
 }
 
-/* Improved SweetAlert styling - angepasst an Website-Modals */
-.swal-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1001;
+/* ===== Einheitliche Dialoge (SweetAlert-Ersatz im App-Design) ===== */
+.app-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 1200;
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 15px;
-    cursor: pointer;
-}
-
-.swal-modal {
-    background-color: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    cursor: default;
-    padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    border: none;
-}
-
-.swal-title {
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-    color: var(--primary-color);
-    font-weight: 600;
-    padding: 0;
-    margin: 0 0 15px 0;
-}
-
-.swal-text {
-    color: var(--dark-color);
-    font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 20px;
-    text-align: center !important;
-}
-
-.swal-footer {
-    text-align: center;
-    padding: 15px 0 0 0;
-    margin-top: 20px;
-    border-top: 1px solid #e9ecef;
-    display: flex;
     justify-content: center;
+    padding: 16px;
+    animation: appDialogFade 0.15s ease;
+}
+.app-dialog-overlay.app-dialog-closing {
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+@keyframes appDialogFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.app-dialog {
+    position: relative;
+    background: #fff;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 420px;
+    padding: 28px 24px 22px;
+    text-align: center;
+    animation: appDialogPop 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes appDialogPop {
+    from { opacity: 0; transform: translateY(10px) scale(0.96); }
+    to { opacity: 1; transform: none; }
+}
+.app-dialog-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    line-height: 1;
+    color: var(--primary-color);
+    cursor: pointer;
+    padding: 0 4px;
+    transition: var(--transition);
+}
+.app-dialog-close:hover {
+    opacity: 0.7;
+}
+.app-dialog-icon {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 14px;
+}
+.app-dialog-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+}
+.app-dialog-text {
+    font-size: 0.95rem;
+    color: var(--grey-color);
+    margin: 0 0 22px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.app-dialog-buttons {
+    display: flex;
     gap: 10px;
+    justify-content: center;
     flex-wrap: wrap;
 }
-
-.swal-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-    color: #fff;
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
-    background-color: var(--primary-color);
-    border: 1px solid transparent;
-    padding: 0.4rem 0.75rem;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    border-radius: var(--border-radius);
-    transition: var(--transition);
-    margin: 0;
-    text-decoration: none;
-    min-height: 40px;
-    white-space: nowrap;
+.app-dialog-buttons .btn {
+    min-width: 120px;
+}
+@media (max-width: 600px) {
+    .app-dialog-buttons {
+        flex-direction: column-reverse;
+    }
+    .app-dialog-buttons .btn {
+        width: 100%;
+    }
 }
 
-.swal-button:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.swal-button--cancel {
-    background-color: #e9ecef !important;
-    color: var(--dark-color) !important;
-    border: 1px solid #ced4da !important;
-}
-
-.swal-button--cancel:hover {
-    background-color: #dee2e6 !important;
-    border-color: #adb5bd !important;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.swal-button--danger {
-    background-color: var(--danger-color) !important;
-    color: white !important;
-    border: none;
-}
-
-.swal-button--danger:hover {
-    background-color: #e03131 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(249, 65, 68, 0.3);
-}
-
-.swal-button--confirm {
-    background-color: var(--primary-color) !important;
-    color: white !important;
-    border: none;
-}
-
-.swal-button--confirm:hover {
-    background-color: var(--primary-light) !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
-}
-
-.swal-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
-}
-
-.swal-icon {
-    margin: 10px auto 20px auto;
-}
-
-.swal-icon--warning {
-    border-color: var(--warning-color);
-}
-
-.swal-icon--warning__body,
-.swal-icon--warning__dot {
-    background-color: var(--warning-color);
-}
-
-.swal-icon--error {
-    border-color: var(--danger-color);
-}
-
-.swal-icon--error__line {
-    background-color: var(--danger-color);
-}
+/* SweetAlert-Styles entfernt — Dialoge laufen jetzt über .app-dialog (eigener Ersatz) */
 
 /* Animations */
 @keyframes fadeIn {
@@ -1890,66 +1833,8 @@ select.form-control {
     background: linear-gradient(to right, lightblue 50%, #ffdab9 50%) !important;
 }
 
-/* Spezielle Stile für Projekt-Löschen SweetAlert */
-.swal-button--deleteOne {
-    background-color: var(--warning-color) !important;
-    color: var(--dark-color) !important;
-    border: none;
-    font-weight: 600;
-    min-width: 100px;
-    flex: 1;
-}
-
-.swal-button--deleteOne:hover {
-    background-color: #f5b935 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(249, 199, 79, 0.3);
-}
-
-.swal-button--deleteAll {
-    background-color: var(--danger-color) !important;
-    color: white !important;
-    border: none;
-    font-weight: 600;
-    min-width: 100px;
-    flex: 1;
-}
-
-.swal-button--deleteAll:hover {
-    background-color: #e03131 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(249, 65, 68, 0.3);
-}
-
-.swal-footer .swal-button {
-    flex: 1;
-    min-width: 80px;
-    max-width: 140px;
-}
-
 /* Responsive Anpassungen für kleine Bildschirme */
 @media (max-width: 600px) {
-    .swal-modal {
-        width: 95% !important;
-        margin: 10px;
-        padding: 15px;
-    }
-    
-    .swal-footer {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .swal-footer .swal-button {
-        min-width: 100%;
-        max-width: none;
-    }
-    
-    .swal-button--deleteOne,
-    .swal-button--deleteAll {
-        min-width: 100% !important;
-    }
-
     .btn-text {
         display: none !important;
     }
@@ -2296,8 +2181,8 @@ select.form-control {
 }
 
 .termin-modal-close:hover {
-    background: #f0f2f5;
     color: var(--primary-color);
+    opacity: 0.7;
 }
 
 .termin-add-form {
@@ -3853,7 +3738,7 @@ body.modal-open {
     flex-shrink: 0;
     transition: background 0.12s, color 0.12s;
 }
-.zt-modal-close:hover { background: var(--light-color); color: var(--primary-color); }
+.zt-modal-close:hover { color: var(--primary-color); opacity: 0.7; }
 
 /* Ergebnis im Modal */
 .zt-modal .zt-result-text {
@@ -3940,6 +3825,250 @@ body.modal-open {
     font-size: 11px;
     font-weight: 700;
     margin-left: 2px;
+}
+
+/* ===== Globale Werkzeuge: Startleisten-Symbole + Tool-Fenster ===== */
+/* Kopfzeile: Startseite-Leiste füllt bis zu den Werkzeug-Kreisen, Kreise rechts daneben */
+.topbar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+/* Breadcrumb ohne weiße Leiste – Home wird zum Kreis, Klassenname als Text daneben */
+.topbar-row .breadcrumb {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    border-radius: 0;
+    overflow: visible;
+    gap: 4px;
+}
+.tool-launchers {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+/* Einzelne, „schwebende" runde Werkzeug-Buttons (rechts) */
+.tool-launcher-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    color: var(--primary-color);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, transform 0.12s, box-shadow 0.15s, border-color 0.15s;
+}
+/* Home: runder Kreis-Button mit Haus; Klassenname erscheint als Text daneben */
+.topbar-row .home-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    color: var(--primary-color);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, transform 0.12s, box-shadow 0.15s, border-color 0.15s;
+}
+.topbar-row .breadcrumb-active {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    color: var(--dark-color);
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tool-launcher-btn:hover,
+.topbar-row .home-circle:hover {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    transform: translateY(-1px);
+}
+.tool-launcher-btn:active,
+.topbar-row .home-circle:active {
+    transform: translateY(0) scale(0.95);
+}
+
+/* Trenner zwischen Werkzeug-Kreisen und Status/Abmelden */
+.launcher-sep {
+    width: 1px;
+    height: 26px;
+    background: var(--border-color);
+    flex-shrink: 0;
+    margin: 0 2px;
+}
+
+/* Sync-Status-Kreis: Symbol/Farbe spiegelt den Live-Zustand */
+.tool-launchers .sync-circle[data-state="synced"] { color: var(--success-color); }
+.tool-launchers .sync-circle[data-state="syncing"] { color: var(--primary-color); }
+.tool-launchers .sync-circle[data-state="error"] { color: #e74c3c; }
+.tool-launchers .sync-circle[data-state="error"] {
+    border-color: #f5b7b1;
+    background: #fef5f4;
+}
+/* Hover: neutraler Lift, Zustandsfarbe bleibt sichtbar */
+.tool-launchers .sync-circle:hover {
+    background: var(--light-color);
+    border-color: var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+.tool-launchers .sync-circle[data-state="error"]:hover {
+    background: #fdecea;
+    border-color: #f5b7b1;
+}
+
+/* Abmelden-Kreis */
+.tool-launchers .account-circle { color: var(--grey-color); }
+.tool-launchers .account-circle:hover {
+    background: #fef2f2;
+    color: #e74c3c;
+    border-color: #e74c3c;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.22);
+    transform: translateY(-1px);
+}
+
+/* Inhalt des Sync-Status-Modals */
+.sync-modal-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+.sync-modal-status i { font-size: 1.4rem; flex-shrink: 0; }
+.sync-modal-status[data-state="synced"] { background: #ecfdf3; color: #166534; }
+.sync-modal-status[data-state="syncing"] { background: #eef2ff; color: #3730a3; }
+.sync-modal-status[data-state="error"] { background: #fef2f2; color: #991b1b; }
+.sync-modal-rows { display: flex; flex-direction: column; gap: 10px; }
+.sync-modal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--light-color);
+    border-radius: 10px;
+    font-size: 0.92rem;
+}
+.sync-modal-row .label { color: var(--grey-color); }
+.sync-modal-row .value { font-weight: 700; color: var(--dark-color); }
+
+.tool-window-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 990;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+}
+.tool-window-overlay.open { display: flex; }
+.tool-window {
+    background: #fff;
+    width: 100%;
+    max-width: 1100px;
+    margin: auto;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 48px);
+    overflow: hidden;
+}
+.tool-window-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 10px 0;
+    flex-shrink: 0;
+}
+.tool-window-close {
+    width: 38px;
+    height: 38px;
+    border: none;
+    background: none;
+    color: var(--primary-color);
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.tool-window-close:hover { opacity: 0.7; }
+.tool-window-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 4px;
+}
+/* Reparentete Module/Panels: Anzeige wird per JS gesteuert */
+.tool-window-panel { display: none; }
+.tool-window-panel.active { display: block; }
+/* Inhalts-Karte „flach" machen: das Fenster selbst ist das weiße Feld (kein Feld-im-Feld) */
+.tool-window-body .card {
+    margin: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 12px 20px 24px;
+}
+.tool-window-body .card:hover { box-shadow: none; }
+
+/* Kalender-Fenster-Kopf */
+.kalender-window-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.kalender-window-head h2 { margin: 0; }
+.kalender-window-head .kalender-window-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+    .tool-window-overlay { padding: 0; }
+    .tool-window {
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        min-height: 100vh;
+    }
+    .tool-launchers { gap: 8px; }
+    .tool-launcher-btn { width: 40px; height: 40px; }
+    .topbar-row .home-circle { width: 40px; height: 40px; }
 }
 
 

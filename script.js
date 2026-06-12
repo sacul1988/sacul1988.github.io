@@ -340,7 +340,7 @@ function showPage(page, classId = null) {
                 <span class="separator">/</span>
                 <span>${className}</span>
             `;
-            
+
             // Standardmodus für Sitzplan auf Bewerten setzen
             if (classes[classId].sitzplan) {
                 classes[classId].sitzplan.currentMode = 'evaluation';
@@ -500,6 +500,9 @@ function renderModuleContent() {
             setTimeout(renderSitzplanModule, 50);
             break;
         case 'planung':
+            // Klassen-Tab zeigt ausschließlich die Unterrichtsplanung (Listenansicht).
+            // Die Kalenderansicht lebt jetzt im globalen Kalender-Fenster.
+            AppState.planungViewMode = 'list';
             renderPlanung();
             break;
         case 'kontakte':
@@ -510,6 +513,397 @@ function renderModuleContent() {
             break;
     }
 }
+
+// ===== Globale Werkzeuge: Tool-Fenster (Kalender, Adressbuch, Zeugnistexte) =====
+// Die drei übergreifenden Bereiche werden einmalig aus dem Klassen-Layout in ein
+// eigenständiges Overlay-Fenster verschoben und nur noch über die Startleisten-Symbole geöffnet.
+function initToolWindows() {
+    const body = document.getElementById('tool-window-body');
+    if (!body || body._toolInit) return;
+    body._toolInit = true;
+
+    // Adressbuch- und Zeugnistexte-Modul ins Fenster verschieben
+    ['kontakte-module', 'zeugnis-texte-module'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.remove('module');
+            el.classList.add('tool-window-panel');
+            el.style.display = '';
+            body.appendChild(el);
+        }
+    });
+
+    // Kalenderansicht ins Kalender-Fenster einhängen (Unterrichtsplanung bleibt in der Klasse)
+    const calHost = document.getElementById('kalender-window-calendar-host');
+    const calContainer = document.getElementById('planung-calendar-container');
+    if (calHost && calContainer) {
+        calContainer.style.display = 'block';
+        calHost.appendChild(calContainer);
+    }
+}
+
+function openToolWindow(which) {
+    initToolWindows();
+    const overlay = document.getElementById('tool-window-overlay');
+    if (!overlay) return;
+
+    overlay.querySelectorAll('.tool-window-panel').forEach(p => p.classList.remove('active'));
+
+    let panel = null;
+    if (which === 'kalender') {
+        panel = document.getElementById('kalender-window-panel');
+        prepareKalenderWindow();
+    } else if (which === 'kontakte') {
+        panel = document.getElementById('kontakte-module');
+        if (typeof renderContactsModule === 'function') renderContactsModule();
+    } else if (which === 'zeugnis-texte') {
+        panel = document.getElementById('zeugnis-texte-module');
+        if (typeof renderZeugnisTTexteModule === 'function') renderZeugnisTTexteModule();
+    }
+    if (!panel) return;
+
+    panel.classList.add('active');
+    window._activeToolWindow = which;
+    overlay.classList.add('open');
+    document.body.classList.add('modal-open');
+
+    const wbody = document.getElementById('tool-window-body');
+    if (wbody) wbody.scrollTop = 0;
+}
+
+function closeToolWindow() {
+    const overlay = document.getElementById('tool-window-overlay');
+    if (!overlay) return;
+
+    // Offene Zeugnis-/Kalender-Daten sichern (analog zum Modulwechsel)
+    if (typeof window.saveDataToCloud === 'function' && window.firebaseAuth && window.firebaseAuth.currentUser) {
+        window.saveDataToCloud();
+    }
+
+    overlay.classList.remove('open');
+    window._activeToolWindow = null;
+
+    // modal-open nur entfernen, wenn kein normales Modal mehr offen ist
+    const modalContainer = document.getElementById('modal-container');
+    if (!modalContainer || modalContainer.style.display === 'none') {
+        document.body.classList.remove('modal-open');
+    }
+}
+
+function closeToolWindowOnBackdrop(event) {
+    if (event && event.target && event.target.id === 'tool-window-overlay') {
+        closeToolWindow();
+    }
+}
+
+// Globalen Kalender-Zeitraum laden (klassenübergreifend) – auch ohne aktive Klasse nutzbar
+function loadGlobalCalendarRange() {
+    if (!AppState.planung) {
+        AppState.planung = { startDate: '', endDate: '', selectedDays: [], entries: {}, hiddenTermine: [] };
+    }
+    if (!AppState.planung.entries) AppState.planung.entries = {};
+    if (!AppState.planung.hiddenTermine) AppState.planung.hiddenTermine = [];
+
+    let range = { startDate: '', endDate: '' };
+    try {
+        const s = localStorage.getItem('planung_global_calendar_range');
+        if (s) range = JSON.parse(s);
+    } catch (e) {}
+
+    AppState.planung.calendarStartDate = range.startDate || '';
+    AppState.planung.calendarEndDate = range.endDate || '';
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    if (localStorage.getItem('calendarLastLoadedDay') !== todayStr) {
+        AppState.planung.calendarStartDate = todayStr;
+        localStorage.setItem('calendarLastLoadedDay', todayStr);
+        localStorage.setItem('planung_global_calendar_range', JSON.stringify({
+            startDate: todayStr,
+            endDate: AppState.planung.calendarEndDate || ''
+        }));
+    }
+}
+
+function prepareKalenderWindow() {
+    loadGlobalCalendarRange();
+    AppState.planungViewMode = 'calendar';
+
+    const cal = document.getElementById('planung-calendar-container');
+    if (cal) cal.style.display = 'block';
+
+    const p = AppState.planung || {};
+    const startEl = safeGetElement('planung-start-date');
+    const endEl = safeGetElement('planung-end-date');
+    if (startEl) {
+        if (startEl._flatpickr) startEl._flatpickr.setDate(p.calendarStartDate || '', false);
+        else startEl.value = p.calendarStartDate || '';
+    }
+    if (endEl) {
+        if (endEl._flatpickr) endEl._flatpickr.setDate(p.calendarEndDate || '', false);
+        else endEl.value = p.calendarEndDate || '';
+    }
+
+    if (typeof renderPlanungCalendar === 'function') renderPlanungCalendar();
+}
+
+// ===== ICS-Kalender-Import (zentrale Termine) =====
+function triggerIcsImport() {
+    const input = document.getElementById('ics-import-input');
+    if (input) input.click();
+}
+
+function unescapeIcs(s) {
+    return String(s == null ? '' : s)
+        .replace(/\\n/gi, ' ')
+        .replace(/\\,/g, ',')
+        .replace(/\\;/g, ';')
+        .replace(/\\\\/g, '\\')
+        .trim();
+}
+
+function parseIcsDate(value) {
+    // Akzeptiert: 20260612 | 20260612T100000 | 20260612T100000Z
+    const m = String(value).match(/(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?)?/);
+    if (!m) return null;
+    const date = `${m[1]}-${m[2]}-${m[3]}`;
+    const time = (m[4] && m[5]) ? `${m[4]}:${m[5]}` : '';
+    return { date, time };
+}
+
+function parseIcs(text) {
+    // Gefaltete Zeilen (Fortsetzung beginnt mit Space/Tab) zusammenführen
+    const rawLines = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+    const lines = [];
+    for (const line of rawLines) {
+        if ((line.startsWith(' ') || line.startsWith('\t')) && lines.length) {
+            lines[lines.length - 1] += line.slice(1);
+        } else {
+            lines.push(line);
+        }
+    }
+
+    const events = [];
+    let cur = null;
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed === 'BEGIN:VEVENT') { cur = {}; continue; }
+        if (trimmed === 'END:VEVENT') {
+            if (cur && cur.date) events.push(cur);
+            cur = null;
+            continue;
+        }
+        if (!cur) continue;
+        const ci = line.indexOf(':');
+        if (ci === -1) continue;
+        const key = line.slice(0, ci).split(';')[0].toUpperCase();
+        const value = line.slice(ci + 1);
+        if (key === 'SUMMARY') {
+            cur.title = unescapeIcs(value);
+        } else if (key === 'DTSTART') {
+            const dt = parseIcsDate(value);
+            if (dt) { cur.date = dt.date; cur.timeStart = dt.time; }
+        } else if (key === 'DTEND') {
+            const dt = parseIcsDate(value);
+            if (dt) { cur.timeEnd = dt.time; }
+        }
+    }
+    return events;
+}
+
+function importIcsFile(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = ''; // Reset, damit dieselbe Datei erneut wählbar ist
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        let parsed;
+        try {
+            parsed = parseIcs(e.target.result);
+        } catch (err) {
+            console.error('ICS-Parse-Fehler:', err);
+            swal('Fehler', 'Die Datei konnte nicht gelesen werden. Ist es eine gültige .ics-Datei?', 'error');
+            return;
+        }
+
+        if (!parsed.length) {
+            swal('Keine Termine gefunden', 'In der Datei wurden keine Termine (VEVENT) gefunden.', 'warning');
+            return;
+        }
+
+        if (!AppState.termine) AppState.termine = [];
+
+        const existing = new Set(AppState.termine.map(t => `${t.date}|${(t.title || '').toLowerCase()}|${t.timeStart || ''}`));
+        let added = 0;
+        let skipped = 0;
+        const base = Date.now();
+
+        parsed.forEach((ev, i) => {
+            if (!ev.date) { skipped++; return; }
+            const key = `${ev.date}|${(ev.title || '').toLowerCase()}|${ev.timeStart || ''}`;
+            if (existing.has(key)) { skipped++; return; }
+            existing.add(key);
+            AppState.termine.push({
+                id: (base + i).toString(),
+                title: ev.title || 'Termin',
+                date: ev.date,
+                timeStart: ev.timeStart || '',
+                timeEnd: ev.timeEnd || ''
+            });
+            added++;
+        });
+
+        if (added > 0) {
+            // Kalender-Zeitraum so erweitern, dass die importierten Termine sichtbar werden
+            if (!AppState.planung) AppState.planung = { entries: {}, hiddenTermine: [] };
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            if (!AppState.planung.calendarStartDate) AppState.planung.calendarStartDate = todayStr;
+            const maxImported = parsed.reduce((m, ev) => (ev.date && ev.date > m) ? ev.date : m, '');
+            if (maxImported && maxImported > (AppState.planung.calendarEndDate || '')) {
+                AppState.planung.calendarEndDate = maxImported;
+            }
+            localStorage.setItem('planung_global_calendar_range', JSON.stringify({
+                startDate: AppState.planung.calendarStartDate,
+                endDate: AppState.planung.calendarEndDate || ''
+            }));
+
+            saveTermine();
+
+            const startEl = safeGetElement('planung-start-date');
+            const endEl = safeGetElement('planung-end-date');
+            if (startEl) {
+                if (startEl._flatpickr) startEl._flatpickr.setDate(AppState.planung.calendarStartDate, false);
+                else startEl.value = AppState.planung.calendarStartDate;
+            }
+            if (endEl) {
+                if (endEl._flatpickr) endEl._flatpickr.setDate(AppState.planung.calendarEndDate || '', false);
+                else endEl.value = AppState.planung.calendarEndDate || '';
+            }
+            if (typeof renderPlanungCalendar === 'function') renderPlanungCalendar();
+        }
+
+        const msg = `${added} Termin(e) importiert.` + (skipped ? ` ${skipped} übersprungen (Duplikat oder ohne Datum).` : '');
+        swal('Import abgeschlossen', msg, added ? 'success' : 'info');
+    };
+    reader.onerror = function() {
+        swal('Fehler', 'Datei konnte nicht gelesen werden.', 'error');
+    };
+    reader.readAsText(file);
+}
+
+window.triggerIcsImport = triggerIcsImport;
+window.importIcsFile = importIcsFile;
+window.openToolWindow = openToolWindow;
+window.closeToolWindow = closeToolWindow;
+window.closeToolWindowOnBackdrop = closeToolWindowOnBackdrop;
+window.initToolWindows = initToolWindows;
+
+/* ============================================================
+   Sync-Status-Kreis + Modal (ersetzt die grüne Status-Leiste)
+   ============================================================ */
+// Letzter bekannter Sync-Zustand (vom unsichtbaren Status-Träger gespiegelt)
+window._syncState = { state: 'synced', message: 'Alle Daten aktuell', updatedAt: null };
+
+const SYNC_CIRCLE_ICONS = {
+    synced:  '<i class="fas fa-circle-check"></i>',
+    syncing: '<i class="fas fa-rotate fa-spin"></i>',
+    error:   '<i class="fas fa-exclamation-triangle"></i>'
+};
+
+// Aus dem (versteckten) Status-Span Zustand + Klartext ableiten und auf den Kreis spiegeln
+function reflectSyncStatus() {
+    const src = document.querySelector('#cloud-status-bar span');
+    const circle = document.getElementById('sync-status-circle');
+    if (!src) return;
+    const html = src.innerHTML || '';
+    const text = (src.textContent || '').trim();
+    let state = 'synced';
+    if (/fa-spin/.test(html)) state = 'syncing';
+    else if (/text-danger|exclamation|fehler/i.test(html + ' ' + text)) state = 'error';
+
+    window._syncState = { state, message: text || window._syncState.message, updatedAt: new Date() };
+
+    if (circle) {
+        circle.dataset.state = state;
+        if (circle.innerHTML !== SYNC_CIRCLE_ICONS[state]) {
+            circle.innerHTML = SYNC_CIRCLE_ICONS[state];
+        }
+    }
+    // Falls das Modal gerade offen ist, live mitaktualisieren
+    if (document.getElementById('sync-status-modal')?.offsetParent !== null) {
+        renderSyncModalBody();
+    }
+}
+
+function initSyncStatusMirror() {
+    const src = document.querySelector('#cloud-status-bar span');
+    if (!src || src._syncMirror) return;
+    src._syncMirror = true;
+    const obs = new MutationObserver(reflectSyncStatus);
+    obs.observe(src, { childList: true, characterData: true, subtree: true });
+    reflectSyncStatus();
+}
+
+function syncStateLabel(state) {
+    if (state === 'syncing') return 'Synchronisiere…';
+    if (state === 'error') return 'Synchronisierungsproblem';
+    return 'Alle Daten aktuell';
+}
+
+function renderSyncModalBody() {
+    const body = document.getElementById('sync-status-modal-body');
+    if (!body) return;
+    const { state, message, updatedAt } = window._syncState;
+    const count = document.getElementById('sync-counter-value')?.textContent || '0';
+    const timeStr = updatedAt
+        ? updatedAt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        : '–';
+    const detail = (message && message !== syncStateLabel(state)) ? message : '';
+
+    body.innerHTML = `
+        <div class="sync-modal-status" data-state="${state}">
+            ${SYNC_CIRCLE_ICONS[state]}
+            <span>${syncStateLabel(state)}</span>
+        </div>
+        ${detail ? `<p style="margin:-6px 2px 16px; color: var(--grey-color); font-size:0.9rem;">${detail}</p>` : ''}
+        <div class="sync-modal-rows">
+            <div class="sync-modal-row"><span class="label">Synchronisierungen heute</span><span class="value">${count}×</span></div>
+            <div class="sync-modal-row"><span class="label">Letzte Aktualisierung</span><span class="value">${timeStr}</span></div>
+        </div>
+        ${state === 'error'
+            ? '<p style="margin:16px 2px 0; color:#991b1b; font-size:0.88rem;"><i class="fas fa-circle-info"></i> Prüfe deine Internetverbindung. Deine Eingaben bleiben lokal gespeichert und werden automatisch hochgeladen, sobald die Verbindung wieder steht.</p>'
+            : '<p style="margin:16px 2px 0; color: var(--grey-color); font-size:0.88rem;"><i class="fas fa-circle-info"></i> Alle Änderungen werden automatisch mit der Cloud synchronisiert.</p>'}
+    `;
+}
+
+function openSyncModal() {
+    reflectSyncStatus();
+    renderSyncModalBody();
+    showModal('sync-status-modal');
+}
+
+function confirmLogout() {
+    if (typeof swal === 'function') {
+        swal({
+            title: 'Abmelden?',
+            text: 'Möchtest du dich wirklich abmelden?',
+            icon: 'warning',
+            buttons: [false, 'Abmelden'],
+            dangerMode: true
+        }).then(ok => {
+            if (ok && typeof window.handleLogout === 'function') window.handleLogout();
+        });
+    } else if (confirm('Möchtest du dich wirklich abmelden?') && typeof window.handleLogout === 'function') {
+        window.handleLogout();
+    }
+}
+
+window.reflectSyncStatus = reflectSyncStatus;
+window.initSyncStatusMirror = initSyncStatusMirror;
+window.openSyncModal = openSyncModal;
+window.confirmLogout = confirmLogout;
 
 // Modal anzeigen/verstecken
 function showModal(modalId) {
@@ -588,6 +982,163 @@ function closeModalOnOutsideClick(event) {
         }
     }
 }
+
+/* ============================================================
+   Einheitliche Dialoge: eigener SweetAlert-Ersatz im App-Design.
+   Bildet die genutzte swal()-API nach und gibt ein Promise zurück:
+     swal('Titel', 'Text', 'icon')
+     swal({ title, text, icon, button, buttons, dangerMode })
+   buttons: [cancel, confirm] (Element false = ausgeblendet),
+            { key: { text, value } } oder einzeln via button.
+   ============================================================ */
+const APP_DIALOG_ICONS = {
+    success:  { cls: 'fa-circle-check',         color: '#16a34a' },
+    error:    { cls: 'fa-circle-xmark',         color: '#e74c3c' },
+    warning:  { cls: 'fa-triangle-exclamation', color: '#f39c12' },
+    info:     { cls: 'fa-circle-info',          color: '#3b82f6' },
+    question: { cls: 'fa-circle-question',      color: '#6b7280' }
+};
+
+let _appDialogState = null; // { overlay, resolve, keyHandler }
+
+// Aus den Optionen die Button-Liste ableiten: [{ text, value, type }]
+function _appDialogButtons(opts) {
+    const danger = !!opts.dangerMode;
+    const primaryType = danger ? 'danger' : 'primary';
+    const list = [];
+
+    // Einzel-Button (reiner Alert)
+    if (opts.button !== undefined && opts.buttons === undefined) {
+        if (opts.button === false) return list;
+        const text = (typeof opts.button === 'object' && opts.button) ? (opts.button.text || 'OK')
+                   : (opts.button === true ? 'OK' : String(opts.button));
+        list.push({ text, value: true, type: primaryType });
+        return list;
+    }
+
+    const b = opts.buttons;
+    if (b === undefined) { list.push({ text: 'OK', value: true, type: primaryType }); return list; }
+    if (b === true) {
+        list.push({ text: 'Abbrechen', value: null, type: 'secondary' });
+        list.push({ text: 'OK', value: true, type: primaryType });
+        return list;
+    }
+    if (Array.isArray(b)) {
+        const cancel = b[0];
+        const confirm = b.length > 1 ? b[1] : true;
+        if (cancel !== false) {
+            list.push({ text: (cancel === true || cancel == null) ? 'Abbrechen' : String(cancel), value: null, type: 'secondary' });
+        }
+        if (confirm !== false) {
+            list.push({ text: (confirm === true || confirm == null) ? 'OK' : String(confirm), value: true, type: primaryType });
+        }
+        return list;
+    }
+    if (typeof b === 'object') {
+        const keys = Object.keys(b);
+        keys.forEach((key, i) => {
+            const cfg = b[key] || {};
+            const isCancel = key === 'cancel';
+            const isLast = i === keys.length - 1;
+            const value = (cfg.value !== undefined) ? cfg.value : (isCancel ? null : key);
+            const type = (!isCancel && (isLast || keys.length === 1)) ? primaryType : 'secondary';
+            list.push({ text: cfg.text || key, value, type });
+        });
+        return list;
+    }
+    list.push({ text: 'OK', value: true, type: primaryType });
+    return list;
+}
+
+function _closeAppDialog(value) {
+    if (!_appDialogState) return;
+    const { overlay, resolve, keyHandler } = _appDialogState;
+    _appDialogState = null;
+    document.removeEventListener('keydown', keyHandler, true);
+    overlay.classList.add('app-dialog-closing');
+    setTimeout(() => { if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 120);
+    resolve(value);
+}
+
+function swal() {
+    const args = Array.prototype.slice.call(arguments);
+    const opts = (args.length && typeof args[0] === 'object' && args[0] !== null)
+        ? Object.assign({}, args[0])
+        : { title: args[0], text: args[1], icon: args[2] };
+
+    // Sequenziell: evtl. offenen Dialog vorher schließen
+    if (_appDialogState) _closeAppDialog(null);
+
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'app-dialog-overlay';
+
+        const dialog = document.createElement('div');
+        dialog.className = 'app-dialog';
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'app-dialog-close';
+        closeBtn.setAttribute('aria-label', 'Schließen');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.onclick = () => _closeAppDialog(null);
+        dialog.appendChild(closeBtn);
+
+        if (opts.icon && APP_DIALOG_ICONS[opts.icon]) {
+            const ic = APP_DIALOG_ICONS[opts.icon];
+            const iconEl = document.createElement('div');
+            iconEl.className = 'app-dialog-icon';
+            iconEl.style.color = ic.color;
+            iconEl.innerHTML = `<i class="fas ${ic.cls}"></i>`;
+            dialog.appendChild(iconEl);
+        }
+        if (opts.title) {
+            const t = document.createElement('h2');
+            t.className = 'app-dialog-title';
+            t.textContent = opts.title;
+            dialog.appendChild(t);
+        }
+        if (opts.text) {
+            const p = document.createElement('p');
+            p.className = 'app-dialog-text';
+            p.textContent = opts.text;
+            dialog.appendChild(p);
+        }
+
+        const btnRow = document.createElement('div');
+        btnRow.className = 'app-dialog-buttons';
+        _appDialogButtons(opts).forEach(desc => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            const typeClass = desc.type === 'danger' ? 'btn-danger' : (desc.type === 'secondary' ? 'btn-secondary' : 'btn-primary');
+            button.className = `btn ${typeClass}`;
+            button.textContent = desc.text;
+            button.onclick = () => _closeAppDialog(desc.value);
+            btnRow.appendChild(button);
+        });
+        dialog.appendChild(btnRow);
+
+        overlay.appendChild(dialog);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) _closeAppDialog(null); });
+
+        const keyHandler = (e) => {
+            if (e.key === 'Escape') { e.preventDefault(); _closeAppDialog(null); }
+            else if (e.key === 'Enter') {
+                const primary = btnRow.querySelector('.btn-primary, .btn-danger') || btnRow.lastElementChild;
+                if (primary) { e.preventDefault(); primary.click(); }
+            }
+        };
+        document.addEventListener('keydown', keyHandler, true);
+
+        document.body.appendChild(overlay);
+        _appDialogState = { overlay, resolve, keyHandler };
+
+        const focusBtn = btnRow.querySelector('.btn-primary, .btn-danger') || btnRow.firstElementChild;
+        if (focusBtn) setTimeout(() => focusBtn.focus(), 30);
+    });
+}
+swal.close = function(value) { _closeAppDialog(value === undefined ? null : value); };
+window.swal = swal;
 
 // Funktion zum Zurückkehren zum Bewertungsmodal aus Untermodals
 function returnToEvaluationModal() {
@@ -1164,22 +1715,6 @@ function initFlatpickr() {
     if (endEl) flatpickr(endEl, fpConfig);
 }
 
-// SweetAlert: X-Button automatisch in alle Dialoge injizieren
-(function() {
-    const observer = new MutationObserver(() => {
-        const modal = document.querySelector('.swal-modal');
-        if (modal && !modal.querySelector('.swal-close-btn')) {
-            const btn = document.createElement('button');
-            btn.className = 'swal-close-btn wizard-close-btn';
-            btn.innerHTML = '&times;';
-            btn.style.cssText = 'position:absolute;top:8px;right:12px;z-index:1;';
-            btn.onclick = () => swal.close ? swal.close() : document.querySelector('.swal-button--cancel, .swal-overlay')?.click();
-            modal.style.position = 'relative';
-            modal.appendChild(btn);
-        }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-})();
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisierungsfunktion rufen
@@ -1187,6 +1722,10 @@ document.addEventListener('DOMContentLoaded', function() {
     loadData();
     loadTermine();
     loadPlanung();
+
+    // Globale Werkzeuge-Fenster vorbereiten (Module einmalig ins Overlay verschieben)
+    if (typeof initToolWindows === 'function') initToolWindows();
+    if (typeof initSyncStatusMirror === 'function') initSyncStatusMirror();
     
     // Add styles for the project grades preview
     addProjectGradesPreviewStyles();
@@ -6033,8 +6572,9 @@ function loadPlanung() {
     p.calendarStartDate = globalCalendarRange.startDate || '';
     p.calendarEndDate = globalCalendarRange.endDate || '';
 
-    // View-Modus initialisieren
-    AppState.planungViewMode = 'calendar';
+    // View-Modus initialisieren – der Klassen-Tab zeigt die Unterrichtsplanung (Liste).
+    // Die Kalenderansicht läuft separat über das globale Kalender-Fenster.
+    AppState.planungViewMode = 'list';
 
     // Automatisch heutiges Datum als Startdatum nutzen, wenn ein neuer Tag anbricht oder die App geladen wird
     const todayObj = new Date();
@@ -6666,7 +7206,7 @@ function renderPlanungCalendar() {
 }
 
 function openCalendarDayDetails(dateStr) {
-    if (activeModule !== 'planung') return;
+    if (activeModule !== 'planung' && window._activeToolWindow !== 'kalender') return;
     if (openCalendarDayDetails._busy) return;
     openCalendarDayDetails._busy = true;
     setTimeout(() => { openCalendarDayDetails._busy = false; }, 800);
@@ -7136,7 +7676,7 @@ let contactsInteractionLock = false;
 function setContacts(newContacts) {
     contacts = newContacts || [];
     AppState.contacts = contacts;
-    if (activeModule === 'kontakte') {
+    if (activeModule === 'kontakte' || window._activeToolWindow === 'kontakte') {
         renderContactsModule();
     }
 }
@@ -7254,7 +7794,7 @@ function renderContactsModule() {
 }
 
 function openContactPhonesModal(id) {
-    if (activeModule !== 'kontakte') return;
+    if (activeModule !== 'kontakte' && window._activeToolWindow !== 'kontakte') return;
     if (contactsInteractionLock) return;
     contactsInteractionLock = true;
     setTimeout(() => { contactsInteractionLock = false; }, 800);
@@ -7495,7 +8035,7 @@ function renderZeugnisTTexteModule() {
     ztInitArchive();
 
     document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && activeModule === 'zeugnis-texte') {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && (activeModule === 'zeugnis-texte' || window._activeToolWindow === 'zeugnis-texte')) {
             ztGenerate();
         }
     });
