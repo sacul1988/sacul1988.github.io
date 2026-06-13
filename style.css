@@ -234,10 +234,11 @@ body {
     align-items: center;
 }
 
-.class-card-header .badge {
-    color: white !important;
-    background: rgba(255,255,255,0.2) !important;
-    font-size: 0.75rem;
+.class-card-header .class-card-count {
+    color: rgba(255,255,255,0.9);
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .class-card-body {

@@ -1478,7 +1478,7 @@ function renderClassesGrid() {
         classCard.innerHTML = `
             <div class="class-card-header">
                 <span>${cls.name}</span>
-                <span class="badge">${studentCount} Schüler</span>
+                <span class="class-card-count">${studentCount} Schüler</span>
             </div>
             <div class="class-card-body">
                 <div class="module-buttons">
