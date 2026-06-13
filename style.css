@@ -2002,504 +2002,6 @@ select.form-control {
     box-shadow: none;
 }
 
-/* ===== Mündliche Note: Panel auf der Zeugnis-Karte ===== */
-.zeugnis-muendlich-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.zeugnis-muendlich-wrapper > h4 {
-    margin-bottom: 10px;
-}
-
-.zeugnis-muendlich-panel {
-    position: relative;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    background: #fff;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-    cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.zeugnis-muendlich-panel:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 3px 12px rgba(67, 97, 238, 0.12);
-}
-
-/* Leerer Zustand: einladender Hinweis exakt in der Mitte */
-.muendlich-panel-empty {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    text-align: center;
-    color: var(--grey-color);
-}
-
-.muendlich-panel-empty i {
-    font-size: 1.8rem;
-    color: #c7d2fe;
-    margin-bottom: 4px;
-}
-
-.muendlich-panel-empty span {
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: var(--dark-color);
-}
-
-.muendlich-panel-empty small {
-    font-size: 0.78rem;
-    color: var(--grey-color);
-}
-
-.muendlich-mini-chips {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.muendlich-mini-chip {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 0.78rem;
-    color: var(--dark-color);
-    line-height: 1.4;
-    background: #f8fafc;
-    border: 1px solid var(--border-color);
-    border-left: 3px solid var(--chip-color, #6c757d);
-    border-radius: 8px;
-    padding: 6px 10px;
-}
-
-.muendlich-mini-note {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--chip-color, #6c757d);
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.7rem;
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-
-.muendlich-empty-hint {
-    font-size: 0.82rem;
-    color: var(--grey-color);
-    font-style: italic;
-    margin: 0;
-}
-
-.muendlich-manuell-hint {
-    font-size: 0.75rem;
-    color: var(--grey-color);
-    font-weight: 400;
-}
-
-/* ===== Mündliche Note: Vollbild-Fenster ===== */
-.muendlich-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: var(--bg-color);
-    background-image: linear-gradient(180deg, rgba(67, 97, 238, 0.045) 0%, rgba(67, 97, 238, 0) 320px);
-    z-index: 1000;
-    display: none;
-    flex-direction: column;
-}
-.muendlich-overlay.open { display: flex; }
-
-.muendlich-window {
-    width: 100%;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    max-width: 1100px;
-    margin: 0 auto;
-}
-
-.muendlich-topbar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 16px 10px;
-    flex-shrink: 0;
-}
-
-.muendlich-title {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    line-height: 1.25;
-}
-
-.muendlich-title-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--grey-color);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.muendlich-student-name {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--dark-color);
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.muendlich-nav {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.muendlich-nav .topbar-btn:disabled {
-    opacity: 0.35;
-    pointer-events: none;
-}
-
-/* Zusammenfassung: Note + manuelle Anpassung */
-.muendlich-summary {
-    flex-shrink: 0;
-    margin: 0 16px 12px;
-    padding: 14px 16px;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--box-shadow);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.muendlich-summary-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.muendlich-summary-label {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--dark-color);
-}
-
-.muendlich-summary-badge {
-    margin-right: 0;
-    width: auto;
-    min-width: 34px;
-    height: 34px;
-    padding: 0 10px;
-    border-radius: 17px;
-    font-size: 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.muendlich-summary-num {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--dark-color);
-}
-
-.muendlich-override-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #7c3aed;
-    background: #f3e8ff;
-    border: 1px solid #d8b4fe;
-    border-radius: 12px;
-    padding: 2px 6px 2px 8px;
-}
-
-.muendlich-override-tag button {
-    border: none;
-    background: none;
-    color: #7c3aed;
-    font-size: 0.9rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0 2px;
-}
-
-.muendlich-override-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.muendlich-override-label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--grey-color);
-    flex-shrink: 0;
-}
-
-.muendlich-override-pills {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.muendlich-override-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 32px;
-    height: 28px;
-    padding: 0 8px;
-    border-radius: 14px;
-    border: 1.5px solid var(--border-color);
-    background: #fff;
-    color: var(--grey-color);
-    font-weight: 700;
-    font-size: 0.78rem;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.muendlich-override-pill:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-.muendlich-override-pill.active {
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-.muendlich-override-pill.active.grade-excellent { background-color: #007bff; }
-.muendlich-override-pill.active.grade-good { background-color: #28a745; }
-.muendlich-override-pill.active.grade-average { background-color: #e6a817; }
-.muendlich-override-pill.active.grade-poor { background-color: #fd7e14; }
-.muendlich-override-pill.active.grade-bad { background-color: #dc143c; }
-
-/* Scrollbarer Inhalt: Kategorien mit Chips */
-.muendlich-body {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    padding: 4px 16px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.muendlich-cat {
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--box-shadow);
-    padding: 16px;
-}
-
-.muendlich-cat h4 {
-    margin: 0 0 12px;
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: var(--dark-color);
-}
-
-.muendlich-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.muendlich-chip {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px 8px 8px;
-    border-radius: 20px;
-    background: #fff;
-    border: 1.5px solid;
-    font-size: 0.82rem;
-    line-height: 1.35;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-}
-
-.muendlich-chip-note {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.75rem;
-    flex-shrink: 0;
-}
-
-.muendlich-chip.note-1 { border-color: #007bff; color: #0b5ed7; }
-.muendlich-chip.note-1 .muendlich-chip-note { background: #007bff; }
-.muendlich-chip.note-2 { border-color: #28a745; color: #1e7e34; }
-.muendlich-chip.note-2 .muendlich-chip-note { background: #28a745; }
-.muendlich-chip.note-3 { border-color: #e6a817; color: #b3820f; }
-.muendlich-chip.note-3 .muendlich-chip-note { background: #e6a817; }
-.muendlich-chip.note-4 { border-color: #fd7e14; color: #ca630d; }
-.muendlich-chip.note-4 .muendlich-chip-note { background: #fd7e14; }
-.muendlich-chip.note-5 { border-color: #dc143c; color: #b01030; }
-.muendlich-chip.note-5 .muendlich-chip-note { background: #dc143c; }
-
-.muendlich-chip:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-}
-
-.muendlich-chip.selected { color: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18); }
-.muendlich-chip.selected .muendlich-chip-note { background: rgba(255, 255, 255, 0.25); }
-.muendlich-chip.selected.note-1 { background: #007bff; }
-.muendlich-chip.selected.note-2 { background: #28a745; }
-.muendlich-chip.selected.note-3 { background: #e6a817; }
-.muendlich-chip.selected.note-4 { background: #fd7e14; }
-.muendlich-chip.selected.note-5 { background: #dc143c; }
-
-.muendlich-chip-del {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    font-size: 0.85rem;
-    line-height: 1;
-    opacity: 0.55;
-    flex-shrink: 0;
-}
-.muendlich-chip-del:hover {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.12);
-}
-
-/* Eigener Baustein: Eingabezeile */
-.muendlich-add-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 12px;
-    flex-wrap: wrap;
-}
-
-.muendlich-add-row .form-control {
-    flex: 1;
-    min-width: 180px;
-}
-
-.muendlich-note-picker {
-    display: flex;
-    gap: 5px;
-    flex-shrink: 0;
-}
-
-.muendlich-note-pick {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 1.5px solid var(--pick-color);
-    background: #fff;
-    color: var(--pick-color);
-    font-weight: 700;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.muendlich-note-pick.active {
-    background: var(--pick-color);
-    color: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.muendlich-add-btn {
-    width: 38px;
-    height: 38px;
-    padding: 0;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-@media (max-width: 600px) {
-    .muendlich-summary { margin: 0 10px 10px; }
-    .muendlich-body { padding: 4px 10px 20px; }
-    .muendlich-chip { font-size: 0.78rem; }
-}
-
-.zeugnis-sonstige-avg {
-    margin-top: auto;
-    padding-top: 12px;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.zeugnis-sonstige-avg-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--dark-color);
-}
-
-.zeugnis-sonstige-avg-value {
-    margin-right: 0;
-    width: auto;
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
-    border-radius: 16px;
-    font-size: 0.8rem;
-}
-
-.zeugnis-sonstige-avg-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.zeugnis-sonstige-avg-num {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--dark-color);
-}
-
-/* Summary section spacing */
-.summary-section {
-    margin-top: 20px;
-}
 
 /* Zeugnis top layout */
 .zeugnis-top {
@@ -3234,65 +2736,6 @@ div.notes-textarea:empty::before {
     font-size: 0.88rem;
     font-weight: 500;
     color: var(--dark-color);
-}
-
-/* Zeugnisnote selector styling */
-.zeugnisnote-selector {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-}
-
-.btn-grade-select {
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.92rem;
-    font-weight: 700;
-    cursor: pointer;
-    border: 2px solid #475569;
-    background-color: #ffffff;
-    color: #000000 !important;
-    transition: all 0.2s ease-in-out;
-}
-
-.btn-grade-select:hover {
-    background-color: #f1f5f9;
-    color: #000000 !important;
-    border-color: #1e293b;
-}
-
-/* Highlight styles when active */
-.btn-grade-select.active {
-    color: white !important;
-    border-color: transparent;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    transform: scale(1.05);
-}
-
-.btn-grade-select.active.grade-excellent {
-    background-color: #007bff !important;
-}
-
-.btn-grade-select.active.grade-good {
-    background-color: #28a745 !important;
-}
-
-.btn-grade-select.active.grade-average {
-    background-color: #ffc107 !important;
-    color: #1e293b !important; /* Yellow has dark text for contrast */
-}
-
-.btn-grade-select.active.grade-poor {
-    background-color: #fd7e14 !important;
-}
-
-.btn-grade-select.active.grade-bad {
-    background-color: #dc143c !important;
-}
-
-.btn-grade-select.active.grade-very-bad {
-    background-color: #6c757d !important;
 }
 
 /* Scroll-Sperre und Scroll-Isolierung für Modals */
@@ -4428,6 +3871,393 @@ body.modal-open {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+/* ===== Fachart-Toggle (Klasse bearbeiten) ===== */
+.fachart-toggle {
+    display: flex;
+    gap: 10px;
+}
+.fachart-option {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    background: #fff;
+    color: var(--grey-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.fachart-option:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+.fachart-option.active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: #fff;
+}
+.fachart-hint {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--grey-color);
+    line-height: 1.4;
+}
+
+/* ===== Zeugnisnote-Vollbild-Fenster (KI-Notenvorschlag) ===== */
+.zeugnisnote-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg-color);
+    z-index: 995;
+    display: none;
+    flex-direction: column;
+}
+.zeugnisnote-overlay.open { display: flex; }
+.zeugnisnote-window {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+.zeugnisnote-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    flex-shrink: 0;
+}
+.zeugnisnote-title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+.zeugnisnote-title-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--grey-color);
+}
+.zeugnisnote-student-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.zeugnisnote-nav {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.zeugnisnote-nav .topbar-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+.zeugnisnote-body {
+    flex: 1 1 auto;
+    padding: 0 16px 32px;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Kontext-Box: schriftliche Noten + Durchschnitt + Fachart */
+.zn-context {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 16px 18px;
+    margin-bottom: 18px;
+}
+.zn-context-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.zn-context-head h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--dark-color);
+}
+.zn-fach-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--light-color);
+    color: var(--primary-color);
+    border: 1px solid var(--border-color);
+}
+.zn-grades {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+.zn-grade-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--dark-color);
+    background: var(--light-color);
+    padding: 4px 10px 4px 4px;
+    border-radius: 20px;
+}
+.zn-avg {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+/* Eingabe-Ansicht */
+.zn-input-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin: 0 0 6px;
+}
+.zn-input-hint {
+    font-size: 0.85rem;
+    color: var(--grey-color);
+    margin: 0 0 12px;
+    line-height: 1.4;
+}
+.zn-textarea {
+    width: 100%;
+    min-height: 130px;
+    resize: vertical;
+    line-height: 1.6;
+}
+.zn-generate-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    font-size: 1rem;
+    margin-top: 14px;
+}
+
+/* Ergebnis-Ansicht */
+.zn-result-head {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 8px 0 20px;
+}
+.zn-grade-circle {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--grey-color);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    border: 4px solid rgba(255,255,255,0.6);
+}
+.zn-grade-circle.grade-excellent { background: #007bff; }
+.zn-grade-circle.grade-good { background: #28a745; }
+.zn-grade-circle.grade-average { background: #e6a817; }
+.zn-grade-circle.grade-poor { background: #fd7e14; }
+.zn-grade-circle.grade-bad { background: #dc143c; }
+.zn-grade-circle.grade-very-bad { background: #6c757d; }
+.zn-result-headtext {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+.zn-result-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--grey-color);
+}
+.zn-result-subject {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--dark-color);
+}
+.zn-begruendung {
+    background: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 20px 22px;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--dark-color);
+    min-height: 120px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.zn-begruendung:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.12);
+    background: #fff;
+}
+.zn-edit-hint {
+    font-size: 0.78rem;
+    color: var(--grey-color);
+    margin: 8px 2px 0;
+}
+.zn-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+.zn-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 10px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    color: var(--dark-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.zn-action-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+}
+.zn-action-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+    transform: none;
+}
+.zn-action-btn.zn-better i { color: #28a745; }
+.zn-action-btn.zn-worse i { color: #dc143c; }
+
+/* Anpassen-Hinweisfeld */
+.zn-hinweis-box {
+    margin-top: 16px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 16px 18px;
+}
+.zn-hinweis-box label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--dark-color);
+    margin-bottom: 8px;
+}
+.zn-hinweis-box textarea {
+    width: 100%;
+    min-height: 70px;
+    resize: vertical;
+    line-height: 1.5;
+}
+.zn-hinweis-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+/* Lade-/Leerzustand */
+.zn-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--grey-color);
+    gap: 14px;
+}
+.zn-loading i { font-size: 2rem; color: var(--primary-color); }
+
+@media (max-width: 600px) {
+    .zn-actions { grid-template-columns: repeat(2, 1fr); }
+    .zn-result-head { gap: 14px; }
+    .zn-grade-circle { width: 78px; height: 78px; font-size: 1.6rem; }
+    .zn-result-subject { font-size: 1.15rem; }
+}
+
+/* Zeugnisnote-Anzeige auf der Schülerkarte */
+.zn-card-section { margin-top: 16px; }
+.zn-card-trigger {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+}
+.zn-card-result {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--light-color);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.zn-card-result:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(67, 97, 238, 0.12);
+}
+.zn-card-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--grey-color);
+}
+.zn-card-circle.grade-excellent { background: #007bff; }
+.zn-card-circle.grade-good { background: #28a745; }
+.zn-card-circle.grade-average { background: #e6a817; }
+.zn-card-circle.grade-poor { background: #fd7e14; }
+.zn-card-circle.grade-bad { background: #dc143c; }
+.zn-card-circle.grade-very-bad { background: #6c757d; }
+.zn-card-textwrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.zn-card-preview {
+    font-size: 0.85rem;
+    color: var(--dark-color);
+    line-height: 1.45;
+}
+.zn-card-edit {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--primary-color);
 }
 
 

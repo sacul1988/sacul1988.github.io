@@ -94,3 +94,97 @@ exports.generateZeugnistext = onCall(
     return { text };
   }
 );
+
+// ===== Zeugnisnoten-Vorschlag: Note abwägen + Begründung schreiben =====
+const ZEUGNISNOTE_SYSTEM = `Du bist eine erfahrene Lehrkraft und hilfst dabei, eine faire Zeugnisnote für eine Schülerin oder einen Schüler festzulegen.
+
+Du bekommst:
+- Die schriftlichen Noten (einzelne Arbeiten) und ihren Durchschnitt
+- Eine kurze Beschreibung der sonstigen/mündlichen Mitarbeit im Unterricht
+- Die Fachart: "hauptfach" oder "nebenfach"
+
+Deine Aufgabe: Wäge die schriftlichen Leistungen und die sonstige/mündliche Mitarbeit wie eine erfahrene Lehrkraft gegeneinander ab und schlage EINE konkrete Zeugnisnote vor.
+
+Regeln für die Gewichtung (NICHT mathematisch exakt rechnen, sondern pädagogisch sinnvoll abwägen):
+- Hauptfach: Schriftliche Leistungen und mündliche/sonstige Mitarbeit zählen ungefähr gleich stark.
+- Nebenfach: Die mündliche/sonstige Mitarbeit zählt deutlich stärker als die schriftlichen Leistungen.
+
+Erlaubte Noten (genau eine davon auswählen): 1, 1-, 2+, 2, 2-, 3+, 3, 3-, 4+, 4, 4-, 5+, 5, 5-, 6
+
+Regeln für die Begründung:
+- Sprich die Schülerin/den Schüler direkt mit "Du" an.
+- Erkläre nachvollziehbar, wie die Note zustande kommt: nenne die schriftlichen Noten und den Durchschnitt, gehe auf die mündliche/sonstige Mitarbeit ein und erläutere, wie beides zusammen zur vorgeschlagenen Note führt.
+- Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze und ohne Aufzählungen.
+- Freundlicher, wertschätzender, sachlicher Ton. Ca. 100-150 Wörter.
+
+Antworte AUSSCHLIESSLICH mit einem JSON-Objekt in genau diesem Format (keine Code-Blöcke, kein weiterer Text):
+{"note": "<eine erlaubte Note>", "begruendung": "<Begründungstext>"}`;
+
+exports.generateZeugnisnote = onCall(
+  { secrets: [anthropicApiKey], invoker: "public", cors: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Nicht angemeldet.");
+    }
+
+    const { schriftlicheNoten, durchschnitt, sonstiges, fachart, richtung, hinweis } = request.data || {};
+    const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
+    const fachLabel = fach === "nebenfach" ? "Nebenfach" : "Hauptfach";
+
+    const notenText = Array.isArray(schriftlicheNoten) && schriftlicheNoten.length > 0
+      ? schriftlicheNoten.map(n => `${n.name || "Arbeit"}: ${n.grade}`).join(", ")
+      : "Keine schriftlichen Noten vorhanden";
+
+    let userMsg = `Fachart: ${fachLabel}\n`;
+    userMsg += `Schriftliche Noten: ${notenText}\n`;
+    if (durchschnitt) userMsg += `Schriftlicher Durchschnitt: ${durchschnitt}\n`;
+    userMsg += `Sonstige/mündliche Mitarbeit: ${sonstiges && sonstiges.trim() ? sonstiges.trim() : "Keine Angabe"}\n`;
+
+    if (richtung === "besser") {
+      userMsg += `\nWICHTIG: Schlage eine etwas BESSERE Note vor als beim normalen Abwägen und passe die Begründung entsprechend an.`;
+    } else if (richtung === "schlechter") {
+      userMsg += `\nWICHTIG: Schlage eine etwas SCHLECHTERE Note vor als beim normalen Abwägen und passe die Begründung entsprechend an.`;
+    }
+    if (hinweis && hinweis.trim()) {
+      userMsg += `\nZusätzlicher Hinweis der Lehrkraft, den du berücksichtigen sollst: ${hinweis.trim()}`;
+    }
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: ZEUGNISNOTE_SYSTEM,
+        messages: [{ role: "user", content: userMsg }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new HttpsError("internal", "Anthropic API-Fehler: " + response.status);
+    }
+
+    const data = await response.json();
+    const raw = data.content?.map(b => b.text || "").join("").trim() || "";
+
+    let note = "";
+    let begruendung = "";
+    try {
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+      note = (parsed.note || "").toString().trim();
+      begruendung = (parsed.begruendung || "").toString().trim();
+    } catch (e) {
+      throw new HttpsError("internal", "Antwort konnte nicht verarbeitet werden.");
+    }
+
+    const erlaubt = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5", "5-", "6"];
+    if (!erlaubt.includes(note)) note = "";
+
+    return { note, begruendung };
+  }
+);

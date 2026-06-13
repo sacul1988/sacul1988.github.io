@@ -336,7 +336,6 @@
                                         <button class="btn btn-primary btn-icon" id="zeugnis-view-toggle" onclick="toggleZeugnisView()">
                                             <i class="fas fa-calculator"></i> <span class="btn-text">Durchschnitt</span>
                                         </button>
-                                        <button class="btn btn-primary btn-icon" id="gewichtung-toggle-btn" onclick="toggleZeugnisGewichtung()"><i class="fas fa-scale-balanced"></i> Gewichtung: 50 / 50</button>
                                         <button class="btn btn-primary btn-icon" onclick="exportAllStudentCards()">
                                             <i class="fas fa-file-export"></i>
                                             <span class="btn-text">Zeugnisse exportieren</span>
@@ -512,28 +511,29 @@
             </div>
         </div>
 
-        <!-- Mündliche Note: Vollbild-Fenster mit Textbausteinen -->
-        <div id="muendlich-overlay" class="muendlich-overlay">
-            <div class="muendlich-window">
-                <div class="muendlich-topbar">
-                    <button class="topbar-btn" type="button" title="Schließen" aria-label="Schließen" onclick="closeMuendlichWindow()">
+        <!-- Zeugnisnote: Vollbild-Fenster mit KI-Notenvorschlag -->
+        <div id="zeugnisnote-overlay" class="zeugnisnote-overlay">
+            <div class="zeugnisnote-window">
+                <div class="zeugnisnote-topbar">
+                    <button class="topbar-btn" type="button" title="Schließen" aria-label="Schließen" onclick="closeZeugnisnoteWindow()">
                         <i class="fas fa-arrow-left"></i>
                     </button>
-                    <div class="muendlich-title">
-                        <span class="muendlich-title-label">Mündliche Note</span>
-                        <span class="muendlich-student-name" id="muendlich-student-name"></span>
+                    <div class="zeugnisnote-title">
+                        <span class="zeugnisnote-title-label">Zeugnisnote</span>
+                        <span class="zeugnisnote-student-name" id="zeugnisnote-student-name"></span>
                     </div>
-                    <div class="muendlich-nav">
-                        <button class="topbar-btn" type="button" id="muendlich-prev-btn" title="Vorheriger Schüler" aria-label="Vorheriger Schüler" onclick="muendlichNav(-1)">
+                    <div class="zeugnisnote-nav">
+                        <button class="topbar-btn" type="button" id="zeugnisnote-prev-btn" title="Vorheriger Schüler" aria-label="Vorheriger Schüler" onclick="zeugnisnoteNav(-1)">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button class="topbar-btn" type="button" id="muendlich-next-btn" title="Nächster Schüler" aria-label="Nächster Schüler" onclick="muendlichNav(1)">
+                        <button class="topbar-btn" type="button" id="zeugnisnote-next-btn" title="Nächster Schüler" aria-label="Nächster Schüler" onclick="zeugnisnoteNav(1)">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
                 </div>
-                <div class="muendlich-summary" id="muendlich-summary"></div>
-                <div class="muendlich-body" id="muendlich-body"></div>
+                <div class="zeugnisnote-body" id="zeugnisnote-body">
+                    <!-- Wird per JS gefüllt (Eingabe- oder Ergebnis-Ansicht) -->
+                </div>
             </div>
         </div>
 
@@ -705,11 +705,23 @@
                 <div class="form-group">
                     <input type="text" id="edit-class-input" class="form-control" placeholder="Klassenname">
                 </div>
+                <div class="form-group">
+                    <label>Fachart</label>
+                    <div class="fachart-toggle" id="edit-class-fachart">
+                        <button type="button" class="fachart-option" data-fachart="hauptfach" onclick="setEditClassFachart('hauptfach')">
+                            <i class="fas fa-book"></i> Hauptfach
+                        </button>
+                        <button type="button" class="fachart-option" data-fachart="nebenfach" onclick="setEditClassFachart('nebenfach')">
+                            <i class="fas fa-book-open"></i> Nebenfach
+                        </button>
+                    </div>
+                    <small class="fachart-hint">Im Hauptfach zählen schriftliche und mündliche Leistungen etwa gleich, im Nebenfach zählt die mündliche Mitarbeit mehr.</small>
+                </div>
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-primary" onclick="saveEditedClass()">Speichern</button>
                 </div>
             </div>
-            
+
             <!-- Modal für Schüler bearbeiten -->
             <div id="edit-student-modal" class="modal" style="display: none;">
                 <div class="wizard-header">
@@ -964,6 +976,27 @@
             const json = await response.json();
             if (json.error) throw new Error(json.error.message || 'Fehler beim Generieren.');
             return json.result.text;
+        };
+
+        // Firebase Functions: Zeugnisnoten-Vorschlag (Note abwägen + Begründung)
+        window.callGenerateZeugnisnote = async (payload) => {
+            const user = auth.currentUser;
+            if (!user) throw new Error('Nicht angemeldet.');
+            const token = await user.getIdToken(true);
+            const response = await fetch(
+                'https://us-central1-schulverwaltung-487c9.cloudfunctions.net/generateZeugnisnote',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ data: payload })
+                }
+            );
+            const json = await response.json();
+            if (json.error) throw new Error(json.error.message || 'Fehler beim Generieren.');
+            return json.result;
         };
 
         // AUTH-FLOW
@@ -1258,11 +1291,6 @@
                 }
             }
 
-            // Eigene Bausteine für die mündliche Note synchronisieren
-            if (shouldApplyFormulierungen && Array.isArray(cloudData.muendlichBausteine)) {
-                localStorage.setItem('muendlichBausteine', JSON.stringify(cloudData.muendlichBausteine));
-            }
-
             // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
             // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
             if (Array.isArray(cloudData.termine)) {
@@ -1334,7 +1362,6 @@
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
                     formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]'),
                     zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
-                    muendlichBausteine: JSON.parse(localStorage.getItem('muendlichBausteine') || '[]'),
                     contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
                 };

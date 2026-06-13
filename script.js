@@ -1739,14 +1739,28 @@ function cloneClass() {
 // Variable für die zu bearbeitende Klasse
 let classToEditId = null;
 
+let _editClassFachart = 'hauptfach';
+
+function setEditClassFachart(typ) {
+    _editClassFachart = typ === 'nebenfach' ? 'nebenfach' : 'hauptfach';
+    const container = safeGetElement('edit-class-fachart');
+    if (container) {
+        container.querySelectorAll('.fachart-option').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.fachart === _editClassFachart);
+        });
+    }
+}
+window.setEditClassFachart = setEditClassFachart;
+
 function editClass(classId) {
     if (classId === null || classId === undefined || !classes[classId]) return;
-    
+
     classToEditId = classId;
     const cls = classes[classId];
     const input = safeGetElement('edit-class-input');
     if (input) input.value = cls.name;
-    
+    setEditClassFachart(cls.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach');
+
     showModal('edit-class-modal');
 }
 
@@ -1758,6 +1772,7 @@ function saveEditedClass() {
     const newName = input.value.trim();
     if (newName) {
         classes[classToEditId].name = newName;
+        classes[classToEditId].gewichtung = _editClassFachart;
         saveData();
         renderClassesGrid();
         
@@ -5460,115 +5475,7 @@ function toggleZeugnisView() {
     renderZeugnisModule();
 }
 
-// Durchschnitt der aktiven (nicht auf "Aus" gestellten) Slider berechnen
-function calcSonstigeAvg(sl) {
-    const active = [sl.muendlich ?? 3, sl.arbeitsphase ?? 3, sl.stoerungen ?? 3].filter(v => v !== 6);
-    if (active.length === 0) return null;
-    return active.reduce((a, b) => a + b, 0) / active.length;
-}
-
-function calculateFinalNumericValue(student) {
-    const average = calculateProjectAverage(student.projects);
-    const writtenAvg = average ? parseFloat(average.exact) : null;
-    const sonstigeAvg = calcSonstigeAvg(student.sonstigeSlider || {});
-    if (writtenAvg !== null && sonstigeAvg !== null) {
-        const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
-        const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
-        const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
-        return writtenAvg * wSchrift + sonstigeAvg * wSonstig;
-    }
-    if (writtenAvg !== null) return writtenAvg;
-    return sonstigeAvg; // kann null sein wenn alle Slider "Aus"
-}
-
-// Hilfsfunktion zur Generierung des HTML für die Zeugnisnoten-Auswahl mit integriertem Notenvorschlag
-function getGradesSelectorHtml(student, index) {
-    const selectedGrade = student.zeugnisnote || '';
-    const suggestedGradeWithTendency = getSuggestedGradeWithTendency(student, index);
-
-    const allSelectableGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5"];
-    const hasActiveSelection = allSelectableGrades.includes(selectedGrade);
-
-    return allSelectableGrades.map(g => {
-        const isSelected = selectedGrade === g;
-        const isSuggested = suggestedGradeWithTendency === g;
-        const colorClass = Utils.getGradeColorClass(g);
-
-        const colorMap = {
-            'grade-excellent': '#007bff',
-            'grade-good': '#28a745',
-            'grade-average': '#ffc107',
-            'grade-poor': '#fd7e14',
-            'grade-bad': '#dc143c',
-            'grade-very-bad': '#6c757d'
-        };
-        const bgColor = colorMap[colorClass] || '#6c757d';
-
-        let btnStyle = `
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
-            margin: 0;
-        `;
-
-        let titleAttr = '';
-        if (isSuggested) {
-            titleAttr = ' title="Vorgeschlagene Note (Notenvorschlag)"';
-        }
-
-        if (hasActiveSelection) {
-            if (isSelected) {
-                const textColor = 'white';
-                btnStyle += `background-color: ${bgColor} !important; color: ${textColor} !important; box-shadow: 0 2px 5px rgba(0,0,0,0.2);`;
-            } else if (isSuggested) {
-                // Gestrichelter lila Rand als dezenter Hinweis auf den Vorschlag, auch wenn eine andere Note gewählt wurde
-                btnStyle += `
-                    background-color: #e2e8f0 !important;
-                    color: #94a3b8 !important;
-                    border: 2px dashed #c084fc !important;
-                `;
-            } else {
-                btnStyle += `
-                    background-color: #e2e8f0 !important;
-                    color: #94a3b8 !important;
-                    border-color: transparent !important;
-                `;
-            }
-        } else {
-            if (isSuggested) {
-                // Notenvorschlag als helle blasse Lila einfärben (#d8b4fe)
-                btnStyle += `
-                    background-color: #d8b4fe !important;
-                    color: #581c87 !important;
-                    border: 2px solid #a855f7 !important;
-                    box-shadow: 0 2px 5px rgba(168, 85, 247, 0.3);
-                `;
-            } else {
-                const textColor = 'white';
-                btnStyle += `background-color: ${bgColor} !important; color: ${textColor} !important;`;
-            }
-        }
-
-        return `<button style="${btnStyle}"${titleAttr} onclick="selectZeugnisGrade(${index}, '${g}')">${g}</button>`;
-    }).join('') + (() => {
-        const fv = calculateFinalNumericValue(student);
-        return `<span style="font-size:1rem;font-weight:700;color:var(--dark-color);margin-left:10px;">(${fv.toFixed(2)})</span>`;
-    })();
-}
-
 function renderZeugnisModule() {
-    // Gewichtung-Buttons für diese Klasse setzen
-    const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
-    _applyZeugnisGewichtungButtons(gewichtung);
-
     // Update button styling based on persisted state
     const btn = safeGetElement('zeugnis-view-toggle');
     if (btn) {
@@ -5653,10 +5560,35 @@ function renderZeugnisModule() {
             // Save data locally and sync
             saveData(index);
         }
-        
-        // Zeugnisnote vorschlagen (ohne automatische Auswahl)
-        const gradesSelectorHtml = getGradesSelectorHtml(student, index);
-        
+
+        // Zeugnisnote-Bereich (KI-Vorschlag)
+        const znNote = student.zeugnisnote || '';
+        const znText = student.zeugnisBegruendung || '';
+        let zeugnisnoteSectionHtml;
+        if (znNote) {
+            const znClass = Utils.getGradeColorClass(Utils.convertGrade(znNote));
+            const znPreview = znText ? (znText.length > 160 ? escapeHtml(znText.slice(0, 160)) + '…' : escapeHtml(znText)) : 'Keine Begründung vorhanden.';
+            zeugnisnoteSectionHtml = `
+                <div class="zeugnis-section zn-card-section">
+                    <h4>Zeugnisnote</h4>
+                    <div class="zn-card-result" onclick="openZeugnisnoteWindow(${index})" role="button" title="Zeugnisnote bearbeiten">
+                        <span class="zn-card-circle ${znClass}">${znNote}</span>
+                        <div class="zn-card-textwrap">
+                            <span class="zn-card-preview">${znPreview}</span>
+                            <span class="zn-card-edit"><i class="fas fa-pen"></i> Bearbeiten</span>
+                        </div>
+                    </div>
+                </div>`;
+        } else {
+            zeugnisnoteSectionHtml = `
+                <div class="zeugnis-section zn-card-section">
+                    <h4>Zeugnisnote</h4>
+                    <button class="btn btn-primary btn-icon zn-card-trigger" onclick="openZeugnisnoteWindow(${index})">
+                        <i class="fas fa-wand-magic-sparkles"></i> Zeugnisnote mit KI vorschlagen
+                    </button>
+                </div>`;
+        }
+
         card.innerHTML = `
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
@@ -5687,82 +5619,247 @@ function renderZeugnisModule() {
                             <h4>Notizen (${student.name})</h4>
                             <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
                         </div>
-                        <div class="zeugnis-slider-wrapper">
-                            <h4>Mündlich (${student.name})</h4>
-                        <div class="zeugnis-slider-panel">
-                            ${(() => {
-                                const sl = student.sonstigeSlider || {};
-                                const s1 = sl.muendlich ?? 3;
-                                const s2 = sl.arbeitsphase ?? 3;
-                                const s3 = sl.stoerungen ?? 3;
-                                const active = [s1, s2, s3].filter(v => v !== 6);
-                                const avgN = active.length > 0 ? active.reduce((a,b)=>a+b,0)/active.length : null;
-                                const avgLabel = avgN !== null ? numericToGradeWithTendency(avgN) : '–';
-                                const avgBase = parseInt(avgLabel);
-                                const cmap = {1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad',6:'grade-very-bad'};
-                                const avgBadgeCls = avgN !== null ? (cmap[avgBase] || 'grade-average') : 'grade-average';
-                                const avgNumText = avgN !== null ? `(${avgN.toFixed(2)})` : '';
-                                return `
-                            <div class="zeugnis-slider-item${s1===6?' is-off':''}">
-                                <span class="zeugnis-slider-label">Mündliche Beteiligung</span>
-                                <div class="zeugnis-slider-row">
-                                    <div class="zeugnis-slider-wrap">
-                                        <input type="range" min="1" max="6" step="1" value="${s1}" class="zeugnis-slider" id="slider-muendlich-${index}" oninput="updateSonstigeNote(${index})">
-                                        <span class="zeugnis-off-sep" aria-hidden="true"></span>
-                                    </div>
-                                    <span class="zeugnis-slider-value" id="slider-muendlich-val-${index}">${s1===6?'Aus':s1}</span>
-                                </div>
-                                <span class="zeugnis-slider-text" id="slider-muendlich-text-${index}">${s1===6?'':ZeugnisSliderTexte.muendlich[s1-1]}</span>
-                            </div>
-                            <div class="zeugnis-slider-item${s2===6?' is-off':''}">
-                                <span class="zeugnis-slider-label">Selbstständigkeit</span>
-                                <div class="zeugnis-slider-row">
-                                    <div class="zeugnis-slider-wrap">
-                                        <input type="range" min="1" max="6" step="1" value="${s2}" class="zeugnis-slider" id="slider-arbeitsphase-${index}" oninput="updateSonstigeNote(${index})">
-                                        <span class="zeugnis-off-sep" aria-hidden="true"></span>
-                                    </div>
-                                    <span class="zeugnis-slider-value" id="slider-arbeitsphase-val-${index}">${s2===6?'Aus':s2}</span>
-                                </div>
-                                <span class="zeugnis-slider-text" id="slider-arbeitsphase-text-${index}">${s2===6?'':ZeugnisSliderTexte.arbeitsphase[s2-1]}</span>
-                            </div>
-                            <div class="zeugnis-slider-item${s3===6?' is-off':''}">
-                                <span class="zeugnis-slider-label">Störungen</span>
-                                <div class="zeugnis-slider-row">
-                                    <div class="zeugnis-slider-wrap">
-                                        <input type="range" min="1" max="6" step="1" value="${s3}" class="zeugnis-slider" id="slider-stoerungen-${index}" oninput="updateSonstigeNote(${index})">
-                                        <span class="zeugnis-off-sep" aria-hidden="true"></span>
-                                    </div>
-                                    <span class="zeugnis-slider-value" id="slider-stoerungen-val-${index}">${s3===6?'Aus':s3}</span>
-                                </div>
-                                <span class="zeugnis-slider-text" id="slider-stoerungen-text-${index}">${s3===6?'':ZeugnisSliderTexte.stoerungen[s3-1]}</span>
-                            </div>
-                            <div class="zeugnis-sonstige-avg" id="sonstige-avg-${index}">
-                                <span class="zeugnis-sonstige-avg-label">Durchschnitt (Mündlich):</span>
-                                <div class="zeugnis-sonstige-avg-right">
-                                    <span class="grade-badge ${avgBadgeCls} zeugnis-sonstige-avg-value" id="sonstige-avg-val-${index}">${avgLabel}</span>
-                                    <span class="zeugnis-sonstige-avg-num" id="sonstige-avg-num-${index}">${avgNumText}</span>
-                                </div>
-                            </div>`; })()}
-                        </div>
-                        </div>
                     </div>
                 </div>
-                
-                <div class="zeugnis-section summary-section" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
-                    <h4 id="zeugnisnote-header-${index}" style="margin: 0; white-space: nowrap;">Zeugnisnote:</h4>
-                    <div class="zeugnisnote-selector" id="zeugnisnote-selector-${index}" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0;">
-                        ${gradesSelectorHtml}
-                    </div>
-                </div>
+                ${zeugnisnoteSectionHtml}
             </div>
         `;
-        
+
         container.appendChild(card);
     });
 
 }
 
+// ===== Zeugnisnote-Vollbild-Fenster (KI-Notenvorschlag) =====
+let _zeugnisnoteStudentIndex = null;
+let _zeugnisnoteBusy = false;
 
+function getZeugnisnoteContext(student) {
+    const schriftlicheNoten = (student.projects || [])
+        .filter(p => p.grade && p.grade !== '-')
+        .map(p => ({ name: p.name || 'Arbeit', grade: p.grade }));
+    const avg = calculateProjectAverage(student.projects);
+    return { schriftlicheNoten, durchschnitt: avg ? avg.exact : '' };
+}
+
+function openZeugnisnoteWindow(studentIndex) {
+    if (activeClassId === null || !classes[activeClassId]?.students?.[studentIndex]) return;
+    _zeugnisnoteStudentIndex = studentIndex;
+    renderZeugnisnoteWindow();
+    const overlay = document.getElementById('zeugnisnote-overlay');
+    if (overlay) overlay.classList.add('open');
+    document.body.classList.add('modal-open');
+}
+
+function closeZeugnisnoteWindow() {
+    const overlay = document.getElementById('zeugnisnote-overlay');
+    if (overlay) overlay.classList.remove('open');
+    _zeugnisnoteStudentIndex = null;
+    const modalContainer = document.getElementById('modal-container');
+    if (!modalContainer || modalContainer.style.display === 'none') {
+        document.body.classList.remove('modal-open');
+    }
+    if (typeof renderZeugnisModule === 'function' && activeModule === 'zeugnis') {
+        renderZeugnisModule();
+    }
+}
+
+function zeugnisnoteNav(dir) {
+    if (_zeugnisnoteStudentIndex === null || activeClassId === null) return;
+    const students = classes[activeClassId]?.students || [];
+    const next = _zeugnisnoteStudentIndex + dir;
+    if (next < 0 || next >= students.length) return;
+    _zeugnisnoteStudentIndex = next;
+    renderZeugnisnoteWindow();
+    const body = document.getElementById('zeugnisnote-body');
+    if (body) body.scrollTop = 0;
+}
+
+function _znUpdateTopbar(student) {
+    const nameEl = document.getElementById('zeugnisnote-student-name');
+    if (nameEl) nameEl.textContent = student.name;
+    const students = classes[activeClassId]?.students || [];
+    const prevBtn = document.getElementById('zeugnisnote-prev-btn');
+    const nextBtn = document.getElementById('zeugnisnote-next-btn');
+    if (prevBtn) prevBtn.disabled = _zeugnisnoteStudentIndex === 0;
+    if (nextBtn) nextBtn.disabled = _zeugnisnoteStudentIndex === students.length - 1;
+}
+
+function renderZeugnisnoteWindow() {
+    if (_zeugnisnoteStudentIndex === null || activeClassId === null) return;
+    const student = classes[activeClassId].students[_zeugnisnoteStudentIndex];
+    if (!student) return;
+    _znUpdateTopbar(student);
+
+    if (student.zeugnisnote && student.zeugnisBegruendung) {
+        renderZeugnisnoteResult(student);
+    } else {
+        renderZeugnisnoteInput(student);
+    }
+}
+
+function _znContextHtml(student) {
+    const { schriftlicheNoten, durchschnitt } = getZeugnisnoteContext(student);
+    const fachart = classes[activeClassId]?.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
+    const fachLabel = fachart === 'nebenfach' ? 'Nebenfach' : 'Hauptfach';
+    const gradesHtml = schriftlicheNoten.length > 0
+        ? schriftlicheNoten.map(n => {
+            const cls = Utils.getGradeColorClass(Utils.convertGrade(n.grade));
+            return `<span class="zn-grade-item"><span class="grade-badge ${cls}">${n.grade}</span>${escapeHtml(n.name)}</span>`;
+          }).join('')
+        : '<span style="color: var(--grey-color); font-size: 0.85rem;">Keine schriftlichen Noten</span>';
+    const avgHtml = durchschnitt ? `<div class="zn-avg">Schriftlicher Durchschnitt: ${durchschnitt}</div>` : '';
+    return `
+        <div class="zn-context">
+            <div class="zn-context-head">
+                <h4>Schriftliche Noten</h4>
+                <span class="zn-fach-badge">${fachLabel}</span>
+            </div>
+            <div class="zn-grades">${gradesHtml}</div>
+            ${avgHtml}
+        </div>`;
+}
+
+function renderZeugnisnoteInput(student) {
+    const body = document.getElementById('zeugnisnote-body');
+    if (!body) return;
+    const sonstiges = student.zeugnisSonstiges || '';
+    body.innerHTML = `
+        ${_znContextHtml(student)}
+        <p class="zn-input-label">Sonstige Mitarbeit im Unterricht</p>
+        <p class="zn-input-hint">Beschreibe kurz die mündliche und sonstige Mitarbeit (z.&nbsp;B. 3 Stichpunkte). Die KI wägt das mit den schriftlichen Noten ab und schlägt eine Note vor.</p>
+        <textarea id="zn-sonstiges" class="form-control zn-textarea" placeholder="z. B. beteiligt sich rege am Unterricht, hilft Mitschülern, arbeitet bei Experimenten sehr sorgfältig...">${escapeHtml(sonstiges)}</textarea>
+        <button class="btn btn-primary btn-icon zn-generate-btn" onclick="zeugnisnoteGenerate(null)">
+            <i class="fas fa-wand-magic-sparkles"></i> Notenvorschlag generieren
+        </button>`;
+}
+
+function renderZeugnisnoteResult(student) {
+    const body = document.getElementById('zeugnisnote-body');
+    if (!body) return;
+    const note = student.zeugnisnote || '';
+    const text = student.zeugnisBegruendung || '';
+    const circleClass = Utils.getGradeColorClass(Utils.convertGrade(note));
+    const subject = classes[activeClassId]?.name || 'Zeugnis';
+    body.innerHTML = `
+        <div class="zn-result-head">
+            <div class="zn-grade-circle ${circleClass}">${note}</div>
+            <div class="zn-result-headtext">
+                <span class="zn-result-label">Endnote (Vorschlag)</span>
+                <span class="zn-result-subject">${escapeHtml(subject)}</span>
+            </div>
+        </div>
+        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung" oninput="saveZeugnisnoteBegruendung()">${escapeHtml(text)}</div>
+        <p class="zn-edit-hint">Du kannst den Text direkt anpassen. Für eine andere Note nutze „Besser", „Schlechter" oder „Anpassen".</p>
+        <div class="zn-actions">
+            <button class="zn-action-btn zn-new" onclick="zeugnisnoteBackToInput()"><i class="fas fa-rotate-left"></i> Neu</button>
+            <button class="zn-action-btn zn-better" onclick="zeugnisnoteGenerate('besser')"><i class="fas fa-caret-up"></i> Besser</button>
+            <button class="zn-action-btn zn-worse" onclick="zeugnisnoteGenerate('schlechter')"><i class="fas fa-caret-down"></i> Schlechter</button>
+            <button class="zn-action-btn zn-adjust" onclick="zeugnisnoteToggleHinweis()"><i class="fas fa-sliders"></i> Anpassen</button>
+        </div>
+        <div id="zn-hinweis-container"></div>`;
+}
+
+function zeugnisnoteBackToInput() {
+    if (_zeugnisnoteStudentIndex === null) return;
+    const student = classes[activeClassId].students[_zeugnisnoteStudentIndex];
+    renderZeugnisnoteInput(student);
+}
+
+function zeugnisnoteToggleHinweis() {
+    const container = document.getElementById('zn-hinweis-container');
+    if (!container) return;
+    if (container.innerHTML.trim()) {
+        container.innerHTML = '';
+        return;
+    }
+    container.innerHTML = `
+        <div class="zn-hinweis-box">
+            <label for="zn-hinweis">Individueller Hinweis an die KI</label>
+            <textarea id="zn-hinweis" class="form-control" placeholder="z. B. hat sich im zweiten Halbjahr deutlich gesteigert; Prüfungsangst berücksichtigen..."></textarea>
+            <div class="zn-hinweis-actions">
+                <button class="btn btn-light" onclick="zeugnisnoteToggleHinweis()">Abbrechen</button>
+                <button class="btn btn-primary btn-icon" onclick="zeugnisnoteGenerate('hinweis')"><i class="fas fa-wand-magic-sparkles"></i> Neu generieren</button>
+            </div>
+        </div>`;
+    const ta = document.getElementById('zn-hinweis');
+    if (ta) ta.focus();
+}
+
+async function zeugnisnoteGenerate(richtung) {
+    if (_zeugnisnoteBusy || _zeugnisnoteStudentIndex === null || activeClassId === null) return;
+    const student = classes[activeClassId].students[_zeugnisnoteStudentIndex];
+    if (!student) return;
+
+    // Eingabe einsammeln
+    const sonstigesEl = document.getElementById('zn-sonstiges');
+    if (sonstigesEl) {
+        student.zeugnisSonstiges = sonstigesEl.value;
+    }
+    let hinweis = '';
+    if (richtung === 'hinweis') {
+        const hinweisEl = document.getElementById('zn-hinweis');
+        hinweis = hinweisEl ? hinweisEl.value.trim() : '';
+        if (!hinweis) { swal('Hinweis', 'Bitte gib einen Hinweis ein.', 'info'); return; }
+    }
+
+    const { schriftlicheNoten, durchschnitt } = getZeugnisnoteContext(student);
+    const fachart = classes[activeClassId]?.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
+
+    // Ladeansicht
+    const body = document.getElementById('zeugnisnote-body');
+    if (body) {
+        body.innerHTML = `<div class="zn-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Die KI wägt ab und schreibt einen Vorschlag…</span></div>`;
+    }
+    _zeugnisnoteBusy = true;
+
+    try {
+        if (typeof window.callGenerateZeugnisnote !== 'function') {
+            throw new Error('Funktion nicht verfügbar.');
+        }
+        const result = await window.callGenerateZeugnisnote({
+            schriftlicheNoten,
+            durchschnitt,
+            sonstiges: student.zeugnisSonstiges || '',
+            fachart,
+            richtung: (richtung === 'besser' || richtung === 'schlechter') ? richtung : null,
+            hinweis
+        });
+        if (!result || !result.note) {
+            throw new Error('Kein gültiger Notenvorschlag erhalten.');
+        }
+        // Note direkt setzen + speichern
+        student.zeugnisnote = result.note;
+        student.zeugnisBegruendung = result.begruendung || '';
+        saveData(_zeugnisnoteStudentIndex);
+        renderZeugnisnoteResult(student);
+    } catch (err) {
+        console.error('Zeugnisnote-Fehler:', err);
+        if (body) {
+            body.innerHTML = `<div class="zn-loading"><i class="fas fa-triangle-exclamation" style="color:#dc143c;"></i><span>${escapeHtml(err.message || 'Fehler beim Generieren.')}</span><button class="btn btn-primary" onclick="renderZeugnisnoteWindow()">Zurück</button></div>`;
+        }
+    } finally {
+        _zeugnisnoteBusy = false;
+    }
+}
+
+function saveZeugnisnoteBegruendung() {
+    if (_zeugnisnoteStudentIndex === null || activeClassId === null) return;
+    const el = document.getElementById('zn-begruendung');
+    const student = classes[activeClassId].students[_zeugnisnoteStudentIndex];
+    if (!el || !student) return;
+    student.zeugnisBegruendung = el.innerText;
+    saveData(_zeugnisnoteStudentIndex);
+}
+
+window.openZeugnisnoteWindow = openZeugnisnoteWindow;
+window.closeZeugnisnoteWindow = closeZeugnisnoteWindow;
+window.zeugnisnoteNav = zeugnisnoteNav;
+window.zeugnisnoteGenerate = zeugnisnoteGenerate;
+window.zeugnisnoteBackToInput = zeugnisnoteBackToInput;
+window.zeugnisnoteToggleHinweis = zeugnisnoteToggleHinweis;
+window.saveZeugnisnoteBegruendung = saveZeugnisnoteBegruendung;
+window.renderZeugnisnoteWindow = renderZeugnisnoteWindow;
 
 
 function collapseStudentAndScrollToTop(module, studentIndex) {
@@ -5898,83 +5995,6 @@ function splitSpanAtCaret(event) {
 }
 window.splitSpanAtCaret = splitSpanAtCaret;
 
-// Notizen speichern
-const ZeugnisSliderTexte = {
-    muendlich: [
-        'Beteiligt sich häufig und aktiv am Unterrichtsgespräch. Die Beiträge zeigen eine vernetzte Denkweise und eigenständige Schlussfolgerungen.',
-        'Beteiligt sich regelmäßig am Unterricht. Die Beiträge zeigen ein inhaltsbezogenes Verständnis.',
-        'Beteiligt sich gelegentlich am Unterricht. Mündliche Beiträge werden jedoch insgesamt etwas zu selten eingebracht.',
-        'Beteiligt sich nur sehr selten am Unterricht. Die mündliche Beteiligung ist insgesamt deutlich zu gering.',
-        'Eine mündliche Mitarbeit im Unterricht ist im Wesentlichen nicht vorhanden.'
-    ],
-    arbeitsphase: [
-        'Vorbildliche Arbeitsweise: zielgerichtet, selbstständig, vollständig, sorgfältig und zügig.',
-        'Überwiegend selbstständig und konzentriert. Aufgaben werden zuverlässig, vollständig und ordentlich bearbeitet.',
-        'Benötigt gelegentlich Aufforderungen zur Weiterarbeit. Nach einer Aufforderung wird die Arbeit zuverlässig fortgesetzt. Aufgaben werden überwiegend vollständig und korrekt bearbeitet.',
-        'Benötigt regelmäßig Aufforderungen zur Weiterarbeit. Aufgaben werden teilweise nur unvollständig oder oberflächlich bearbeitet.',
-        'Selbstständiges Arbeiten gelingt überwiegend nicht. Trotz Aufforderung werden Aufgaben oft nur unvollständig oder nicht bearbeitet.'
-    ],
-    stoerungen: [
-        'Verhält sich durchgehend ruhig und trägt aktiv zu einem positiven Lernklima bei.',
-        'Verhält sich überwiegend ruhig. Sehr seltene Ablenkungen oder Störungen unterbrechen die Arbeitsruhe allenfalls nur sehr kurzfristig.',
-        'Gelegentliche Störungen beeinträchtigen die Arbeitsruhe der Klasse oder die eigene Konzentration zeitweise.',
-        'Regelmäßige Störungen und Ablenkungen beeinträchtigen den Unterricht und die eigene Arbeit.',
-        'Massive, wiederkehrende Störungen belasten teilweise den Unterricht für alle Beteiligten so erheblich, dass Maßnahmen getroffen werden müssen.'
-    ]
-};
-
-function updateSonstigeNote(index) {
-    const v1 = parseInt(document.getElementById(`slider-muendlich-${index}`)?.value || 3);
-    const v2 = parseInt(document.getElementById(`slider-arbeitsphase-${index}`)?.value || 3);
-    const v3 = parseInt(document.getElementById(`slider-stoerungen-${index}`)?.value || 3);
-
-    // Wert-Anzeige: "Aus" wenn 6, sonst Ziffer
-    const valEl1 = document.getElementById(`slider-muendlich-val-${index}`);
-    const valEl2 = document.getElementById(`slider-arbeitsphase-val-${index}`);
-    const valEl3 = document.getElementById(`slider-stoerungen-val-${index}`);
-    if (valEl1) valEl1.textContent = v1 === 6 ? 'Aus' : v1;
-    if (valEl2) valEl2.textContent = v2 === 6 ? 'Aus' : v2;
-    if (valEl3) valEl3.textContent = v3 === 6 ? 'Aus' : v3;
-
-    // is-off-Klasse setzen/entfernen
-    [['slider-muendlich-', v1], ['slider-arbeitsphase-', v2], ['slider-stoerungen-', v3]].forEach(([pfx, val]) => {
-        const item = document.getElementById(`${pfx}${index}`)?.closest('.zeugnis-slider-item');
-        if (item) item.classList.toggle('is-off', val === 6);
-    });
-
-    // Speichern
-    if (activeClassId !== null && classes[activeClassId]?.students?.[index]) {
-        classes[activeClassId].students[index].sonstigeSlider = { muendlich: v1, arbeitsphase: v2, stoerungen: v3 };
-        saveData(index);
-    }
-
-    // Durchschnitt nur aus aktiven Slidern
-    const active = [v1, v2, v3].filter(v => v !== 6);
-    const avgEl = document.getElementById(`sonstige-avg-val-${index}`);
-    const avgNumEl = document.getElementById(`sonstige-avg-num-${index}`);
-    if (active.length === 0) {
-        if (avgEl) { avgEl.textContent = '–'; avgEl.className = 'grade-badge zeugnis-sonstige-avg-value grade-average'; }
-        if (avgNumEl) avgNumEl.textContent = '';
-    } else {
-        const avgNum = active.reduce((a, b) => a + b, 0) / active.length;
-        const avgLabel = numericToGradeWithTendency(avgNum);
-        const avgBase = parseInt(avgLabel);
-        const avgColorMap = { 1: 'grade-excellent', 2: 'grade-good', 3: 'grade-average', 4: 'grade-poor', 5: 'grade-bad', 6: 'grade-very-bad' };
-        if (avgEl) { avgEl.textContent = avgLabel; avgEl.className = `grade-badge zeugnis-sonstige-avg-value ${avgColorMap[avgBase] || 'grade-average'}`; }
-        if (avgNumEl) avgNumEl.textContent = `(${avgNum.toFixed(2)})`;
-    }
-
-    // Beschreibungstexte
-    const t = document.getElementById(`slider-muendlich-text-${index}`);
-    if (t) t.textContent = v1 === 6 ? '' : ZeugnisSliderTexte.muendlich[v1 - 1];
-    const t2 = document.getElementById(`slider-arbeitsphase-text-${index}`);
-    if (t2) t2.textContent = v2 === 6 ? '' : ZeugnisSliderTexte.arbeitsphase[v2 - 1];
-    const t3 = document.getElementById(`slider-stoerungen-text-${index}`);
-    if (t3) t3.textContent = v3 === 6 ? '' : ZeugnisSliderTexte.stoerungen[v3 - 1];
-
-    updateZeugnisNoteVorschlag(index);
-}
-
 function saveStudentNotes(studentIndex, isDebounced = false) {
     const leftTextarea = safeGetElement(`notes-left-${studentIndex}`);
     if (!leftTextarea) return;
@@ -5990,9 +6010,6 @@ function saveStudentNotes(studentIndex, isDebounced = false) {
     
     student.leftNotes = leftNotesText;
 
-    // Notenvorschlag sofort dynamisch im DOM aktualisieren
-    updateZeugnisNoteVorschlag(studentIndex);
-    
     // Wenn es ein Live-Update (oninput) ist, nutzen wir einen SEHR KURZEN debounced Sync (500ms)
     // Das verhält sich dann fast so "stark" wie bei den Noten, schont aber den Cursor beim Tippen.
     if (isDebounced) {
@@ -6009,166 +6026,6 @@ function saveStudentNotes(studentIndex, isDebounced = false) {
         saveData(studentIndex);
     }
 }
-
-// Zeugnisnote auswählen
-function selectZeugnisGrade(studentIndex, grade) {
-    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students || !classes[activeClassId].students[studentIndex]) return;
-    const student = classes[activeClassId].students[studentIndex];
-    const currentGrade = student.zeugnisnote;
-
-    if (currentGrade === grade) {
-        return;
-    } else if (currentGrade) {
-        swal({
-            title: 'Note ändern?',
-            text: `${student.name}: ${currentGrade} → ${grade}`,
-            icon: 'warning',
-            buttons: [false, 'Ändern'],
-        }).then((confirmed) => {
-            if (confirmed) {
-                student.zeugnisnote = grade;
-                saveData(studentIndex);
-                renderZeugnisModule();
-            }
-        });
-    } else {
-        student.zeugnisnote = grade;
-        saveData(studentIndex);
-        renderZeugnisModule();
-    }
-}
-window.selectZeugnisGrade = selectZeugnisGrade;
-
-function setZeugnisGewichtung(typ) {
-    if (activeClassId === null || !classes[activeClassId]) return;
-    classes[activeClassId].gewichtung = typ;
-    saveData();
-    _applyZeugnisGewichtungButtons(typ);
-    const students = classes[activeClassId]?.students || [];
-    students.forEach((_, i) => updateZeugnisNoteVorschlag(i));
-}
-
-function _applyZeugnisGewichtungButtons(typ) {
-    const btn = document.getElementById('gewichtung-toggle-btn');
-    if (!btn) return;
-    btn.innerHTML = typ === 'nebenfach' ? '<i class="fas fa-scale-balanced"></i> Gewichtung: 30 / 70' : '<i class="fas fa-scale-balanced"></i> Gewichtung: 50 / 50';
-    btn.classList.remove('btn-warning', 'btn-primary');
-    btn.classList.add(typ === 'nebenfach' ? 'btn-warning' : 'btn-primary');
-}
-
-function toggleZeugnisGewichtung() {
-    const current = classes[activeClassId]?.gewichtung || 'hauptfach';
-    setZeugnisGewichtung(current === 'hauptfach' ? 'nebenfach' : 'hauptfach');
-}
-window.setZeugnisGewichtung = setZeugnisGewichtung;
-window.toggleZeugnisGewichtung = toggleZeugnisGewichtung;
-
-function numericToGradeWithTendency(value) {
-    const base = value <= 1.5 ? 1 : value <= 2.5 ? 2 : value <= 3.5 ? 3 : value <= 4.5 ? 4 : value <= 5.5 ? 5 : 6;
-    const diff = value - base;
-    const plus  = String(base) + '+';
-    const minus = String(base) + '-';
-    if (diff <= -0.15 && gradeConversion[plus]  !== undefined) return plus;
-    if (diff >=  0.15 && gradeConversion[minus] !== undefined) return minus;
-    return String(base);
-}
-
-// Berechnungsvorschlag für die Zeugnisnote
-function calculateSuggestedGrade(student, studentIndex) {
-    const average = calculateProjectAverage(student.projects);
-    const writtenAvg = average ? parseFloat(average.exact) : null;
-
-    const sonstigeAvg = calcSonstigeAvg(student.sonstigeSlider || {});
-
-    let finalValue;
-    if (writtenAvg !== null && sonstigeAvg !== null) {
-        const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
-        const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
-        const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
-        finalValue = writtenAvg * wSchrift + sonstigeAvg * wSonstig;
-    } else if (writtenAvg !== null) {
-        finalValue = writtenAvg;
-    } else if (sonstigeAvg !== null) {
-        finalValue = sonstigeAvg;
-    } else {
-        return null;
-    }
-
-    if (finalValue <= 1.5) return 'sehr gut';
-    if (finalValue <= 2.5) return 'gut';
-    if (finalValue <= 3.5) return 'befriedigend';
-    if (finalValue <= 4.5) return 'ausreichend';
-    if (finalValue <= 5.5) return 'mangelhaft';
-    return 'ungenügend';
-}
-
-// Funktion zur Bestimmung des Notenvorschlags inklusive Tendenz (+/-) in Kurzform (z.B. "2-", "3")
-function getSuggestedGradeWithTendency(student, studentIndex) {
-    const suggestedGrade = calculateSuggestedGrade(student, studentIndex);
-    if (!suggestedGrade) return null;
-
-    // Konvertiere Textnote in numerische Basisnote (z.B. "gut" -> "2")
-    const wholeGradesMap = {
-        "sehr gut": "1",
-        "gut": "2",
-        "befriedigend": "3",
-        "ausreichend": "4",
-        "mangelhaft": "5",
-        "ungenügend": "6"
-    };
-
-    const N_label = wholeGradesMap[suggestedGrade];
-    if (!N_label) return suggestedGrade;
-
-    // Compute finalValue the same way calculateSuggestedGrade does, for tendency detection
-    const average2 = calculateProjectAverage(student.projects);
-    const writtenAvg = average2 ? parseFloat(average2.exact) : null;
-    const sonstigeAvg = calcSonstigeAvg(student.sonstigeSlider || {});
-
-    let finalValue;
-    if (writtenAvg !== null && sonstigeAvg !== null) {
-        const gewichtung = classes[activeClassId]?.gewichtung || 'hauptfach';
-        const wSchrift = gewichtung === 'nebenfach' ? 0.3 : 0.5;
-        const wSonstig = gewichtung === 'nebenfach' ? 0.7 : 0.5;
-        finalValue = writtenAvg * wSchrift + sonstigeAvg * wSonstig;
-    } else if (writtenAvg !== null) {
-        finalValue = writtenAvg;
-    } else {
-        finalValue = sonstigeAvg;
-    }
-
-    const N = parseFloat(N_label);
-    if (N) {
-        const diff = finalValue - N;
-        if (diff <= -0.15) {
-            const plusGrade = N_label + "+";
-            if (gradeConversion[plusGrade] !== undefined) {
-                return plusGrade;
-            }
-        } else if (diff >= 0.15) {
-            const minusGrade = N_label + "-";
-            if (gradeConversion[minusGrade] !== undefined) {
-                return minusGrade;
-            }
-        }
-    }
-
-    return N_label;
-}
-
-// Notenvorschlag im DOM dynamisch aktualisieren (ohne Seite neu zu rendern)
-function updateZeugnisNoteVorschlag(studentIndex) {
-    if (activeClassId === null || !classes[activeClassId] || !classes[activeClassId].students) return;
-    const student = classes[activeClassId].students[studentIndex];
-    if (!student) return;
-
-    const selectorDiv = document.getElementById(`zeugnisnote-selector-${studentIndex}`);
-    if (selectorDiv) {
-        selectorDiv.innerHTML = getGradesSelectorHtml(student, studentIndex);
-    }
-}
-
-
 
 // Hilfsfunktion zur Umwandlung von Kurznoten (z.B. "3+") in Textform für den Export (z.B. "befriedigend (plus)")
 function getExportGradeWord(gradeCode) {
@@ -6221,7 +6078,6 @@ function exportAllStudentCards() {
                 .avg-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-weight: 700; font-size: 0.9rem; }
                 .avg-num { font-size: 0.85rem; color: #64748b; font-weight: 400; }
                 .zeugnisnote-row { font-size: 1.1rem; font-weight: 700; }
-                .final-num { font-size: 0.9rem; color: #64748b; font-weight: 400; margin-left: 6px; }
             </style>
         </head>
         <body>
@@ -6256,38 +6112,6 @@ function exportAllStudentCards() {
             gradesHtml = '<li>Keine Noten vorhanden</li>';
         }
 
-        // Mündlich
-        const sl = student.sonstigeSlider || {};
-        const sv1 = sl.muendlich ?? 3;
-        const sv2 = sl.arbeitsphase ?? 3;
-        const sv3 = sl.stoerungen ?? 3;
-        const activeVals = [sv1, sv2, sv3].filter(v => v !== 6);
-        const avgN = activeVals.length > 0 ? activeVals.reduce((a,b)=>a+b,0)/activeVals.length : null;
-        const avgLabel = avgN !== null ? numericToGradeWithTendency(avgN) : '–';
-        const avgBase = parseInt(avgLabel);
-        const avgColorClass = {1:'grade-excellent',2:'grade-good',3:'grade-average',4:'grade-poor',5:'grade-bad',6:'grade-very-bad'}[avgBase] || 'grade-average';
-        const avgColor = exportGradeColors[avgColorClass] || '#e6a817';
-        const sliderLabels = ['Mündliche Beteiligung', 'Selbstständigkeit', 'Störungen'];
-        const sliderTexts = [ZeugnisSliderTexte.muendlich[sv1-1] || '', ZeugnisSliderTexte.arbeitsphase[sv2-1] || '', ZeugnisSliderTexte.stoerungen[sv3-1] || ''];
-        const sliderVals = [sv1, sv2, sv3];
-        const muendlichHtml = sliderLabels.map((label, i) => {
-            const val = sliderVals[i];
-            if (val === 6) return ''; // "Aus"-Slider nicht exportieren
-            const color = exportSliderColors[val] || '#6c757d';
-            return `<div class="slider-item">
-                <span class="slider-circle" style="background:${color}">${val}</span>
-                <div class="slider-content">
-                    <span class="slider-label">${label}</span>
-                    <div class="slider-desc">${sliderTexts[i]}</div>
-                </div>
-            </div>`;
-        }).join('') + (avgN !== null ? `
-        <div class="avg-row">
-            <span>Durchschnitt (Mündlich):</span>
-            <span class="grade-badge" style="background:${avgColor}">${avgLabel}</span>
-            <span class="avg-num">(${avgN.toFixed(2)})</span>
-        </div>` : '');
-
         // Sonstiges
         const homework = student.homework || 0;
         const materials = student.materials || 0;
@@ -6300,7 +6124,7 @@ function exportAllStudentCards() {
         // Zeugnisnote
         const rawZeugnisnote = student.zeugnisnote || '';
         const zeugnisnote = getExportGradeWord(rawZeugnisnote);
-        const finalVal = calculateFinalNumericValue(student);
+        const zeugnisBegruendung = student.zeugnisBegruendung || '';
 
         allPrintHtml += `
             <div class="student-page">
@@ -6308,10 +6132,6 @@ function exportAllStudentCards() {
                 <div class="section">
                     <h2>Schriftlich</h2>
                     <ul>${gradesHtml}${averageText}</ul>
-                </div>
-                <div class="section">
-                    <h2>Mündlich</h2>
-                    ${muendlichHtml}
                 </div>
                 <div class="section">
                     <h2>Sonstiges</h2>
@@ -6325,7 +6145,8 @@ function exportAllStudentCards() {
                 ${leftNotes ? `<div class="section"><h2>Notizen</h2><div class="notes">${leftNotes}</div></div>` : ''}
                 <div class="section">
                     <h2>Zeugnisnote</h2>
-                    <div class="zeugnisnote-row">${zeugnisnote || '-'}<span class="final-num">${rawZeugnisnote && finalVal ? `(${finalVal.toFixed(2)})` : ''}</span></div>
+                    <div class="zeugnisnote-row">${zeugnisnote || '-'}</div>
+                    ${zeugnisBegruendung ? `<div class="notes" style="margin-top:8px;">${escapeHtml(zeugnisBegruendung)}</div>` : ''}
                 </div>
             </div>
         `;
