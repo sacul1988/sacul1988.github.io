@@ -1739,19 +1739,6 @@ function cloneClass() {
 // Variable für die zu bearbeitende Klasse
 let classToEditId = null;
 
-let _editClassFachart = 'hauptfach';
-
-function setEditClassFachart(typ) {
-    _editClassFachart = typ === 'nebenfach' ? 'nebenfach' : 'hauptfach';
-    const container = safeGetElement('edit-class-fachart');
-    if (container) {
-        container.querySelectorAll('.fachart-option').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.fachart === _editClassFachart);
-        });
-    }
-}
-window.setEditClassFachart = setEditClassFachart;
-
 function editClass(classId) {
     if (classId === null || classId === undefined || !classes[classId]) return;
 
@@ -1759,7 +1746,8 @@ function editClass(classId) {
     const cls = classes[classId];
     const input = safeGetElement('edit-class-input');
     if (input) input.value = cls.name;
-    setEditClassFachart(cls.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach');
+    const select = safeGetElement('edit-class-fachart');
+    if (select) select.value = cls.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
 
     showModal('edit-class-modal');
 }
@@ -1772,7 +1760,8 @@ function saveEditedClass() {
     const newName = input.value.trim();
     if (newName) {
         classes[classToEditId].name = newName;
-        classes[classToEditId].gewichtung = _editClassFachart;
+        const fachartSelect = safeGetElement('edit-class-fachart');
+        classes[classToEditId].gewichtung = fachartSelect ? fachartSelect.value : 'hauptfach';
         saveData();
         renderClassesGrid();
         
@@ -5561,38 +5550,17 @@ function renderZeugnisModule() {
             saveData(index);
         }
 
-        // Zeugnisnote-Bereich (KI-Vorschlag)
-        const znNote = student.zeugnisnote || '';
-        const znText = student.zeugnisBegruendung || '';
-        let zeugnisnoteSectionHtml;
-        if (znNote) {
-            const znClass = Utils.getGradeColorClass(Utils.convertGrade(znNote));
-            const znPreview = znText ? (znText.length > 160 ? escapeHtml(znText.slice(0, 160)) + '…' : escapeHtml(znText)) : 'Keine Begründung vorhanden.';
-            zeugnisnoteSectionHtml = `
-                <div class="zeugnis-section zn-card-section">
-                    <h4>Zeugnisnote</h4>
-                    <div class="zn-card-result" onclick="openZeugnisnoteWindow(${index})" role="button" title="Zeugnisnote bearbeiten">
-                        <span class="zn-card-circle ${znClass}">${znNote}</span>
-                        <div class="zn-card-textwrap">
-                            <span class="zn-card-preview">${znPreview}</span>
-                            <span class="zn-card-edit"><i class="fas fa-pen"></i> Bearbeiten</span>
-                        </div>
-                    </div>
-                </div>`;
-        } else {
-            zeugnisnoteSectionHtml = `
-                <div class="zeugnis-section zn-card-section">
-                    <h4>Zeugnisnote</h4>
-                    <button class="btn btn-primary btn-icon zn-card-trigger" onclick="openZeugnisnoteWindow(${index})">
-                        <i class="fas fa-wand-magic-sparkles"></i> Zeugnisnote mit KI vorschlagen
-                    </button>
-                </div>`;
-        }
+        // Notizen vorhanden?
+        const _notesTmp = document.createElement('div');
+        _notesTmp.innerHTML = student.leftNotes || '';
+        const notesText = _notesTmp.textContent.trim();
+        const notesActive = notesText.length > 0 && notesText !== '-' && notesText !== '- ';
 
         card.innerHTML = `
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                    <button class="btn-back-to-top-circle${notesActive ? ' notes-btn-active' : ''}" onclick="event.stopPropagation(); openNotesModal(${index})" title="Notizen"><i class="fas fa-pen"></i></button>
                     <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);" title="Nach oben"><i class="fas fa-arrow-up"></i></button>
                     <button class="btn-back-to-top-circle" onclick="openSearchModal('zeugnis')" title="Suchen"><i class="fas fa-search"></i></button>
                 </div>
@@ -5614,14 +5582,8 @@ function renderZeugnisModule() {
                     </div>
                 </div>
                 <div class="zeugnis-section">
-                    <div class="zeugnis-notes-container">
-                        <div class="zeugnis-notes-wrapper">
-                            <h4>Notizen (${student.name})</h4>
-                            <div contenteditable="true" class="form-control notes-textarea" id="notes-left-${index}" placeholder="Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveStudentNotes(${index}, true)" onblur="saveStudentNotes(${index})">${leftNotes}</div>
-                        </div>
-                    </div>
+                    <div class="zn-inline" id="zn-inline-${index}">${zeugnisnoteInlineHtml(student, index)}</div>
                 </div>
-                ${zeugnisnoteSectionHtml}
             </div>
         `;
 
@@ -5630,8 +5592,7 @@ function renderZeugnisModule() {
 
 }
 
-// ===== Zeugnisnote-Vollbild-Fenster (KI-Notenvorschlag) =====
-let _zeugnisnoteStudentIndex = null;
+// ===== Zeugnisnote (KI-Notenvorschlag) – inline in der Schülerkarte =====
 let _zeugnisnoteBusy = false;
 
 function getZeugnisnoteContext(student) {
@@ -5639,135 +5600,38 @@ function getZeugnisnoteContext(student) {
         .filter(p => p.grade && p.grade !== '-')
         .map(p => ({ name: p.name || 'Arbeit', grade: p.grade }));
     const avg = calculateProjectAverage(student.projects);
-    return { schriftlicheNoten, durchschnitt: avg ? avg.exact : '' };
+    return { schriftlicheNoten, durchschnitt: avg ? avg.exact : '', durchschnittNote: avg ? avg.rounded : '' };
 }
 
-function openZeugnisnoteWindow(studentIndex) {
-    if (activeClassId === null || !classes[activeClassId]?.students?.[studentIndex]) return;
-    _zeugnisnoteStudentIndex = studentIndex;
-    renderZeugnisnoteWindow();
-    const overlay = document.getElementById('zeugnisnote-overlay');
-    if (overlay) overlay.classList.add('open');
-    document.body.classList.add('modal-open');
-}
-
-function closeZeugnisnoteWindow() {
-    const overlay = document.getElementById('zeugnisnote-overlay');
-    if (overlay) overlay.classList.remove('open');
-    _zeugnisnoteStudentIndex = null;
-    const modalContainer = document.getElementById('modal-container');
-    if (!modalContainer || modalContainer.style.display === 'none') {
-        document.body.classList.remove('modal-open');
-    }
-    if (typeof renderZeugnisModule === 'function' && activeModule === 'zeugnis') {
-        renderZeugnisModule();
-    }
-}
-
-function zeugnisnoteNav(dir) {
-    if (_zeugnisnoteStudentIndex === null || activeClassId === null) return;
-    const students = classes[activeClassId]?.students || [];
-    const next = _zeugnisnoteStudentIndex + dir;
-    if (next < 0 || next >= students.length) return;
-    _zeugnisnoteStudentIndex = next;
-    renderZeugnisnoteWindow();
-    const body = document.getElementById('zeugnisnote-body');
-    if (body) body.scrollTop = 0;
-}
-
-function _znUpdateTopbar(student) {
-    const nameEl = document.getElementById('zeugnisnote-student-name');
-    if (nameEl) nameEl.textContent = student.name;
-    const students = classes[activeClassId]?.students || [];
-    const prevBtn = document.getElementById('zeugnisnote-prev-btn');
-    const nextBtn = document.getElementById('zeugnisnote-next-btn');
-    if (prevBtn) prevBtn.disabled = _zeugnisnoteStudentIndex === 0;
-    if (nextBtn) nextBtn.disabled = _zeugnisnoteStudentIndex === students.length - 1;
-}
-
-function renderZeugnisnoteWindow() {
-    if (_zeugnisnoteStudentIndex === null || activeClassId === null) return;
-    const student = classes[activeClassId].students[_zeugnisnoteStudentIndex];
-    if (!student) return;
-    _znUpdateTopbar(student);
-
-    if (student.zeugnisnote && student.zeugnisBegruendung) {
-        renderZeugnisnoteResult(student);
-    } else {
-        renderZeugnisnoteInput(student);
-    }
-}
-
-function _znContextHtml(student) {
-    const { schriftlicheNoten, durchschnitt } = getZeugnisnoteContext(student);
-    const fachart = classes[activeClassId]?.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
-    const fachLabel = fachart === 'nebenfach' ? 'Nebenfach' : 'Hauptfach';
-    const gradesHtml = schriftlicheNoten.length > 0
-        ? schriftlicheNoten.map(n => {
-            const cls = Utils.getGradeColorClass(Utils.convertGrade(n.grade));
-            return `<span class="zn-grade-item"><span class="grade-badge ${cls}">${n.grade}</span>${escapeHtml(n.name)}</span>`;
-          }).join('')
-        : '<span style="color: var(--grey-color); font-size: 0.85rem;">Keine schriftlichen Noten</span>';
-    const avgHtml = durchschnitt ? `<div class="zn-avg">Schriftlicher Durchschnitt: ${durchschnitt}</div>` : '';
-    return `
-        <div class="zn-context">
-            <div class="zn-context-head">
-                <h4>Schriftliche Noten</h4>
-                <span class="zn-fach-badge">${fachLabel}</span>
-            </div>
-            <div class="zn-grades">${gradesHtml}</div>
-            ${avgHtml}
-        </div>`;
-}
-
-function renderZeugnisnoteInput(student) {
-    const body = document.getElementById('zeugnisnote-body');
-    if (!body) return;
-    const sonstiges = student.zeugnisSonstiges || '';
-    body.innerHTML = `
-        ${_znContextHtml(student)}
-        <p class="zn-input-label">Sonstige Mitarbeit im Unterricht</p>
-        <p class="zn-input-hint">Beschreibe kurz die mündliche und sonstige Mitarbeit (z.&nbsp;B. 3 Stichpunkte). Die KI wägt das mit den schriftlichen Noten ab und schlägt eine Note vor.</p>
-        <textarea id="zn-sonstiges" class="form-control zn-textarea" placeholder="z. B. beteiligt sich rege am Unterricht, hilft Mitschülern, arbeitet bei Experimenten sehr sorgfältig...">${escapeHtml(sonstiges)}</textarea>
-        <button class="btn btn-primary btn-icon zn-generate-btn" onclick="zeugnisnoteGenerate(null)">
-            <i class="fas fa-wand-magic-sparkles"></i> Notenvorschlag generieren
-        </button>`;
-}
-
-function renderZeugnisnoteResult(student) {
-    const body = document.getElementById('zeugnisnote-body');
-    if (!body) return;
+// Liefert das komplette Inline-HTML des Zeugnisnote-Bereichs einer Karte
+function zeugnisnoteInlineHtml(student, index) {
     const note = student.zeugnisnote || '';
     const text = student.zeugnisBegruendung || '';
+
+    const triggerBtn = `<button class="zn-generate-trigger" onclick="openZeugnisnoteInput(${index})"><i class="fas fa-wand-magic-sparkles"></i> <span>Zeugnistext und Zeugnisnote generieren</span></button>`;
+
+    if (!note) {
+        return `<div class="zn-top-row">${triggerBtn}</div>`;
+    }
+
     const circleClass = Utils.getGradeColorClass(Utils.convertGrade(note));
-    const subject = classes[activeClassId]?.name || 'Zeugnis';
-    body.innerHTML = `
-        <div class="zn-result-head">
+    return `
+        <div class="zn-top-row">
+            ${triggerBtn}
             <div class="zn-grade-circle ${circleClass}">${note}</div>
-            <div class="zn-result-headtext">
-                <span class="zn-result-label">Endnote (Vorschlag)</span>
-                <span class="zn-result-subject">${escapeHtml(subject)}</span>
-            </div>
         </div>
-        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung" oninput="saveZeugnisnoteBegruendung()">${escapeHtml(text)}</div>
-        <p class="zn-edit-hint">Du kannst den Text direkt anpassen. Für eine andere Note nutze „Besser", „Schlechter" oder „Anpassen".</p>
+        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})">${escapeHtml(text)}</div>
         <div class="zn-actions">
-            <button class="zn-action-btn zn-new" onclick="zeugnisnoteBackToInput()"><i class="fas fa-rotate-left"></i> Neu</button>
-            <button class="zn-action-btn zn-better" onclick="zeugnisnoteGenerate('besser')"><i class="fas fa-caret-up"></i> Besser</button>
-            <button class="zn-action-btn zn-worse" onclick="zeugnisnoteGenerate('schlechter')"><i class="fas fa-caret-down"></i> Schlechter</button>
-            <button class="zn-action-btn zn-adjust" onclick="zeugnisnoteToggleHinweis()"><i class="fas fa-sliders"></i> Anpassen</button>
+            <button class="zn-action-btn zn-new" onclick="zeugnisnoteGenerate(${index}, null)"><i class="fas fa-rotate-left"></i> Neu</button>
+            <button class="zn-action-btn zn-better" onclick="zeugnisnoteGenerate(${index}, 'besser')"><i class="fas fa-caret-up"></i> Besser</button>
+            <button class="zn-action-btn zn-worse" onclick="zeugnisnoteGenerate(${index}, 'schlechter')"><i class="fas fa-caret-down"></i> Schlechter</button>
+            <button class="zn-action-btn zn-adjust" onclick="zeugnisnoteToggleHinweis(${index})"><i class="fas fa-sliders"></i> Anpassen</button>
         </div>
-        <div id="zn-hinweis-container"></div>`;
+        <div id="zn-hinweis-container-${index}"></div>`;
 }
 
-function zeugnisnoteBackToInput() {
-    if (_zeugnisnoteStudentIndex === null) return;
-    const student = classes[activeClassId].students[_zeugnisnoteStudentIndex];
-    renderZeugnisnoteInput(student);
-}
-
-function zeugnisnoteToggleHinweis() {
-    const container = document.getElementById('zn-hinweis-container');
+function zeugnisnoteToggleHinweis(index) {
+    const container = document.getElementById(`zn-hinweis-container-${index}`);
     if (!container) return;
     if (container.innerHTML.trim()) {
         container.innerHTML = '';
@@ -5775,41 +5639,36 @@ function zeugnisnoteToggleHinweis() {
     }
     container.innerHTML = `
         <div class="zn-hinweis-box">
-            <label for="zn-hinweis">Individueller Hinweis an die KI</label>
-            <textarea id="zn-hinweis" class="form-control" placeholder="z. B. hat sich im zweiten Halbjahr deutlich gesteigert; Prüfungsangst berücksichtigen..."></textarea>
+            <label for="zn-hinweis-${index}">Individueller Hinweis an die KI</label>
+            <textarea id="zn-hinweis-${index}" class="form-control" placeholder="z. B. hat sich im zweiten Halbjahr deutlich gesteigert; Prüfungsangst berücksichtigen..."></textarea>
             <div class="zn-hinweis-actions">
-                <button class="btn btn-light" onclick="zeugnisnoteToggleHinweis()">Abbrechen</button>
-                <button class="btn btn-primary btn-icon" onclick="zeugnisnoteGenerate('hinweis')"><i class="fas fa-wand-magic-sparkles"></i> Neu generieren</button>
+                <button class="btn btn-light" onclick="zeugnisnoteToggleHinweis(${index})">Abbrechen</button>
+                <button class="btn btn-primary btn-icon" onclick="zeugnisnoteGenerate(${index}, 'hinweis')"><i class="fas fa-wand-magic-sparkles"></i> Neu generieren</button>
             </div>
         </div>`;
-    const ta = document.getElementById('zn-hinweis');
+    const ta = document.getElementById(`zn-hinweis-${index}`);
     if (ta) ta.focus();
 }
 
-async function zeugnisnoteGenerate(richtung) {
-    if (_zeugnisnoteBusy || _zeugnisnoteStudentIndex === null || activeClassId === null) return;
-    const student = classes[activeClassId].students[_zeugnisnoteStudentIndex];
+async function zeugnisnoteGenerate(index, richtung) {
+    if (_zeugnisnoteBusy || activeClassId === null) return;
+    const student = classes[activeClassId]?.students?.[index];
     if (!student) return;
 
-    // Eingabe einsammeln
-    const sonstigesEl = document.getElementById('zn-sonstiges');
-    if (sonstigesEl) {
-        student.zeugnisSonstiges = sonstigesEl.value;
-    }
     let hinweis = '';
     if (richtung === 'hinweis') {
-        const hinweisEl = document.getElementById('zn-hinweis');
+        const hinweisEl = document.getElementById(`zn-hinweis-${index}`);
         hinweis = hinweisEl ? hinweisEl.value.trim() : '';
         if (!hinweis) { swal('Hinweis', 'Bitte gib einen Hinweis ein.', 'info'); return; }
     }
 
-    const { schriftlicheNoten, durchschnitt } = getZeugnisnoteContext(student);
+    const { schriftlicheNoten, durchschnitt, durchschnittNote } = getZeugnisnoteContext(student);
     const fachart = classes[activeClassId]?.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
 
     // Ladeansicht
-    const body = document.getElementById('zeugnisnote-body');
-    if (body) {
-        body.innerHTML = `<div class="zn-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Die KI wägt ab und schreibt einen Vorschlag…</span></div>`;
+    const container = document.getElementById(`zn-inline-${index}`);
+    if (container) {
+        container.innerHTML = `<div class="zn-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Die KI wägt ab und schreibt einen Vorschlag…</span></div>`;
     }
     _zeugnisnoteBusy = true;
 
@@ -5820,6 +5679,7 @@ async function zeugnisnoteGenerate(richtung) {
         const result = await window.callGenerateZeugnisnote({
             schriftlicheNoten,
             durchschnitt,
+            durchschnittNote,
             sonstiges: student.zeugnisSonstiges || '',
             fachart,
             richtung: (richtung === 'besser' || richtung === 'schlechter') ? richtung : null,
@@ -5831,35 +5691,101 @@ async function zeugnisnoteGenerate(richtung) {
         // Note direkt setzen + speichern
         student.zeugnisnote = result.note;
         student.zeugnisBegruendung = result.begruendung || '';
-        saveData(_zeugnisnoteStudentIndex);
-        renderZeugnisnoteResult(student);
+        saveData(index);
     } catch (err) {
         console.error('Zeugnisnote-Fehler:', err);
-        if (body) {
-            body.innerHTML = `<div class="zn-loading"><i class="fas fa-triangle-exclamation" style="color:#dc143c;"></i><span>${escapeHtml(err.message || 'Fehler beim Generieren.')}</span><button class="btn btn-primary" onclick="renderZeugnisnoteWindow()">Zurück</button></div>`;
-        }
+        swal('Fehler', err.message || 'Fehler beim Generieren.', 'error');
     } finally {
         _zeugnisnoteBusy = false;
+        const c = document.getElementById(`zn-inline-${index}`);
+        if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
     }
 }
 
-function saveZeugnisnoteBegruendung() {
-    if (_zeugnisnoteStudentIndex === null || activeClassId === null) return;
-    const el = document.getElementById('zn-begruendung');
-    const student = classes[activeClassId].students[_zeugnisnoteStudentIndex];
+function saveZeugnisnoteBegruendung(index) {
+    if (activeClassId === null) return;
+    const el = document.getElementById(`zn-begruendung-${index}`);
+    const student = classes[activeClassId]?.students?.[index];
     if (!el || !student) return;
     student.zeugnisBegruendung = el.innerText;
-    saveData(_zeugnisnoteStudentIndex);
+    saveData(index);
 }
 
-window.openZeugnisnoteWindow = openZeugnisnoteWindow;
-window.closeZeugnisnoteWindow = closeZeugnisnoteWindow;
-window.zeugnisnoteNav = zeugnisnoteNav;
+// ===== Beobachtungen-Modal (Eingabe für KI-Notenvorschlag) =====
+let _zeugnisInputIndex = null;
+
+function openZeugnisnoteInput(index) {
+    if (activeClassId === null) return;
+    const student = classes[activeClassId]?.students?.[index];
+    if (!student) return;
+    _zeugnisInputIndex = index;
+    const titleEl = document.getElementById('zeugnis-input-title');
+    const ta = document.getElementById('zeugnis-input-textarea');
+    if (titleEl) titleEl.textContent = `Beobachtungen (${student.name})`;
+    if (ta) ta.value = student.zeugnisSonstiges || '';
+    showModal('zeugnis-input-modal');
+    if (ta) ta.focus();
+}
+
+function saveZeugnisInputLocal() {
+    if (_zeugnisInputIndex === null || activeClassId === null) return;
+    const ta = document.getElementById('zeugnis-input-textarea');
+    const student = classes[activeClassId]?.students?.[_zeugnisInputIndex];
+    if (!ta || !student) return;
+    student.zeugnisSonstiges = ta.value;
+    localStorage.setItem('classes', JSON.stringify(classes));
+}
+
+async function zeugnisInputGenerate() {
+    if (_zeugnisInputIndex === null) return;
+    const index = _zeugnisInputIndex;
+    saveZeugnisInputLocal();
+    hideModal();
+    await zeugnisnoteGenerate(index, null);
+}
+window.openZeugnisnoteInput = openZeugnisnoteInput;
+window.saveZeugnisInputLocal = saveZeugnisInputLocal;
+window.zeugnisInputGenerate = zeugnisInputGenerate;
+
+// ===== Notizen-Modal (Zeugnis-Tab) =====
+let _notesModalStudentIndex = null;
+
+function openNotesModal(studentIndex) {
+    if (activeClassId === null) return;
+    _notesModalStudentIndex = studentIndex;
+    const student = classes[activeClassId].students[studentIndex];
+    if (!student) return;
+    const titleEl = document.getElementById('notes-modal-title');
+    const ta = document.getElementById('notes-modal-textarea');
+    if (titleEl) titleEl.textContent = `Notizen (${student.name})`;
+    if (ta) ta.innerHTML = student.leftNotes || '';
+    showModal('notes-modal');
+    if (ta) { ta.focus(); const r = document.createRange(); r.selectNodeContents(ta); r.collapse(false); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+}
+
+function closeNotesModal() {
+    saveNotesModalLocal();
+    hideModal();
+    _notesModalStudentIndex = null;
+    renderZeugnisModule();
+}
+
+function saveNotesModalLocal() {
+    if (_notesModalStudentIndex === null || activeClassId === null) return;
+    const ta = document.getElementById('notes-modal-textarea');
+    const student = classes[activeClassId]?.students?.[_notesModalStudentIndex];
+    if (!ta || !student) return;
+    student.leftNotes = ta.innerHTML;
+    saveData(_notesModalStudentIndex);
+}
+
+window.openNotesModal = openNotesModal;
+window.closeNotesModal = closeNotesModal;
+window.saveNotesModalLocal = saveNotesModalLocal;
+
 window.zeugnisnoteGenerate = zeugnisnoteGenerate;
-window.zeugnisnoteBackToInput = zeugnisnoteBackToInput;
 window.zeugnisnoteToggleHinweis = zeugnisnoteToggleHinweis;
 window.saveZeugnisnoteBegruendung = saveZeugnisnoteBegruendung;
-window.renderZeugnisnoteWindow = renderZeugnisnoteWindow;
 
 
 function collapseStudentAndScrollToTop(module, studentIndex) {
@@ -6163,11 +6089,10 @@ function exportAllStudentCards() {
     printWindow.document.write(allPrintHtml);
     printWindow.document.close();
     printWindow.focus();
-    
+
     // Druckdialog öffnen
     printWindow.print();
 }
-
 
 // Modal für letzte Eingabe rückgängig machen öffnen
 function openUndoModal(desk) {

@@ -511,31 +511,6 @@
             </div>
         </div>
 
-        <!-- Zeugnisnote: Vollbild-Fenster mit KI-Notenvorschlag -->
-        <div id="zeugnisnote-overlay" class="zeugnisnote-overlay">
-            <div class="zeugnisnote-window">
-                <div class="zeugnisnote-topbar">
-                    <button class="topbar-btn" type="button" title="Schließen" aria-label="Schließen" onclick="closeZeugnisnoteWindow()">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <div class="zeugnisnote-title">
-                        <span class="zeugnisnote-title-label">Zeugnisnote</span>
-                        <span class="zeugnisnote-student-name" id="zeugnisnote-student-name"></span>
-                    </div>
-                    <div class="zeugnisnote-nav">
-                        <button class="topbar-btn" type="button" id="zeugnisnote-prev-btn" title="Vorheriger Schüler" aria-label="Vorheriger Schüler" onclick="zeugnisnoteNav(-1)">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button class="topbar-btn" type="button" id="zeugnisnote-next-btn" title="Nächster Schüler" aria-label="Nächster Schüler" onclick="zeugnisnoteNav(1)">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="zeugnisnote-body" id="zeugnisnote-body">
-                    <!-- Wird per JS gefüllt (Eingabe- oder Ergebnis-Ansicht) -->
-                </div>
-            </div>
-        </div>
 
         <!-- Modals -->
         <div id="modal-container" style="display: none;" onclick="closeModalOnOutsideClick(event)" role="dialog" aria-modal="true" aria-hidden="true">
@@ -706,16 +681,10 @@
                     <input type="text" id="edit-class-input" class="form-control" placeholder="Klassenname">
                 </div>
                 <div class="form-group">
-                    <label>Fachart</label>
-                    <div class="fachart-toggle" id="edit-class-fachart">
-                        <button type="button" class="fachart-option" data-fachart="hauptfach" onclick="setEditClassFachart('hauptfach')">
-                            <i class="fas fa-book"></i> Hauptfach
-                        </button>
-                        <button type="button" class="fachart-option" data-fachart="nebenfach" onclick="setEditClassFachart('nebenfach')">
-                            <i class="fas fa-book-open"></i> Nebenfach
-                        </button>
-                    </div>
-                    <small class="fachart-hint">Im Hauptfach zählen schriftliche und mündliche Leistungen etwa gleich, im Nebenfach zählt die mündliche Mitarbeit mehr.</small>
+                    <select id="edit-class-fachart" class="form-control">
+                        <option value="hauptfach">Hauptfach</option>
+                        <option value="nebenfach">Nebenfach</option>
+                    </select>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-primary" onclick="saveEditedClass()">Speichern</button>
@@ -898,8 +867,28 @@
                     <button class="btn btn-primary" onclick="saveContact()">Speichern</button>
                 </div>
             </div>
+            <!-- Notizen Modal (Zeugnis-Tab) -->
+            <div id="notes-modal" class="modal" style="display: none; max-width: 560px; width: 95%;">
+                <div class="wizard-header">
+                    <h2 id="notes-modal-title">Notizen</h2>
+                    <button class="wizard-close-btn" onclick="closeNotesModal()">&times;</button>
+                </div>
+                <div contenteditable="true" class="form-control notes-textarea notes-modal-textarea" id="notes-modal-textarea" placeholder="Notizen..." onkeydown="splitSpanAtCaret(event)" oninput="saveNotesModalLocal()" onblur="saveNotesModalLocal()"></div>
+            </div>
+
+            <!-- Beobachtungen Modal (Eingabe für KI-Notenvorschlag) -->
+            <div id="zeugnis-input-modal" class="modal" style="display: none; max-width: 560px; width: 95%;">
+                <div class="wizard-header">
+                    <h2 id="zeugnis-input-title">Beobachtungen</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
+                <div class="zeugnis-input-wrap">
+                    <textarea id="zeugnis-input-textarea" class="form-control zeugnis-input-textarea" placeholder="Sonstige Mitarbeit im Unterricht – z. B. beteiligt sich rege am Unterricht, hilft Mitschülern, arbeitet bei Experimenten sehr sorgfältig..." oninput="saveZeugnisInputLocal()"></textarea>
+                    <button class="zeugnis-input-generate-btn" title="Generieren" aria-label="Generieren" onclick="zeugnisInputGenerate()"><i class="fas fa-wand-magic-sparkles"></i></button>
+                </div>
+            </div>
         </div>
-        
+
         <!-- Bottom Sheet Modal (nur auf Mobilgeräten) -->
         <div id="mobile-action-sheet-backdrop" class="action-sheet-backdrop" onclick="closeMobileActionSheet()">
             <div class="action-sheet" onclick="event.stopPropagation()">

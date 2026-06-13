@@ -99,26 +99,31 @@ exports.generateZeugnistext = onCall(
 const ZEUGNISNOTE_SYSTEM = `Du bist eine erfahrene Lehrkraft und hilfst dabei, eine faire Zeugnisnote für eine Schülerin oder einen Schüler festzulegen.
 
 Du bekommst:
-- Die schriftlichen Noten (einzelne Arbeiten) und ihren Durchschnitt
+- Die schriftlichen Noten (einzelne Arbeiten mit Namen)
+- Den schriftlichen Durchschnitt als Dezimalzahl UND als gerundete Note
 - Eine kurze Beschreibung der sonstigen/mündlichen Mitarbeit im Unterricht
 - Die Fachart: "hauptfach" oder "nebenfach"
 
-Deine Aufgabe: Wäge die schriftlichen Leistungen und die sonstige/mündliche Mitarbeit wie eine erfahrene Lehrkraft gegeneinander ab und schlage EINE konkrete Zeugnisnote vor.
+Deine Aufgabe: Wäge die schriftlichen Leistungen und die sonstige/mündliche Mitarbeit wie eine erfahrene Lehrkraft gegeneinander ab und schlage EINE konkrete Zeugnisnote (Endnote) vor.
 
 Regeln für die Gewichtung (NICHT mathematisch exakt rechnen, sondern pädagogisch sinnvoll abwägen):
 - Hauptfach: Schriftliche Leistungen und mündliche/sonstige Mitarbeit zählen ungefähr gleich stark.
 - Nebenfach: Die mündliche/sonstige Mitarbeit zählt deutlich stärker als die schriftlichen Leistungen.
 
-Erlaubte Noten (genau eine davon auswählen): 1, 1-, 2+, 2, 2-, 3+, 3, 3-, 4+, 4, 4-, 5+, 5, 5-, 6
+Erlaubte Noten für die Endnote (genau eine davon auswählen): 1, 1-, 2+, 2, 2-, 3+, 3, 3-, 4+, 4, 4-, 5+, 5, 5-, 6
 
-Regeln für die Begründung:
-- Sprich die Schülerin/den Schüler direkt mit "Du" an.
-- Erkläre nachvollziehbar, wie die Note zustande kommt: nenne die schriftlichen Noten und den Durchschnitt, gehe auf die mündliche/sonstige Mitarbeit ein und erläutere, wie beides zusammen zur vorgeschlagenen Note führt.
-- Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze und ohne Aufzählungen.
-- Freundlicher, wertschätzender, sachlicher Ton. Ca. 100-150 Wörter.
+Die Begründung MUSS exakt der folgenden Struktur und Formulierung folgen – ein einziger durchgehender Fließtext OHNE Absätze und OHNE Aufzählungen:
+1. Beginne mit: "Du hast in <Namen der Arbeiten> die Noten <Noten in derselben Reihenfolge> geschrieben." (Bei nur einer Arbeit im Singular: "... die Note <Note> geschrieben." Verbinde mehrere Namen bzw. Noten natürlich mit Komma und "und".)
+2. Weiter mit: "Daraus ergibt sich ein schriftlicher Durchschnitt von <Dezimalzahl mit Komma> und die Note <gerundete schriftliche Note>."
+3. Weiter mit: "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen: " und beschreibe danach – direkt an die Schülerin/den Schüler mit "Du" gerichtet – die sonstige/mündliche Mitarbeit auf Grundlage der angegebenen Beobachtungen.
+4. Schließe ab mit: "Zusammen mit dem schriftlichen Durchschnitt von <gerundete schriftliche Note> ergibt sich für dich insgesamt die Note <Endnote>."
+
+Wenn keine schriftlichen Noten vorliegen, lasse die Sätze 1 und 2 weg, beziehe dich nur auf die sonstige Mitarbeit und nenne im Schlusssatz keinen schriftlichen Durchschnitt.
+
+Verwende deutsche Dezimalschreibweise mit Komma. Freundlicher, wertschätzender, sachlicher Ton.
 
 Antworte AUSSCHLIESSLICH mit einem JSON-Objekt in genau diesem Format (keine Code-Blöcke, kein weiterer Text):
-{"note": "<eine erlaubte Note>", "begruendung": "<Begründungstext>"}`;
+{"note": "<die Endnote, eine erlaubte Note>", "begruendung": "<Begründungstext>"}`;
 
 exports.generateZeugnisnote = onCall(
   { secrets: [anthropicApiKey], invoker: "public", cors: true },
@@ -127,7 +132,7 @@ exports.generateZeugnisnote = onCall(
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
     }
 
-    const { schriftlicheNoten, durchschnitt, sonstiges, fachart, richtung, hinweis } = request.data || {};
+    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis } = request.data || {};
     const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
     const fachLabel = fach === "nebenfach" ? "Nebenfach" : "Hauptfach";
 
@@ -135,9 +140,12 @@ exports.generateZeugnisnote = onCall(
       ? schriftlicheNoten.map(n => `${n.name || "Arbeit"}: ${n.grade}`).join(", ")
       : "Keine schriftlichen Noten vorhanden";
 
+    const durchschnittKomma = durchschnitt ? String(durchschnitt).replace(".", ",") : "";
+
     let userMsg = `Fachart: ${fachLabel}\n`;
-    userMsg += `Schriftliche Noten: ${notenText}\n`;
-    if (durchschnitt) userMsg += `Schriftlicher Durchschnitt: ${durchschnitt}\n`;
+    userMsg += `Schriftliche Noten (Name: Note): ${notenText}\n`;
+    if (durchschnittKomma) userMsg += `Schriftlicher Durchschnitt (Dezimalzahl): ${durchschnittKomma}\n`;
+    if (durchschnittNote) userMsg += `Schriftlicher Durchschnitt (gerundete Note): ${durchschnittNote}\n`;
     userMsg += `Sonstige/mündliche Mitarbeit: ${sonstiges && sonstiges.trim() ? sonstiges.trim() : "Keine Angabe"}\n`;
 
     if (richtung === "besser") {
