@@ -947,7 +947,7 @@
     <script type="module">
         import { initializeApp } from "firebase/app";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-        import { initializeFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+        import { initializeFirestore, doc, setDoc, getDoc, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
         // ===== DEINE FIREBASE KONFIGURATION =====
         const firebaseConfig = {
@@ -960,12 +960,15 @@
           measurementId: "G-RS2DNE2VLK"
         };
 
-        // Initialisierung mit Long Polling
+        // Initialisierung mit Long Polling & Multi-Tab Offline-Persistenz
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = initializeFirestore(app, {
             experimentalForceLongPolling: true,
-            useFetchStreams: false
+            useFetchStreams: false,
+            localCache: persistentLocalCache({
+                tabManager: persistentMultipleTabManager()
+            })
         });
 
         window.firebaseDb = db;
