@@ -3760,6 +3760,9 @@ body.modal-open {
 }
 
 @media (max-width: 600px) {
+    .topbar-title {
+        font-size: 1.2rem;
+    }
     .topbar-title:empty::before {
         content: 'Start';
     }
