@@ -336,6 +336,9 @@
                                         <button class="btn btn-primary btn-icon" id="zeugnis-view-toggle" onclick="toggleZeugnisView()">
                                             <i class="fas fa-calculator"></i> <span class="btn-text">Durchschnitt</span>
                                         </button>
+                                        <button class="btn btn-primary btn-icon" onclick="openZeugnisBatch()">
+                                            <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Durchlauf</span>
+                                        </button>
                                         <button class="btn btn-primary btn-icon" onclick="exportAllStudentCards()">
                                             <i class="fas fa-file-export"></i>
                                             <span class="btn-text">Zeugnisse exportieren</span>
@@ -885,6 +888,24 @@
                 <div class="zeugnis-input-wrap">
                     <textarea id="zeugnis-input-textarea" class="form-control zeugnis-input-textarea" placeholder="Sonstige Mitarbeit im Unterricht – z. B. beteiligt sich rege am Unterricht, hilft Mitschülern, arbeitet bei Experimenten sehr sorgfältig..." oninput="saveZeugnisInputLocal()"></textarea>
                     <button class="zeugnis-input-generate-btn" title="Generieren" aria-label="Generieren" onclick="zeugnisInputGenerate()"><i class="fas fa-wand-magic-sparkles"></i></button>
+                </div>
+            </div>
+
+            <!-- Durchlauf Modal (Beobachtungen für mehrere Schüler nacheinander) -->
+            <div id="zeugnis-batch-modal" class="modal" style="display: none; max-width: 560px; width: 95%;">
+                <div class="wizard-header">
+                    <h2>Durchlauf</h2>
+                    <button class="wizard-close-btn" onclick="closeZeugnisBatch()">&times;</button>
+                </div>
+                <div id="zeugnis-batch-body">
+                    <!-- per JS: Counter, Name, Textfeld -->
+                </div>
+                <div id="zeugnis-batch-footer" class="zeugnis-batch-footer">
+                    <button class="btn btn-light" id="zb-prev" onclick="zeugnisBatchNav(-1)"><i class="fas fa-chevron-left"></i> Zurück</button>
+                    <div class="zb-footer-right">
+                        <button class="btn btn-light" id="zb-next" onclick="zeugnisBatchNav(1)">Weiter <i class="fas fa-chevron-right"></i></button>
+                        <button class="btn btn-primary btn-icon" id="zb-generate" onclick="zeugnisBatchGenerate()"><i class="fas fa-wand-magic-sparkles"></i> Generieren</button>
+                    </div>
                 </div>
             </div>
         </div>

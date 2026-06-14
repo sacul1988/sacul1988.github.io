@@ -3969,6 +3969,38 @@ body.modal-open {
 }
 .zeugnis-input-generate-btn i { margin: 0; line-height: 1; }
 
+/* Durchlauf-Modal */
+.zeugnis-batch-counter {
+    font-size: 0.85rem;
+    color: var(--grey-color);
+    margin-bottom: 10px;
+}
+.zeugnis-batch-counter strong { color: var(--dark-color); }
+.zeugnis-batch-textarea {
+    width: 100%;
+    min-height: 220px;
+    resize: vertical;
+    line-height: 1.6;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+.zeugnis-batch-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 16px;
+}
+.zb-footer-right {
+    display: flex;
+    gap: 10px;
+}
+.zeugnis-batch-footer .btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
 /* Ergebnis (entsteht nach dem Generieren) */
 .zn-grade-circle {
     width: 64px;

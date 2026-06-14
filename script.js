@@ -5747,6 +5747,153 @@ window.openZeugnisnoteInput = openZeugnisnoteInput;
 window.saveZeugnisInputLocal = saveZeugnisInputLocal;
 window.zeugnisInputGenerate = zeugnisInputGenerate;
 
+// ===== Durchlauf: Beobachtungen für mehrere Schüler nacheinander =====
+let _zbOpenIndices = [];   // Schüler-Indizes (offen, Variante B: nicht Note UND Text)
+let _zbPos = 0;            // Position innerhalb von _zbOpenIndices
+
+function openZeugnisBatch() {
+    if (activeClassId === null) return;
+    const students = classes[activeClassId]?.students || [];
+    // Offen = NICHT (Zeugnisnote UND Begründungstext vorhanden)
+    _zbOpenIndices = students
+        .map((s, i) => i)
+        .filter(i => {
+            const s = students[i];
+            return !(s.zeugnisnote && s.zeugnisBegruendung);
+        });
+    if (_zbOpenIndices.length === 0) {
+        swal('Durchlauf', 'Alle Schüler haben bereits eine Zeugnisnote.', 'info');
+        return;
+    }
+    _zbPos = 0;
+    const footer = document.getElementById('zeugnis-batch-footer');
+    if (footer) footer.style.display = '';
+    showModal('zeugnis-batch-modal');
+    renderZeugnisBatch();
+}
+
+function renderZeugnisBatch() {
+    const body = document.getElementById('zeugnis-batch-body');
+    if (!body || activeClassId === null) return;
+    const total = _zbOpenIndices.length;
+    const idx = _zbOpenIndices[_zbPos];
+    const student = classes[activeClassId].students[idx];
+    if (!student) return;
+    body.innerHTML = `
+        <div class="zeugnis-batch-counter">Schüler ${_zbPos + 1} von ${total} (offen) · <strong>${escapeHtml(student.name)}</strong></div>
+        <textarea id="zeugnis-batch-textarea" class="form-control zeugnis-batch-textarea" placeholder="Sonstige Mitarbeit im Unterricht – z. B. beteiligt sich rege am Unterricht, hilft Mitschülern, arbeitet bei Experimenten sehr sorgfältig..." oninput="_zbSaveCurrentLocal()">${escapeHtml(student.zeugnisSonstiges || '')}</textarea>`;
+    const prevBtn = document.getElementById('zb-prev');
+    const nextBtn = document.getElementById('zb-next');
+    if (prevBtn) prevBtn.disabled = _zbPos === 0;
+    if (nextBtn) nextBtn.disabled = _zbPos === total - 1;
+    const ta = document.getElementById('zeugnis-batch-textarea');
+    if (ta) ta.focus();
+}
+
+function _zbReadCurrentToModel() {
+    const ta = document.getElementById('zeugnis-batch-textarea');
+    if (!ta || activeClassId === null) return;
+    const student = classes[activeClassId]?.students?.[_zbOpenIndices[_zbPos]];
+    if (student) student.zeugnisSonstiges = ta.value;
+}
+
+// Bei jedem Tastendruck: nur lokal (kein Cloud-Sync)
+function _zbSaveCurrentLocal() {
+    _zbReadCurrentToModel();
+    localStorage.setItem('classes', JSON.stringify(classes));
+}
+
+// Beim Blättern/Schließen: Cloud-Sync, damit man auf anderen Geräten weitermachen kann
+function _zbSaveCloud() {
+    _zbReadCurrentToModel();
+    saveData(_zbOpenIndices[_zbPos]);
+}
+
+function zeugnisBatchNav(dir) {
+    if (_zeugnisnoteBusy) return;
+    const total = _zbOpenIndices.length;
+    const next = _zbPos + dir;
+    if (next < 0 || next >= total) return;
+    _zbSaveCloud();
+    _zbPos = next;
+    renderZeugnisBatch();
+}
+
+function closeZeugnisBatch() {
+    if (_zeugnisnoteBusy) return;
+    _zbSaveCloud();
+    hideModal();
+}
+
+async function zeugnisBatchGenerate() {
+    if (_zeugnisnoteBusy || activeClassId === null) return;
+    _zbReadCurrentToModel();
+    // Zielschüler: offene mit nicht-leeren Beobachtungen
+    const targets = _zbOpenIndices.filter(i => {
+        const s = classes[activeClassId].students[i];
+        return s && (s.zeugnisSonstiges || '').trim();
+    });
+    if (targets.length === 0) {
+        swal('Durchlauf', 'Du hast bei keinem Schüler Beobachtungen eingegeben.', 'info');
+        return;
+    }
+
+    _zeugnisnoteBusy = true;
+    const body = document.getElementById('zeugnis-batch-body');
+    const footer = document.getElementById('zeugnis-batch-footer');
+    if (footer) footer.style.display = 'none';
+
+    const fachart = classes[activeClassId]?.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
+    let done = 0;
+    const failed = [];
+
+    for (let k = 0; k < targets.length; k++) {
+        const idx = targets[k];
+        const student = classes[activeClassId].students[idx];
+        if (!student) continue;
+        if (body) {
+            body.innerHTML = `<div class="zn-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Generiere ${k + 1} von ${targets.length} …<br>${escapeHtml(student.name)}</span></div>`;
+        }
+        try {
+            if (typeof window.callGenerateZeugnisnote !== 'function') throw new Error('Funktion nicht verfügbar.');
+            const { schriftlicheNoten, durchschnitt, durchschnittNote } = getZeugnisnoteContext(student);
+            const result = await window.callGenerateZeugnisnote({
+                schriftlicheNoten,
+                durchschnitt,
+                durchschnittNote,
+                sonstiges: student.zeugnisSonstiges || '',
+                fachart,
+                richtung: null,
+                hinweis: ''
+            });
+            if (!result || !result.note) throw new Error('Kein gültiger Notenvorschlag erhalten.');
+            student.zeugnisnote = result.note;
+            student.zeugnisBegruendung = result.begruendung || '';
+            saveData(idx);
+            done++;
+        } catch (err) {
+            console.error('Durchlauf-Fehler bei', student.name, err);
+            failed.push(student.name);
+        }
+    }
+
+    _zeugnisnoteBusy = false;
+    hideModal();
+    if (typeof renderZeugnisModule === 'function' && activeModule === 'zeugnis') {
+        renderZeugnisModule();
+    }
+
+    let msg = `${done} Zeugnisnote${done === 1 ? '' : 'n'} erstellt.`;
+    if (failed.length) msg += `\n\nFehlgeschlagen (${failed.length}): ${failed.join(', ')}`;
+    swal(failed.length ? 'Teilweise fertig' : 'Fertig', msg, failed.length ? 'warning' : 'success');
+}
+
+window.openZeugnisBatch = openZeugnisBatch;
+window.closeZeugnisBatch = closeZeugnisBatch;
+window.zeugnisBatchNav = zeugnisBatchNav;
+window.zeugnisBatchGenerate = zeugnisBatchGenerate;
+window._zbSaveCurrentLocal = _zbSaveCurrentLocal;
+
 // ===== Notizen-Modal (Zeugnis-Tab) =====
 let _notesModalStudentIndex = null;
 
