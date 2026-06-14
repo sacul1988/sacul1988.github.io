@@ -3292,23 +3292,6 @@ body.modal-open {
     color: var(--danger-color) !important;
 }
 
-/* Cancel button styling */
-.action-sheet-footer .cancel-btn {
-    margin-top: 12px;
-    width: 100%;
-    min-height: 50px;
-    font-weight: 700;
-    border-radius: 14px;
-    background-color: #cbd5e1 !important;
-    color: #1e293b !important;
-    border: none !important;
-    cursor: pointer;
-}
-
-.action-sheet-footer .cancel-btn:active {
-    background-color: #94a3b8 !important;
-}
-
 /* --- Contacts Module --- */
 #kontakte-module .student-list-table td {
     vertical-align: middle;
