@@ -6080,7 +6080,7 @@ function exportAllStudentCards() {
                 .zg-col ul { list-style: none; margin: 0; padding: 0; }
                 .zg-col li { font-size: 0.92rem; padding: 2px 0; }
                 .zg-avg { margin-top: 8px; padding-top: 6px; border-top: 1px solid #e2e8f0; font-weight: 700; font-size: 0.92rem; }
-                .zg-note { border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 14px; font-size: 1.05rem; margin-bottom: 12px; }
+                .zg-note { border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 14px; font-size: 1.05rem; margin-top: 14px; }
                 .zg-note strong { font-size: 1.15rem; }
                 .zg-text-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; font-weight: 700; margin-bottom: 5px; }
                 .zg-text { font-size: 0.95rem; line-height: 1.6; text-align: justify; white-space: pre-wrap; }
@@ -6140,8 +6140,8 @@ function exportAllStudentCards() {
                         </ul>
                     </div>
                 </div>
-                <div class="zg-note">Zeugnisnote: <strong>${zeugnisnoteWort}</strong></div>
                 ${zeugnisBegruendung ? `<div class="zg-text-label">Beurteilung</div><div class="zg-text">${escapeHtml(zeugnisBegruendung)}</div>` : ''}
+                <div class="zg-note">Zeugnisnote: <strong>${zeugnisnoteWort}</strong></div>
             </div>
         `;
     });
