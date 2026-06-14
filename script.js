@@ -5678,16 +5678,20 @@ window.zeugnisInputGenerate = zeugnisInputGenerate;
 let _zbOpenIndices = [];   // Schüler-Indizes (offen, Variante B: nicht Note UND Text)
 let _zbPos = 0;            // Position innerhalb von _zbOpenIndices
 
+// Ein Zeugnis gilt nur als fertig, wenn Note UND ein nicht-leerer Begründungstext da sind.
+// .trim() ist wichtig: ein geleertes contenteditable-Feld hinterlässt oft Whitespace/\n,
+// sonst würde ein gelöschter Text weiterhin als "fertig" zählen.
+function zeugnisIstFertig(s) {
+    return !!(s && String(s.zeugnisnote || '').trim() && String(s.zeugnisBegruendung || '').trim());
+}
+
 function openZeugnisBatch() {
     if (activeClassId === null) return;
     const students = classes[activeClassId]?.students || [];
-    // Offen = NICHT (Zeugnisnote UND Begründungstext vorhanden)
+    // Offen = Zeugnis noch nicht fertig (Note + Begründung)
     _zbOpenIndices = students
         .map((s, i) => i)
-        .filter(i => {
-            const s = students[i];
-            return !(s.zeugnisnote && s.zeugnisBegruendung);
-        });
+        .filter(i => !zeugnisIstFertig(students[i]));
     if (_zbOpenIndices.length === 0) {
         swal('Durchlauf', 'Alle Schüler haben bereits eine Zeugnisnote.', 'info');
         return;
