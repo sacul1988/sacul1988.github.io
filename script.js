@@ -680,7 +680,9 @@ function loadGlobalCalendarRange() {
     try {
         const s = localStorage.getItem('planung_global_calendar_range');
         if (s) range = JSON.parse(s);
-    } catch (e) {}
+    } catch (e) {
+        console.warn("Fehler beim Laden von planung_global_calendar_range:", e);
+    }
 
     AppState.planung.calendarStartDate = range.startDate || '';
     AppState.planung.calendarEndDate = range.endDate || '';
@@ -1359,7 +1361,7 @@ function loadData() {
                             if (student.projects) {
                                 student.projects.forEach(project => {
                                     // Alte signatureProvided-Eigenschaft entfernen, falls vorhanden
-                                    if (project.hasOwnProperty('signatureProvided')) {
+                                    if (Object.prototype.hasOwnProperty.call(project, 'signatureProvided')) {
                                         delete project.signatureProvided;
                                     }
                                 });
@@ -6560,7 +6562,9 @@ function loadPlanung() {
     try {
         const savedGlobal = localStorage.getItem('planung_global_calendar_range');
         if (savedGlobal) globalCalendarRange = JSON.parse(savedGlobal);
-    } catch (e) {}
+    } catch (e) {
+        console.warn("Fehler beim Laden von planung_global_calendar_range:", e);
+    }
 
     p.calendarStartDate = globalCalendarRange.startDate || '';
     p.calendarEndDate = globalCalendarRange.endDate || '';
@@ -6747,7 +6751,7 @@ function exportPlanungTable() {
             <thead><tr><th>Nr.</th><th>Tag</th><th>Datum</th><th>Inhalt</th></tr></thead>
             <tbody>${tbodyHtml}</tbody>
         </table>
-        <script>window.onload = function(){ window.print(); }<\/script>
+        <script>window.onload = function(){ window.print(); }</script>
     </body></html>`);
     win.document.close();
 }
@@ -7565,7 +7569,7 @@ function exportPlanungCalendar() {
     </style></head><body>
         <h2>${exportTitle}</h2>
         ${calendarHtml}
-        <script>window.onload = function(){ window.print(); }<\/script>
+        <script>window.onload = function(){ window.print(); }</script>
     </body></html>`);
     win.document.close();
 }
@@ -8267,7 +8271,9 @@ function ztPersistArchive() {
     try {
         localStorage.setItem('zeugnistexteArchiv', JSON.stringify(ZtState.archive));
         localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
-    } catch (e) {}
+    } catch (e) {
+        console.warn("Fehler beim Speichern von zeugnistexteArchiv:", e);
+    }
     ztUpdateArchiveBadge();
     if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.saveDataToCloud === 'function') {
         window.saveDataToCloud();
