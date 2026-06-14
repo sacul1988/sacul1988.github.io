@@ -9,6 +9,7 @@ import fs from 'node:fs';
 function projectGlobals() {
   let src = '';
   try { src += fs.readFileSync('script.js', 'utf8') + '\n'; } catch { /* ignore */ }
+  try { src += fs.readFileSync('grades.js', 'utf8') + '\n'; } catch { /* ignore */ }
   try {
     const html = fs.readFileSync('index.html', 'utf8');
     for (const m of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) src += m[1] + '\n';
@@ -53,9 +54,9 @@ export default [
     },
   },
 
-  // Node-Code (CommonJS)
+  // Node-/CommonJS-Code (grades.js ist dual-mode: Browser-global + module.exports)
   {
-    files: ['functions/**/*.js', 'check.js'],
+    files: ['functions/**/*.js', 'check.js', 'grades.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'commonjs',

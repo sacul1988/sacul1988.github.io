@@ -41,45 +41,8 @@ window.setClasses = function(newClasses) {
     }
 };
 
-// Notenumrechnungstabelle
-const gradeConversion = {
-    '1': 1.0,
-    '1-': 1.33,
-    '2+': 1.66,
-    '2': 2.0,
-    '2-': 2.33,
-    '3+': 2.66,
-    '3': 3.0,
-    '3-': 3.33,
-    '4+': 3.66,
-    '4': 4.0,
-    '4-': 4.33,
-    '5+': 4.66,
-    '5': 5.0,
-    '5-': 5.33,
-    '6+': 5.66,
-    '6': 6.0
-};
-
-// Umgekehrte Notenumrechnungstabelle (für Rundung)
-const reverseGradeConversion = {
-    1.0: '1',
-    1.33: '1-',
-    1.66: '2+',
-    2.0: '2',
-    2.33: '2-',
-    2.66: '3+',
-    3.0: '3',
-    3.33: '3-',
-    3.66: '4+',
-    4.0: '4',
-    4.33: '4-',
-    4.66: '5+',
-    5.0: '5',
-    5.33: '5-',
-    5.66: '6+',
-    6.0: '6'
-};
+// Notenumrechnungstabellen (gradeConversion / reverseGradeConversion) ausgelagert
+// nach grades.js – dort als globale Konstanten definiert, hier weiter nutzbar.
 
 // Hilfsfunktionen für häufig verwendete Operationen
 const Utils = {
@@ -280,20 +243,8 @@ function convertToWholeGrade(gradeStr) {
     return Utils.convertToWholeGrade(gradeStr);
 }
 
-// Funktion zur Umrechnung von Noten
-function convertGrade(grade) {
-    return Utils.convertGrade(grade);
-}
-
-// Funktion zur Rundung der Endnote
-function roundGrade(grade) {
-    return Utils.roundGrade(grade);
-}
-
-// Funktion zum Bestimmen der Notenfarbe
-function getGradeColorClass(grade) {
-    return Utils.getGradeColorClass(grade);
-}
+// convertGrade / roundGrade / getGradeColorClass sind nach grades.js ausgelagert
+// (dort die echte Logik, global verfügbar). Utils.* bleibt davon unberührt.
 
 // Hilfsfunktion zur Bestimmung der Farbe basierend auf dem Notenwert
 function getGradeColor(grade) {
@@ -5418,32 +5369,7 @@ function exportGrades() {
 
 // Zeugnis-Modul rendern
 // Funktion zur Berechnung der Durchschnittsnote der Projekte
-function calculateProjectAverage(projects) {
-    if (!projects || projects.length === 0) return null;
-    
-    let sum = 0;
-    let count = 0;
-    
-    projects.forEach(project => {
-        if (project.grade) {
-            const gradeValue = convertGrade(project.grade);
-            if (gradeValue > 0) {
-                sum += gradeValue;
-                count++;
-            }
-        }
-    });
-    
-    if (count === 0) return null;
-    
-    const average = sum / count;
-    const rounded = roundGrade(average);
-    
-    return {
-        exact: average.toFixed(2),
-        rounded: reverseGradeConversion[rounded] || rounded.toString()
-    };
-}
+// calculateProjectAverage ist nach grades.js ausgelagert (global verfügbar).
 
 // Funktion zum Umschalten der Zeugnisansicht (Durchschnitt an/aus)
 function toggleZeugnisView() {
@@ -6118,17 +6044,7 @@ function saveStudentNotes(studentIndex, isDebounced = false) {
 }
 
 // Hilfsfunktion zur Umwandlung von Kurznoten (z.B. "3+") in Textform für den Export (z.B. "befriedigend (plus)")
-function getExportGradeWord(gradeCode) {
-    if (!gradeCode) return '-';
-    const baseGradesMap = { "1": "sehr gut", "2": "gut", "3": "befriedigend", "4": "ausreichend", "5": "mangelhaft", "6": "ungenügend" };
-    const base = gradeCode.charAt(0);
-    const suffix = gradeCode.slice(1);
-    const word = baseGradesMap[base];
-    if (!word) return gradeCode;
-    if (suffix === "+") return `${word} (plus)`;
-    if (suffix === "-") return `${word} (minus)`;
-    return word;
-}
+// getExportGradeWord ist nach grades.js ausgelagert (global verfügbar).
 
 // Alle Schüler-Karteikarten exportieren
 function exportAllStudentCards() {

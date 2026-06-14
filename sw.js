@@ -1,7 +1,8 @@
-const CACHE = 'schulverwaltung-v2';
+const CACHE = 'schulverwaltung-v3';
 const ASSETS = [
     './',
     './index.html',
+    './grades.js',
     './script.js',
     './style.css',
     './app-icon.png',
