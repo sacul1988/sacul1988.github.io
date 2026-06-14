@@ -3849,7 +3849,8 @@ body.modal-open {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 16px;
+    /* Safe-Area oben (Notch/Statusleiste) – wirkt nur in der installierten PWA */
+    padding: calc(16px + env(safe-area-inset-top)) 16px 16px;
 }
 .tool-window-title {
     flex: 1;
@@ -3865,7 +3866,8 @@ body.modal-open {
 .tool-window-body {
     flex: 1 1 auto;
     overflow-y: visible;
-    padding: 0 16px 16px;
+    /* Safe-Area unten (Home-Indikator) – wirkt nur in der installierten PWA */
+    padding: 0 16px calc(16px + env(safe-area-inset-bottom));
 }
 /* Reparentete Module/Panels: Anzeige wird per JS gesteuert */
 .tool-window-panel { display: none; }
