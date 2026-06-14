@@ -284,6 +284,17 @@ body {
     justify-content: center;
 }
 
+/* Such-Buttons: in der Kopfzeile nur das Lupensymbol (spart Platz).
+   Im Mobil-Überlaufmenü (außerhalb .desktop-header-buttons) bleibt das Label "Suchen". */
+.desktop-header-buttons .search-icon-btn {
+    width: 40px;
+    min-width: 40px;
+    flex: 0 0 auto;
+    padding: 0;
+}
+.desktop-header-buttons .search-icon-btn .btn-text { display: none; }
+.desktop-header-buttons .search-icon-btn i { margin: 0; }
+
 .btn {
     display: inline-flex;
     align-items: center;
