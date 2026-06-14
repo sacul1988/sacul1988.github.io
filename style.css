@@ -99,7 +99,7 @@ body {
 
 .card-header h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: var(--dark-color);
     white-space: nowrap;
@@ -2972,7 +2972,7 @@ body.modal-open {
     
     .card-header h2,
     .card-header h3 {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         flex: 1;
         margin: 0;
         white-space: nowrap;
@@ -3128,7 +3128,7 @@ body.modal-open {
     .topbar-btn { width: 38px; height: 38px; }
     .topbar-tools { gap: 5px; }
     .topbar-sep { margin: 0 4px; height: 26px; }
-    .topbar-title { font-size: 1.05rem; }
+    .topbar-title { font-size: 1.2rem; }
 
     /* Startseite: Kacheln einzeln untereinander */
     .classes-grid {
@@ -3726,7 +3726,7 @@ body.modal-open {
 .topbar-title {
     flex: 1;
     min-width: 0;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: var(--dark-color);
     letter-spacing: -0.02em;
