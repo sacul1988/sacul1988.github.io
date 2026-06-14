@@ -5113,7 +5113,7 @@ function selectStudent(module, studentIndex) {
     let targetElement = null;
     
     switch (module) {
-        case 'noten':
+        case 'noten': {
             // In Noten-Modul: .student-card Element finden
             const studentsList = document.getElementById('students-list');
             if (studentsList) {
@@ -5123,8 +5123,9 @@ function selectStudent(module, studentIndex) {
                 }
             }
             break;
+        }
             
-        case 'zeugnis':
+        case 'zeugnis': {
             // In Zeugnis-Modul: .student-card Element finden
             const zeugnisContainer = document.getElementById('zeugnis-container');
             if (zeugnisContainer) {
@@ -5134,6 +5135,7 @@ function selectStudent(module, studentIndex) {
                 }
             }
             break;
+        }
     }
     
     // Zum Element scrollen
