@@ -5549,29 +5549,17 @@ function zeugnisnoteInlineHtml(student, index) {
             <button class="zn-action-btn zn-new" onclick="zeugnisnoteGenerate(${index}, null)"><i class="fas fa-rotate-left"></i> Neu</button>
             <button class="zn-action-btn zn-better" onclick="zeugnisnoteGenerate(${index}, 'besser')"><i class="fas fa-caret-up"></i> Besser</button>
             <button class="zn-action-btn zn-worse" onclick="zeugnisnoteGenerate(${index}, 'schlechter')"><i class="fas fa-caret-down"></i> Schlechter</button>
-            <button class="zn-action-btn zn-adjust" onclick="zeugnisnoteToggleHinweis(${index})"><i class="fas fa-sliders"></i> Anpassen</button>
-        </div>
-        <div id="zn-hinweis-container-${index}"></div>`;
+            <button class="zn-action-btn zn-adjust" onclick="openZeugnisnoteHinweisModal(${index})"><i class="fas fa-sliders"></i> Anpassen</button>
+        </div>`;
 }
 
-function zeugnisnoteToggleHinweis(index) {
-    const container = document.getElementById(`zn-hinweis-container-${index}`);
-    if (!container) return;
-    if (container.innerHTML.trim()) {
-        container.innerHTML = '';
-        return;
+function openZeugnisnoteHinweisModal(index) {
+    window.currentAdjustingStudentIndex = index;
+    const textarea = document.getElementById('zeugnis-hinweis-textarea');
+    if (textarea) {
+        textarea.value = '';
     }
-    container.innerHTML = `
-        <div class="zn-hinweis-box">
-            <label for="zn-hinweis-${index}">Individueller Hinweis an die KI</label>
-            <textarea id="zn-hinweis-${index}" class="form-control"></textarea>
-            <div class="zn-hinweis-actions">
-                <button class="btn btn-light" onclick="zeugnisnoteToggleHinweis(${index})">Abbrechen</button>
-                <button class="btn btn-primary btn-icon" onclick="zeugnisnoteGenerate(${index}, 'hinweis')"><i class="fas fa-wand-magic-sparkles"></i> Neu generieren</button>
-            </div>
-        </div>`;
-    const ta = document.getElementById(`zn-hinweis-${index}`);
-    if (ta) ta.focus();
+    showModal('zeugnis-hinweis-modal');
 }
 
 async function zeugnisnoteGenerate(index, richtung) {
@@ -5581,9 +5569,10 @@ async function zeugnisnoteGenerate(index, richtung) {
 
     let hinweis = '';
     if (richtung === 'hinweis') {
-        const hinweisEl = document.getElementById(`zn-hinweis-${index}`);
+        const hinweisEl = document.getElementById('zeugnis-hinweis-textarea');
         hinweis = hinweisEl ? hinweisEl.value.trim() : '';
         if (!hinweis) { swal('Hinweis', 'Bitte gib einen Hinweis ein.', 'info'); return; }
+        hideModal();
     }
 
     const { schriftlicheNoten, durchschnitt, durchschnittNote } = getZeugnisnoteContext(student);
@@ -5875,7 +5864,7 @@ window.closeNotesModal = closeNotesModal;
 window.saveNotesModalLocal = saveNotesModalLocal;
 
 window.zeugnisnoteGenerate = zeugnisnoteGenerate;
-window.zeugnisnoteToggleHinweis = zeugnisnoteToggleHinweis;
+window.openZeugnisnoteHinweisModal = openZeugnisnoteHinweisModal;
 window.saveZeugnisnoteBegruendung = saveZeugnisnoteBegruendung;
 
 
