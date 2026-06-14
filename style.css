@@ -4035,7 +4035,7 @@ body.modal-open {
 }
 .zn-grade-circle.grade-excellent { background-color: #007bff !important; }
 .zn-grade-circle.grade-good { background-color: #28a745 !important; }
-.zn-grade-circle.grade-average { background-color: #e6a817 !important; }
+.zn-grade-circle.grade-average { background-color: #ffc107 !important; }
 .zn-grade-circle.grade-poor { background-color: #fd7e14 !important; }
 .zn-grade-circle.grade-bad { background-color: #dc143c !important; }
 .zn-grade-circle.grade-very-bad { background-color: #6c757d !important; }
