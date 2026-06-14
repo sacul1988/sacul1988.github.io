@@ -4026,16 +4026,16 @@ body.modal-open {
     justify-content: center;
     font-size: 1.15rem;
     font-weight: 700;
-    color: var(--dark-color) !important;
-    background: #fff !important;
-    border: 3px solid var(--grey-color);
+    color: #fff !important;
+    background: var(--grey-color) !important;
+    border: none;
 }
-.zn-grade-circle.grade-excellent { border-color: #007bff; }
-.zn-grade-circle.grade-good { border-color: #28a745; }
-.zn-grade-circle.grade-average { border-color: #e6a817; }
-.zn-grade-circle.grade-poor { border-color: #fd7e14; }
-.zn-grade-circle.grade-bad { border-color: #dc143c; }
-.zn-grade-circle.grade-very-bad { border-color: #6c757d; }
+.zn-grade-circle.grade-excellent { background-color: #007bff !important; }
+.zn-grade-circle.grade-good { background-color: #28a745 !important; }
+.zn-grade-circle.grade-average { background-color: #e6a817 !important; }
+.zn-grade-circle.grade-poor { background-color: #fd7e14 !important; }
+.zn-grade-circle.grade-bad { background-color: #dc143c !important; }
+.zn-grade-circle.grade-very-bad { background-color: #6c757d !important; }
 .zn-begruendung {
     background: #fff;
     border: 1px solid var(--border-color);

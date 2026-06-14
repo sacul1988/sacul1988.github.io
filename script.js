@@ -5532,7 +5532,7 @@ function zeugnisnoteInlineHtml(student, index) {
     const note = student.zeugnisnote || '';
     const text = student.zeugnisBegruendung || '';
 
-    const triggerBtn = `<button class="zn-generate-trigger" onclick="openZeugnisnoteInput(${index})"><i class="fas fa-wand-magic-sparkles"></i> <span>Zeugnis generieren</span></button>`;
+    const triggerBtn = `<button class="zn-generate-trigger" onclick="openZeugnisnoteInput(${index})"><i class="fas fa-wand-magic-sparkles"></i> <span>Zeugnis erstellen</span></button>`;
 
     if (!note) {
         return `<div class="zn-top-row">${triggerBtn}</div>`;
@@ -5734,9 +5734,9 @@ function _zbUpdateGenerateLabel() {
         const s = classes[activeClassId].students[i];
         return s && (s.zeugnisSonstiges || '').trim();
     }).length;
-    labelEl.textContent = count === 0 ? 'Generieren'
-        : count === 1 ? '1 Zeugnis generieren'
-        : `${count} Zeugnisse generieren`;
+    labelEl.textContent = count === 0 ? 'Erstellen'
+        : count === 1 ? '1 Zeugnis erstellen'
+        : `${count} Zeugnisse erstellen`;
 }
 
 function _zbReadCurrentToModel() {
