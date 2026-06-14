@@ -5787,8 +5787,23 @@ function renderZeugnisBatch() {
     const nextBtn = document.getElementById('zb-next');
     if (prevBtn) prevBtn.disabled = _zbPos === 0;
     if (nextBtn) nextBtn.disabled = _zbPos === total - 1;
+    _zbUpdateGenerateLabel();
     const ta = document.getElementById('zeugnis-batch-textarea');
     if (ta) ta.focus();
+}
+
+// Anzahl der Schüler mit eingegebenen Beobachtungen im Generieren-Button anzeigen
+function _zbUpdateGenerateLabel() {
+    const labelEl = document.getElementById('zb-generate-label');
+    if (!labelEl || activeClassId === null) return;
+    _zbReadCurrentToModel();
+    const count = _zbOpenIndices.filter(i => {
+        const s = classes[activeClassId].students[i];
+        return s && (s.zeugnisSonstiges || '').trim();
+    }).length;
+    labelEl.textContent = count === 0 ? 'Generieren'
+        : count === 1 ? '1 Zeugnis generieren'
+        : `${count} Zeugnisse generieren`;
 }
 
 function _zbReadCurrentToModel() {
@@ -5802,6 +5817,7 @@ function _zbReadCurrentToModel() {
 function _zbSaveCurrentLocal() {
     _zbReadCurrentToModel();
     localStorage.setItem('classes', JSON.stringify(classes));
+    _zbUpdateGenerateLabel();
 }
 
 // Beim Blättern/Schließen: Cloud-Sync, damit man auf anderen Geräten weitermachen kann
