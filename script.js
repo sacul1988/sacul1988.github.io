@@ -254,7 +254,7 @@ function getGradeColor(grade) {
 // ===== NAVIGATION UND UI =====
 
 // Seitennavigation
-function showPage(page, classId = null) {
+function showPage(page, classId = null, shouldPushState = true) {
     const previousClassId = activeClassId;
 
     // Vor Seiten-/Klassenwechsel offene Zeugnis-Änderungen der aktuellen Klasse sichern.
@@ -307,6 +307,20 @@ function showPage(page, classId = null) {
         renderClassesGrid();
     } else if (page === 'class') {
         renderModuleContent();
+    }
+
+    // Verlauf verwalten
+    if (shouldPushState) {
+        const state = { page: page, classId: classId };
+        if (page === 'home') {
+            if (history.state && history.state.page !== 'home') {
+                history.pushState(state, '');
+            } else {
+                history.replaceState(state, '');
+            }
+        } else {
+            history.pushState(state, '');
+        }
     }
 }
 
@@ -1806,9 +1820,43 @@ function initFlatpickr() {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisierungsfunktion rufen
     initFlatpickr();
+
+    // Ersten Zustand im Verlauf festlegen (Startseite)
+    if (!history.state) {
+        history.replaceState({ page: 'home', classId: null }, '');
+    }
+
     loadData();
     loadTermine();
     loadPlanung();
+
+    // Event-Listener für Zurück-Navigation (Browser-Zurück, Maus-Zurück, PWA)
+    window.addEventListener('popstate', function(event) {
+        const modalContainer = document.getElementById('modal-container');
+        const isModalOpen = modalContainer && modalContainer.style.display === 'flex';
+        const toolWindowOverlay = document.getElementById('tool-window-overlay');
+        const isToolWindowOpen = toolWindowOverlay && toolWindowOverlay.classList.contains('open');
+
+        if (isModalOpen) {
+            hideModal();
+            // Zustand wiederherstellen, da nur das Modal geschlossen wurde
+            history.pushState({ page: currentPage, classId: activeClassId }, '');
+            return;
+        }
+        
+        if (isToolWindowOpen) {
+            closeToolWindow();
+            // Zustand wiederherstellen, da nur das Tool-Overlay geschlossen wurde
+            history.pushState({ page: currentPage, classId: activeClassId }, '');
+            return;
+        }
+
+        if (event.state && event.state.page) {
+            showPage(event.state.page, event.state.classId, false);
+        } else {
+            showPage('home', null, false);
+        }
+    });
 
     // Globale Werkzeuge-Fenster vorbereiten (Module einmalig ins Overlay verschieben)
     if (typeof initToolWindows === 'function') initToolWindows();
