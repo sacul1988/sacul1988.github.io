@@ -5564,7 +5564,7 @@ function zeugnisnoteToggleHinweis(index) {
     container.innerHTML = `
         <div class="zn-hinweis-box">
             <label for="zn-hinweis-${index}">Individueller Hinweis an die KI</label>
-            <textarea id="zn-hinweis-${index}" class="form-control" placeholder="z. B. hat sich im zweiten Halbjahr deutlich gesteigert; Prüfungsangst berücksichtigen..."></textarea>
+            <textarea id="zn-hinweis-${index}" class="form-control"></textarea>
             <div class="zn-hinweis-actions">
                 <button class="btn btn-light" onclick="zeugnisnoteToggleHinweis(${index})">Abbrechen</button>
                 <button class="btn btn-primary btn-icon" onclick="zeugnisnoteGenerate(${index}, 'hinweis')"><i class="fas fa-wand-magic-sparkles"></i> Neu generieren</button>
