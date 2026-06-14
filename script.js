@@ -3060,7 +3060,10 @@ function updateProjectStatistics(event) {
     distributionElement.innerHTML = '';
     
     const maxCount = Math.max(...Object.values(distribution));
-    
+
+    // Säulenfarben an den Notenfarben orientiert (1 blau, 2 grün, 3 gelb, 4 orange, 5 rot, 6 grau)
+    const gradeBarColors = { '1': '#007bff', '2': '#28a745', '3': '#e6a817', '4': '#fd7e14', '5': '#dc143c', '6': '#6c757d' };
+
     sortedGrades.forEach(grade => {
         const count = distribution[grade];
         const height = Math.max(20, Math.round((count / maxCount) * 100));
@@ -3073,8 +3076,8 @@ function updateProjectStatistics(event) {
             <div class="distribution-bar-label">${grade}</div>
         `;
         
-        // Farbe basierend auf Note
-        bar.style.backgroundColor = getGradeColor(parseInt(grade));
+        // Farbe basierend auf Note (Notenfarben wie im Rest der App)
+        bar.style.backgroundColor = gradeBarColors[grade] || '#6c757d';
         
         distributionElement.appendChild(bar);
     });
