@@ -2939,11 +2939,18 @@ function updateProjectSelectionOptions() {
         }
     });
     
-    // Optionen für jede Projektnummer erstellen
+    // Optionen je Projekt – mit dem eingegebenen Projektnamen (Fallback: "Projekt N")
     for (let i = 0; i < maxProjects; i++) {
+        let projectName = '';
+        for (const student of cls.students) {
+            if (student.projects && student.projects[i] && student.projects[i].name) {
+                projectName = student.projects[i].name;
+                break;
+            }
+        }
         const option = document.createElement('option');
         option.value = i;
-        option.textContent = `Projekt ${i + 1}`;
+        option.textContent = projectName || `Projekt ${i + 1}`;
         projectSelect.appendChild(option);
     }
     
