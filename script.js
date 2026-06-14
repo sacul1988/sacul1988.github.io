@@ -5535,7 +5535,7 @@ function zeugnisnoteInlineHtml(student, index) {
     const note = student.zeugnisnote || '';
     const text = student.zeugnisBegruendung || '';
 
-    const triggerBtn = `<button class="zn-generate-trigger" onclick="openZeugnisnoteInput(${index})"><i class="fas fa-wand-magic-sparkles"></i> <span>Zeugnistext generieren</span></button>`;
+    const triggerBtn = `<button class="zn-generate-trigger" onclick="openZeugnisnoteInput(${index})"><i class="fas fa-wand-magic-sparkles"></i> <span>Zeugnis generieren</span></button>`;
 
     if (!note) {
         return `<div class="zn-top-row">${triggerBtn}</div>`;
