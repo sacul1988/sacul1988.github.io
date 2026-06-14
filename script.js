@@ -3062,7 +3062,7 @@ function updateProjectStatistics(event) {
     const maxCount = Math.max(...Object.values(distribution));
 
     // Säulenfarben an den Notenfarben orientiert (1 blau, 2 grün, 3 gelb, 4 orange, 5 rot, 6 grau)
-    const gradeBarColors = { '1': '#007bff', '2': '#28a745', '3': '#e6a817', '4': '#fd7e14', '5': '#dc143c', '6': '#6c757d' };
+    const gradeBarColors = { '1': '#007bff', '2': '#28a745', '3': '#ffc107', '4': '#fd7e14', '5': '#dc143c', '6': '#6c757d' };
 
     sortedGrades.forEach(grade => {
         const count = distribution[grade];
