@@ -890,12 +890,9 @@
                     <h2>Individueller Hinweis an die KI</h2>
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <textarea id="zeugnis-hinweis-textarea" class="form-control" style="height: 120px; resize: vertical;"></textarea>
-                </div>
-                <div style="text-align: right; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px; display: flex; justify-content: flex-end; gap: 10px;">
-                    <button class="btn btn-light" onclick="hideModal()">Abbrechen</button>
-                    <button class="btn btn-primary btn-icon" id="zeugnis-hinweis-submit-btn" onclick="zeugnisnoteGenerate(window.currentAdjustingStudentIndex, 'hinweis')"><i class="fas fa-wand-magic-sparkles"></i> Neu generieren</button>
+                <div class="zeugnis-input-wrap" style="margin-top: 15px;">
+                    <textarea id="zeugnis-hinweis-textarea" class="form-control zeugnis-input-textarea" style="min-height: 120px; padding-bottom: 50px;"></textarea>
+                    <button class="zeugnis-input-generate-btn" style="bottom: 10px; right: 10px; width: 36px; height: 36px; border-radius: 10px;" title="Neu generieren" aria-label="Neu generieren" onclick="zeugnisnoteGenerate(window.currentAdjustingStudentIndex, 'hinweis')"><i class="fas fa-wand-magic-sparkles"></i></button>
                 </div>
             </div>
 
