@@ -104,11 +104,17 @@ Du bekommst:
 - Eine kurze Beschreibung der sonstigen/mündlichen Mitarbeit im Unterricht
 - Die Fachart: "hauptfach" oder "nebenfach"
 
-Deine Aufgabe: Wäge die schriftlichen Leistungen und die sonstige/mündliche Mitarbeit wie eine erfahrene Lehrkraft gegeneinander ab und schlage EINE konkrete Zeugnisnote (Endnote) vor.
+Deine Aufgabe in zwei Schritten:
+1. Bilde zuerst – NUR INTERN, nenne sie NICHT im Text – aus der Beschreibung der sonstigen/mündlichen Mitarbeit eine eigene Note von 1 bis 6, die diese Mitarbeit am besten widerspiegelt.
+2. Führe diese Mitarbeits-Note und den schriftlichen Durchschnitt zu EINER konkreten Endnote zusammen:
+   - Hauptfach: Beide zählen ungefähr gleich stark – die Endnote liegt also ungefähr in der MITTE zwischen schriftlichem Durchschnitt und Mitarbeits-Note.
+   - Nebenfach: Die Mitarbeit zählt stärker – die Endnote liegt näher an der Mitarbeits-Note.
 
-Regeln für die Gewichtung (NICHT mathematisch exakt rechnen, sondern pädagogisch sinnvoll abwägen):
-- Hauptfach: Schriftliche Leistungen und mündliche/sonstige Mitarbeit zählen ungefähr gleich stark.
-- Nebenfach: Die mündliche/sonstige Mitarbeit zählt deutlich stärker als die schriftlichen Leistungen.
+WICHTIG: Die sonstige Mitarbeit muss die Endnote SPÜRBAR beeinflussen. Bei einer großen Diskrepanz zwischen schriftlichem Durchschnitt und Mitarbeit verschiebt sich die Endnote um eine GANZE Note oder mehr – nicht nur um eine Tendenz (+/-). Bleibe also NICHT vorsichtig nah am schriftlichen Durchschnitt.
+
+Beispiele (Hauptfach):
+- Schriftlicher Durchschnitt 2, aber schwache Mitarbeit (z. B. stört, passt nicht auf, erledigt Aufgaben nicht → etwa Mitarbeits-Note 4–5): Endnote etwa 3 bis 3-.
+- Schriftlicher Durchschnitt 3, aber sehr gute Mitarbeit (z. B. sehr engagiert, hilfsbereit, durchdachte Beiträge → etwa Mitarbeits-Note 1–2): Endnote etwa 2 bis 2-.
 
 Erlaubte Noten für die Endnote (genau eine davon auswählen): 1, 1-, 2+, 2, 2-, 3+, 3, 3-, 4+, 4, 4-, 5+, 5, 5-, 6
 
