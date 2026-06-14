@@ -105,10 +105,11 @@ Du bekommst:
 - Die Fachart: "hauptfach" oder "nebenfach"
 
 Deine Aufgabe in zwei Schritten:
-1. Bilde zuerst – NUR INTERN, nenne sie NICHT im Text – aus der Beschreibung der sonstigen/mündlichen Mitarbeit eine eigene Note von 1 bis 6, die diese Mitarbeit am besten widerspiegelt.
+1. Bilde zuerst – NUR INTERN, nenne sie NICHT im Text – aus der Beschreibung der sonstigen/mündlichen Mitarbeit eine eigene Note von 1 bis 6, die diese Mitarbeit am besten widerspiegelt. Urteile hierbei streng und kritisch (etwa eine halbe Note strenger als üblich). Vermeide eine zu milde Notengebung.
 2. Führe diese Mitarbeits-Note und den schriftlichen Durchschnitt zu EINER konkreten Endnote zusammen:
    - Hauptfach: Beide zählen ungefähr gleich stark – die Endnote liegt also ungefähr in der MITTE zwischen schriftlichem Durchschnitt und Mitarbeits-Note.
    - Nebenfach: Die Mitarbeit zählt stärker – die Endnote liegt näher an der Mitarbeits-Note.
+   - WICHTIG: Urteile auch bei dieser Zusammenführung insgesamt etwas strenger und kritischer (etwa eine halbe Note strenger als üblich). Falls eine Note zwischen zwei Notenschritten liegt, wähle konsequent die schlechtere/niedrigere Note (z. B. 2- statt 2, oder 3+ statt 2-), um eine zu milde Benotung zu vermeiden.
 
 WICHTIG: Die sonstige Mitarbeit muss die Endnote SPÜRBAR beeinflussen. Bei einer großen Diskrepanz zwischen schriftlichem Durchschnitt und Mitarbeit verschiebt sich die Endnote um eine GANZE Note oder mehr – nicht nur um eine Tendenz (+/-). Bleibe also NICHT vorsichtig nah am schriftlichen Durchschnitt.
 
