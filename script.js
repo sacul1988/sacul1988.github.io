@@ -5582,11 +5582,40 @@ async function zeugnisnoteGenerate(index, richtung) {
     if (!student) return;
 
     let hinweis = '';
-    if (richtung === 'hinweis') {
+    let apiRichtung = null;
+
+    // Bestimme die Zielnote und den passenden Prompt-Hinweis für "besser" und "schlechter", wenn bereits eine Note existiert
+    if ((richtung === 'besser' || richtung === 'schlechter') && student.zeugnisnote) {
+        const allowedGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5", "5-", "6"];
+        const currentGrade = student.zeugnisnote.trim();
+        const currentIndex = allowedGrades.indexOf(currentGrade);
+        
+        if (currentIndex !== -1) {
+            let newIndex = currentIndex;
+            if (richtung === 'besser') {
+                newIndex = currentIndex - 1; // Besser -> Index verringern (Richtung 1)
+            } else {
+                newIndex = currentIndex + 1; // Schlechter -> Index erhöhen (Richtung 6)
+            }
+
+            if (newIndex >= 0 && newIndex < allowedGrades.length) {
+                const newGrade = allowedGrades[newIndex];
+                if (richtung === 'besser') {
+                    hinweis = `WICHTIG: Die neue Endnote MUSS exakt "${newGrade}" sein (eine halbe Stufe besser als die vorherige Note "${currentGrade}"). Bitte formuliere den Begründungstext so um, dass er ganz leicht positiver/lobender ist und perfekt zu der Note "${newGrade}" passt.`;
+                } else {
+                    hinweis = `WICHTIG: Die neue Endnote MUSS exakt "${newGrade}" sein (eine halbe Stufe schlechter als die vorherige Note "${currentGrade}"). Bitte formuliere den Begründungstext so um, dass er ganz leicht kritischer bzw. weniger lobend ist und perfekt zu der Note "${newGrade}" passt.`;
+                }
+                apiRichtung = null; // Über den Hinweis steuern, um Doppel-Modifikatoren zu vermeiden
+            }
+        }
+    } else if (richtung === 'hinweis') {
         const hinweisEl = document.getElementById('zeugnis-hinweis-textarea');
         hinweis = hinweisEl ? hinweisEl.value.trim() : '';
         if (!hinweis) { swal('Hinweis', 'Bitte gib einen Hinweis ein.', 'info'); return; }
         hideModal();
+        apiRichtung = null;
+    } else {
+        apiRichtung = richtung;
     }
 
     const { schriftlicheNoten, durchschnitt, durchschnittNote } = getZeugnisnoteContext(student);
@@ -5595,7 +5624,7 @@ async function zeugnisnoteGenerate(index, richtung) {
     // Ladeansicht
     const container = document.getElementById(`zn-inline-${index}`);
     if (container) {
-        container.innerHTML = `<div class="zn-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Die KI wägt ab und schreibt einen Vorschlag…</span></div>`;
+        container.innerHTML = `<div class="zn-loading"><i class="fas fa-circle-notch fa-spin"></i></div>`;
     }
     _zeugnisnoteBusy = true;
 
@@ -5609,15 +5638,47 @@ async function zeugnisnoteGenerate(index, richtung) {
             durchschnittNote,
             sonstiges: student.zeugnisSonstiges || '',
             fachart,
-            richtung: (richtung === 'besser' || richtung === 'schlechter') ? richtung : null,
-            hinweis
+            richtung: apiRichtung,
+            hinweis: hinweis
         });
         if (!result || !result.note) {
             throw new Error('Kein gültiger Notenvorschlag erhalten.');
         }
+
+        let noteToSet = result.note;
+        let textToSet = result.begruendung || '';
+
+        // Falls die KI trotz Hinweis eine andere Note generiert hat (Fallbacksicherung),
+        // erzwingen wir die gewünschte Zielnote und korrigieren den Schlusssatz.
+        if ((richtung === 'besser' || richtung === 'schlechter') && student.zeugnisnote) {
+            const allowedGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5", "5-", "6"];
+            const currentGrade = student.zeugnisnote.trim();
+            const currentIndex = allowedGrades.indexOf(currentGrade);
+            if (currentIndex !== -1) {
+                const targetIndex = richtung === 'besser' ? currentIndex - 1 : currentIndex + 1;
+                if (targetIndex >= 0 && targetIndex < allowedGrades.length) {
+                    const expectedGrade = allowedGrades[targetIndex];
+                    if (noteToSet !== expectedGrade) {
+                        console.warn(`KI gab Note ${noteToSet} statt ${expectedGrade} zurück. Erzwinge ${expectedGrade}.`);
+                        noteToSet = expectedGrade;
+                        const escapedOldGrade = result.note.replace(/[-+]/g, '\\$&');
+                        const regex = new RegExp(`Note\\s+${escapedOldGrade}(?=\\s*\\.?\\s*$)`, 'i');
+                        if (regex.test(textToSet)) {
+                            textToSet = textToSet.replace(regex, `Note ${expectedGrade}`);
+                        } else {
+                            const lastIndex = textToSet.lastIndexOf(`Note ${result.note}`);
+                            if (lastIndex !== -1) {
+                                textToSet = textToSet.substring(0, lastIndex) + `Note ${expectedGrade}` + textToSet.substring(lastIndex + `Note ${result.note}`.length);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Note direkt setzen + speichern
-        student.zeugnisnote = result.note;
-        student.zeugnisBegruendung = result.begruendung || '';
+        student.zeugnisnote = noteToSet;
+        student.zeugnisBegruendung = textToSet;
         saveData(index);
         if (window.temporaryAiHints) {
             delete window.temporaryAiHints[index];
