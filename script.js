@@ -6061,62 +6061,55 @@ function exportAllStudentCards() {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Zeugnisse - Alle Schüler</title>
+            <meta charset="UTF-8">
+            <title>Zeugnisse</title>
             <style>
-                @media print {
-                    @page { margin: 1.5cm; }
-                    body { margin: 0; padding: 0; }
-                    .student-page { page-break-after: always; }
+                @page { size: A4; margin: 1.2cm; }
+                * { box-sizing: border-box; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; margin: 0; }
+                .zeugnis {
+                    border: 1.5px solid #475569;
+                    border-radius: 12px;
+                    padding: 16px 22px 18px;
+                    margin-bottom: 0.5cm;
+                    min-height: 12.8cm;          /* ~halbe A4-Seite -> 2 Schüler pro Seite */
+                    page-break-inside: avoid;    /* ein Schüler wird nie umgebrochen */
+                    break-inside: avoid;
+                    display: flex;
+                    flex-direction: column;
                 }
-                body { font-family: Arial, sans-serif; margin: 20px; color: #1e293b; }
-                .student-page { margin-bottom: 60px; }
-                h1 { font-size: 1.4rem; margin-bottom: 4px; border-bottom: 2px solid #1e293b; padding-bottom: 6px; }
-                .section { margin-bottom: 0; padding: 14px 0; border-bottom: 1px solid #cbd5e1; }
-                .section:last-child { border-bottom: none; }
-                .section h2 { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; margin-top: 0; }
-                ul { list-style: none; padding: 0; margin: 0; }
-                ul li { padding: 2px 0; font-size: 0.9rem; }
-                .notes { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; }
-                .notes span { color: #000 !important; }
-                .grade-badge { display: inline-block; font-weight: 700; font-size: 0.8rem; padding: 2px 7px; border-radius: 12px; color: white; }
-                .grade-text { font-weight: bold; }
-                .slider-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
-                .slider-circle { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; color: white; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; margin-top: 1px; }
-                .slider-content { flex: 1; }
-                .slider-label { font-weight: 700; font-size: 0.9rem; display: block; }
-                .slider-desc { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
-                .avg-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-weight: 700; font-size: 0.9rem; }
-                .avg-num { font-size: 0.85rem; color: #64748b; font-weight: 400; }
-                .zeugnisnote-row { font-size: 1.1rem; font-weight: 700; }
+                .zg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 2px solid #1f2937; padding-bottom: 8px; margin-bottom: 14px; }
+                .zg-name { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.01em; }
+                .zg-class { font-size: 0.95rem; color: #475569; font-weight: 600; white-space: nowrap; }
+                .zg-cols { display: flex; gap: 32px; margin-bottom: 14px; }
+                .zg-col { flex: 1; }
+                .zg-col h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin: 0 0 6px; font-weight: 700; }
+                .zg-col ul { list-style: none; margin: 0; padding: 0; }
+                .zg-col li { font-size: 0.92rem; padding: 2px 0; }
+                .zg-avg { margin-top: 8px; padding-top: 6px; border-top: 1px solid #e2e8f0; font-weight: 700; font-size: 0.92rem; }
+                .zg-note { border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 14px; font-size: 1.05rem; margin-bottom: 12px; }
+                .zg-note strong { font-size: 1.15rem; }
+                .zg-text-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; font-weight: 700; margin-bottom: 5px; }
+                .zg-text { font-size: 0.95rem; line-height: 1.6; text-align: justify; white-space: pre-wrap; }
             </style>
         </head>
         <body>
     `;
     
-    const exportSliderColors = {1:'#007bff', 2:'#28a745', 3:'#e6a817', 4:'#fd7e14', 5:'#dc143c'};
-    const exportGradeColors = {'grade-excellent':'#007bff','grade-good':'#28a745','grade-average':'#e6a817','grade-poor':'#fd7e14','grade-bad':'#dc143c','grade-very-bad':'#6c757d'};
+    const className = classes[activeClassId].name || '';
 
     classes[activeClassId].students.forEach(student => {
-        // Schriftlich
+        // Schriftliche Noten – schlichter Text (kein farbiger Kreis)
         let gradesHtml = '';
-        let averageText = '';
+        let averageHtml = '';
         if (student.projects && student.projects.length > 0) {
             gradesHtml = student.projects.map(project => {
                 const grade = project.grade || '-';
-                if (grade !== '-') {
-                    const gradeValue = convertGrade(grade);
-                    const gradeClass = getGradeColorClass(gradeValue);
-                    const color = exportGradeColors[gradeClass] || '#6c757d';
-                    return `<li>${project.name}: <span class="grade-badge" style="background:${color}">${grade}</span></li>`;
-                }
-                return `<li>${project.name}: -</li>`;
+                return `<li>${escapeHtml(project.name)}: ${escapeHtml(grade)}</li>`;
             }).join('');
             const average = calculateProjectAverage(student.projects);
             if (average) {
-                const avgVal = convertGrade(average.rounded);
-                const avgClass = getGradeColorClass(avgVal);
-                const avgColor = exportGradeColors[avgClass] || '#6c757d';
-                averageText = `<li style="margin-top:8px;"><strong>Durchschnitt (Schriftlich): <span class="grade-badge" style="background:${avgColor}">${average.rounded}</span> <span style="color:#64748b;font-weight:400">(${average.exact})</span></strong></li>`;
+                averageHtml = `<div class="zg-avg">Durchschnitt: ${average.rounded} (${average.exact})</div>`;
             }
         } else {
             gradesHtml = '<li>Keine Noten vorhanden</li>';
@@ -6128,36 +6121,34 @@ function exportAllStudentCards() {
         const negative = student.participation ? student.participation.negative || 0 : 0;
         const printKonsequenzCount = student.hwHistory ? student.hwHistory.filter(e => e.type === 'abschreibtext' || e.type === 'nachsitzen').length : 0;
 
-        // Notizen
-        const leftNotes = student.leftNotes || '';
-
-        // Zeugnisnote
-        const rawZeugnisnote = student.zeugnisnote || '';
-        const zeugnisnote = getExportGradeWord(rawZeugnisnote);
+        // Zeugnisnote + generierter Text (Notizen werden NICHT exportiert)
+        const zeugnisnoteWort = getExportGradeWord(student.zeugnisnote || '');
         const zeugnisBegruendung = student.zeugnisBegruendung || '';
 
         allPrintHtml += `
-            <div class="student-page">
-                <h1>${student.name}</h1>
-                <div class="section">
-                    <h2>Schriftlich</h2>
-                    <ul>${gradesHtml}${averageText}</ul>
+            <div class="zeugnis">
+                <div class="zg-head">
+                    <span class="zg-name">${escapeHtml(student.name)}</span>
+                    ${className ? `<span class="zg-class">${escapeHtml(className)}</span>` : ''}
                 </div>
-                <div class="section">
-                    <h2>Sonstiges</h2>
-                    <ul>
-                        <li>Hausaufgaben: ${homework}</li>
-                        <li>Material: ${materials}</li>
-                        <li>Störung: ${negative}</li>
-                        ${printKonsequenzCount > 0 ? `<li>Konsequenz: ${printKonsequenzCount}</li>` : ''}
-                    </ul>
+                <div class="zg-cols">
+                    <div class="zg-col">
+                        <h3>Schriftliche Leistungen</h3>
+                        <ul>${gradesHtml}</ul>
+                        ${averageHtml}
+                    </div>
+                    <div class="zg-col">
+                        <h3>Sonstiges</h3>
+                        <ul>
+                            <li>Hausaufgaben: ${homework}</li>
+                            <li>Material: ${materials}</li>
+                            <li>Störung: ${negative}</li>
+                            ${printKonsequenzCount > 0 ? `<li>Konsequenz: ${printKonsequenzCount}</li>` : ''}
+                        </ul>
+                    </div>
                 </div>
-                ${leftNotes ? `<div class="section"><h2>Notizen</h2><div class="notes">${leftNotes}</div></div>` : ''}
-                <div class="section">
-                    <h2>Zeugnisnote</h2>
-                    <div class="zeugnisnote-row">${zeugnisnote || '-'}</div>
-                    ${zeugnisBegruendung ? `<div class="notes" style="margin-top:8px;">${escapeHtml(zeugnisBegruendung)}</div>` : ''}
-                </div>
+                <div class="zg-note">Zeugnisnote: <strong>${zeugnisnoteWort}</strong></div>
+                ${zeugnisBegruendung ? `<div class="zg-text-label">Beurteilung</div><div class="zg-text">${escapeHtml(zeugnisBegruendung)}</div>` : ''}
             </div>
         `;
     });
