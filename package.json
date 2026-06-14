@@ -1,0 +1,15 @@
+{
+  "name": "schulverwaltung",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Schulverwaltung – Dev-Tooling (Lint & Pre-Deploy-Checks)",
+  "scripts": {
+    "lint": "eslint script.js sw.js check.js functions/index.js",
+    "check": "node check.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.5.0",
+    "globals": "^17.6.0"
+  }
+}

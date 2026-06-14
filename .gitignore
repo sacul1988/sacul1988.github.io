@@ -8,6 +8,11 @@
 !/firebase.json
 !/.firebaserc
 !/functions/package.json
+!/package.json
+
+# Node / Dev-Tooling
+node_modules/
+package-lock.json
 
 # Firebase
 functions/node_modules/
