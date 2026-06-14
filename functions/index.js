@@ -96,41 +96,30 @@ exports.generateZeugnistext = onCall(
 );
 
 // ===== Zeugnisnoten-Vorschlag: Note abwägen + Begründung schreiben =====
-const ZEUGNISNOTE_SYSTEM = `Du bist eine erfahrene Lehrkraft und hilfst dabei, eine faire Zeugnisnote für eine Schülerin oder einen Schüler festzulegen.
+const ZEUGNISNOTE_SYSTEM = `Du unterstützt eine Lehrkraft dabei, einer Schülerin oder einem Schüler eine Rückmeldung zur Endnote zu geben. Der Text wird DIREKT AN DIE SCHÜLERIN ODER DEN SCHÜLER gerichtet, also in der Anrede "Du".
+Der erste Teil des Rückmeldetextes wurde bereits automatisch erstellt und lautet:
 
-Du bekommst:
-- Die schriftlichen Noten (einzelne Arbeiten mit Namen)
-- Den schriftlichen Durchschnitt als Dezimalzahl UND als gerundete Note
-- Eine kurze Beschreibung der sonstigen/mündlichen Mitarbeit im Unterricht
-- Die Fachart: "hauptfach" oder "nebenfach"
+"[automatisch berechneter Satz zu den schriftlichen Noten, z. B. 'Du hast in Klassenarbeit 1, Klassenarbeit 2 und Projektarbeit die Noten 3, 2- und 1+ geschrieben. Daraus ergibt sich ein schriftlicher Durchschnitt von 2,00 und die Note 2.']"
+Deine Aufgabe ist es, NUR den zweiten Teil zu schreiben, der direkt an diesen ersten Teil anschließt, sowie eine Endnote vorzuschlagen.
+Antworte AUSSCHLIESSLICH mit einem JSON-Objekt in genau diesem Format, ohne zusätzlichen Text, ohne Markdown-Codeblöcke, ohne Einleitung oder Erklärung davor oder danach:
 
-Deine Aufgabe in zwei Schritten:
-1. Bilde zuerst – NUR INTERN, nenne sie NICHT im Text – aus der Beschreibung der sonstigen/mündlichen Mitarbeit eine eigene Note von 1 bis 6, die diese Mitarbeit am besten widerspiegelt. Urteile hierbei streng und kritisch (etwa eine halbe Note strenger als üblich). Vermeide eine zu milde Notengebung.
-2. Führe diese Mitarbeits-Note und den schriftlichen Durchschnitt zu EINER konkreten Endnote zusammen:
-   - Hauptfach: Beide zählen ungefähr gleich stark – die Endnote liegt also ungefähr in der MITTE zwischen schriftlichem Durchschnitt und Mitarbeits-Note.
-   - Nebenfach: Die Mitarbeit zählt stärker – die Endnote liegt näher an der Mitarbeits-Note.
-   - WICHTIG: Urteile auch bei dieser Zusammenführung insgesamt etwas strenger und kritischer (etwa eine halbe Note strenger als üblich). Falls eine Note zwischen zwei Notenschritten liegt, wähle konsequent die schlechtere/niedrigere Note (z. B. 2- statt 2, oder 3+ statt 2-), um eine zu milde Benotung zu vermeiden.
+{"endnote": "...", "mitarbeit_text": "..."}
+Regeln für "mitarbeit_text":
 
-WICHTIG: Die sonstige Mitarbeit muss die Endnote SPÜRBAR beeinflussen. Bei einer großen Diskrepanz zwischen schriftlichem Durchschnitt und Mitarbeit verschiebt sich die Endnote um eine GANZE Note oder mehr – nicht nur um eine Tendenz (+/-). Bleibe also NICHT vorsichtig nah am schriftlichen Durchschnitt.
+Beginnt sinngemäß mit einem Übergang zur sonstigen Mitarbeit, z. B. "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen: Du ..." – die genaue Formulierung darf variieren, der Sinn (Überleitung zur sonstigen/mündlichen Mitarbeit, Anrede "Du") soll aber erhalten bleiben.
+Insgesamt 3 bis 5 Sätze in der direkten Anrede "Du", die sich konkret auf die unten genannten Beobachtungen zur mündlichen Mitarbeit beziehen. Formuliere in ganzen, runden Sätzen, nicht als Stichpunktliste, ohne Zeilenumbrüche.
+Endet mit einem Satz, der erklärt, wie sich aus dem schriftlichen Durchschnitt und der sonstigen Mitarbeit zusammen die Endnote ergibt, z. B. "Insgesamt ergibt das für dich die Note X."
+Formuliere wertschätzend und konstruktiv, auch wenn die Rückmeldung nicht durchgehend positiv ist.
+Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.
+Wenn die Beobachtungen sehr knapp oder widersprüchlich sind, weise das kurz und sachlich an passender Stelle darauf hin.
 
-Beispiele (Hauptfach):
-- Schriftlicher Durchschnitt 2, aber schwache Mitarbeit (z. B. stört, passt nicht auf, erledigt Aufgaben nicht → etwa Mitarbeits-Note 4–5): Endnote etwa 3 bis 3-.
-- Schriftlicher Durchschnitt 3, aber sehr gute Mitarbeit (z. B. sehr engagiert, hilfsbereit, durchdachte Beiträge → etwa Mitarbeits-Note 1–2): Endnote etwa 2 bis 2-.
+Regeln für "endnote":
 
-Erlaubte Noten für die Endnote (genau eine davon auswählen): 1, 1-, 2+, 2, 2-, 3+, 3, 3-, 4+, 4, 4-, 5+, 5, 5-, 6
-
-Die Begründung MUSS exakt der folgenden Struktur und Formulierung folgen – ein einziger durchgehender Fließtext OHNE Absätze und OHNE Aufzählungen:
-1. Beginne mit: "Du hast in <Namen der Arbeiten> die Noten <Noten in derselben Reihenfolge> geschrieben." (Bei nur einer Arbeit im Singular: "... die Note <Note> geschrieben." Verbinde mehrere Namen bzw. Noten natürlich mit Komma und "und".)
-2. Weiter mit: "Daraus ergibt sich ein schriftlicher Durchschnitt von <Dezimalzahl mit Komma> und die Note <gerundete schriftliche Note>."
-3. Weiter mit: "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen: " und beschreibe danach – direkt an die Schülerin/den Schüler mit "Du" gerichtet – die sonstige/mündliche Mitarbeit auf Grundlage der angegebenen Beobachtungen.
-4. Schließe ab mit: "Zusammen mit dem schriftlichen Durchschnitt von <gerundete schriftliche Note> ergibt sich für dich insgesamt die Note <Endnote>."
-
-Wenn keine schriftlichen Noten vorliegen, lasse die Sätze 1 und 2 weg, beziehe dich nur auf die sonstige Mitarbeit und nenne im Schlusssatz keinen schriftlichen Durchschnitt.
-
-Verwende deutsche Dezimalschreibweise mit Komma. Freundlicher, wertschätzender, sachlicher Ton.
-
-Antworte AUSSCHLIESSLICH mit einem JSON-Objekt in genau diesem Format (keine Code-Blöcke, kein weiterer Text):
-{"note": "<die Endnote, eine erlaubte Note>", "begruendung": "<Begründungstext>"}`;
+EIN eindeutiger Wert zwischen 1 (sehr gut) und 5 (mangelhaft) als String, ohne Spanne. Optional mit Tendenz: entweder die reine Zahl (z. B. "2"), oder die Zahl mit angehängtem "+" für die bessere Tendenz oder "-" für die schwächere Tendenz (z. B. "2+", "3-"). Die Note 6 wird nicht verwendet; "5-" ist die schwächste mögliche Einstufung.
+Berücksichtige sowohl den schriftlichen Durchschnitt als auch die Beobachtungen zur mündlichen Mitarbeit. Ohne ausdrücklichen Hinweis gehe von einer ungefähr gleichgewichtigen Berücksichtigung beider Bereiche aus. Liegen keine schriftlichen Noten vor, basiert die Endnote im Wesentlichen auf der mündlichen Mitarbeit.
+Sei bei der Einschätzung der mündlichen Mitarbeit konsequent und nicht zu wohlwollend, aber auch nicht übertrieben streng: Wenn die Beobachtungen überwiegend kritisch sind (z. B. mangelnde Aufgabenbearbeitung, häufige Ablenkungen, fehlende Mitarbeit, häufige Ermahnungen), soll sich das spürbar in der Endnote zeigen, auch wenn der schriftliche Durchschnitt gut ist – in der Regel um etwa eine Notenstufe unter dem schriftlichen Durchschnitt (z. B. Durchschnitt 2 → Endnote 3 oder 3-). Ein Abstand von mehr als einer Notenstufe ist nur gerechtfertigt, wenn die Beobachtungen sehr gravierend sind (z. B. nahezu keine Mitarbeit, massive und wiederholte Störungen, Ausschluss vom Unterricht).
+Genauso gilt umgekehrt: Eine durchgehend sehr positive mündliche Mitarbeit kann die Endnote über den schriftlichen Durchschnitt heben, in der Regel ebenfalls um etwa eine Notenstufe.
+Die im Schlusssatz von "mitarbeit_text" genannte Note muss exakt dem Wert von "endnote" entsprechen.`;
 
 exports.generateZeugnisnote = onCall(
   { secrets: [anthropicApiKey], invoker: "public", cors: true },
@@ -139,21 +128,24 @@ exports.generateZeugnisnote = onCall(
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
     }
 
-    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis } = request.data || {};
+    const { durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, fachContext } = request.data || {};
     const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
-    const fachLabel = fach === "nebenfach" ? "Nebenfach" : "Hauptfach";
-
-    const notenText = Array.isArray(schriftlicheNoten) && schriftlicheNoten.length > 0
-      ? schriftlicheNoten.map(n => `${n.name || "Arbeit"}: ${n.grade}`).join(", ")
-      : "Keine schriftlichen Noten vorhanden";
 
     const durchschnittKomma = durchschnitt ? String(durchschnitt).replace(".", ",") : "";
 
-    let userMsg = `Fachart: ${fachLabel}\n`;
-    userMsg += `Schriftliche Noten (Name: Note): ${notenText}\n`;
-    if (durchschnittKomma) userMsg += `Schriftlicher Durchschnitt (Dezimalzahl): ${durchschnittKomma}\n`;
-    if (durchschnittNote) userMsg += `Schriftlicher Durchschnitt (gerundete Note): ${durchschnittNote}\n`;
-    userMsg += `Sonstige/mündliche Mitarbeit: ${sonstiges && sonstiges.trim() ? sonstiges.trim() : "Keine Angabe"}\n`;
+    let userMsg = `Fach/Kontext: ${fachContext || "Keine Angabe"}\n`;
+    if (durchschnitt) {
+      userMsg += `Schriftlicher Durchschnitt: ${durchschnittKomma} (entspricht der Note ${durchschnittNote})\n`;
+    } else {
+      userMsg += `Es liegen keine schriftlichen Noten vor.\n`;
+    }
+    userMsg += `Beobachtungen zur mündlichen Mitarbeit:\n\n${sonstiges && sonstiges.trim() ? sonstiges.trim() : "Keine Angabe"}\n`;
+
+    if (fach === "nebenfach") {
+      userMsg += `\nArt des Fachs: Nebenfach. Bei diesem Fach zählt die mündliche Leistung für die Endnote deutlich mehr als die schriftliche Leistung.\n`;
+    } else {
+      userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
+    }
 
     if (richtung === "besser") {
       userMsg += `\nWICHTIG: Schlage eine etwas BESSERE Note vor als beim normalen Abwägen und passe die Begründung entsprechend an.`;
@@ -191,8 +183,8 @@ exports.generateZeugnisnote = onCall(
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
-      note = (parsed.note || "").toString().trim();
-      begruendung = (parsed.begruendung || "").toString().trim();
+      note = (parsed.note || parsed.endnote || "").toString().trim();
+      begruendung = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
     } catch (e) {
       throw new HttpsError("internal", "Antwort konnte nicht verarbeitet werden.");
     }

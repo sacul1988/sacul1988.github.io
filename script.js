@@ -5639,7 +5639,8 @@ async function zeugnisnoteGenerate(index, richtung) {
             sonstiges: student.zeugnisSonstiges || '',
             fachart,
             richtung: apiRichtung,
-            hinweis: hinweis
+            hinweis: hinweis,
+            fachContext: classes[activeClassId]?.name || ''
         });
         if (!result || !result.note) {
             throw new Error('Kein gültiger Notenvorschlag erhalten.');
@@ -5875,7 +5876,8 @@ async function zeugnisBatchGenerate() {
                 sonstiges: student.zeugnisSonstiges || '',
                 fachart,
                 richtung: null,
-                hinweis: ''
+                hinweis: '',
+                fachContext: classes[activeClassId]?.name || ''
             });
             if (!result || !result.note) throw new Error('Kein gültiger Notenvorschlag erhalten.');
             student.zeugnisnote = result.note;
