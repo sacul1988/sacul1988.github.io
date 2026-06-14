@@ -6065,11 +6065,14 @@ function exportAllStudentCards() {
                     border-radius: 12px;
                     padding: 16px 22px 18px;
                     margin-bottom: 0.5cm;
-                    min-height: 12.8cm;          /* ~halbe A4-Seite -> 2 Schüler pro Seite */
                     page-break-inside: avoid;    /* ein Schüler wird nie umgebrochen */
                     break-inside: avoid;
                     display: flex;
                     flex-direction: column;
+                }
+                .zeugnis:not(:last-child) {
+                    page-break-after: always;
+                    break-after: page;
                 }
                 .zg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 2px solid #1f2937; padding-bottom: 8px; margin-bottom: 14px; }
                 .zg-name { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.01em; }
@@ -6079,10 +6082,10 @@ function exportAllStudentCards() {
                 .zg-col h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin: 0 0 6px; font-weight: 700; }
                 .zg-col ul { list-style: none; margin: 0; padding: 0; }
                 .zg-col li { font-size: 0.92rem; padding: 2px 0; }
-                .zg-avg { margin-top: 8px; padding-top: 6px; border-top: 1px solid #e2e8f0; font-weight: 700; font-size: 0.92rem; }
-                .zg-note { border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 14px; font-size: 1.05rem; margin-top: 14px; }
+                .zg-avg { margin-top: 8px; padding-top: 6px; border-top: 1px solid #e2e8f0; font-size: 0.92rem; }
+                .zg-note { font-size: 1.05rem; margin-top: 14px; }
                 .zg-note strong { font-size: 1.15rem; }
-                .zg-text-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; font-weight: 700; margin-bottom: 5px; }
+                .zg-text-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; font-weight: 700; margin-top: 16px; margin-bottom: 5px; }
                 .zg-text { font-size: 0.95rem; line-height: 1.6; text-align: justify; white-space: pre-wrap; }
             </style>
         </head>
@@ -6090,7 +6093,7 @@ function exportAllStudentCards() {
     `;
     
     const className = classes[activeClassId].name || '';
-
+ 
     classes[activeClassId].students.forEach(student => {
         // Schriftliche Noten – schlichter Text (kein farbiger Kreis)
         let gradesHtml = '';
@@ -6098,26 +6101,26 @@ function exportAllStudentCards() {
         if (student.projects && student.projects.length > 0) {
             gradesHtml = student.projects.map(project => {
                 const grade = project.grade || '-';
-                return `<li>${escapeHtml(project.name)}: ${escapeHtml(grade)}</li>`;
+                return `<li>${escapeHtml(project.name)}: <strong>${escapeHtml(grade)}</strong></li>`;
             }).join('');
             const average = calculateProjectAverage(student.projects);
             if (average) {
-                averageHtml = `<div class="zg-avg">Durchschnitt: ${average.rounded} (${average.exact})</div>`;
+                averageHtml = `<div class="zg-avg">Durchschnitt: <strong>${average.rounded} (${average.exact})</strong></div>`;
             }
         } else {
             gradesHtml = '<li>Keine Noten vorhanden</li>';
         }
-
+ 
         // Sonstiges
         const homework = student.homework || 0;
         const materials = student.materials || 0;
         const negative = student.participation ? student.participation.negative || 0 : 0;
         const printKonsequenzCount = student.hwHistory ? student.hwHistory.filter(e => e.type === 'abschreibtext' || e.type === 'nachsitzen').length : 0;
-
+ 
         // Zeugnisnote + generierter Text (Notizen werden NICHT exportiert)
         const zeugnisnoteWort = getExportGradeWord(student.zeugnisnote || '');
         const zeugnisBegruendung = student.zeugnisBegruendung || '';
-
+ 
         allPrintHtml += `
             <div class="zeugnis">
                 <div class="zg-head">
@@ -6651,8 +6654,7 @@ function exportPlanungTable() {
     }
 
     // Unterrichtstage aufbauen
-    const todayStr = localDateStr(new Date());
-    const visibleStartDate = p.startDate < todayStr ? todayStr : p.startDate;
+    const visibleStartDate = p.startDate;
     const teachingDates = new Set();
     const rows = [];
     const current = new Date(visibleStartDate + 'T00:00:00');
@@ -6840,7 +6842,30 @@ function renderPlanungTable() {
 
     // Unterrichtstage aufbauen
     const todayStr = localDateStr(new Date());
-    const visibleStartDate = p.startDate < todayStr ? todayStr : p.startDate;
+    
+    // Alle Unterrichtstage sammeln, um den aktuellen oder den letzten vorherigen Unterrichtstag zu ermitteln
+    const allTeachingDates = [];
+    const tempDate = new Date(p.startDate + 'T00:00:00');
+    const tempEnd = new Date(p.endDate + 'T00:00:00');
+    while (tempDate <= tempEnd) {
+        if ((p.selectedDays || []).includes(tempDate.getDay())) {
+            allTeachingDates.push(localDateStr(tempDate));
+        }
+        tempDate.setDate(tempDate.getDate() + 1);
+    }
+
+    let highlightDate = null;
+    if (allTeachingDates.includes(todayStr)) {
+        highlightDate = todayStr;
+    } else {
+        const pastTeachingDates = allTeachingDates.filter(d => d < todayStr);
+        if (pastTeachingDates.length > 0) {
+            highlightDate = pastTeachingDates[pastTeachingDates.length - 1];
+        }
+    }
+
+    let visibleStartDate = p.startDate;
+
     const teachingDates = new Set();
     const rows = [];
     const current = new Date(visibleStartDate + 'T00:00:00');
@@ -6886,9 +6911,10 @@ function renderPlanungTable() {
         const inhalt = (p.entries && p.entries[row.date]) ? escapeHtml(p.entries[row.date]) : '';
 
         const terminText = row.termins.map(t => escapeHtml(t.title)).join(', ');
+        const highlightClass = row.date === highlightDate ? ' planung-row-highlight' : '';
 
         if (row.isTeaching) {
-            return `<tr class="planung-row${terminText ? ' planung-row-termin' : ''}" data-date="${row.date}">
+            return `<tr class="planung-row${terminText ? ' planung-row-termin' : ''}${highlightClass}" data-date="${row.date}">
                 <td class="planung-col-nr">${nr}</td>
                 <td class="planung-col-tag">${PLANUNG_DAY_NAMES[row.dow]}</td>
                 <td class="planung-col-datum">${formattedDate}</td>
@@ -6900,7 +6926,7 @@ function renderPlanungTable() {
                 </td>
             </tr>`;
         } else {
-            return `<tr class="planung-row planung-row-termin" data-date="${row.date}">
+            return `<tr class="planung-row planung-row-termin${highlightClass}" data-date="${row.date}">
                 <td class="planung-col-nr">—</td>
                 <td class="planung-col-tag">${ALL_DAY_NAMES[row.dow]}</td>
                 <td class="planung-col-datum">${formattedDate}</td>
@@ -7104,10 +7130,9 @@ function renderPlanungCalendar() {
     const todayObj = new Date();
     const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
     
-    // Die Anzeige startet nie vor heute, auch wenn ein alter Zeitraum gespeichert ist.
-    const visibleStartDate = p.calendarStartDate < todayStr ? todayStr : p.calendarStartDate;
+    const visibleStartDate = p.calendarStartDate;
     if (visibleStartDate > p.calendarEndDate) {
-        container.innerHTML = '<p class="planung-empty" style="text-align: center; padding: 40px;">Keine zukünftigen Tage im gewählten Zeitraum.</p>';
+        container.innerHTML = '<p class="planung-empty" style="text-align: center; padding: 40px;">Keine Tage im gewählten Zeitraum.</p>';
         return;
     }
 
