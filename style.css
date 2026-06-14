@@ -99,7 +99,7 @@ body {
 
 .card-header h2 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--dark-color);
     white-space: nowrap;
@@ -2972,7 +2972,7 @@ body.modal-open {
     
     .card-header h2,
     .card-header h3 {
-        font-size: 1.05rem;
+        font-size: 1.25rem;
         flex: 1;
         margin: 0;
         white-space: nowrap;
