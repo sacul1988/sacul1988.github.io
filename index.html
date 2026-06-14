@@ -268,15 +268,10 @@
                         
                         <!-- Projekt-Statistiken Card remains third -->
                         <div class="card" id="project-statistics-card">
-                            <div class="card-header collapsible-header" onclick="toggleProjectStatistics()">
-                                <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                                    <h2>Projekt-Statistiken</h2>
-                                </div>
-                                <div class="collapse-icon">
-                                    <i id="project-stats-toggle-icon" class="fas fa-chevron-down"></i>
-                                </div>
+                            <div class="card-header">
+                                <h2>Projekt-Statistiken</h2>
                             </div>
-                            <div id="project-statistics-content" class="collapse-content project-statistics-content" style="display: none;">
+                            <div id="project-statistics-content" class="project-statistics-content" style="display: block;">
                                 <div style="margin-bottom: 15px;">
                                     <select id="project-number-select" class="form-control" onchange="updateProjectStatistics(event)">
                                         <option value="">Alle Projekte</option>

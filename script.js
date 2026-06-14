@@ -2954,23 +2954,7 @@ function updateProjectSelectionOptions() {
 }
 
 // Funktion zum Ein- und Ausklappen der Projekt-Statistiken
-function toggleProjectStatistics() {
-    const content = safeGetElement('project-statistics-content');
-    const toggleIcon = safeGetElement('project-stats-toggle-icon');
-    
-    if (!content || !toggleIcon) return;
-    
-    // Status umschalten
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        toggleIcon.classList.add('fa-chevron-up');
-        toggleIcon.classList.remove('fa-chevron-down');
-    } else {
-        content.style.display = 'none';
-        toggleIcon.classList.add('fa-chevron-down');
-        toggleIcon.classList.remove('fa-chevron-up');
-    }
-}
+// Projekt-Statistiken sind immer ausgeklappt (kein Toggle mehr).
 
 // Funktion zur Berechnung und Anzeige der Projektstatistiken
 function updateProjectStatistics(event) {
