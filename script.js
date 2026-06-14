@@ -5557,9 +5557,23 @@ function openZeugnisnoteHinweisModal(index) {
     window.currentAdjustingStudentIndex = index;
     const textarea = document.getElementById('zeugnis-hinweis-textarea');
     if (textarea) {
-        textarea.value = '';
+        if (!window.temporaryAiHints) {
+            window.temporaryAiHints = {};
+        }
+        textarea.value = window.temporaryAiHints[index] || '';
     }
     showModal('zeugnis-hinweis-modal');
+}
+
+function saveTemporaryAiHint() {
+    const textarea = document.getElementById('zeugnis-hinweis-textarea');
+    const index = window.currentAdjustingStudentIndex;
+    if (textarea && index !== undefined && index !== null) {
+        if (!window.temporaryAiHints) {
+            window.temporaryAiHints = {};
+        }
+        window.temporaryAiHints[index] = textarea.value;
+    }
 }
 
 async function zeugnisnoteGenerate(index, richtung) {
@@ -5605,6 +5619,9 @@ async function zeugnisnoteGenerate(index, richtung) {
         student.zeugnisnote = result.note;
         student.zeugnisBegruendung = result.begruendung || '';
         saveData(index);
+        if (window.temporaryAiHints) {
+            delete window.temporaryAiHints[index];
+        }
     } catch (err) {
         console.error('Zeugnisnote-Fehler:', err);
         swal('Fehler', err.message || 'Fehler beim Generieren.', 'error');
@@ -5866,6 +5883,7 @@ window.saveNotesModalLocal = saveNotesModalLocal;
 window.zeugnisnoteGenerate = zeugnisnoteGenerate;
 window.openZeugnisnoteHinweisModal = openZeugnisnoteHinweisModal;
 window.saveZeugnisnoteBegruendung = saveZeugnisnoteBegruendung;
+window.saveTemporaryAiHint = saveTemporaryAiHint;
 
 
 function collapseStudentAndScrollToTop(module, studentIndex) {

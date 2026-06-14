@@ -891,7 +891,7 @@
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
                 <div class="zeugnis-input-wrap" style="margin-top: 15px;">
-                    <textarea id="zeugnis-hinweis-textarea" class="form-control zeugnis-input-textarea" style="min-height: 120px; padding-bottom: 50px;"></textarea>
+                    <textarea id="zeugnis-hinweis-textarea" class="form-control zeugnis-input-textarea" style="min-height: 120px; padding-bottom: 50px;" oninput="saveTemporaryAiHint()"></textarea>
                     <button class="zeugnis-input-generate-btn" style="bottom: 10px; right: 10px; width: 36px; height: 36px; border-radius: 10px;" title="Neu generieren" aria-label="Neu generieren" onclick="zeugnisnoteGenerate(window.currentAdjustingStudentIndex, 'hinweis')"><i class="fas fa-wand-magic-sparkles"></i></button>
                 </div>
             </div>
