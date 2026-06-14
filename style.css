@@ -950,11 +950,13 @@ select.form-control {
 
 .distribution-bar-value {
     position: absolute;
-    top: -25px;
+    top: -24px;
     left: 0;
     right: 0;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--dark-color);
 }
 
 /* Student list styles */

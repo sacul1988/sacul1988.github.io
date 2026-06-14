@@ -3063,14 +3063,13 @@ function updateProjectStatistics(event) {
     
     sortedGrades.forEach(grade => {
         const count = distribution[grade];
-        const percentage = Math.round((count / grades.length) * 100);
         const height = Math.max(20, Math.round((count / maxCount) * 100));
         
         const bar = document.createElement('div');
         bar.className = 'distribution-bar';
         bar.style.height = `${height}%`;
         bar.innerHTML = `
-            <div class="distribution-bar-value">${count} (${percentage}%)</div>
+            <div class="distribution-bar-value">${count}x</div>
             <div class="distribution-bar-label">${grade}</div>
         `;
         
