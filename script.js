@@ -1603,11 +1603,11 @@ function handleStudentDrop(event, targetIndex) {
 // Klasse erstellen
 function createClass() {
     const classNameInput = safeGetElement('new-class-name');
-    const subjectInput = safeGetElement('new-class-subject');
+    const fachartSelect = safeGetElement('new-class-fachart');
     if (!classNameInput) return;
 
     const className = classNameInput.value.trim();
-    const subject = subjectInput ? subjectInput.value.trim() : '';
+    const gewichtung = fachartSelect ? fachartSelect.value : 'hauptfach';
 
     if (!className) {
         if (typeof swal !== 'undefined') {
@@ -1634,7 +1634,8 @@ function createClass() {
 
     const newClass = {
         name: className,
-        subject: subject,
+        subject: '',
+        gewichtung: gewichtung,
         students: [],
         homework: {},
         materials: {},
@@ -1654,7 +1655,7 @@ function createClass() {
 
     // Felder zurücksetzen
     if (classNameInput) classNameInput.value = '';
-    if (subjectInput) subjectInput.value = '';
+    if (fachartSelect) fachartSelect.value = 'hauptfach';
 
     renderClassesGrid();
 

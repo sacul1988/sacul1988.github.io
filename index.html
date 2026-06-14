@@ -559,8 +559,11 @@
                     <input type="text" id="new-class-name" class="form-control" placeholder="z.B. 9a, 10b, Englisch GK12">
                 </div>
                 <div class="form-group">
-                    <label for="new-class-subject">Fach (optional)</label>
-                    <input type="text" id="new-class-subject" class="form-control" placeholder="z.B. Mathematik, Englisch">
+                    <label for="new-class-fachart">Fachart</label>
+                    <select id="new-class-fachart" class="form-control">
+                        <option value="hauptfach">Hauptfach</option>
+                        <option value="nebenfach">Nebenfach</option>
+                    </select>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-primary" onclick="createClass()">Erstellen</button>
