@@ -32,6 +32,10 @@
     display: none;
 }
 
+html {
+    background-color: var(--bg-color);
+}
+
 html, body {
     min-height: 100%;
     width: 100%;
