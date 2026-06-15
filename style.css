@@ -3239,7 +3239,13 @@ html.modal-open, body.modal-open {
 
     /* Kopfzeile: kompakter, damit alle Werkzeuge in eine Zeile passen */
     .app-topbar { gap: 6px; }
-    .topbar-btn { width: 38px; height: 38px; }
+    .topbar-btn {
+        width: 38px;
+        height: 38px;
+        border: none;
+        box-shadow: none;
+        background: transparent;
+    }
     .topbar-tools { gap: 5px; }
     .topbar-sep { margin: 0 4px; height: 26px; }
     .topbar-title { font-size: 1.2rem; }
