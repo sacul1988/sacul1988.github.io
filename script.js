@@ -3826,13 +3826,33 @@ function exportAllData(event) {
     }
 
     try {
+        // Alle Planungsdaten sammeln
+        const planungObj = {};
+        if (Array.isArray(classes)) {
+            classes.forEach((_, i) => {
+                try {
+                    const p = localStorage.getItem(`planung_${i}`);
+                    if (p) planungObj[String(i)] = JSON.parse(p);
+                } catch (e) {
+                    // Ignorieren falls JSON ungültig ist
+                }
+            });
+        }
+
         // Alle Daten in einem Objekt zusammenfassen
         const exportData = {
-            version: "1.0",
+            version: "1.1",
             timestamp: new Date().toISOString(),
             classes: classes,
             contacts: contacts,
-            formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]')
+            termine: (window.AppState && window.AppState.termine) ? window.AppState.termine : [],
+            deletedTermineIds: JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'),
+            planung: planungObj,
+            planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
+            formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]'),
+            zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
+            zeugnisViewMode: localStorage.getItem('zeugnisViewMode') || 'individual',
+            extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || new Date().toISOString()
         };
         
         // Als JSON konvertieren
@@ -3925,6 +3945,61 @@ function importBackupFile(event) {
                         AppState.contacts = importData.contacts;
                         window.contacts = importData.contacts;
                         localStorage.setItem('contacts', JSON.stringify(contacts));
+                    }
+
+                    // Termine übernehmen (falls vorhanden)
+                    if (importData.termine && Array.isArray(importData.termine)) {
+                        if (window.AppState) window.AppState.termine = importData.termine;
+                        localStorage.setItem('termine', JSON.stringify(importData.termine));
+                    }
+                    if (importData.deletedTermineIds && Array.isArray(importData.deletedTermineIds)) {
+                        localStorage.setItem('deletedTermineIds', JSON.stringify(importData.deletedTermineIds));
+                    }
+
+                    // Planung übernehmen (falls vorhanden)
+                    if (importData.planung && typeof importData.planung === 'object') {
+                        // Zuerst alle alten Planungen löschen
+                        const planungKeys = [];
+                        for (let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            if (key && key.startsWith('planung_')) {
+                                planungKeys.push(key);
+                            }
+                        }
+                        planungKeys.forEach(key => localStorage.removeItem(key));
+
+                        // Neue Planungen einspielen
+                        Object.keys(importData.planung).forEach(id => {
+                            try {
+                                localStorage.setItem(`planung_${id}`, JSON.stringify(importData.planung[id]));
+                            } catch (e) {
+                                // Ignorieren falls JSON-Stringify fehlschlägt
+                            }
+                        });
+                    }
+                    if (importData.planung_global_calendar_range && typeof importData.planung_global_calendar_range === 'object') {
+                        localStorage.setItem('planung_global_calendar_range', JSON.stringify(importData.planung_global_calendar_range));
+                    }
+
+                    // Formulierungshilfen übernehmen (falls vorhanden)
+                    if (importData.formulierungshilfen && Array.isArray(importData.formulierungshilfen)) {
+                        localStorage.setItem('formulierungshilfen', JSON.stringify(importData.formulierungshilfen));
+                    }
+
+                    // Zeugnistexte Archiv übernehmen (falls vorhanden)
+                    if (importData.zeugnistexteArchiv && Array.isArray(importData.zeugnistexteArchiv)) {
+                        localStorage.setItem('zeugnistexteArchiv', JSON.stringify(importData.zeugnistexteArchiv));
+                    }
+
+                    // Zeugnisansicht-Einstellung übernehmen
+                    if (importData.zeugnisViewMode) {
+                        if (window.AppState) window.AppState.zeugnisViewMode = importData.zeugnisViewMode;
+                        localStorage.setItem('zeugnisViewMode', importData.zeugnisViewMode);
+                    }
+
+                    // Timestamps übernehmen
+                    if (importData.extraDataLastUpdate) {
+                        localStorage.setItem('extraDataLastUpdate', importData.extraDataLastUpdate);
                     }
                     
                     // UI aktualisieren und Cloud-Sync triggern
