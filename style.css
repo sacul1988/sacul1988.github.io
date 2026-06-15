@@ -3246,6 +3246,12 @@ html.modal-open, body.modal-open {
         box-shadow: none !important;
         background: transparent !important;
     }
+    /* Icon-Größe wie bei den Karten-Header-Buttons (.btn-icon i = 1.1rem),
+       damit Kalender/Adressbuch/Zeugnistext gleich groß sind wie +/Export/Import */
+    .topbar-btn i,
+    .topbar-btn svg {
+        font-size: 1.1rem;
+    }
     .topbar-tools { gap: 5px; }
     .topbar-sep { margin: 0 4px; height: 26px; }
     .topbar-title { font-size: 1.2rem; }
