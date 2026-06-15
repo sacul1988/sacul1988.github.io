@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Schulverwaltung – Klassen, Noten & Zeugnistexte mit KI</title>
-    <meta name="description" content="Schulverwaltung bündelt Schülerlisten, Sitzpläne, Notenverwaltung, Kalender und KI-gestützte Zeugnistexte in einer schnellen, sicheren Web-App. Für Lehrkräfte an Förder- und Regelschulen.">
+    <meta name="description" content="Schulverwaltung bündelt Klassen, Schülerlisten, Sitzpläne, Noten, Kalender, Adressbuch und KI-gestützte Zeugnistexte in einer schnellen, sicheren Web-App. Für Lehrkräfte an Förder- und Regelschulen.">
     <meta name="theme-color" content="#1e293b">
 
-    <!-- Open Graph / Social Preview -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Schulverwaltung – Klassen, Noten & Zeugnistexte mit KI">
-    <meta property="og:description" content="Schülerlisten, Sitzpläne, Noten, Kalender und KI-gestützte Zeugnistexte – alles an einem Ort.">
-    <meta property="og:image" content="assets/screenshots/08-ki-zeugnistext.png">
+    <meta property="og:description" content="Klassen, Noten, Sitzpläne, Kalender, Adressbuch und KI-Zeugnistexte – alles an einem Ort.">
+    <meta property="og:image" content="assets/screenshots/c-ki-zeugnistext.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,62 +25,28 @@
 
     <style>
         :root {
-            --primary: #4361ee;
-            --primary-light: #5b77f0;
-            --primary-hover: #3451d1;
-            --accent: #f72585;
-            --dark: #1e293b;
-            --indigo: #312e81;
-            --grey: #64748b;
-            --bg: #f2f4fa;
-            --border: #e5e9f2;
-            --radius: 16px;
-            --radius-sm: 12px;
+            --primary: #4361ee; --primary-light: #5b77f0; --primary-hover: #3451d1;
+            --accent: #f72585; --dark: #1e293b; --indigo: #312e81; --grey: #64748b;
+            --bg: #f2f4fa; --border: #e5e9f2; --radius: 16px; --radius-sm: 12px;
             --shadow: 0 1px 2px rgba(15,23,42,.04), 0 10px 30px rgba(15,23,42,.08);
-            --shadow-lg: 0 30px 60px rgba(15,23,42,.18);
-            --maxw: 1140px;
+            --shadow-lg: 0 30px 60px rgba(15,23,42,.18); --maxw: 1140px;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-            color: var(--dark);
-            background: var(--bg);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-        }
-
+        body { font-family: 'Inter','Segoe UI',system-ui,-apple-system,sans-serif; color: var(--dark); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased; }
         a { text-decoration: none; color: inherit; }
         img { max-width: 100%; display: block; }
-
         .wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
-        .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            font-family: inherit; font-size: 1rem; font-weight: 600;
-            padding: 13px 26px; border-radius: var(--radius-sm);
-            border: none; cursor: pointer; transition: all .2s ease; white-space: nowrap;
-        }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; font-size: 1rem; font-weight: 600; padding: 13px 26px; border-radius: var(--radius-sm); border: none; cursor: pointer; transition: all .2s ease; white-space: nowrap; }
         .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 6px 18px rgba(67,97,238,.35); }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(67,97,238,.4); }
         .btn-ghost { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.3); }
         .btn-ghost:hover { background: rgba(255,255,255,.18); }
-        .btn-light { background: #fff; color: var(--dark); border: 1px solid var(--border); }
-        .btn-light:hover { border-color: var(--primary); color: var(--primary); }
         .btn-lg { font-size: 1.08rem; padding: 16px 34px; }
 
-        /* ===== Header ===== */
-        header {
-            position: sticky; top: 0; z-index: 50;
-            backdrop-filter: saturate(180%) blur(12px);
-            -webkit-backdrop-filter: saturate(180%) blur(12px);
-            background: rgba(242,244,250,.8);
-            border-bottom: 1px solid transparent;
-            transition: border-color .2s ease, background .2s ease;
-        }
+        /* Header */
+        header { position: sticky; top: 0; z-index: 50; backdrop-filter: saturate(180%) blur(12px); -webkit-backdrop-filter: saturate(180%) blur(12px); background: rgba(242,244,250,.8); border-bottom: 1px solid transparent; transition: border-color .2s, background .2s; }
         header.scrolled { border-color: var(--border); background: rgba(242,244,250,.92); }
         .nav { display: flex; align-items: center; justify-content: space-between; height: 70px; }
         .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 1.15rem; letter-spacing: -.01em; }
@@ -89,160 +54,126 @@
         .nav-links { display: flex; align-items: center; gap: 30px; }
         .nav-links a.link { color: var(--grey); font-weight: 500; font-size: .97rem; transition: color .2s; }
         .nav-links a.link:hover { color: var(--dark); }
-        .menu-toggle { display: none; }
 
-        /* ===== Hero ===== */
-        .hero {
-            position: relative; overflow: hidden;
-            background: linear-gradient(135deg, var(--dark) 0%, var(--indigo) 100%);
-            color: #fff; padding: 90px 0 130px;
-        }
-        .hero::before {
-            content: ''; position: absolute; inset: 0;
-            background: radial-gradient(60% 60% at 80% 10%, rgba(91,119,240,.35) 0%, transparent 60%),
-                        radial-gradient(50% 50% at 10% 90%, rgba(247,37,133,.18) 0%, transparent 60%);
-            pointer-events: none;
-        }
+        /* Hero */
+        .hero { position: relative; overflow: hidden; background: linear-gradient(135deg, var(--dark) 0%, var(--indigo) 100%); color: #fff; padding: 90px 0 130px; }
+        .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(60% 60% at 80% 10%, rgba(91,119,240,.35) 0%, transparent 60%), radial-gradient(50% 50% at 10% 90%, rgba(247,37,133,.18) 0%, transparent 60%); pointer-events: none; }
         .hero .wrap { position: relative; z-index: 1; text-align: center; }
-        .eyebrow {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
-            color: #c7d2fe; font-weight: 600; font-size: .85rem;
-            padding: 7px 16px; border-radius: 999px; margin-bottom: 26px;
-        }
-        .hero h1 {
-            font-size: clamp(2.1rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.1;
-            letter-spacing: -.02em; max-width: 880px; margin: 0 auto 22px;
-        }
+        .eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); color: #c7d2fe; font-weight: 600; font-size: .85rem; padding: 7px 16px; border-radius: 999px; margin-bottom: 26px; }
+        .hero h1 { font-size: clamp(2.1rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.1; letter-spacing: -.02em; max-width: 880px; margin: 0 auto 22px; }
         .hero h1 .grad { background: linear-gradient(90deg, #a5b4fc, #fff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p.lead { font-size: clamp(1.05rem, 2vw, 1.27rem); color: #cbd5e1; max-width: 660px; margin: 0 auto 36px; }
+        .hero p.lead { font-size: clamp(1.05rem, 2vw, 1.27rem); color: #cbd5e1; max-width: 680px; margin: 0 auto 36px; }
         .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
         .trust { display: flex; gap: 26px; justify-content: center; flex-wrap: wrap; margin-top: 40px; color: #94a3b8; font-size: .92rem; font-weight: 500; }
-        .trust span { display: inline-flex; align-items: center; gap: 8px; }
-        .trust i { color: #818cf8; }
-
-        /* Hero screenshot */
+        .trust span { display: inline-flex; align-items: center; gap: 8px; } .trust i { color: #818cf8; }
         .hero-shot { position: relative; z-index: 1; max-width: 980px; margin: 56px auto -180px; }
+        .hero-offset { height: 180px; }
 
-        /* Browser mockup frame */
-        .mock {
-            background: #fff; border-radius: var(--radius); overflow: hidden;
-            box-shadow: var(--shadow-lg); border: 1px solid var(--border);
-        }
-        .mock-bar { display: flex; align-items: center; gap: 7px; padding: 12px 16px; background: #f1f3f9; border-bottom: 1px solid var(--border); }
+        /* Browser mockup */
+        .mock { background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
+        .mock.flat { box-shadow: var(--shadow); }
+        .mock-bar { display: flex; align-items: center; gap: 7px; padding: 11px 15px; background: #f1f3f9; border-bottom: 1px solid var(--border); }
         .mock-bar i { width: 11px; height: 11px; border-radius: 50%; background: #cbd5e1; display: block; }
         .mock-bar i:nth-child(1){ background:#ff5f57; } .mock-bar i:nth-child(2){ background:#febc2e; } .mock-bar i:nth-child(3){ background:#28c840; }
         .mock img { width: 100%; height: auto; display: block; }
 
-        /* spacer to offset hero overlap */
-        .hero-offset { height: 180px; }
+        /* Part dividers */
+        .part { padding: 80px 0 10px; }
+        .part-head { text-align: center; max-width: 720px; margin: 0 auto; }
+        .part-label { display: inline-block; background: rgba(67,97,238,.1); color: var(--primary); font-weight: 700; font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; padding: 7px 16px; border-radius: 999px; margin-bottom: 16px; }
+        .part-head h2 { font-size: clamp(1.7rem, 3.6vw, 2.5rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
+        .part-head p { color: var(--grey); font-size: 1.1rem; }
 
-        /* ===== Sections ===== */
-        section.block { padding: 80px 0; }
-        .section-head { text-align: center; max-width: 680px; margin: 0 auto 60px; }
-        .section-head .kicker { color: var(--primary); font-weight: 700; font-size: .9rem; text-transform: uppercase; letter-spacing: .08em; }
-        .section-head h2 { font-size: clamp(1.7rem, 3.5vw, 2.5rem); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 14px; }
-        .section-head p { color: var(--grey); font-size: 1.1rem; }
+        /* Tour rows */
+        .tour { padding: 46px 0; }
+        .tour-row { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+        .tour-row.reverse .t-text { order: 2; }
+        .t-text .tag { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: .82rem; color: var(--primary); background: rgba(67,97,238,.1); padding: 6px 13px; border-radius: 999px; margin-bottom: 16px; }
+        .t-text .tag.ai { color: var(--accent); background: rgba(247,37,133,.1); }
+        .t-text h3 { font-size: clamp(1.4rem, 2.8vw, 1.9rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: 14px; line-height: 1.2; }
+        .t-text p { color: var(--grey); font-size: 1.05rem; margin-bottom: 16px; }
+        .t-text ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        .t-text li { display: flex; align-items: flex-start; gap: 11px; font-weight: 500; }
+        .t-text li i { color: #22c55e; margin-top: 5px; font-size: .9rem; }
 
-        /* Feature rows (alternating) */
-        .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-bottom: 90px; }
-        .feature-row:last-child { margin-bottom: 0; }
-        .feature-row.reverse .feature-text { order: 2; }
-        .feature-text .tag {
-            display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: .85rem;
-            color: var(--primary); background: rgba(67,97,238,.1); padding: 6px 14px; border-radius: 999px; margin-bottom: 18px;
-        }
-        .feature-text .tag.ai { color: var(--accent); background: rgba(247,37,133,.1); }
-        .feature-text h3 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: 16px; line-height: 1.2; }
-        .feature-text p { color: var(--grey); font-size: 1.08rem; margin-bottom: 20px; }
-        .feature-text ul { list-style: none; display: flex; flex-direction: column; gap: 11px; }
-        .feature-text li { display: flex; align-items: flex-start; gap: 11px; color: var(--dark); font-weight: 500; }
-        .feature-text li i { color: #22c55e; margin-top: 5px; font-size: .95rem; }
+        /* Sub-grid of small crops */
+        .subgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 26px; margin-top: 34px; }
+        .sub { }
+        .sub .mock { margin-bottom: 16px; }
+        .sub h4 { font-size: 1.08rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 9px; }
+        .sub h4 i { color: var(--primary); font-size: .95rem; }
+        .sub p { color: var(--grey); font-size: .96rem; }
 
-        /* Small feature cards grid */
-        .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
-        .card {
-            background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 30px; box-shadow: var(--shadow); transition: transform .2s ease, box-shadow .2s ease;
-        }
-        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-        .card .ico { width: 52px; height: 52px; border-radius: 13px; display: grid; place-items: center; font-size: 1.3rem; color: #fff; margin-bottom: 18px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
-        .card h4 { font-size: 1.2rem; font-weight: 700; margin-bottom: 9px; }
-        .card p { color: var(--grey); font-size: .98rem; }
+        /* KI band */
+        .ki-band { background: linear-gradient(135deg, #1e293b 0%, #312e81 100%); color: #fff; margin-top: 60px; }
+        .ki-band .part-label { background: rgba(247,37,133,.2); color: #fbcfe8; }
+        .ki-band .part-head h2 { color: #fff; }
+        .ki-band .part-head p { color: #cbd5e1; }
+        .ki-band .t-text h3 { color: #fff; }
+        .ki-band .t-text p { color: #cbd5e1; }
+        .ki-band .t-text li { color: #e2e8f0; }
+        .ki-band .t-text .tag { background: rgba(247,37,133,.2); color: #fbcfe8; }
 
-        /* Benefits band */
+        /* Benefits */
         .band { background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         .benefits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
         .benefit { text-align: center; }
         .benefit i { font-size: 1.7rem; color: var(--primary); margin-bottom: 14px; }
-        .benefit h4 { font-size: 1.08rem; font-weight: 700; margin-bottom: 7px; }
-        .benefit p { color: var(--grey); font-size: .95rem; }
+        .benefit h4 { font-size: 1.06rem; font-weight: 700; margin-bottom: 7px; }
+        .benefit p { color: var(--grey); font-size: .94rem; }
 
         /* Final CTA */
-        .cta {
-            background: linear-gradient(135deg, var(--dark) 0%, var(--indigo) 100%);
-            color: #fff; border-radius: 24px; text-align: center; padding: 70px 30px;
-            position: relative; overflow: hidden;
-        }
+        .cta { background: linear-gradient(135deg, var(--dark) 0%, var(--indigo) 100%); color: #fff; border-radius: 24px; text-align: center; padding: 70px 30px; position: relative; overflow: hidden; }
         .cta::before { content:''; position:absolute; inset:0; background: radial-gradient(50% 80% at 50% 0%, rgba(91,119,240,.35), transparent 70%); }
         .cta > * { position: relative; z-index: 1; }
         .cta h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: 16px; }
         .cta p { color: #cbd5e1; font-size: 1.12rem; max-width: 520px; margin: 0 auto 32px; }
-        .cta .note { margin-top: 22px; color: #94a3b8; font-size: .9rem; }
-        .cta .note i { color: #818cf8; }
+        .cta .note { margin-top: 22px; color: #94a3b8; font-size: .9rem; } .cta .note i { color: #818cf8; }
 
-        /* Footer */
         footer { padding: 50px 0 60px; }
         .foot { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; color: var(--grey); font-size: .92rem; }
-        .foot .brand { font-size: 1rem; color: var(--dark); }
-        .foot .brand img { width: 28px; height: 28px; }
+        .foot .brand { font-size: 1rem; color: var(--dark); } .foot .brand img { width: 28px; height: 28px; }
+        section.block { padding: 80px 0; }
 
-        /* ===== Responsive ===== */
         @media (max-width: 860px) {
-            .feature-row { grid-template-columns: 1fr; gap: 32px; margin-bottom: 64px; }
-            .feature-row.reverse .feature-text { order: 0; }
-            .cards { grid-template-columns: 1fr; }
+            .tour-row { grid-template-columns: 1fr; gap: 28px; }
+            .tour-row.reverse .t-text { order: 0; }
             .benefits { grid-template-columns: repeat(2, 1fr); gap: 34px; }
             .nav-links .link { display: none; }
         }
         @media (max-width: 560px) {
             .wrap { padding: 0 18px; }
             .hero { padding: 64px 0 110px; }
-            .hero-shot { margin: 40px auto -120px; }
-            .hero-offset { height: 120px; }
+            .hero-shot { margin: 40px auto -120px; } .hero-offset { height: 120px; }
             .benefits { grid-template-columns: 1fr; }
-            section.block { padding: 60px 0; }
-            .btn { width: 100%; }
-            .hero-cta { flex-direction: column; }
+            section.block, .part { padding: 56px 0 0; }
+            .tour { padding: 32px 0; }
+            .btn { width: 100%; } .hero-cta { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-    <!-- ===== Header ===== -->
     <header id="header">
         <div class="wrap nav">
-            <a href="#top" class="brand">
-                <img src="app-icon.png" alt="Schulverwaltung Logo">
-                Schulverwaltung
-            </a>
+            <a href="#top" class="brand"><img src="app-icon.png" alt="Schulverwaltung Logo"> Schulverwaltung</a>
             <nav class="nav-links">
-                <a href="#funktionen" class="link">Funktionen</a>
-                <a href="#ki" class="link">KI-Zeugnistexte</a>
-                <a href="#sicherheit" class="link">Sicherheit</a>
+                <a href="#startseite" class="link">Startseite</a>
+                <a href="#klasse" class="link">In der Klasse</a>
+                <a href="#ki" class="link">KI-Features</a>
                 <a href="app.html" class="btn btn-primary">Einloggen</a>
             </nav>
         </div>
     </header>
 
-    <!-- ===== Hero ===== -->
+    <!-- Hero -->
     <section class="hero" id="top">
         <div class="wrap">
             <span class="eyebrow"><i class="fas fa-graduation-cap"></i> Für Lehrkräfte an Förder- und Regelschulen</span>
             <h1>Klassen, Noten und Zeugnisse –<br><span class="grad">alles an einem Ort.</span></h1>
-            <p class="lead">Schülerlisten, Sitzpläne, Notenverwaltung, Kalender und KI-gestützte Zeugnistexte in einer schnellen, sicheren Web-App. Überall verfügbar, automatisch synchronisiert.</p>
+            <p class="lead">Schülerlisten, Sitzpläne, Notenverwaltung, Kalender, Adressbuch und KI-gestützte Zeugnistexte in einer schnellen, sicheren Web-App. Überall verfügbar, automatisch synchronisiert.</p>
             <div class="hero-cta">
                 <a href="app.html" class="btn btn-primary btn-lg"><i class="fas fa-right-to-bracket"></i> Einloggen</a>
-                <a href="#funktionen" class="btn btn-ghost btn-lg">Funktionen entdecken</a>
+                <a href="#startseite" class="btn btn-ghost btn-lg">Funktionen entdecken</a>
             </div>
             <div class="trust">
                 <span><i class="fas fa-lock"></i> DSGVO-konform</span>
@@ -260,136 +191,220 @@
     </section>
     <div class="hero-offset"></div>
 
-    <!-- ===== KI Highlight ===== -->
-    <section class="block" id="ki">
+    <!-- ===== TEIL 1: Startseite ===== -->
+    <div class="part" id="startseite">
+        <div class="wrap part-head">
+            <span class="part-label">Teil 1 · Die Startseite</span>
+            <h2>Dein Überblick</h2>
+            <p>Von der Startseite aus erreichst du alle Klassen sowie die zentralen Werkzeuge: Kalender und Adressbuch.</p>
+        </div>
+    </div>
+
+    <section class="tour">
+        <div class="wrap tour-row">
+            <div class="t-text">
+                <span class="tag"><i class="fas fa-users"></i> Klassen</span>
+                <h3>Klassen anlegen &amp; verwalten</h3>
+                <p>Lege beliebig viele Klassen an und sieh auf einen Blick die Schülerzahl. Jede Klasse lässt sich mit einem Klick bearbeiten, klonen oder löschen.</p>
+                <ul>
+                    <li><i class="fas fa-check"></i> Beliebig viele Klassen &amp; Fächer</li>
+                    <li><i class="fas fa-check"></i> Klonen für ähnliche Kurse</li>
+                    <li><i class="fas fa-check"></i> Import &amp; Export deiner Daten</li>
+                </ul>
+            </div>
+            <div class="t-img">
+                <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-klassen-card.png" alt="Klassenkarte" loading="lazy"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tour">
+        <div class="wrap tour-row reverse">
+            <div class="t-text">
+                <span class="tag"><i class="fas fa-calendar-days"></i> Kalender</span>
+                <h3>Zentraler Kalender</h3>
+                <p>Termine wie Klassenarbeiten, Elternabende oder Ausflüge an einem Ort – über alle Klassen hinweg, mit Uhrzeiten und automatisch synchronisiert.</p>
+            </div>
+            <div class="t-img">
+                <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-kalender.png" alt="Zentraler Kalender mit Terminen" loading="lazy"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tour">
+        <div class="wrap tour-row">
+            <div class="t-text">
+                <span class="tag"><i class="fas fa-address-book"></i> Adressbuch</span>
+                <h3>Kontakte griffbereit</h3>
+                <p>Eltern- und Notfallkontakte zu jedem Kind – mit mehreren Nummern pro Kontakt (z.&nbsp;B. Mutter, Vater) und schnell durchsuchbar.</p>
+            </div>
+            <div class="t-img">
+                <div class="mock flat"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-adressbuch-phones.png" alt="Kontakt mit Telefonnummern" loading="lazy"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TEIL 2: In der Klasse ===== -->
+    <div class="part" id="klasse">
+        <div class="wrap part-head">
+            <span class="part-label">Teil 2 · In der Klasse</span>
+            <h2>Die fünf Tabs</h2>
+            <p>Jede Klasse bietet fünf Bereiche – von der Schülerliste über Sitzplan, Noten und Zeugnis bis zur Unterrichtsplanung.</p>
+        </div>
+    </div>
+
+    <section class="tour">
+        <div class="wrap tour-row reverse">
+            <div class="t-text">
+                <span class="tag"><i class="fas fa-user-graduate"></i> Schülerliste</span>
+                <h3>Alle Schüler im Blick</h3>
+                <p>Alle Schülerinnen und Schüler einer Klasse auf einen Blick – inklusive Förderschwerpunkten (ESE / Lernen). Neue Namen ergänzt du mit einer einfachen Eingabe.</p>
+            </div>
+            <div class="t-img">
+                <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-schuelerliste.png" alt="Schülerliste mit Förderschwerpunkten" loading="lazy"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tour">
         <div class="wrap">
-            <div class="feature-row">
-                <div class="feature-text">
-                    <span class="tag ai"><i class="fas fa-wand-magic-sparkles"></i> KI-gestützt</span>
-                    <h3>Zeugnistexte in Sekunden – nicht in Stunden</h3>
-                    <p>Stichpunkte rein, fertiger Zeugnistext raus. Speziell für Förderschule und Inklusion entwickelt: differenzierte, wertschätzende Formulierungen in der korrekten Vergangenheitsform.</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> Haupt- und Nebenfächer sowie Arbeits- und Sozialverhalten</li>
-                        <li><i class="fas fa-check"></i> Kürzen, verlängern oder neu generieren auf Knopfdruck</li>
-                        <li><i class="fas fa-check"></i> Eigenes Archiv für alle erstellten Texte</li>
-                    </ul>
+            <div class="t-text" style="max-width:680px;">
+                <span class="tag"><i class="fas fa-chair"></i> Sitzplan</span>
+                <h3>Sitzplan &amp; Unterrichtsbegleitung</h3>
+                <p>Den Klassenraum frei anordnen – und je nach Modus den Unterricht direkt begleiten. Material, Hausaufgaben und Störungen fließen später ins Zeugnis ein.</p>
+            </div>
+            <div class="subgrid">
+                <div class="sub">
+                    <div class="mock flat"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-sitzplan.png" alt="Sitzplan anordnen" loading="lazy"></div>
+                    <h4><i class="fas fa-up-down-left-right"></i> Anordnen</h4>
+                    <p>Tische per Drag &amp; Drop platzieren und als Bild exportieren.</p>
                 </div>
-                <div class="feature-img">
-                    <div class="mock">
-                        <div class="mock-bar"><i></i><i></i><i></i></div>
-                        <img src="assets/screenshots/08-ki-zeugnistext.png" alt="KI-generierter Zeugnistext" loading="lazy" width="2880" height="1800">
-                    </div>
+                <div class="sub">
+                    <div class="mock flat"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-sitzplan-arbeitsphase.png" alt="Arbeitsphase-Modus" loading="lazy"></div>
+                    <h4><i class="fas fa-comment-slash"></i> Arbeitsphase</h4>
+                    <p>Störungen während stiller Arbeitsphasen schnell festhalten.</p>
+                </div>
+                <div class="sub">
+                    <div class="mock flat"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-sitzplan-material.png" alt="Material- und Hausaufgaben-Modus" loading="lazy"></div>
+                    <h4><i class="fas fa-paperclip"></i> Material &amp; Hausaufgaben</h4>
+                    <p>Fehlendes Material und Hausaufgaben pro Kind erfassen.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ===== Funktionen: Noten ===== -->
-    <section class="block" id="funktionen" style="padding-top:0;">
+    <section class="tour">
         <div class="wrap">
-            <div class="section-head">
-                <span class="kicker">Funktionen</span>
-                <h2>Alles, was du im Schulalltag brauchst</h2>
-                <p>Eine durchdachte Oberfläche statt vieler Zettel, Tabellen und Apps.</p>
+            <div class="t-text" style="max-width:680px;">
+                <span class="tag"><i class="fas fa-pen"></i> Schriftlich · Noten</span>
+                <h3>Noten erfassen und sofort auswerten</h3>
+                <p>Schriftliche Noten, Projekte und mündliche Mitarbeit erfassen – mit farbcodierter Übersicht, automatischem Durchschnitt und Notenverteilung.</p>
             </div>
-
-            <div class="feature-row reverse">
-                <div class="feature-text">
-                    <span class="tag"><i class="fas fa-pen"></i> Noten &amp; Auswertung</span>
-                    <h3>Noten erfassen und sofort auswerten</h3>
-                    <p>Schriftliche Noten, Projekte und mündliche Mitarbeit – mit Notenverteilung und automatischem Durchschnitt auf einen Blick.</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> Farbcodierte Noten für schnelle Übersicht</li>
-                        <li><i class="fas fa-check"></i> Automatische Durchschnitts- und Verteilungsberechnung</li>
-                        <li><i class="fas fa-check"></i> Export für Konferenzen und Zeugnisse</li>
-                    </ul>
+            <div class="subgrid">
+                <div class="sub">
+                    <div class="mock flat"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-noten-badges.png" alt="Farbcodierte Noten je Schüler" loading="lazy"></div>
+                    <h4><i class="fas fa-circle-half-stroke"></i> Farbcodierte Noten</h4>
+                    <p>Jede Note auf einen Blick – grün, gelb, orange je nach Leistung.</p>
                 </div>
-                <div class="feature-img">
-                    <div class="mock">
-                        <div class="mock-bar"><i></i><i></i><i></i></div>
-                        <img src="assets/screenshots/04-noten.png" alt="Notenverwaltung mit Statistik" loading="lazy" width="2880" height="1800">
-                    </div>
-                </div>
-            </div>
-
-            <div class="feature-row">
-                <div class="feature-text">
-                    <span class="tag"><i class="fas fa-chair"></i> Sitzplan</span>
-                    <h3>Sitzpläne per Drag &amp; Drop</h3>
-                    <p>Den Klassenraum frei anordnen, Schülerinnen und Schüler platzieren und als Bild exportieren – ideal für Vertretungen.</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> Tische frei verschieben</li>
-                        <li><i class="fas fa-check"></i> Bewerten direkt im Sitzplan</li>
-                        <li><i class="fas fa-check"></i> Als JPEG exportieren</li>
-                    </ul>
-                </div>
-                <div class="feature-img">
-                    <div class="mock">
-                        <div class="mock-bar"><i></i><i></i><i></i></div>
-                        <img src="assets/screenshots/03-sitzplan.png" alt="Sitzplan per Drag and Drop" loading="lazy" width="2880" height="1800">
-                    </div>
+                <div class="sub">
+                    <div class="mock flat"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-noten-stats.png" alt="Durchschnitt und Notenverteilung" loading="lazy"></div>
+                    <h4><i class="fas fa-chart-column"></i> Auswertung</h4>
+                    <p>Automatischer Durchschnitt und Notenverteilung pro Projekt.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ===== Weitere Funktionen (Karten) ===== -->
-    <section class="block" style="padding-top:0;">
-        <div class="wrap">
-            <div class="cards">
-                <div class="card">
-                    <div class="ico"><i class="fas fa-calendar-days"></i></div>
-                    <h4>Kalender &amp; Termine</h4>
-                    <p>Klassenarbeiten, Elternabende und Ausflüge zentral verwalten – automatisch synchronisiert über alle Geräte.</p>
-                </div>
-                <div class="card">
-                    <div class="ico"><i class="fas fa-address-book"></i></div>
-                    <h4>Adressbuch</h4>
-                    <p>Eltern- und Notfallkontakte zu jedem Kind, schnell durchsuchbar und immer griffbereit.</p>
-                </div>
-                <div class="card">
-                    <div class="ico"><i class="fas fa-users"></i></div>
-                    <h4>Klassen &amp; Schülerlisten</h4>
-                    <p>Beliebig viele Klassen, übersichtliche Schülerlisten und Import/Export deiner Daten.</p>
-                </div>
+    <section class="tour">
+        <div class="wrap tour-row reverse">
+            <div class="t-text">
+                <span class="tag"><i class="fas fa-graduation-cap"></i> Zeugnis</span>
+                <h3>Alle Leistungen gebündelt</h3>
+                <p>Je Schüler alles zusammengeführt: schriftliche Noten, mündliche Mitarbeit und das „Sonstige" (Hausaufgaben, Material, Störungen) – die ideale Grundlage fürs Zeugnis.</p>
+            </div>
+            <div class="t-img">
+                <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-zeugnis-card.png" alt="Zeugnis-Übersicht je Schüler" loading="lazy"></div>
             </div>
         </div>
     </section>
 
-    <!-- ===== Sicherheit / Benefits ===== -->
+    <section class="tour">
+        <div class="wrap tour-row">
+            <div class="t-text">
+                <span class="tag"><i class="fas fa-clipboard-list"></i> Planung</span>
+                <h3>Unterricht planen</h3>
+                <p>Deine Unterrichtsstunden im gewählten Zeitraum als übersichtliche Tabelle. Termine erscheinen automatisch, der aktuelle Tag ist hervorgehoben.</p>
+            </div>
+            <div class="t-img">
+                <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-planung.png" alt="Unterrichtsplanung als Tabelle" loading="lazy"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TEIL 3: KI ===== -->
+    <section class="ki-band">
+        <div class="part" id="ki">
+            <div class="wrap part-head">
+                <span class="part-label"><i class="fas fa-wand-magic-sparkles"></i> Teil 3 · KI-Features</span>
+                <h2>Zwei KI-Helfer, die wirklich Zeit sparen</h2>
+                <p>Speziell für Förderschule und Inklusion entwickelt – damit aus Stichpunkten in Sekunden ein guter Text wird.</p>
+            </div>
+        </div>
+
+        <section class="tour">
+            <div class="wrap tour-row">
+                <div class="t-text">
+                    <span class="tag ai"><i class="fas fa-wand-magic-sparkles"></i> KI-Zeugnistext (Inklusion)</span>
+                    <h3>Zeugnistexte in Sekunden</h3>
+                    <p>Stichpunkte zu Themen und Beobachtungen rein – fertiger Zeugnistext raus, in korrekter Vergangenheitsform und wertschätzender Sprache.</p>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Haupt- &amp; Nebenfächer sowie Arbeits-/Sozialverhalten</li>
+                        <li><i class="fas fa-check"></i> Kürzen, verlängern oder neu generieren</li>
+                        <li><i class="fas fa-check"></i> Mit eigener Anweisung anpassen &amp; Archiv</li>
+                    </ul>
+                </div>
+                <div class="t-img">
+                    <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-ki-zeugnistext.png" alt="KI-generierter Zeugnistext" loading="lazy"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tour" style="padding-bottom:80px;">
+            <div class="wrap tour-row reverse">
+                <div class="t-text">
+                    <span class="tag ai"><i class="fas fa-wand-magic-sparkles"></i> KI-Bewertungstext (Zeugnis-Tab)</span>
+                    <h3>Notenvorschlag mit Begründung</h3>
+                    <p>Direkt in der Schülerkarte: Aus den erfassten Leistungen schlägt die KI eine Zeugnisnote samt formuliertem Bewertungstext vor.</p>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Berücksichtigt Noten, Mitarbeit &amp; Sonstiges</li>
+                        <li><i class="fas fa-check"></i> Mit „Besser / Schlechter" fein justierbar</li>
+                        <li><i class="fas fa-check"></i> Jederzeit neu generieren oder anpassen</li>
+                    </ul>
+                </div>
+                <div class="t-img">
+                    <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-ki-zeugnisnote.png" alt="KI-Notenvorschlag mit Begründung" loading="lazy"></div>
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <!-- Benefits -->
     <section class="block band" id="sicherheit">
         <div class="wrap">
-            <div class="section-head">
-                <span class="kicker">Sicher &amp; verlässlich</span>
+            <div class="part-head" style="margin-bottom:54px;">
+                <span class="part-label">Sicher &amp; verlässlich</span>
                 <h2>Deine Daten sind geschützt</h2>
-                <p>Gebaut mit Blick auf Datenschutz und den echten Schulalltag.</p>
             </div>
             <div class="benefits">
-                <div class="benefit">
-                    <i class="fas fa-shield-halved"></i>
-                    <h4>DSGVO-konform</h4>
-                    <p>Strikte Zugriffsregeln – jede Lehrkraft sieht ausschließlich die eigenen Daten.</p>
-                </div>
-                <div class="benefit">
-                    <i class="fas fa-cloud-arrow-up"></i>
-                    <h4>Automatische Sync</h4>
-                    <p>Änderungen landen sofort sicher in der Cloud – ganz ohne manuelles Speichern.</p>
-                </div>
-                <div class="benefit">
-                    <i class="fas fa-wifi"></i>
-                    <h4>Offline nutzbar</h4>
-                    <p>Als App installierbar und auch ohne Internet weiter einsatzbereit.</p>
-                </div>
-                <div class="benefit">
-                    <i class="fas fa-mobile-screen-button"></i>
-                    <h4>Überall verfügbar</h4>
-                    <p>Läuft im Browser auf Laptop, Tablet und Smartphone.</p>
-                </div>
+                <div class="benefit"><i class="fas fa-shield-halved"></i><h4>DSGVO-konform</h4><p>Strikte Zugriffsregeln – jede Lehrkraft sieht ausschließlich die eigenen Daten.</p></div>
+                <div class="benefit"><i class="fas fa-cloud-arrow-up"></i><h4>Automatische Sync</h4><p>Änderungen landen sofort sicher in der Cloud – ohne manuelles Speichern.</p></div>
+                <div class="benefit"><i class="fas fa-wifi"></i><h4>Offline nutzbar</h4><p>Als App installierbar und auch ohne Internet weiter einsatzbereit.</p></div>
+                <div class="benefit"><i class="fas fa-mobile-screen-button"></i><h4>Überall verfügbar</h4><p>Läuft im Browser auf Laptop, Tablet und Smartphone.</p></div>
             </div>
         </div>
     </section>
 
-    <!-- ===== Final CTA ===== -->
+    <!-- Final CTA -->
     <section class="block">
         <div class="wrap">
             <div class="cta">
@@ -401,7 +416,6 @@
         </div>
     </section>
 
-    <!-- ===== Footer ===== -->
     <footer>
         <div class="wrap foot">
             <a href="#top" class="brand"><img src="app-icon.png" alt="Logo"> Schulverwaltung</a>
@@ -411,12 +425,10 @@
     </footer>
 
     <script>
-        // Header-Schatten beim Scrollen
         const header = document.getElementById('header');
         const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 10);
         window.addEventListener('scroll', onScroll, { passive: true });
         onScroll();
-        // Jahr aktuell halten
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
 </body>
