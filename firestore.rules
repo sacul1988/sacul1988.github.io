@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: userData
+    // Document ID: {userId} (Matches the authenticated user's UID)
+    // Fields:
+    //   - lastUpdate: string (required) - ISO 8601 timestamp of last sync
+    //   - classes: list (required) - Array of classes, students, grades
+    //   - termine: list (required) - Array of calendar events
+    //   - deletedTermineIds: list (required) - Array of deleted event IDs
+    //   - planung: map (required) - Seating plan settings mapped by class index
+    //   - planung_global_calendar_range: map (required) - Global calendar configuration
+    //   - formulierungshilfen: list (required) - Custom report templates
+    //   - zeugnistexteArchiv: list (required) - Archived report texts
+    //   - contacts: list (required) - Address book contacts
+    //   - extraDataLastUpdate: string (required) - Timestamp for local extra data synchronization
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if user is the owner of the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Validate required fields exist
+    function hasRequiredFields(data, fields) {
+      return data.keys().hasAll(fields);
+    }
+
+    // Validate only allowed fields exist
+    function hasOnlyAllowedFields(data, fields) {
+      return data.keys().hasOnly(fields);
+    }
+
+    // Enforce size limits and basic data type validation
+    function isValidUserData(data) {
+      return hasRequiredFields(data, [
+        'lastUpdate', 'classes', 'termine', 'deletedTermineIds', 
+        'planung', 'planung_global_calendar_range', 'formulierungshilfen', 
+        'zeugnistexteArchiv', 'contacts', 'extraDataLastUpdate'
+      ]) &&
+      hasOnlyAllowedFields(data, [
+        'lastUpdate', 'classes', 'termine', 'deletedTermineIds', 
+        'planung', 'planung_global_calendar_range', 'formulierungshilfen', 
+        'zeugnistexteArchiv', 'contacts', 'extraDataLastUpdate'
+      ]) &&
+      data.lastUpdate is string && data.lastUpdate.size() <= 40 &&
+      data.extraDataLastUpdate is string && data.extraDataLastUpdate.size() <= 40 &&
+      data.classes is list && data.classes.size() <= 100 &&
+      data.termine is list && data.termine.size() <= 1000 &&
+      data.deletedTermineIds is list && data.deletedTermineIds.size() <= 1000 &&
+      data.planung is map &&
+      data.planung_global_calendar_range is map &&
+      data.formulierungshilfen is list && data.formulierungshilfen.size() <= 500 &&
+      data.zeugnistexteArchiv is list && data.zeugnistexteArchiv.size() <= 2000 &&
+      data.contacts is list && data.contacts.size() <= 500;
+    }
+
+    // Rules for userData documents
+    match /userData/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Deny queries across multiple users' data
+      allow create: if isOwner(userId) && isValidUserData(request.resource.data);
+      allow update: if isOwner(userId) && isValidUserData(request.resource.data);
+      allow delete: if isOwner(userId);
+    }
+  }
+}
