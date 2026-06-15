@@ -1859,11 +1859,17 @@ function initFlatpickr() {
             }, 0);
         }
     };
-    const terminConfig = Object.assign({}, fpConfig);
+    // Zeitraum-Picker: auf dem Desktop (genug Platz) zwei direkt eingebettete
+    // Kalender (inline); auf Mobile wie bisher Popup beim Klick ins Feld.
+    const twoCalendars = window.matchMedia('(min-width: 720px)').matches;
+    const rangeConfig = Object.assign({}, fpConfig, {
+        inline: twoCalendars,
+        altInput: !twoCalendars,
+    });
     const startEl = document.getElementById('planung-start-date');
     const endEl = document.getElementById('planung-end-date');
-    if (startEl) flatpickr(startEl, fpConfig);
-    if (endEl) flatpickr(endEl, fpConfig);
+    if (startEl) flatpickr(startEl, rangeConfig);
+    if (endEl) flatpickr(endEl, rangeConfig);
 }
 
 
@@ -7384,7 +7390,23 @@ function togglePlanungZeitraum() {
     const mode = AppState.planungViewMode || 'calendar';
     const title = document.getElementById('planung-zeitraum-modal-title');
     if (title) title.textContent = 'Zeitraum';
+
+    // Aktuelle Werte in die Picker setzen (Monat/Markierung)
+    const p = AppState.planung || {};
+    const cs = mode === 'calendar' ? (p.calendarStartDate || '') : (p.startDate || '');
+    const ce = mode === 'calendar' ? (p.calendarEndDate || '') : (p.endDate || '');
+    const s = document.getElementById('planung-start-date');
+    const e = document.getElementById('planung-end-date');
+    if (s && s._flatpickr) s._flatpickr.setDate(cs, false);
+    if (e && e._flatpickr) e._flatpickr.setDate(ce, false);
+
     showModal('planung-zeitraum-modal');
+
+    // Desktop: eingebettete (inline) Kalender nach dem Einblenden neu zeichnen
+    if (window.matchMedia('(min-width: 720px)').matches) {
+        if (s && s._flatpickr) s._flatpickr.redraw();
+        if (e && e._flatpickr) e._flatpickr.redraw();
+    }
 }
 
 function renderPlanung() {

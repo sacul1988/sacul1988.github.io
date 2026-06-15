@@ -4815,3 +4815,26 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
         height: 100dvh !important;
         overflow: hidden !important;
     }
+}
+
+/* ================================================================
+   Zeitraum-Modal (Kalender/Planung): auf dem Desktop ZWEI direkt
+   eingebettete Kalender nebeneinander statt der Klick-zum-Öffnen-Felder.
+   Nur ab 720px (genug Platz). Darunter / mobil bleiben die Datumsfelder.
+   ================================================================ */
+@media (min-width: 720px) {
+    #planung-zeitraum-modal {
+        max-width: 700px !important;
+        width: auto !important;
+    }
+    /* rohe Datumsfelder + Trenner ausblenden – es zählen nur die Inline-Kalender */
+    #planung-zeitraum-modal .planung-date-input,
+    #planung-zeitraum-modal .zeitraum-dash {
+        display: none !important;
+    }
+    /* die beiden Inline-Kalender mittig nebeneinander */
+    #planung-zeitraum-modal .flatpickr-calendar.inline {
+        margin: 4px 10px 0;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 20px rgba(15, 23, 42, .06);
+    }
+}
