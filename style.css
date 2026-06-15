@@ -3372,6 +3372,7 @@ body.modal-open {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+    align-content: start;
 }
 
 .zt-radio-group {
@@ -4237,6 +4238,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         display: grid;
         grid-template-columns: 1fr;
         gap: 14px;
+        align-content: start;
     }
     
     /* Dynamisches Strecken der Eingabefelder auf der rechten Seite bis zum Rand */
