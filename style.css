@@ -3058,7 +3058,7 @@ html.modal-open, body.modal-open {
     .calendar-month-column {
         width: 100% !important;
         max-width: 100%;
-        flex-shrink: 0;
+        flex: none !important;
         border-radius: 8px;
     }
     
