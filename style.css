@@ -1883,10 +1883,10 @@ html.login-active, body.login-active {
         font-size: 1.1rem;
     }
 
-    /* Mobile header actions buttons: blue border, white background, blue icon */
+    /* Mobile header actions buttons: white background, blue icon, no border */
     .desktop-header-buttons .btn {
         background-color: white !important;
-        border: 2px solid var(--primary-color) !important;
+        border: none !important;
         color: var(--primary-color) !important;
         box-shadow: none !important;
     }
