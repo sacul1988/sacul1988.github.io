@@ -1031,24 +1031,6 @@ window.openSyncModal = openSyncModal;
 window.confirmLogout = confirmLogout;
 
 
-// Hilfsfunktionen für dynamische Theme-Color Anpassung bei geöffneten Modals/Backdrops
-function setDimmedThemeColor() {
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-    if (themeColorMeta) {
-        const color = window.innerWidth <= 600 ? '#979ca7' : '#f2f4fa';
-        themeColorMeta.setAttribute('content', color);
-    }
-}
-
-function restoreThemeColor() {
-    const isLoginActive = document.documentElement.classList.contains('login-active') || document.body.classList.contains('login-active');
-    const color = isLoginActive ? '#1e293b' : '#f2f4fa';
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-    if (themeColorMeta) {
-        themeColorMeta.setAttribute('content', color);
-    }
-}
-
 // Modal anzeigen/verstecken
 function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
@@ -1060,8 +1042,6 @@ function showModal(modalId) {
         document.body.classList.add('modal-open-scroll-lock');
     } else {
         modalContainer.classList.remove('mobile-menu-active');
-        // Immediately start dimming the Safari chrome and browser frame
-        setDimmedThemeColor();
         document.documentElement.classList.add('modal-open');
         document.body.classList.add('modal-open');
     }
@@ -1130,7 +1110,6 @@ function hideModal() {
     document.body.classList.remove('modal-open');
     document.documentElement.classList.remove('modal-open-scroll-lock');
     document.body.classList.remove('modal-open-scroll-lock');
-    restoreThemeColor();
 
     // Sitzplan-spezifische Logik: selectedDesk zurücksetzen und Auswahl aufheben
     selectedDesk = null;
