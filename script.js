@@ -1053,7 +1053,7 @@ function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
 
-    if (modalId === 'mobile-menu-modal') {
+    if (modalId === 'mobile-menu-modal' || modalId === 'zt-archive-modal') {
         modalContainer.classList.add('mobile-menu-active');
         document.documentElement.classList.add('modal-open-scroll-lock');
         document.body.classList.add('modal-open-scroll-lock');
