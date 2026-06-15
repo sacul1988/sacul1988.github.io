@@ -695,7 +695,7 @@ select.form-control {
     box-shadow: 0 4px 12px rgba(67, 97, 238, 0.35);
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (min-width: 601px) {
     .module-nav-item .btn:hover {
         background-color: #f1f5f9;
         transform: none;
@@ -4746,5 +4746,12 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     }
     .planung-table tbody tr:nth-child(even):hover {
         background: #f8f9fa !important;
+    }
+
+    /* Sitzplan-Modus-Buttons (Bearbeiten/Arbeitsphase/Material): kein
+       Hover-Verdunkeln der inaktiven Buttons. Aktive (orange) bleiben unberührt. */
+    #sitzplan-module .sitzplan-controls .btn:not(.active):hover {
+        background-color: var(--primary-color) !important;
+        box-shadow: none !important;
     }
 }
