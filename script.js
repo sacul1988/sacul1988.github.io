@@ -1053,7 +1053,7 @@ function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
 
-    if (modalId === 'mobile-menu-modal' || modalId === 'zt-archive-modal') {
+    if (modalId === 'zt-archive-modal') {
         modalContainer.classList.add('mobile-menu-active');
         document.documentElement.classList.add('modal-open-scroll-lock');
         document.body.classList.add('modal-open-scroll-lock');
@@ -7899,58 +7899,7 @@ window.editCalendarDayTermin = editCalendarDayTermin;
 window.updateCalendarDayFormUI = updateCalendarDayFormUI;
 window.cancelEditCalendarDayTermin = cancelEditCalendarDayTermin;
 
-// ===== MOBILE BOTTOM SHEET (ACTION SHEET) =====
 
-function openMobileActionSheet(title, sourceButtonsSelector) {
-    const container = document.getElementById('mobile-menu-buttons-container');
-    const titleEl = document.getElementById('mobile-menu-title');
-    
-    if (!container || !titleEl) return;
-    
-    titleEl.textContent = title;
-    container.innerHTML = '';
-    
-    const sourceContainer = document.querySelector(sourceButtonsSelector);
-    if (sourceContainer) {
-        const buttons = sourceContainer.querySelectorAll('button');
-        buttons.forEach(btn => {
-            if (btn.style.display === 'none') return;
-
-            const clonedBtn = btn.cloneNode(true);
-            clonedBtn.removeAttribute('id');
-            clonedBtn.style.display = '';
-            
-            // Stylize as full-width secondary buttons inside the modal
-            clonedBtn.className = 'btn btn-block btn-secondary btn-icon';
-            clonedBtn.style.margin = '0';
-            clonedBtn.style.width = '100%';
-            clonedBtn.style.justifyContent = 'flex-start';
-            clonedBtn.style.padding = '12px 16px';
-            clonedBtn.style.fontSize = '1rem';
-
-            // Ensure clicking a button closes the modal
-            const originalOnClick = clonedBtn.getAttribute('onclick');
-            if (originalOnClick) {
-                clonedBtn.setAttribute('onclick', `${originalOnClick}; closeMobileActionSheet();`);
-            } else {
-                clonedBtn.addEventListener('click', () => {
-                    closeMobileActionSheet();
-                });
-            }
-
-            container.appendChild(clonedBtn);
-        });
-    }
-    
-    showModal('mobile-menu-modal');
-}
-
-function closeMobileActionSheet() {
-    hideModal();
-}
-
-window.openMobileActionSheet = openMobileActionSheet;
-window.closeMobileActionSheet = closeMobileActionSheet;
 
 // ===== CENTRALIZED CONTACTS (ADRESSBUCH) =====
 
@@ -8124,50 +8073,6 @@ function copyPhoneNumber(number, btn) {
     });
 }
 
-
-function openPlanungOptionsSheet() {
-    const backdrop = document.getElementById('mobile-action-sheet-backdrop');
-    const container = document.getElementById('action-sheet-buttons-container');
-    const titleEl = document.getElementById('action-sheet-title');
-    if (!backdrop || !container || !titleEl) return;
-
-    titleEl.textContent = 'Planung';
-    container.innerHTML = '';
-
-    const viewMode = AppState.planungViewMode || 'calendar';
-
-    if (viewMode === 'list') {
-        const btnDays = document.createElement('button');
-        btnDays.className = 'btn btn-secondary btn-icon';
-        btnDays.style.marginBottom = '8px';
-        btnDays.innerHTML = '<i class="fas fa-calendar-week"></i> <span class="btn-text">Unterrichtstage</span>';
-        btnDays.onclick = () => { closeMobileActionSheet(); showModal('unterrichtstage-modal'); };
-        container.appendChild(btnDays);
-
-        const btn1 = document.createElement('button');
-        btn1.className = 'btn btn-secondary btn-icon';
-        btn1.style.marginBottom = '8px';
-        btn1.innerHTML = '<i class="fas fa-calendar-alt"></i> <span class="btn-text">Termine ein/ausblenden</span>';
-        btn1.onclick = () => { closeMobileActionSheet(); showTermineModal(); };
-        container.appendChild(btn1);
-
-        const btn2 = document.createElement('button');
-        btn2.className = 'btn btn-primary btn-icon';
-        btn2.innerHTML = '<i class="fas fa-trash"></i> <span class="btn-text">Planung löschen</span>';
-        btn2.onclick = () => { closeMobileActionSheet(); deletePlanungTable(); };
-        container.appendChild(btn2);
-    } else {
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-primary btn-icon';
-        btn.innerHTML = '<i class="fas fa-file-download"></i> <span class="btn-text">Termine exportieren</span>';
-        btn.onclick = () => { closeMobileActionSheet(); exportAllTermineToICS(); };
-        container.appendChild(btn);
-    }
-
-    backdrop.style.display = 'flex';
-    backdrop.offsetHeight;
-    backdrop.classList.add('show');
-}
 
 function filterContacts() {
     renderContactsModule();

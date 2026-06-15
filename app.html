@@ -121,9 +121,7 @@
                                     <i class="fas fa-file-import"></i> <span class="btn-text">Importieren</span>
                                 </button>
                             </div>
-                            <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Klassen', '#home-page .desktop-header-buttons')">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
+
                         </div>
                     </div>
                     
@@ -180,9 +178,7 @@
                                             <span class="btn-text">Exportieren</span>
                                         </button>
                                     </div>
-                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Schülerliste', '#schueler-module .desktop-header-buttons')">
-                                        <i class="fas fa-ellipsis-h"></i>
-                                    </button>
+
                                 </div>
                             </div>
                             
@@ -227,9 +223,7 @@
                                                 <span class="btn-text">Exportieren</span>
                                             </button>
                                         </div>
-                                        <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Sitzplan', '#sitzplan-module .desktop-header-buttons')">
-                                            <i class="fas fa-ellipsis-h"></i>
-                                        </button>
+
                                     </div>
                                 </div>
                             
@@ -274,9 +268,7 @@
                                             <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
                                         </button>
                                     </div>
-                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Noten / Schriftlich', '#noten-module .desktop-header-buttons')">
-                                        <i class="fas fa-ellipsis-h"></i>
-                                    </button>
+
                                 </div>
                             </div>
                             <div class="search-container" id="search-container-noten" style="display: none;">
@@ -336,9 +328,7 @@
                                             <span class="btn-text">Exportieren</span>
                                         </button>
                                     </div>
-                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Planung', '#planung-module .desktop-header-buttons')">
-                                        <i class="fas fa-ellipsis-h"></i>
-                                    </button>
+
                                 </div>
                             </div>
 
@@ -368,9 +358,7 @@
                                             <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
                                         </button>
                                     </div>
-                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Zeugnis', '#zeugnis-module .desktop-header-buttons')">
-                                        <i class="fas fa-ellipsis-h"></i>
-                                    </button>
+
                                 </div>
                             </div>
                             <div class="search-container" id="search-container-zeugnis" style="display: none;">
@@ -467,9 +455,7 @@
                                             <i class="fas fa-search"></i> <span class="btn-text">Suchen</span>
                                         </button>
                                     </div>
-                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Kontakte', '#kontakte-module .desktop-header-buttons')">
-                                        <i class="fas fa-ellipsis-h"></i>
-                                    </button>
+
                                 </div>
                             </div>
                             
@@ -523,9 +509,7 @@
                                             <i class="fas fa-file-export"></i> <span class="btn-text">Exportieren</span>
                                         </button>
                                     </div>
-                                    <button class="btn btn-light btn-icon mobile-overflow-btn" onclick="openMobileActionSheet('Kalender', '#kalender-window-panel .desktop-header-buttons')">
-                                        <i class="fas fa-ellipsis-h"></i>
-                                    </button>
+
                                 </div>
                             </div>
                             <input type="file" id="ics-import-input" accept=".ics,text/calendar" style="display: none;" onchange="importIcsFile(event)">
@@ -562,14 +546,7 @@
                 </div>
             </div>
 
-            <!-- Mobil-Aktionsmenü (Ersetzt Bottom Sheet) -->
-            <div id="mobile-menu-modal" class="modal" style="display: none;">
-                <div class="wizard-header">
-                    <h2 id="mobile-menu-title">Aktionen</h2>
-                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
-                </div>
-                <div id="mobile-menu-buttons-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;"></div>
-            </div>
+
 
             <!-- Synchronisierungs-Status Modal -->
             <div id="sync-status-modal" class="modal" style="display: none;">

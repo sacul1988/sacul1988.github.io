@@ -3188,13 +3188,11 @@ html.modal-open, body.modal-open {
     }
 
     .topbar-btn,
-    .mobile-overflow-btn,
     .student-list-table .student-actions .btn {
         position: relative;
     }
 
     .topbar-btn::after,
-    .mobile-overflow-btn::after,
     .student-list-table .student-actions .btn::after {
         content: '';
         position: absolute;
@@ -3219,15 +3217,8 @@ html.modal-open, body.modal-open {
     align-items: center;
 }
 
-.mobile-overflow-btn {
-    display: none !important; /* Hidden on desktop */
-}
-
 /* --- iPhone / Mobilgeräte (Bottom Sheet) --- */
 @media (max-width: 600px) {
-    .desktop-header-buttons {
-        display: none !important; /* Hide inline buttons on mobile */
-    }
 
     /* Kopfzeile: kompakter, damit alle Werkzeuge in eine Zeile passen */
     .app-topbar { gap: 6px; }
@@ -3263,27 +3254,7 @@ html.modal-open, body.modal-open {
         min-width: 480px;
     }
     
-    .mobile-overflow-btn {
-        display: inline-flex !important; /* Show overflow button on mobile */
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        justify-content: center;
-        align-items: center;
-        border: 1px solid var(--border-color) !important;
-        background-color: #f1f5f9 !important;
-        color: #1e293b !important;
-        cursor: pointer;
-        flex-shrink: 0;
-    }
 
-    .mobile-overflow-btn i {
-        color: #1e293b !important;
-    }
-
-    .mobile-overflow-btn:hover {
-        background-color: #e2e8f0 !important;
-    }
 
 }
 
