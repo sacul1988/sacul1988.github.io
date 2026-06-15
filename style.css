@@ -1279,6 +1279,12 @@ html.login-active, body.login-active {
     align-items: center;
     padding: 16px;
     cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+#modal-container.show {
+    opacity: 1;
 }
 
 .modal {

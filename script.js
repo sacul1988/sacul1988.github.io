@@ -1054,10 +1054,6 @@ function showModal(modalId) {
     if (!modalContainer) return;
 
     setDimmedThemeColor();
-    modalContainer.style.display = 'flex';
-    modalContainer.setAttribute('aria-hidden', 'false');
-    document.documentElement.classList.add('modal-open');
-    document.body.classList.add('modal-open');
 
     // Alle Modals ausblenden
     const modals = document.querySelectorAll('.modal');
@@ -1084,21 +1080,34 @@ function showModal(modalId) {
             focusableElement.focus();
         }
     }
+
+    modalContainer.style.display = 'flex';
+    modalContainer.offsetHeight; // Force reflow
+    modalContainer.classList.add('show');
+    modalContainer.setAttribute('aria-hidden', 'false');
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
 }
 
 function hideModal() {
     const modalContainer = safeGetElement('modal-container');
     if (modalContainer) {
-        modalContainer.style.display = 'none';
+        modalContainer.classList.remove('show');
         modalContainer.setAttribute('aria-hidden', 'true');
 
-        // Alle Modals ausblenden
-        const modals = document.querySelectorAll('.modal');
-        if (modals) {
-            modals.forEach(m => {
-                m.setAttribute('aria-hidden', 'true');
-            });
-        }
+        setTimeout(() => {
+            if (!modalContainer.classList.contains('show')) {
+                modalContainer.style.display = 'none';
+                
+                // Alle Modals ausblenden
+                const modals = document.querySelectorAll('.modal');
+                if (modals) {
+                    modals.forEach(m => {
+                        m.setAttribute('aria-hidden', 'true');
+                    });
+                }
+            }
+        }, 250);
     }
 
     document.documentElement.classList.remove('modal-open');
