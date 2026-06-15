@@ -1270,9 +1270,9 @@ html.login-active, body.login-active {
 #modal-container {
     position: fixed;
     inset: 0;
-    background-color: rgba(15, 23, 42, 0.55);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    background-color: rgba(15, 23, 42, 0.25);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
     z-index: 1001;
     display: flex;
     justify-content: center;
