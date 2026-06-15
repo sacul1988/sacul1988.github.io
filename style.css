@@ -1269,15 +1269,16 @@ html.login-active, body.login-active {
 /* Modal styles */
 #modal-container {
     position: fixed;
-    inset: 0;
+    inset: -100px;
+    padding: 116px;
     background-color: rgba(15, 23, 42, 0.08);
     backdrop-filter: blur(1px);
     -webkit-backdrop-filter: blur(1px);
+    will-change: backdrop-filter;
     z-index: 1001;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 16px;
     cursor: pointer;
     opacity: 0;
     transition: opacity 0.25s ease;
