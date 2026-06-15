@@ -4713,10 +4713,32 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
         border-color: transparent !important;
     }
 
-    /* Karten & Klassenkacheln: kein „Anheben" über den Schatten */
+    /* Karten & Klassenkacheln: kein „Anheben" über den Schatten oder Ändern des Rahmens */
     .card:hover,
     .class-card:hover {
         box-shadow: var(--box-shadow) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    /* Klassenkacheln Haupt-Button: kein Hover-Dunkelfärben */
+    .class-card .btn-green:hover {
+        background-color: #475569 !important;
+        box-shadow: none !important;
+    }
+
+    /* Klassenkacheln Aktions-Buttons: kein Hover-Farbwechsel */
+    .class-card .class-card-actions .btn:hover {
+        background-color: var(--primary-color) !important;
+        box-shadow: none !important;
+    }
+
+    /* Abmelden-Button: kein Hover-Farbwechsel oder Einfärben */
+    .topbar-tools .logout-btn:hover,
+    .topbar-tools .logout-btn:focus,
+    .topbar-tools .logout-btn:active {
+        background: transparent !important;
+        color: var(--grey-color) !important;
+        border-color: transparent !important;
     }
 
     /* Planung-„Optionen" und „Zeitraum" (Kalender + Planung) waren deutlich

@@ -33,7 +33,7 @@ export default [
 
   // Browser-Code (klassische Skripte, kein Modul)
   {
-    files: ['script.js', 'sw.js'],
+    files: ['script.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'script',
