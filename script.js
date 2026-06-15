@@ -1040,15 +1040,11 @@ function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
 
-    if (modalId === 'zt-archive-modal') {
-        modalContainer.classList.add('mobile-menu-active');
-        document.documentElement.classList.add('modal-open-scroll-lock');
-        document.body.classList.add('modal-open-scroll-lock');
-    } else {
-        modalContainer.classList.remove('mobile-menu-active');
-        document.documentElement.classList.add('modal-open');
-        document.body.classList.add('modal-open');
-    }
+    // Alle Modale (inkl. Archiv im Zeugnistextgenerator) bekommen denselben
+    // eingefärbten Backdrop + iOS-Bottom-Fix.
+    modalContainer.classList.remove('mobile-menu-active');
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
 
     // Alle Modals ausblenden
     const modals = document.querySelectorAll('.modal');
