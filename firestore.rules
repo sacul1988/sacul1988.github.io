@@ -41,21 +41,20 @@ service cloud.firestore {
       return data.keys().hasAll(fields);
     }
 
-    // Validate only allowed fields exist
-    function hasOnlyAllowedFields(data, fields) {
-      return data.keys().hasOnly(fields);
-    }
-
     // Enforce size limits and basic data type validation
+    //
+    // Hinweis: Es wird BEWUSST nicht via hasOnlyAllowedFields auf "nur diese
+    // Felder" eingeschränkt. Die App schreibt mit setDoc(..., { merge: true }),
+    // und das Schema ist über die Zeit gewachsen. Bei einem Update prüfen die
+    // Regeln das vollständige Dokument NACH dem Merge – enthält es noch ein
+    // Altfeld aus einer früheren Version, würde hasOnly jeden Schreibvorgang
+    // ablehnen (permission-denied). Pflichtfelder, Typen und Größen werden
+    // weiterhin streng validiert, der Zugriff bleibt strikt auf den Eigentümer
+    // beschränkt.
     function isValidUserData(data) {
       return hasRequiredFields(data, [
-        'lastUpdate', 'classes', 'termine', 'deletedTermineIds', 
-        'planung', 'planung_global_calendar_range', 'formulierungshilfen', 
-        'zeugnistexteArchiv', 'contacts', 'extraDataLastUpdate'
-      ]) &&
-      hasOnlyAllowedFields(data, [
-        'lastUpdate', 'classes', 'termine', 'deletedTermineIds', 
-        'planung', 'planung_global_calendar_range', 'formulierungshilfen', 
+        'lastUpdate', 'classes', 'termine', 'deletedTermineIds',
+        'planung', 'planung_global_calendar_range', 'formulierungshilfen',
         'zeugnistexteArchiv', 'contacts', 'extraDataLastUpdate'
       ]) &&
       data.lastUpdate is string && data.lastUpdate.size() <= 40 &&
