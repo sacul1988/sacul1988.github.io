@@ -3627,7 +3627,8 @@ body.modal-open {
 .zt-modal-close:hover { color: var(--primary-color); opacity: 0.7; }
 
 /* Ergebnis im Modal */
-.zt-modal .zt-result-text {
+.zt-modal .zt-result-text,
+#zt-result-container .zt-result-text {
     padding: 16px 18px;
     background: var(--light-color);
     border: 1px solid var(--border-color);
@@ -3640,7 +3641,8 @@ body.modal-open {
     text-align: justify;
 }
 
-.zt-modal .zt-result-actions {
+.zt-modal .zt-result-actions,
+#zt-result-container .zt-result-actions {
     padding: 0;
     border: none;
     background: none;
@@ -3650,7 +3652,8 @@ body.modal-open {
     flex-wrap: wrap;
 }
 
-.zt-modal .zt-result-actions .btn {
+.zt-modal .zt-result-actions .btn,
+#zt-result-container .zt-result-actions .btn {
     flex: 1 1 130px;
     justify-content: center;
 }

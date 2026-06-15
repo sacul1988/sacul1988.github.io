@@ -8243,6 +8243,37 @@ function ztBuildUserMsg() {
     return `Schüler/in: ${name}\n${fach ? 'Fach: ' + fach + '\n' : ''}${fach ? 'Halbjahr: ' + halbjahr + '\n' : ''}${themen ? 'Themen: ' + themen + '\n' : ''}Beobachtungen: ${beob}`;
 }
 
+function ztCloseResult() {
+    const container = document.getElementById('zt-result-container');
+    const inputContainer = document.getElementById('zt-input-container');
+    if (container) container.style.display = 'none';
+    if (inputContainer) inputContainer.style.display = '';
+}
+
+function ztNextStudent() {
+    const nameEl = document.getElementById('zt-name');
+    const fachEl = document.getElementById('zt-fach');
+    const themenEl = document.getElementById('zt-themen');
+    const beobEl = document.getElementById('zt-beobachtungen');
+    
+    if (nameEl) nameEl.value = '';
+    if (fachEl) fachEl.value = '';
+    if (themenEl) themenEl.value = '';
+    if (beobEl) beobEl.value = '';
+    
+    const typEl = document.getElementById('zt-typ');
+    if (typEl) {
+        typEl.value = 'nebenfach';
+        setZtTyp('nebenfach');
+    }
+    
+    ZtState.currentId = null;
+    ZtState.currentText = '';
+    ZtState.currentLabel = '';
+    
+    ztCloseResult();
+}
+
 async function ztGenerate() {
     const name = (document.getElementById('zt-name')?.value || '').trim();
     const fach = (document.getElementById('zt-fach')?.value || '').trim();
@@ -8262,22 +8293,21 @@ async function ztGenerate() {
     ZtState.currentLabel = ZtState.currentTyp === 'sozialverhalten' ? name : `${name} · ${fach}`;
     ZtState.currentId = null;
 
-    ztSetModalLoading();
-    showModal('zt-result-modal');
+    ztSetLoading();
 
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([{ role: 'user', content: userMsg }]));
         ztCreateArchiveEntry();
-        ztRenderResultModal();
+        ztRenderResult();
     } catch(e) {
-        hideModal();
+        ztCloseResult();
         swal('Fehler beim Generieren. Bitte erneut versuchen.', { icon: 'error', button: 'OK' });
     }
 }
 
 async function ztRegenerate() {
     const userMsg = ztBuildUserMsg();
-    ztSetModalLoading();
+    ztSetLoading();
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: userMsg },
@@ -8285,39 +8315,39 @@ async function ztRegenerate() {
             { role: 'user', content: 'Schreibe einen neuen, anders formulierten Text mit denselben Inhalten.' }
         ]));
         ztUpdateCurrentEntry();
-        ztRenderResultModal();
+        ztRenderResult();
     } catch(e) {
-        ztRenderResultModal();
+        ztRenderResult();
         swal('Fehler beim Generieren.', { icon: 'error', button: 'OK' });
     }
 }
 
 async function ztShortenText() {
-    ztSetModalLoading();
+    ztSetLoading();
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: ZtState.currentText },
             { role: 'user', content: 'Kürze diesen Text um ca. zwei Sätze. Behalte den Stil und alle wichtigen Informationen bei.' }
         ]));
         ztUpdateCurrentEntry();
-        ztRenderResultModal();
+        ztRenderResult();
     } catch(e) {
-        ztRenderResultModal();
+        ztRenderResult();
         swal('Fehler.', { icon: 'error', button: 'OK' });
     }
 }
 
 async function ztLengthenText() {
-    ztSetModalLoading();
+    ztSetLoading();
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: ZtState.currentText },
             { role: 'user', content: 'Verlängere diesen Text um ca. zwei Sätze. Füge sinnvolle, passende Informationen hinzu und behalte den Stil bei.' }
         ]));
         ztUpdateCurrentEntry();
-        ztRenderResultModal();
+        ztRenderResult();
     } catch(e) {
-        ztRenderResultModal();
+        ztRenderResult();
         swal('Fehler.', { icon: 'error', button: 'OK' });
     }
 }
@@ -8327,16 +8357,16 @@ async function ztRefineText() {
     const input = document.getElementById('zt-refine-input');
     const instruction = (input?.value || '').trim();
     if (!instruction) return;
-    ztSetModalLoading();
+    ztSetLoading();
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: ZtState.currentText },
             { role: 'user', content: 'Überarbeite den vorigen Zeugnistext nach dieser Anweisung und gib den vollständigen, überarbeiteten Text zurück: ' + instruction }
         ]));
         ztUpdateCurrentEntry();
-        ztRenderResultModal();
+        ztRenderResult();
     } catch(e) {
-        ztRenderResultModal();
+        ztRenderResult();
         swal('Fehler. Bitte erneut versuchen.', { icon: 'error', button: 'OK' });
     }
 }
@@ -8352,39 +8382,54 @@ function ztTypLabel(typ) {
     return '';
 }
 
-function ztSetModalLoading() {
-    const modal = document.getElementById('zt-result-modal');
-    if (!modal) return;
-    modal.innerHTML = `
-        <div class="zt-modal-head">
-            <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ztEsc(ZtState.currentLabel || 'Zeugnistext')}</span>
-            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="zt-result-loading">
-            <div class="zt-spinner"></div>
-            <p>Text wird erstellt…</p>
+function ztSetLoading() {
+    const container = document.getElementById('zt-result-container');
+    const inputContainer = document.getElementById('zt-input-container');
+    if (!container) return;
+
+    if (inputContainer) inputContainer.style.display = 'none';
+    container.style.display = '';
+
+    container.innerHTML = `
+        <div class="zt-panel-body">
+            <div class="zt-modal-head">
+                <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ztEsc(ZtState.currentLabel || 'Zeugnistext')}</span>
+                <button class="zt-modal-close" onclick="ztCloseResult()" title="Schließen"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="zt-result-loading">
+                <div class="zt-spinner"></div>
+                <p>Text wird erstellt…</p>
+            </div>
         </div>`;
 }
 
-function ztRenderResultModal() {
-    const modal = document.getElementById('zt-result-modal');
-    if (!modal) return;
+function ztRenderResult() {
+    const container = document.getElementById('zt-result-container');
+    const inputContainer = document.getElementById('zt-input-container');
+    if (!container) return;
+
+    if (inputContainer) inputContainer.style.display = 'none';
+    container.style.display = '';
+
     ZtState.currentText = ztNormalizeText(ZtState.currentText);
-    modal.innerHTML = `
-        <div class="zt-modal-head">
-            <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ztEsc(ZtState.currentLabel)}</span>
-            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="zt-result-text">${ztEsc(ZtState.currentText)}</div>
-        <div class="zt-result-actions">
-            <button class="btn btn-primary btn-icon" onclick="ztRegenerate()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
-            <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
-            <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
-            <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
-        </div>
-        <div class="zt-refine">
-            <input type="text" id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter'){event.preventDefault();ztRefineText();}">
-            <button class="btn btn-primary btn-icon zt-refine-btn" onclick="ztRefineText()"><i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Anwenden</span></button>
+    container.innerHTML = `
+        <div class="zt-panel-body">
+            <div class="zt-modal-head">
+                <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ztEsc(ZtState.currentLabel)}</span>
+                <button class="zt-modal-close" onclick="ztCloseResult()" title="Schließen"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="zt-result-text">${ztEsc(ZtState.currentText)}</div>
+            <div class="zt-result-actions">
+                <button class="btn btn-primary btn-icon" onclick="ztRegenerate()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
+                <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
+                <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
+                <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
+                <button class="btn btn-success btn-icon" onclick="ztNextStudent()"><i class="fas fa-user-plus"></i> <span class="btn-text">Nächster Schüler</span></button>
+            </div>
+            <div class="zt-refine">
+                <input type="text" id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter'){event.preventDefault();ztRefineText();}">
+                <button class="btn btn-primary btn-icon zt-refine-btn" onclick="ztRefineText()"><i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Anwenden</span></button>
+            </div>
         </div>`;
 }
 
@@ -8505,8 +8550,8 @@ function ztOpenArchive(id) {
     ZtState.currentLabel = item.label;
     ZtState.currentId = item.id;
     if (item.typ) setZtTyp(item.typ);
-    ztRenderResultModal();
-    showModal('zt-result-modal');
+    hideModal();
+    ztRenderResult();
 }
 
 function ztDeleteArchive(id) {
@@ -8546,3 +8591,5 @@ window.ztCopyText = ztCopyText;
 window.ztOpenArchiveModal = ztOpenArchiveModal;
 window.ztOpenArchive = ztOpenArchive;
 window.ztDeleteArchive = ztDeleteArchive;
+window.ztCloseResult = ztCloseResult;
+window.ztNextStudent = ztNextStudent;
