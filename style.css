@@ -4298,6 +4298,109 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         justify-content: center;
         padding: 10px 16px;
     }
+
+    /* Verhindert das Scrollen des gesamten Fensters, wenn die Eingabemaske zu sehen ist */
+    .tool-window-overlay.open:has(#zt-input-container:not([style*="display: none"])) .tool-window {
+        overflow-y: hidden;
+        height: 100dvh;
+    }
+    .tool-window-overlay.open:has(#zt-input-container:not([style*="display: none"])) .tool-window-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+    .tool-window-overlay.open:has(#zt-input-container:not([style*="display: none"])) #zeugnis-texte-module.tool-window-panel.active {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        height: 100%;
+        overflow: hidden;
+    }
+    .tool-window-overlay.open:has(#zt-input-container:not([style*="display: none"])) #zeugnis-texte-module .card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0;
+        overflow: hidden;
+    }
+    .tool-window-overlay.open:has(#zt-input-container:not([style*="display: none"])) #zeugnis-texte-module .zt-stack {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .tool-window-overlay.open:has(#zt-input-container:not([style*="display: none"])) #zt-input-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+    .tool-window-overlay.open:has(#zt-input-container:not([style*="display: none"])) #zt-input-container .zt-panel-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 12px;
+        overflow: hidden;
+        gap: 12px;
+    }
+
+    /* Grid/Flex-Struktur für Eingabefelder auf Mobile */
+    #zt-input-container .zt-grid-desktop {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        height: 100%;
+        gap: 12px;
+        min-height: 0;
+    }
+
+    #zt-input-container .zt-col-left {
+        flex-shrink: 0;
+    }
+
+    #zt-input-container .zt-col-right {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        gap: 12px;
+    }
+
+    #zt-input-container .zt-themen-field {
+        flex-shrink: 0;
+    }
+    
+    #zt-input-container textarea.zt-themen-textarea {
+        height: 70px;
+        resize: none;
+    }
+
+    #zt-input-container .zt-textarea-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+    }
+
+    #zt-input-container .zt-textarea-wrap {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        position: relative;
+    }
+
+    #zt-input-container textarea.zt-textarea {
+        flex: 1;
+        height: 100%;
+        min-height: 120px;
+        resize: none;
+        box-sizing: border-box;
+    }
 }
 
 /* ===== Zeugnistextgenerator Desktop-Optimierung ===== */
