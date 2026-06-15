@@ -4775,4 +4775,12 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
         background-color: var(--primary-color) !important;
         box-shadow: none !important;
     }
+
+    /* HTML/Body Background-Color Transition und Verdunkelung bei geöffneten Modals */
+    html, body {
+        transition: background-color 0.25s ease;
+    }
+    html.modal-open, body.modal-open {
+        background-color: #979ca7 !important;
+    }
 }
