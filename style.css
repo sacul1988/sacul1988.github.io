@@ -3092,7 +3092,7 @@ html.modal-open, body.modal-open {
     
     /* 7. Sitzplan Workspace scroll indicators */
     #sitzplan-module .workspace {
-        height: calc(100dvh - 290px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        height: calc(100dvh - 210px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
         min-height: 380px;
     }
     
