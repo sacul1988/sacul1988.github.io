@@ -2383,9 +2383,7 @@ html.login-active, body.login-active {
     z-index: 1;
 }
 
-.planung-table tbody tr:nth-child(even) {
-    background: #f8f9fa;
-}
+/* Zebrastreifen entfernt – alle Planungs-Zeilen sollen gleich aussehen */
 
 .planung-table tbody tr:hover {
     background: #eef2ff;
@@ -4777,12 +4775,9 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     }
 
     /* Planung-Tabelle: kein Hover-Einfärben der Zeilen beim Gleiten mit
-       Finger/Maus (Klick zum Eintragen bleibt). Zebrastreifen bleiben erhalten. */
+       Finger/Maus (Klick zum Eintragen bleibt). */
     .planung-table tbody tr:hover {
         background: transparent !important;
-    }
-    .planung-table tbody tr:nth-child(even):hover {
-        background: #f8f9fa !important;
     }
 
     /* Sitzplan-Modus-Buttons (Bearbeiten/Arbeitsphase/Material): kein
