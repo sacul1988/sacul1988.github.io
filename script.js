@@ -1035,7 +1035,7 @@ window.confirmLogout = confirmLogout;
 function setDimmedThemeColor() {
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColorMeta) {
-        themeColorMeta.setAttribute('content', '#7c828d');
+        themeColorMeta.setAttribute('content', '#0f172a');
     }
 }
 
@@ -7907,6 +7907,8 @@ function openMobileActionSheet(title, sourceButtonsSelector) {
     backdrop.style.display = 'flex';
     backdrop.offsetHeight; // Force reflow to trigger CSS transition
     backdrop.classList.add('show');
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
     setDimmedThemeColor();
 }
 
@@ -7915,6 +7917,8 @@ function closeMobileActionSheet() {
     if (!backdrop) return;
     
     backdrop.classList.remove('show');
+    document.documentElement.classList.remove('modal-open');
+    document.body.classList.remove('modal-open');
     restoreThemeColor();
     setTimeout(() => {
         if (!backdrop.classList.contains('show')) {
