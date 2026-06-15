@@ -1271,8 +1271,8 @@ html.login-active, body.login-active {
     position: fixed;
     inset: 0;
     background-color: transparent;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
     z-index: 1001;
     display: flex;
     justify-content: center;
