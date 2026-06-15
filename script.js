@@ -8674,7 +8674,7 @@ function ztRenderArchiveModal() {
     modal.innerHTML = `
         <div class="zt-modal-head">
             <span style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-box-archive"></i> Archiv
+                Archiv
                 ${countLabel ? `<span class="zt-archive-count" style="font-size: 0.82rem; font-weight: 400; color: var(--grey-color); background: var(--light-color); padding: 2px 8px; border-radius: 12px; margin-left: 6px;">${countLabel}</span>` : ''}
             </span>
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
