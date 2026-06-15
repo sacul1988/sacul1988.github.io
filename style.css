@@ -3090,10 +3090,43 @@ html.modal-open, body.modal-open {
         font-size: 0.85rem !important;
     }
     
-    /* 7. Sitzplan Workspace scroll indicators */
-    #sitzplan-module .workspace {
+    /* 7. Sitzplan Workspace flexbox scaling on mobile */
+    #sitzplan-module {
         height: calc(100dvh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-        min-height: 420px;
+    }
+    #sitzplan-module[style*="display: block"] {
+        display: flex !important;
+        flex-direction: column;
+    }
+    #sitzplan-module .card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0 !important;
+        min-height: 0;
+    }
+    #sitzplan-module .card-header,
+    #sitzplan-module .sitzplan-controls {
+        flex-shrink: 0;
+    }
+    #sitzplan-module .sitzplan-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 10px;
+    }
+    #sitzplan-module .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        gap: 10px;
+    }
+    #sitzplan-module .workspace {
+        flex: 1;
+        height: 100% !important;
+        min-height: 0 !important;
     }
     
     #sitzplan-module .sitzplan-controls {
