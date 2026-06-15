@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2.6">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -838,7 +838,7 @@
             </div>
 
             <!-- Such-Modal (gemeinsam für Noten, Zeugnis und Kontakte) -->
-            <div id="search-modal" class="modal" style="display: none; max-width: 480px; width: 95%;">
+            <div id="search-modal" class="modal search-modal-layout" style="display: none; max-width: 480px; width: 95%;">
                 <div class="wizard-header">
                     <h2 id="search-modal-title">Suchen</h2>
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
@@ -848,7 +848,7 @@
                        style="margin-top: 12px;"
                        oninput="handleSearchModalInput()"
                        onkeydown="handleSearchModalKeydown(event)">
-                <ul id="search-modal-suggestions" class="search-suggestions" style="position: static; border-radius: 8px; margin-top: 8px; max-height: 280px; overflow-y: auto; display: none;"></ul>
+                <ul id="search-modal-suggestions" class="search-suggestions" style="display: none;"></ul>
             </div>
 
             <!-- Kontakt hinzufügen/bearbeiten Modal -->
@@ -1507,7 +1507,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js"></script>
+    <script src="script.js?v=2.6"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {

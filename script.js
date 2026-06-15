@@ -622,8 +622,9 @@ function openSearchModal(module) {
     const input = document.getElementById('search-modal-input');
     const suggestions = document.getElementById('search-modal-suggestions');
     if (input) input.value = '';
-    if (suggestions) { suggestions.innerHTML = ''; suggestions.style.display = 'none'; }
+    if (suggestions) { suggestions.innerHTML = ''; suggestions.style.display = 'block'; }
     showModal('search-modal');
+    handleSearchModalInput();
     requestAnimationFrame(() => { if (input) input.focus(); });
 }
 
@@ -634,18 +635,21 @@ function handleSearchModalInput() {
     if (!module || !input || !suggestions) return;
     const query = input.value.toLowerCase().trim();
     suggestions.innerHTML = '';
-    if (!query) { suggestions.style.display = 'none'; return; }
 
     let items = [];
     if (module === 'kontakte') {
         items = contacts
-            .map((c, i) => ({ label: c.childName || '', index: i }))
-            .filter(c => c.label.toLowerCase().includes(query));
+            .map((c, i) => ({ label: c.childName || '', index: i }));
+        if (query) {
+            items = items.filter(c => c.label.toLowerCase().includes(query));
+        }
     } else {
         const students = (classes[activeClassId] && classes[activeClassId].students) ? classes[activeClassId].students : [];
         items = students
-            .map((s, i) => ({ label: s.name, index: i }))
-            .filter(s => s.label.toLowerCase().includes(query));
+            .map((s, i) => ({ label: s.name, index: i }));
+        if (query) {
+            items = items.filter(s => s.label.toLowerCase().includes(query));
+        }
     }
 
     if (items.length === 0) {
@@ -1058,7 +1062,7 @@ function showModal(modalId) {
     // Gewünschtes Modal anzeigen
     const targetModal = safeGetElement(modalId);
     if (targetModal) {
-        if (targetModal.classList.contains('mitarbeit-modal')) {
+        if (targetModal.classList.contains('mitarbeit-modal') || modalId === 'search-modal') {
             targetModal.style.display = 'flex';
         } else {
             targetModal.style.display = 'block';
@@ -1072,16 +1076,10 @@ function showModal(modalId) {
         }
     }
 
-    // A tiny 60ms delay gives iOS Safari UI thread a head start to initiate
-    // the status/address bar theme-color transition, so they finish exactly together.
-    setTimeout(() => {
-        if (document.documentElement.classList.contains('modal-open') || document.documentElement.classList.contains('modal-open-scroll-lock')) {
-            modalContainer.style.display = 'flex';
-            modalContainer.offsetHeight; // Force reflow
-            modalContainer.classList.add('show');
-            modalContainer.setAttribute('aria-hidden', 'false');
-        }
-    }, 60);
+    // Sofort anzeigen (ohne Animation und ohne Verzögerung)
+    modalContainer.style.display = 'flex';
+    modalContainer.classList.add('show');
+    modalContainer.setAttribute('aria-hidden', 'false');
 }
 
 function hideModal() {
@@ -1089,21 +1087,16 @@ function hideModal() {
     if (modalContainer) {
         modalContainer.classList.remove('show');
         modalContainer.setAttribute('aria-hidden', 'true');
-
-        setTimeout(() => {
-            if (!modalContainer.classList.contains('show')) {
-                modalContainer.style.display = 'none';
-                modalContainer.classList.remove('mobile-menu-active');
-                
-                // Alle Modals ausblenden
-                const modals = document.querySelectorAll('.modal');
-                if (modals) {
-                    modals.forEach(m => {
-                        m.setAttribute('aria-hidden', 'true');
-                    });
-                }
-            }
-        }, 250);
+        modalContainer.style.display = 'none';
+        modalContainer.classList.remove('mobile-menu-active');
+        
+        // Alle Modals ausblenden
+        const modals = document.querySelectorAll('.modal');
+        if (modals) {
+            modals.forEach(m => {
+                m.setAttribute('aria-hidden', 'true');
+            });
+        }
     }
 
     document.documentElement.classList.remove('modal-open');
@@ -3838,6 +3831,7 @@ function exportAllData(event) {
             version: "1.0",
             timestamp: new Date().toISOString(),
             classes: classes,
+            contacts: contacts,
             formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]')
         };
         
@@ -3924,6 +3918,14 @@ function importBackupFile(event) {
                     
                     // In localStorage speichern
                     localStorage.setItem('classes', JSON.stringify(classes));
+                    
+                    // Kontakte übernehmen (falls vorhanden)
+                    if (importData.contacts && Array.isArray(importData.contacts)) {
+                        contacts = importData.contacts;
+                        AppState.contacts = importData.contacts;
+                        window.contacts = importData.contacts;
+                        localStorage.setItem('contacts', JSON.stringify(contacts));
+                    }
                     
                     // UI aktualisieren und Cloud-Sync triggern
                     renderClassesGrid();
@@ -5627,7 +5629,7 @@ function renderZeugnisModule() {
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
                     <button class="btn-back-to-top-circle${notesActive ? ' notes-btn-active' : ''}" onclick="event.stopPropagation(); openNotesModal(${index})" title="Notizen"><i class="fas fa-pen"></i></button>
                     <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);" title="Nach oben"><i class="fas fa-arrow-up"></i></button>
-                    <button class="btn-back-to-top-circle" onclick="openSearchModal('zeugnis')" title="Suchen"><i class="fas fa-search"></i></button>
+                    <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); openSearchModal('zeugnis')" title="Suchen"><i class="fas fa-search"></i></button>
                 </div>
             </div>
             <div class="card-body">

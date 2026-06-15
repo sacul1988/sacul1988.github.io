@@ -1275,16 +1275,14 @@ html.login-active, body.login-active {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     z-index: 1001;
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 #modal-container.show {
-    opacity: 1;
+    display: flex;
 }
 
 .modal {
@@ -1296,21 +1294,41 @@ html.login-active, body.login-active {
     max-height: 90vh;
     overflow-y: auto;
     cursor: default;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 0 1px rgba(0,0,0,0.05);
     border: 1px solid var(--border-color);
-    transform: scale(0.97);
-    opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease-out;
-}
-
-#modal-container.show .modal {
-    transform: scale(1);
-    opacity: 1;
 }
 
 /* Spezifische Breite für das Evaluationsmodal im Sitzplan */
 #evaluation-modal {
     max-width: 700px !important;
+}
+
+/* Custom layout for Search Modal to prevent height jumping */
+#search-modal.search-modal-layout {
+    height: 420px !important;
+    max-height: 80vh !important;
+    flex-direction: column;
+}
+
+#search-modal.search-modal-layout .wizard-header {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+}
+
+#search-modal.search-modal-layout #search-modal-input {
+    flex: 0 0 auto;
+}
+
+#search-modal.search-modal-layout #search-modal-suggestions {
+    flex: 1 1 auto;
+    margin-top: 12px;
+    overflow-y: auto;
+    position: static;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    box-shadow: none;
+    max-height: none !important;
 }
 
 .modal h2 {
@@ -2815,8 +2833,6 @@ div.notes-textarea:empty::before {
 /* Scroll-Sperre und Scroll-Isolierung für Modals */
 html.modal-open, body.modal-open {
     overflow: hidden !important;
-    height: 100dvh !important;
-    position: relative;
     overscroll-behavior: contain;
 }
 
@@ -4650,8 +4666,6 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 /* Scroll-Sperre ohne Abdunkelung */
 html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     overflow: hidden !important;
-    height: 100dvh !important;
-    position: relative;
     overscroll-behavior: contain;
 }
 
