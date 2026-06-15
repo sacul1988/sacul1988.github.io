@@ -543,6 +543,7 @@ function openToolWindow(which) {
     }
 
     overlay.classList.add('open');
+    document.documentElement.classList.add('modal-open');
     document.body.classList.add('modal-open');
 
     const wbody = document.getElementById('tool-window-body');
@@ -564,6 +565,7 @@ function closeToolWindow() {
     // modal-open nur entfernen, wenn kein normales Modal mehr offen ist
     const modalContainer = document.getElementById('modal-container');
     if (!modalContainer || modalContainer.style.display === 'none') {
+        document.documentElement.classList.remove('modal-open');
         document.body.classList.remove('modal-open');
     }
 }
@@ -1008,6 +1010,7 @@ function showModal(modalId) {
 
     modalContainer.style.display = 'flex';
     modalContainer.setAttribute('aria-hidden', 'false');
+    document.documentElement.classList.add('modal-open');
     document.body.classList.add('modal-open');
 
     // Alle Modals ausblenden
@@ -1052,6 +1055,7 @@ function hideModal() {
         }
     }
 
+    document.documentElement.classList.remove('modal-open');
     document.body.classList.remove('modal-open');
 
     // Sitzplan-spezifische Logik: selectedDesk zurücksetzen und Auswahl aufheben
