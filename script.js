@@ -1035,7 +1035,7 @@ window.confirmLogout = confirmLogout;
 function setDimmedThemeColor() {
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColorMeta) {
-        themeColorMeta.setAttribute('content', '#f2f4fa');
+        themeColorMeta.setAttribute('content', '#979ca7');
     }
 }
 
