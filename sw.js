@@ -1,4 +1,4 @@
-const CACHE = 'schulverwaltung-v3';
+const CACHE = 'schulverwaltung-v4';
 const ASSETS = [
     './',
     './index.html',
@@ -27,8 +27,25 @@ self.addEventListener('activate', e => {
     self.clients.claim();
 });
 
-// Network-First: immer die neueste Version laden, bei Offline auf den Cache zurückfallen.
-// So wird nach jedem Deploy automatisch die aktuelle Version ausgeliefert.
+// Hilfsfunktion für Netzwerk-Timeout (Lie-Fi-Schutz bei schlechter Verbindung)
+function fetchWithTimeout(request, timeoutMs = 2000) {
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => reject(new Error('Network timeout')), timeoutMs);
+        fetch(request).then(
+            res => {
+                clearTimeout(timeoutId);
+                resolve(res);
+            },
+            err => {
+                clearTimeout(timeoutId);
+                reject(err);
+            }
+        );
+    });
+}
+
+// Network-First mit Timeout: immer die neueste Version laden (Lie-Fi geschützt), bei Offline auf den Cache zurückfallen.
+// So wird nach jedem Deploy automatisch die aktuelle Version ausgeliefert, ohne bei Hängern zu blockieren.
 self.addEventListener('fetch', e => {
     const req = e.request;
 
@@ -38,7 +55,7 @@ self.addEventListener('fetch', e => {
     }
 
     e.respondWith(
-        fetch(req)
+        fetchWithTimeout(req, 2000)
             .then(res => {
                 // Frische Antwort in den Cache legen (für Offline-Nutzung)
                 const copy = res.clone();
