@@ -7892,11 +7892,10 @@ window.cancelEditCalendarDayTermin = cancelEditCalendarDayTermin;
 // ===== MOBILE BOTTOM SHEET (ACTION SHEET) =====
 
 function openMobileActionSheet(title, sourceButtonsSelector) {
-    const backdrop = document.getElementById('mobile-action-sheet-backdrop');
-    const container = document.getElementById('action-sheet-buttons-container');
-    const titleEl = document.getElementById('action-sheet-title');
+    const container = document.getElementById('mobile-menu-buttons-container');
+    const titleEl = document.getElementById('mobile-menu-title');
     
-    if (!backdrop || !container || !titleEl) return;
+    if (!container || !titleEl) return;
     
     titleEl.textContent = title;
     container.innerHTML = '';
@@ -7910,45 +7909,34 @@ function openMobileActionSheet(title, sourceButtonsSelector) {
             const clonedBtn = btn.cloneNode(true);
             clonedBtn.removeAttribute('id');
             clonedBtn.style.display = '';
+            
+            // Stylize as full-width secondary buttons inside the modal
+            clonedBtn.className = 'btn btn-block btn-secondary btn-icon';
+            clonedBtn.style.margin = '0';
+            clonedBtn.style.width = '100%';
+            clonedBtn.style.justifyContent = 'flex-start';
+            clonedBtn.style.padding = '12px 16px';
+            clonedBtn.style.fontSize = '1rem';
 
+            // Ensure clicking a button closes the modal
             const originalOnClick = clonedBtn.getAttribute('onclick');
             if (originalOnClick) {
                 clonedBtn.setAttribute('onclick', `${originalOnClick}; closeMobileActionSheet();`);
+            } else {
+                clonedBtn.addEventListener('click', () => {
+                    closeMobileActionSheet();
+                });
             }
 
             container.appendChild(clonedBtn);
         });
     }
     
-    // Start Safari chrome dimming immediately
-    setDimmedThemeColor();
-    document.documentElement.classList.add('modal-open');
-    document.body.classList.add('modal-open');
-
-    backdrop.style.display = 'flex';
-    backdrop.offsetHeight; // Force reflow
-
-    // A tiny 60ms delay to align the transitions perfectly
-    setTimeout(() => {
-        if (document.documentElement.classList.contains('modal-open')) {
-            backdrop.classList.add('show');
-        }
-    }, 60);
+    showModal('mobile-menu-modal');
 }
 
 function closeMobileActionSheet() {
-    const backdrop = document.getElementById('mobile-action-sheet-backdrop');
-    if (!backdrop) return;
-    
-    backdrop.classList.remove('show');
-    document.documentElement.classList.remove('modal-open');
-    document.body.classList.remove('modal-open');
-    restoreThemeColor();
-    setTimeout(() => {
-        if (!backdrop.classList.contains('show')) {
-            backdrop.style.display = 'none';
-        }
-    }, 300);
+    hideModal();
 }
 
 window.openMobileActionSheet = openMobileActionSheet;

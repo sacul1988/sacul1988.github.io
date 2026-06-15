@@ -562,10 +562,19 @@
                 </div>
             </div>
 
+            <!-- Mobil-Aktionsmenü (Ersetzt Bottom Sheet) -->
+            <div id="mobile-menu-modal" class="modal" style="display: none;">
+                <div class="wizard-header">
+                    <h2 id="mobile-menu-title">Aktionen</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
+                <div id="mobile-menu-buttons-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;"></div>
+            </div>
+
             <!-- Synchronisierungs-Status Modal -->
             <div id="sync-status-modal" class="modal" style="display: none;">
                 <div class="wizard-header">
-                    <h2>Synchronisierung</h2>
+                    <h2 id="sync-status-modal-title">Synchronisierung</h2>
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
                 <div id="sync-status-modal-body"></div>
@@ -948,14 +957,7 @@
             </div>
         </div>
 
-        <!-- Bottom Sheet Modal (nur auf Mobilgeräten) -->
-        <div id="mobile-action-sheet-backdrop" class="action-sheet-backdrop" onclick="closeMobileActionSheet()">
-            <div class="action-sheet" onclick="event.stopPropagation()">
-                <div class="action-sheet-drag-handle"></div>
-                <h3 id="action-sheet-title">Aktionen</h3>
-                <div class="action-sheet-body" id="action-sheet-buttons-container"></div>
-            </div>
-        </div>
+
     </div>
 
     <!-- Flatpickr Date Picker -->
