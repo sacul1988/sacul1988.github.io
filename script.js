@@ -8250,7 +8250,25 @@ function ztCloseResult() {
     if (inputContainer) inputContainer.style.display = '';
 }
 
+let ztSaveTimeout = null;
+function ztFlushSave() {
+    if (ztSaveTimeout) {
+        clearTimeout(ztSaveTimeout);
+        ztSaveTimeout = null;
+        ztUpdateCurrentEntry();
+    }
+}
+
+function ztOnTextEdited(val) {
+    ZtState.currentText = val;
+    if (ztSaveTimeout) clearTimeout(ztSaveTimeout);
+    ztSaveTimeout = setTimeout(() => {
+        ztUpdateCurrentEntry();
+    }, 1000);
+}
+
 function ztNextStudent() {
+    ztFlushSave();
     const nameEl = document.getElementById('zt-name');
     const fachEl = document.getElementById('zt-fach');
     const themenEl = document.getElementById('zt-themen');
@@ -8260,12 +8278,6 @@ function ztNextStudent() {
     if (fachEl) fachEl.value = '';
     if (themenEl) themenEl.value = '';
     if (beobEl) beobEl.value = '';
-    
-    const typEl = document.getElementById('zt-typ');
-    if (typEl) {
-        typEl.value = 'nebenfach';
-        setZtTyp('nebenfach');
-    }
     
     ZtState.currentId = null;
     ZtState.currentText = '';
@@ -8306,6 +8318,7 @@ async function ztGenerate() {
 }
 
 async function ztRegenerate() {
+    ztFlushSave();
     const userMsg = ztBuildUserMsg();
     ztSetLoading();
     try {
@@ -8323,6 +8336,7 @@ async function ztRegenerate() {
 }
 
 async function ztShortenText() {
+    ztFlushSave();
     ztSetLoading();
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
@@ -8338,6 +8352,7 @@ async function ztShortenText() {
 }
 
 async function ztLengthenText() {
+    ztFlushSave();
     ztSetLoading();
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
@@ -8354,6 +8369,7 @@ async function ztLengthenText() {
 
 // Eigene Anweisung zum Verbessern (z.B. nur einen Satz ändern)
 async function ztRefineText() {
+    ztFlushSave();
     const input = document.getElementById('zt-refine-input');
     const instruction = (input?.value || '').trim();
     if (!instruction) return;
@@ -8416,24 +8432,31 @@ function ztRenderResult() {
         <div class="zt-panel-body">
             <div class="zt-modal-head">
                 <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ztEsc(ZtState.currentLabel)}</span>
-                <button class="zt-modal-close" onclick="ztCloseResult()" title="Schließen"><i class="fas fa-times"></i></button>
+                <button class="zt-modal-close" onclick="ztNextStudent()" title="Schließen"><i class="fas fa-times"></i></button>
             </div>
-            <div class="zt-result-text">${ztEsc(ZtState.currentText)}</div>
-            <div class="zt-result-actions">
-                <button class="btn btn-primary btn-icon" onclick="ztRegenerate()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
-                <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
-                <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
-                <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
-                <button class="btn btn-success btn-icon" onclick="ztNextStudent()"><i class="fas fa-user-plus"></i> <span class="btn-text">Nächster Schüler</span></button>
-            </div>
-            <div class="zt-refine">
-                <input type="text" id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter'){event.preventDefault();ztRefineText();}">
-                <button class="btn btn-primary btn-icon zt-refine-btn" onclick="ztRefineText()"><i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Anwenden</span></button>
+            <div class="zt-result-grid-desktop">
+                <div class="zt-result-left">
+                    <textarea class="zt-result-text" oninput="ztOnTextEdited(this.value)">${ztEsc(ZtState.currentText)}</textarea>
+                </div>
+                <div class="zt-result-right">
+                    <div class="zt-result-actions">
+                        <button class="btn btn-primary btn-icon" onclick="ztRegenerate()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
+                        <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
+                        <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
+                        <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
+                        <button class="btn btn-success btn-icon" onclick="ztNextStudent()"><i class="fas fa-user-plus"></i> <span class="btn-text">Nächster Schüler</span></button>
+                    </div>
+                    <div class="zt-refine">
+                        <input type="text" id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter'){event.preventDefault();ztRefineText();}">
+                        <button class="btn btn-primary btn-icon zt-refine-btn" onclick="ztRefineText()"><i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Anwenden</span></button>
+                    </div>
+                </div>
             </div>
         </div>`;
 }
 
 function ztCopyText(btn) {
+    ztFlushSave();
     navigator.clipboard.writeText(ZtState.currentText);
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-check"></i> <span class="btn-text">Kopiert!</span>';
@@ -8593,3 +8616,4 @@ window.ztOpenArchive = ztOpenArchive;
 window.ztDeleteArchive = ztDeleteArchive;
 window.ztCloseResult = ztCloseResult;
 window.ztNextStudent = ztNextStudent;
+window.ztOnTextEdited = ztOnTextEdited;
