@@ -3219,6 +3219,10 @@ html.modal-open, body.modal-open {
     .topbar-sep { margin: 0 4px; height: 26px; }
     .topbar-title { font-size: 1.2rem; }
 
+    /* Tool-Window-Topbar: gleiche Abstände wie die App-Kopfzeile auf Mobile */
+    .tool-window-topbar { gap: 6px; }
+    .tool-window-title { font-size: 1.2rem; }
+
     /* Startseite: Kacheln einzeln untereinander */
     .classes-grid {
         grid-template-columns: 1fr;
@@ -3948,7 +3952,6 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     position: fixed;
     inset: 0;
     background-color: var(--bg-color);
-    background-image: linear-gradient(180deg, rgba(67, 97, 238, 0.045) 0%, rgba(67, 97, 238, 0) 320px);
     z-index: 990;
     display: none;
     flex-direction: column;
@@ -3960,18 +3963,23 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    /* Gleicher Außenabstand wie .container auf der Startseite, damit die
+       Kopfzeile (Start-Button) exakt an derselben Position sitzt.
+       Safe-Area oben (Notch/Statusleiste) – wirkt nur in der installierten PWA. */
+    padding: calc(16px + env(safe-area-inset-top)) 16px 0;
 }
+/* Strukturgleich zu .app-topbar: kein eigenes Padding, Abstand kommt von .tool-window */
 .tool-window-topbar {
     display: flex;
     align-items: center;
     gap: 10px;
-    /* Safe-Area oben (Notch/Statusleiste) – wirkt nur in der installierten PWA */
-    padding: calc(16px + env(safe-area-inset-top)) 16px 16px;
+    margin-bottom: 14px;
+    min-height: 44px;
 }
 .tool-window-title {
     flex: 1;
     min-width: 0;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: var(--dark-color);
     letter-spacing: -0.02em;
@@ -3982,9 +3990,45 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 .tool-window-body {
     flex: 1 1 auto;
     overflow-y: visible;
-    /* Safe-Area unten (Home-Indikator) – wirkt nur in der installierten PWA */
-    padding: 0 16px calc(16px + env(safe-area-inset-bottom));
+    /* Seitlicher Abstand kommt von .tool-window; hier nur Safe-Area unten (Home-Indikator) */
+    padding: 0 0 calc(16px + env(safe-area-inset-bottom));
 }
+/* Auf schmalen Geräten denselben Außenabstand wie .container (8px) verwenden,
+   damit der Start-Button im Tool-Fenster exakt über dem der Startseite liegt */
+@media (max-width: 576px) {
+    .tool-window {
+        padding-left: 8px;
+        padding-right: 8px;
+        padding-top: calc(8px + env(safe-area-inset-top));
+    }
+}
+
+/* ===== Kalender & Adressbuch: Dokument-Scroll (wie die normalen Seiten) =====
+   Das Tool-Fenster läuft im normalen Dokumentfluss statt als fixiertes Overlay
+   mit Innen-Scroll. Dadurch scrollt der Body – und Safari lässt die obere Leiste
+   genauso durchscheinen/weich ausblenden wie auf der Startseite.
+   (Der Zeugnisgenerator bleibt bewusst ein fixiertes Vollbild ohne Scroll.) */
+.tool-window-overlay.doc-scroll {
+    position: static;
+    inset: auto;
+    z-index: auto;
+}
+.tool-window-overlay.doc-scroll .tool-window {
+    /* Außenabstand kommt jetzt von .container, weil das Overlay im Fluss liegt */
+    padding: 0;
+    flex: 0 1 auto;
+    overflow-y: visible;
+}
+.tool-window-overlay.doc-scroll .tool-window-body {
+    overflow-y: visible;
+}
+/* Solange ein Dokument-Scroll-Fenster offen ist, die übrigen Startseiten-Inhalte
+   ausblenden, damit nur das Tool-Fenster den Seiten-Scroll bestimmt.
+   #modal-container bleibt sichtbar, damit Dialoge weiter funktionieren. */
+.container.tool-doc-scroll > *:not(#tool-window-overlay):not(#modal-container) {
+    display: none !important;
+}
+
 /* Reparentete Module/Panels: Anzeige wird per JS gesteuert */
 .tool-window-panel { display: none; }
 .tool-window-panel.active { display: block; }
@@ -4476,12 +4520,12 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 /* ===== Zeugnistextgenerator Desktop-Optimierung ===== */
 @media (min-width: 992px) {
     /* Dehne das Tool-Fenster und die Card für zeugnis-texte-module bis zum unteren Bildschirmrand aus */
-    .tool-window-overlay.open .tool-window {
+    .tool-window-overlay.open:not(.doc-scroll) .tool-window {
         height: 100vh;
         overflow-y: hidden;
     }
-    
-    .tool-window-overlay.open .tool-window-body {
+
+    .tool-window-overlay.open:not(.doc-scroll) .tool-window-body {
         display: flex;
         flex-direction: column;
         flex: 1;

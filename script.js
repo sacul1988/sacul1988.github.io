@@ -543,8 +543,22 @@ function openToolWindow(which) {
     }
 
     overlay.classList.add('open');
-    document.documentElement.classList.add('modal-open');
-    document.body.classList.add('modal-open');
+
+    // Kalender & Adressbuch laufen im normalen Dokument-Scroll (wie die übrigen
+    // Seiten), damit Safari die obere Leiste durchscheinen lässt. Der
+    // Zeugnisgenerator bleibt ein fixiertes Vollbild mit gesperrtem Body-Scroll.
+    const docScroll = (which === 'kalender' || which === 'kontakte');
+    const container = document.querySelector('.container');
+    if (docScroll) {
+        overlay.classList.add('doc-scroll');
+        if (container) container.classList.add('tool-doc-scroll');
+        window.scrollTo(0, 0);
+    } else {
+        overlay.classList.remove('doc-scroll');
+        if (container) container.classList.remove('tool-doc-scroll');
+        document.documentElement.classList.add('modal-open');
+        document.body.classList.add('modal-open');
+    }
 
     const wbody = document.getElementById('tool-window-body');
     if (wbody) wbody.scrollTop = 0;
@@ -559,8 +573,16 @@ function closeToolWindow() {
         window.saveDataToCloud();
     }
 
+    const wasDocScroll = overlay.classList.contains('doc-scroll');
     overlay.classList.remove('open');
+    overlay.classList.remove('doc-scroll');
+    const container = document.querySelector('.container');
+    if (container) container.classList.remove('tool-doc-scroll');
     window._activeToolWindow = null;
+
+    // Beim Dokument-Scroll-Fenster den Seiten-Scroll zurücksetzen, damit die
+    // wieder eingeblendete Ausgangsseite oben beginnt.
+    if (wasDocScroll) window.scrollTo(0, 0);
 
     // modal-open nur entfernen, wenn kein normales Modal mehr offen ist
     const modalContainer = document.getElementById('modal-container');
