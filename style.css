@@ -2801,7 +2801,6 @@ html.modal-open, body.modal-open {
     height: 100dvh !important;
     position: relative;
     overscroll-behavior: contain;
-    background-color: #0f172a !important;
 }
 
 .modal,
