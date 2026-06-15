@@ -7920,9 +7920,20 @@ function openMobileActionSheet(title, sourceButtonsSelector) {
         });
     }
     
+    // Start Safari chrome dimming immediately
+    setDimmedThemeColor();
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
+
     backdrop.style.display = 'flex';
     backdrop.offsetHeight; // Force reflow
-    backdrop.classList.add('show');
+
+    // A tiny 60ms delay to align the transitions perfectly
+    setTimeout(() => {
+        if (document.documentElement.classList.contains('modal-open')) {
+            backdrop.classList.add('show');
+        }
+    }, 60);
 }
 
 function closeMobileActionSheet() {
@@ -7930,6 +7941,9 @@ function closeMobileActionSheet() {
     if (!backdrop) return;
     
     backdrop.classList.remove('show');
+    document.documentElement.classList.remove('modal-open');
+    document.body.classList.remove('modal-open');
+    restoreThemeColor();
     setTimeout(() => {
         if (!backdrop.classList.contains('show')) {
             backdrop.style.display = 'none';

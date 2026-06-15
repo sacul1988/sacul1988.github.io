@@ -3291,7 +3291,7 @@ html.modal-open, body.modal-open {
 .action-sheet-backdrop {
     position: fixed;
     inset: 0;
-    background-color: transparent;
+    background-color: rgba(0, 0, 0, 0.4);
     z-index: 99999;
     display: none;
     opacity: 0;
