@@ -4789,4 +4789,15 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
         background-color: var(--primary-color) !important;
         box-shadow: none !important;
     }
-}
+
+    /* iOS Safari: Modal-Backdrop bis HINTER die untere Browser-Leiste ziehen,
+       damit keine harte Kante über der Tableiste entsteht. position:fixed wird
+       auf iOS an der kleinen (sichtbaren) Viewport-Unterkante gekappt; mit der
+       großen Viewport-Höhe (100vh) + Puffer reicht der Hintergrund hinter die
+       dynamische Safari-Leiste und das darunterliegende dunkle Element. */
+    #modal-container {
+        top: -100px !important;
+        bottom: auto !important;
+        height: calc(100vh + 200px) !important;   /* iOS: 100vh = große Viewport-Höhe */
+        height: calc(100lvh + 200px) !important;   /* moderne Browser: explizit große Viewport-Höhe */
+    }
