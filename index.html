@@ -383,33 +383,28 @@
                                     <div class="zt-panel-body">
                                         <div class="zt-grid-desktop">
                                             <div class="zt-col-left">
-                                                <div class="zt-row">
-                                                    <div class="form-group">
-                                                        <label for="zt-name">Name</label>
-                                                        <input type="text" id="zt-name" class="form-control">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="zt-typ">Art</label>
-                                                        <select id="zt-typ" class="form-control" onchange="setZtTyp(this.value)">
-                                                            <option value="nebenfach">Nebenfach</option>
-                                                            <option value="hauptfach">Hauptfach</option>
-                                                            <option value="sozialverhalten">Arbeits- / Sozialverhalten</option>
-                                                        </select>
-                                                    </div>
+                                                <div class="form-group zt-halbjahr-field">
+                                                    <label for="zt-halbjahr">Halbjahr</label>
+                                                    <select id="zt-halbjahr" class="form-control">
+                                                        <option value="ersten">1. Halbjahr</option>
+                                                        <option value="zweiten">2. Halbjahr</option>
+                                                    </select>
                                                 </div>
-
-                                                <div class="zt-row zt-row-2">
-                                                    <div class="form-group zt-halbjahr-field">
-                                                        <label for="zt-halbjahr">Halbjahr</label>
-                                                        <select id="zt-halbjahr" class="form-control">
-                                                            <option value="ersten">1. Halbjahr</option>
-                                                            <option value="zweiten">2. Halbjahr</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="form-group zt-fach-field">
-                                                        <label for="zt-fach">Fach</label>
-                                                        <input type="text" id="zt-fach" class="form-control">
-                                                    </div>
+                                                <div class="form-group zt-art-field">
+                                                    <label for="zt-typ">Art</label>
+                                                    <select id="zt-typ" class="form-control" onchange="setZtTyp(this.value)">
+                                                        <option value="nebenfach">Nebenfach</option>
+                                                        <option value="hauptfach">Hauptfach</option>
+                                                        <option value="sozialverhalten">Arbeits- / Sozialverhalten</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group zt-fach-field">
+                                                    <label for="zt-fach">Fach</label>
+                                                    <input type="text" id="zt-fach" class="form-control">
+                                                </div>
+                                                <div class="form-group zt-name-field">
+                                                    <label for="zt-name">Name</label>
+                                                    <input type="text" id="zt-name" class="form-control">
                                                 </div>
                                             </div>
 

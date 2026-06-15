@@ -8215,7 +8215,7 @@ function setZtTyp(typ) {
     if (sel && sel.value !== typ) sel.value = typ;
     // Bei Arbeits-/Sozialverhalten entfallen Halbjahr, Fach und Themen
     const isSozial = typ === 'sozialverhalten';
-    document.querySelectorAll('.zt-row-2, .zt-themen-field').forEach(el => {
+    document.querySelectorAll('.zt-halbjahr-field, .zt-fach-field, .zt-themen-field').forEach(el => {
         el.style.display = isSozial ? 'none' : '';
     });
 }
@@ -8293,11 +8293,11 @@ async function ztGenerate() {
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
 
     if (!name || !beob) {
-        swal('Bitte mindestens Name und Beobachtungen ausfüllen.', { icon: 'warning', button: 'OK' });
+        swal('Warnung', 'Bitte mindestens Name und Beobachtungen ausfüllen.', 'warning');
         return;
     }
     if (ZtState.currentTyp !== 'sozialverhalten' && (!fach || !themen)) {
-        swal('Bitte Fach und Themen ausfüllen.', { icon: 'warning', button: 'OK' });
+        swal('Warnung', 'Bitte Fach und Themen ausfüllen.', 'warning');
         return;
     }
 
@@ -8313,7 +8313,7 @@ async function ztGenerate() {
         ztRenderResult();
     } catch(e) {
         ztCloseResult();
-        swal('Fehler beim Generieren. Bitte erneut versuchen.', { icon: 'error', button: 'OK' });
+        swal('Fehler', 'Fehler beim Generieren. Bitte erneut versuchen.', 'error');
     }
 }
 
@@ -8331,7 +8331,7 @@ async function ztRegenerate() {
         ztRenderResult();
     } catch(e) {
         ztRenderResult();
-        swal('Fehler beim Generieren.', { icon: 'error', button: 'OK' });
+        swal('Fehler', 'Fehler beim Generieren.', 'error');
     }
 }
 
@@ -8347,7 +8347,7 @@ async function ztShortenText() {
         ztRenderResult();
     } catch(e) {
         ztRenderResult();
-        swal('Fehler.', { icon: 'error', button: 'OK' });
+        swal('Fehler', 'Fehler beim Kürzen.', 'error');
     }
 }
 
@@ -8363,7 +8363,7 @@ async function ztLengthenText() {
         ztRenderResult();
     } catch(e) {
         ztRenderResult();
-        swal('Fehler.', { icon: 'error', button: 'OK' });
+        swal('Fehler', 'Fehler beim Verlängern.', 'error');
     }
 }
 
@@ -8383,7 +8383,7 @@ async function ztRefineText() {
         ztRenderResult();
     } catch(e) {
         ztRenderResult();
-        swal('Fehler. Bitte erneut versuchen.', { icon: 'error', button: 'OK' });
+        swal('Fehler', 'Fehler beim Verfeinern. Bitte erneut versuchen.', 'error');
     }
 }
 
@@ -8444,11 +8444,13 @@ function ztRenderResult() {
                         <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
                         <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
                         <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
-                        <button class="btn btn-success btn-icon" onclick="ztNextStudent()"><i class="fas fa-user-plus"></i> <span class="btn-text">Nächster Schüler</span></button>
                     </div>
                     <div class="zt-refine">
-                        <input type="text" id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter'){event.preventDefault();ztRefineText();}">
+                        <textarea id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();ztRefineText();}"></textarea>
                         <button class="btn btn-primary btn-icon zt-refine-btn" onclick="ztRefineText()"><i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Anwenden</span></button>
+                    </div>
+                    <div class="zt-next-student-container">
+                        <button class="btn btn-success btn-icon zt-next-student-btn" onclick="ztNextStudent()"><i class="fas fa-user-plus"></i> <span class="btn-text">Nächster Schüler</span></button>
                     </div>
                 </div>
             </div>

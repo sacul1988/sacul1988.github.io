@@ -3368,6 +3368,12 @@ body.modal-open {
     gap: 12px;
 }
 
+.zt-col-left {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
 .zt-radio-group {
     display: flex;
     gap: 16px;
@@ -3692,7 +3698,18 @@ body.modal-open {
     border-top: 1px solid var(--border-color);
 }
 .zt-refine-input { flex: 1; min-width: 0; }
+textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 .zt-refine-btn { flex-shrink: 0; }
+
+.zt-next-student-container {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-color);
+}
+.zt-next-student-container .btn {
+    width: 100%;
+    justify-content: center;
+}
 
 /* Archiv-Modal */
 .zt-modal .zt-archive-list {
@@ -4210,15 +4227,16 @@ body.modal-open {
         flex: 1;
     }
     
-    .zt-col-left, .zt-col-right {
+    .zt-col-right {
         display: flex;
         flex-direction: column;
         gap: 14px;
     }
-    
-    /* Name, Art, Halbjahr, Fach untereinander auf der linken Seite */
-    .zt-col-left .zt-row {
+
+    .zt-col-left {
+        display: grid;
         grid-template-columns: 1fr;
+        gap: 14px;
     }
     
     /* Dynamisches Strecken der Eingabefelder auf der rechten Seite bis zum Rand */
@@ -4266,6 +4284,14 @@ body.modal-open {
         align-self: stretch;
     }
 
+    .zt-result-right {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: space-between;
+        align-self: stretch;
+    }
+
     /* Im Desktop-Ergebnis soll die Textarea flexibel hoch sein und bis zum Rand gehen */
     #zt-result-container textarea.zt-result-text {
         flex: 1;
@@ -4295,12 +4321,37 @@ body.modal-open {
         display: flex;
         flex-direction: column;
         gap: 10px;
-        margin-top: 20px;
-        padding-top: 20px;
+        margin-top: 16px;
+        padding-top: 16px;
         border-top: 1px solid var(--border-color);
+        flex: 1;
+    }
+
+    #zt-result-container textarea.zt-refine-input {
+        flex: 1;
+        width: 100%;
+        resize: none;
+        min-height: 80px;
+        height: 100%;
+        box-sizing: border-box;
     }
 
     #zt-result-container .zt-refine-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 16px;
+        flex-shrink: 0;
+    }
+
+    /* Nächster Schüler Container ganz unten */
+    #zt-result-container .zt-next-student-container {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+        flex-shrink: 0;
+    }
+    
+    #zt-result-container .zt-next-student-container .btn {
         width: 100%;
         justify-content: center;
         padding: 12px 16px;
