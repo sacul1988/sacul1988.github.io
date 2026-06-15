@@ -1891,6 +1891,11 @@ html.login-active, body.login-active {
         box-shadow: none !important;
     }
 
+    .desktop-header-buttons .btn i,
+    .desktop-header-buttons .btn svg {
+        color: var(--primary-color) !important;
+    }
+
     .desktop-header-buttons .btn:active {
         background-color: rgba(67, 97, 238, 0.08) !important;
     }
