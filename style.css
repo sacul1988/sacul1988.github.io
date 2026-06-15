@@ -4228,6 +4228,10 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         overflow: hidden;
     }
 
+    #zt-result-container .zt-modal-head {
+        margin-bottom: 6px;
+    }
+
     /* Grid/Flex-Struktur des Ergebnis-Panels auf Mobile */
     .zt-result-grid-desktop {
         display: flex;
@@ -4400,6 +4404,11 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         min-height: 120px;
         resize: none;
         box-sizing: border-box;
+    }
+
+    #zt-result-container .zt-next-student-container {
+        margin-top: 6px;
+        padding-top: 6px;
     }
 }
 
