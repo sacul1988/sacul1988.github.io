@@ -1271,11 +1271,9 @@ html.login-active, body.login-active {
     position: fixed;
     inset: -100px;
     padding: 116px;
-    /* Etwas dunkleres Grau als --bg-color, transparent (80%),
-       damit der Hintergrund durchscheint statt wie eine graue Wand.
-       Hinweis: gleiche Basisfarbe wie html/body.modal-open unten, damit
-       hinter der iOS-Safari-Leiste keine Kante entsteht. */
-    background-color: rgba(220, 225, 237, 0.80);
+    /* Gleiche Farbe wie --bg-color (#f2f4fa), aber leicht transparent,
+       damit der Hintergrund dezent durchscheint statt wie eine graue Wand. */
+    background-color: rgba(242, 244, 250, 0.85);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     z-index: 1001;
@@ -4811,7 +4809,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
        Wurzel-Hintergrund randlos bis zum Displayende -> hinter der Leiste
        erscheint nur noch #f2f4fa, keine harte Kante / kein dunkler Streifen. */
     html.modal-open, body.modal-open {
-        background-color: rgb(220, 225, 237) !important;   /* gleiche Basisfarbe wie der Backdrop */
+        background-color: var(--bg-color) !important;
     }
     body.modal-open {
         height: 100dvh !important;
