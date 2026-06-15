@@ -94,6 +94,12 @@
                     <i class="fas fa-right-from-bracket"></i>
                 </button>
             </div>
+            <script>
+                // Zeigt die globalen Werkzeug-Buttons sofort an, wenn der Nutzer angemeldet ist
+                if (localStorage.getItem('classes')) {
+                    document.getElementById('tool-launchers').style.display = 'flex';
+                }
+            </script>
         </header>
         
         <!-- Seitencontainer -->
