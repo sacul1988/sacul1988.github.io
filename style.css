@@ -34,14 +34,12 @@
 
 html {
     background-color: var(--bg-color);
-    transition: background-color 0.25s ease;
 }
 
 html, body {
     min-height: 100%;
     width: 100%;
     overflow-x: hidden;
-    transition: background-color 0.25s ease;
 }
 
 body {
@@ -2820,7 +2818,6 @@ html.modal-open, body.modal-open {
     height: 100dvh !important;
     position: relative;
     overscroll-behavior: contain;
-    background-color: #979ca7 !important;
 }
 
 .modal,
