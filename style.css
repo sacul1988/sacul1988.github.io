@@ -1054,6 +1054,14 @@ select.form-control {
     width: 100%;
 }
 
+html.login-active, body.login-active {
+    overflow: hidden !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+}
+
 /* Login Overlay */
 .login-overlay {
     position: fixed;
