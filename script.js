@@ -8270,13 +8270,9 @@ function ztOnTextEdited(val) {
 function ztNextStudent() {
     ztFlushSave();
     const nameEl = document.getElementById('zt-name');
-    const fachEl = document.getElementById('zt-fach');
-    const themenEl = document.getElementById('zt-themen');
     const beobEl = document.getElementById('zt-beobachtungen');
     
     if (nameEl) nameEl.value = '';
-    if (fachEl) fachEl.value = '';
-    if (themenEl) themenEl.value = '';
     if (beobEl) beobEl.value = '';
     
     ZtState.currentId = null;
