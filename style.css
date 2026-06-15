@@ -4718,4 +4718,13 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     .class-card:hover {
         box-shadow: var(--box-shadow) !important;
     }
+
+    /* Planung-„Optionen" und „Zeitraum" (Kalender + Planung) waren deutlich
+       schmaler als die übrigen Modale – auf Mobile gleich breit machen.
+       Nur mobil; am Desktop bleiben sie über das Inline-Styling schmal. */
+    #planung-optionen-modal,
+    #planung-zeitraum-modal {
+        width: 95% !important;
+        max-width: 480px !important;
+    }
 }
