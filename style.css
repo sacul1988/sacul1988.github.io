@@ -4781,11 +4781,6 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
         transition: background-color 0.25s ease;
     }
     html.modal-open, body.modal-open {
-        background-color: #7a7f8a !important;
-    }
-
-    /* Modal-Container: Transparent auf Mobile, da die Abdunkelung durch body geschieht (verhindert doppelte Abdunkelung) */
-    #modal-container {
-        background-color: transparent !important;
+        background-color: #979ca7 !important;
     }
 }
