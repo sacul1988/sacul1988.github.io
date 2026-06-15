@@ -4738,4 +4738,13 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     #planung-zeitraum-modal .planung-date-input::-webkit-datetime-edit {
         text-align: center;
     }
+
+    /* Planung-Tabelle: kein Hover-Einfärben der Zeilen beim Gleiten mit
+       Finger/Maus (Klick zum Eintragen bleibt). Zebrastreifen bleiben erhalten. */
+    .planung-table tbody tr:hover {
+        background: transparent !important;
+    }
+    .planung-table tbody tr:nth-child(even):hover {
+        background: #f8f9fa !important;
+    }
 }
