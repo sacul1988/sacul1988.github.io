@@ -5672,7 +5672,38 @@ async function zeugnisnoteGenerate(index, richtung) {
     // Ladeansicht
     const container = document.getElementById(`zn-inline-${index}`);
     if (container) {
-        container.innerHTML = `<div class="zn-loading"><i class="fas fa-circle-notch fa-spin"></i></div>`;
+        const hasExisting = student.zeugnisnote && student.zeugnisBegruendung;
+        if (hasExisting) {
+            const begruendungEl = document.getElementById(`zn-begruendung-${index}`);
+            if (begruendungEl) {
+                begruendungEl.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; min-height: inherit;"><i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i></div>`;
+            }
+            const actionsEl = container.querySelector('.zn-actions');
+            if (actionsEl) {
+                actionsEl.style.opacity = '0.5';
+                actionsEl.style.pointerEvents = 'none';
+            }
+            const triggerEl = container.querySelector('.zn-generate-trigger');
+            if (triggerEl) {
+                triggerEl.disabled = true;
+            }
+        } else {
+            // Erstmaliges Erstellen: Platzhalter-Layout, damit die Karte nicht springt
+            container.innerHTML = `
+                <div class="zn-top-row">
+                    <button class="zn-generate-trigger" disabled><i class="fas fa-wand-magic-sparkles"></i> <span>Zeugnis erstellen</span></button>
+                </div>
+                <div class="zn-begruendung" id="zn-begruendung-${index}" style="display: flex; align-items: center; justify-content: center; min-height: 180px;">
+                    <i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                </div>
+                <div class="zn-actions" style="opacity: 0.5; pointer-events: none;">
+                    <button class="zn-action-btn zn-new"><i class="fas fa-rotate-left"></i> Neu</button>
+                    <button class="zn-action-btn zn-better"><i class="fas fa-caret-up"></i> Besser</button>
+                    <button class="zn-action-btn zn-worse"><i class="fas fa-caret-down"></i> Schlechter</button>
+                    <button class="zn-action-btn zn-adjust"><i class="fas fa-sliders"></i> Anpassen</button>
+                </div>
+            `;
+        }
     }
     _zeugnisnoteBusy = true;
 
