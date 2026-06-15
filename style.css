@@ -3161,6 +3161,32 @@ html.modal-open, body.modal-open {
         padding: 20px 15px !important;
     }
 
+    /* 11. Mobil-freundliche Klickflächen (Touch Targets) */
+    .student-list-table input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        margin: 0;
+        vertical-align: middle;
+    }
+
+    .topbar-btn,
+    .mobile-overflow-btn,
+    .student-list-table .student-actions .btn {
+        position: relative;
+    }
+
+    .topbar-btn::after,
+    .mobile-overflow-btn::after,
+    .student-list-table .student-actions .btn::after {
+        content: '';
+        position: absolute;
+        top: -6px;
+        bottom: -6px;
+        left: -6px;
+        right: -6px;
+    }
+
 }
 
 /* --- Desktop Header Actions & Mobile Overflow --- */

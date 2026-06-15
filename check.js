@@ -95,7 +95,23 @@ for (const id of ids) { if (seen.has(id)) dups.add(id); else seen.add(id); }
 if (dups.size) { for (const d of dups) fail(`doppelte id="${d}"`); }
 else ok('keine doppelten IDs');
 
+// ===================== 4) Service-Worker Cache-Update =====================
+console.log('\n4) Service-Worker Cache-Update');
+try {
+  const swPath = path.join(ROOT, 'sw.js');
+  let swContent = fs.readFileSync(swPath, 'utf8');
+  const now = new Date();
+  const timestamp = now.toISOString().replace(/[^0-9]/g, '').slice(0, 12);
+  const newCacheVersion = `schulverwaltung-v${timestamp}`;
+  swContent = swContent.replace(/const CACHE = '[^']+';/, `const CACHE = '${newCacheVersion}';`);
+  fs.writeFileSync(swPath, swContent, 'utf8');
+  ok(`Cache-Version in sw.js automatisch auf "${newCacheVersion}" angehoben`);
+} catch (e) {
+  fail(`Fehler beim Aktualisieren der Cache-Version in sw.js: ${e.message}`);
+}
+
 // ===================== Ergebnis =====================
 console.log('');
 if (problems) { console.error(`FEHLGESCHLAGEN: ${problems} Problem(e) gefunden.`); process.exit(1); }
 console.log('Alles in Ordnung ✓');
+
