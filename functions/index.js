@@ -121,6 +121,41 @@ Sei bei der Einschätzung der mündlichen Mitarbeit konsequent und nicht zu wohl
 Genauso gilt umgekehrt: Eine durchgehend sehr positive mündliche Mitarbeit kann die Endnote über den schriftlichen Durchschnitt heben, in der Regel ebenfalls um etwa eine Notenstufe.
 Die im Schlusssatz von "mitarbeit_text" genannte Note muss exakt dem Wert von "endnote" entsprechen.`;
 
+function formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote) {
+  if (!Array.isArray(schriftlicheNoten) || schriftlicheNoten.length === 0) {
+    return "";
+  }
+
+  const names = schriftlicheNoten.map(n => n.name || "Arbeit");
+  const grades = schriftlicheNoten.map(n => n.grade);
+
+  let namesStr = "";
+  if (names.length === 1) {
+    namesStr = names[0];
+  } else {
+    namesStr = names.slice(0, -1).join(", ") + " und " + names[names.length - 1];
+  }
+
+  let gradesStr = "";
+  if (grades.length === 1) {
+    gradesStr = grades[0];
+  } else {
+    gradesStr = grades.slice(0, -1).join(", ") + " und " + grades[grades.length - 1];
+  }
+
+  const singular = names.length === 1;
+  const sentence1 = singular 
+    ? `Du hast in ${namesStr} die Note ${gradesStr} geschrieben.`
+    : `Du hast in ${namesStr} die Noten ${gradesStr} geschrieben.`;
+
+  const durchschnittKomma = durchschnitt ? String(durchschnitt).replace(".", ",") : "";
+  const sentence2 = durchschnitt 
+    ? ` Daraus ergibt sich ein schriftlicher Durchschnitt von ${durchschnittKomma} und die Note ${durchschnittNote}.`
+    : "";
+
+  return sentence1 + sentence2;
+}
+
 exports.generateZeugnisnote = onCall(
   { secrets: [anthropicApiKey], invoker: "public", cors: true },
   async (request) => {
@@ -128,7 +163,7 @@ exports.generateZeugnisnote = onCall(
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
     }
 
-    const { durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, fachContext } = request.data || {};
+    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, fachContext } = request.data || {};
     const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
 
     const durchschnittKomma = durchschnitt ? String(durchschnitt).replace(".", ",") : "";
@@ -184,7 +219,14 @@ exports.generateZeugnisnote = onCall(
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
       note = (parsed.note || parsed.endnote || "").toString().trim();
-      begruendung = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
+      const mitarbeitText = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
+      
+      const firstPart = formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote);
+      if (firstPart && mitarbeitText) {
+        begruendung = firstPart + " " + mitarbeitText;
+      } else {
+        begruendung = mitarbeitText || firstPart;
+      }
     } catch (e) {
       throw new HttpsError("internal", "Antwort konnte nicht verarbeitet werden.");
     }
