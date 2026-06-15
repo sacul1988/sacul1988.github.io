@@ -1053,10 +1053,17 @@ function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
 
-    // Immediately start dimming the Safari chrome and browser frame
-    setDimmedThemeColor();
-    document.documentElement.classList.add('modal-open');
-    document.body.classList.add('modal-open');
+    if (modalId === 'mobile-menu-modal') {
+        modalContainer.classList.add('mobile-menu-active');
+        document.documentElement.classList.add('modal-open-scroll-lock');
+        document.body.classList.add('modal-open-scroll-lock');
+    } else {
+        modalContainer.classList.remove('mobile-menu-active');
+        // Immediately start dimming the Safari chrome and browser frame
+        setDimmedThemeColor();
+        document.documentElement.classList.add('modal-open');
+        document.body.classList.add('modal-open');
+    }
 
     // Alle Modals ausblenden
     const modals = document.querySelectorAll('.modal');
@@ -1087,7 +1094,7 @@ function showModal(modalId) {
     // A tiny 60ms delay gives iOS Safari UI thread a head start to initiate
     // the status/address bar theme-color transition, so they finish exactly together.
     setTimeout(() => {
-        if (document.documentElement.classList.contains('modal-open')) {
+        if (document.documentElement.classList.contains('modal-open') || document.documentElement.classList.contains('modal-open-scroll-lock')) {
             modalContainer.style.display = 'flex';
             modalContainer.offsetHeight; // Force reflow
             modalContainer.classList.add('show');
@@ -1105,6 +1112,7 @@ function hideModal() {
         setTimeout(() => {
             if (!modalContainer.classList.contains('show')) {
                 modalContainer.style.display = 'none';
+                modalContainer.classList.remove('mobile-menu-active');
                 
                 // Alle Modals ausblenden
                 const modals = document.querySelectorAll('.modal');
@@ -1119,6 +1127,8 @@ function hideModal() {
 
     document.documentElement.classList.remove('modal-open');
     document.body.classList.remove('modal-open');
+    document.documentElement.classList.remove('modal-open-scroll-lock');
+    document.body.classList.remove('modal-open-scroll-lock');
     restoreThemeColor();
 
     // Sitzplan-spezifische Logik: selectedDesk zurücksetzen und Auswahl aufheben

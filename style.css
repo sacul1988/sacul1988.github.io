@@ -4648,6 +4648,24 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         padding: 12px 16px;
     }
 }
+/* Scroll-Sperre ohne Abdunkelung */
+html.modal-open-scroll-lock, body.modal-open-scroll-lock {
+    overflow: hidden !important;
+    height: 100dvh !important;
+    position: relative;
+    overscroll-behavior: contain;
+}
 
+/* Transparenter Hintergrund für das mobile Aktionsmenü-Modal */
+#modal-container.mobile-menu-active {
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+}
 
-
+/* Erzwinge die Beschriftung der geklonten Buttons im Aktionsmenü auf Mobile */
+#mobile-menu-buttons-container .btn-text {
+    display: inline !important;
+    margin-left: 8px !important;
+}
