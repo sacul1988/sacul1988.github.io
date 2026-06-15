@@ -1053,7 +1053,10 @@ function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
 
+    // Immediately start dimming the Safari chrome and browser frame
     setDimmedThemeColor();
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
 
     // Alle Modals ausblenden
     const modals = document.querySelectorAll('.modal');
@@ -1081,12 +1084,16 @@ function showModal(modalId) {
         }
     }
 
-    modalContainer.style.display = 'flex';
-    modalContainer.offsetHeight; // Force reflow
-    modalContainer.classList.add('show');
-    modalContainer.setAttribute('aria-hidden', 'false');
-    document.documentElement.classList.add('modal-open');
-    document.body.classList.add('modal-open');
+    // A tiny 60ms delay gives iOS Safari UI thread a head start to initiate
+    // the status/address bar theme-color transition, so they finish exactly together.
+    setTimeout(() => {
+        if (document.documentElement.classList.contains('modal-open')) {
+            modalContainer.style.display = 'flex';
+            modalContainer.offsetHeight; // Force reflow
+            modalContainer.classList.add('show');
+            modalContainer.setAttribute('aria-hidden', 'false');
+        }
+    }, 60);
 }
 
 function hideModal() {
@@ -7913,12 +7920,20 @@ function openMobileActionSheet(title, sourceButtonsSelector) {
         });
     }
     
-    backdrop.style.display = 'flex';
-    backdrop.offsetHeight; // Force reflow to trigger CSS transition
-    backdrop.classList.add('show');
+    // Start Safari chrome dimming immediately
+    setDimmedThemeColor();
     document.documentElement.classList.add('modal-open');
     document.body.classList.add('modal-open');
-    setDimmedThemeColor();
+
+    backdrop.style.display = 'flex';
+    backdrop.offsetHeight; // Force reflow
+
+    // A tiny 60ms delay to align the transitions perfectly
+    setTimeout(() => {
+        if (document.documentElement.classList.contains('modal-open')) {
+            backdrop.classList.add('show');
+        }
+    }, 60);
 }
 
 function closeMobileActionSheet() {

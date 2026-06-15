@@ -1298,6 +1298,14 @@ html.login-active, body.login-active {
     cursor: default;
     box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     border: 1px solid var(--border-color);
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+}
+
+#modal-container.show .modal {
+    transform: scale(1);
+    opacity: 1;
 }
 
 /* Spezifische Breite für das Evaluationsmodal im Sitzplan */
