@@ -4727,4 +4727,15 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
         width: 95% !important;
         max-width: 480px !important;
     }
+
+    /* Zeitraum-Modal: Datumsfelder füllen zusammen die volle Modalbreite,
+       Datum jeweils mittig zentriert (feste Breite aufheben). Nur mobil. */
+    #planung-zeitraum-modal .planung-date-input {
+        flex: 1 1 0 !important;
+        width: auto !important;
+        text-align: center !important;
+    }
+    #planung-zeitraum-modal .planung-date-input::-webkit-datetime-edit {
+        text-align: center;
+    }
 }
