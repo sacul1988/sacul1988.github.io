@@ -14,6 +14,9 @@
 node_modules/
 package-lock.json
 
+# Lokale Dev-Screenshots / Tooling (enthält evtl. Zugangsdaten)
+.dev/
+
 # Firebase
 functions/node_modules/
 .firebase/

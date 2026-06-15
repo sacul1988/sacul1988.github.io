@@ -1,7 +1,7 @@
 {
   "name": "Schulverwaltung",
   "short_name": "Schulverwaltung",
-  "start_url": "index.html",
+  "start_url": "app.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#f2f4fa",

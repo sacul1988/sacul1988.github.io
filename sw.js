@@ -1,7 +1,8 @@
-const CACHE = 'schulverwaltung-v202606150933';
+const CACHE = 'schulverwaltung-v202606151033';
 const ASSETS = [
     './',
     './index.html',
+    './app.html',
     './grades.js',
     './script.js',
     './style.css',
@@ -62,6 +63,6 @@ self.addEventListener('fetch', e => {
                 caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
                 return res;
             })
-            .catch(() => caches.match(req).then(cached => cached || caches.match('./index.html')))
+            .catch(() => caches.match(req).then(cached => cached || caches.match(req.mode === 'navigate' ? './app.html' : './index.html')))
     );
 });

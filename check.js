@@ -46,8 +46,11 @@ for (const f of files) {
 }
 
 // ===================== Quellen laden =====================
-const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-const inlineScripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m => m[1]).join('\n');
+const HTML_FILES = ['index.html', 'app.html'].filter(f => fs.existsSync(path.join(ROOT, f)));
+const htmlSources = HTML_FILES.map(f => ({ name: f, text: fs.readFileSync(path.join(ROOT, f), 'utf8') }));
+const inlineScripts = htmlSources
+  .map(h => [...h.text.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m => m[1]).join('\n'))
+  .join('\n');
 const allJsText = files.map(f => fs.readFileSync(f, 'utf8')).join('\n') + '\n' + inlineScripts;
 
 // ===================== Definierte Funktionsnamen einsammeln =====================
@@ -76,7 +79,7 @@ function collectHandlers(src, label) {
     }
   }
 }
-collectHandlers(html, 'index.html');
+for (const h of htmlSources) collectHandlers(h.text, h.name);
 for (const f of files) collectHandlers(fs.readFileSync(f, 'utf8'), path.relative(ROOT, f));
 
 // ===================== 2) Abgleich =====================
@@ -88,12 +91,14 @@ for (const [name, where] of [...called].sort((a, b) => a[0].localeCompare(b[0]))
 if (missing === 0) ok(`alle ${called.size} genutzten Handler-Funktionen sind definiert`);
 
 // ===================== 3) Doppelte IDs =====================
-console.log('\n3) Doppelte Element-IDs (index.html)');
-const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
-const seen = new Set(), dups = new Set();
-for (const id of ids) { if (seen.has(id)) dups.add(id); else seen.add(id); }
-if (dups.size) { for (const d of dups) fail(`doppelte id="${d}"`); }
-else ok('keine doppelten IDs');
+console.log('\n3) Doppelte Element-IDs');
+for (const h of htmlSources) {
+  const ids = [...h.text.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
+  const seen = new Set(), dups = new Set();
+  for (const id of ids) { if (seen.has(id)) dups.add(id); else seen.add(id); }
+  if (dups.size) { for (const d of dups) fail(`doppelte id="${d}" in ${h.name}`); }
+  else ok(`keine doppelten IDs in ${h.name}`);
+}
 
 // ===================== 4) Service-Worker Cache-Update =====================
 console.log('\n4) Service-Worker Cache-Update');
