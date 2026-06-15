@@ -4154,12 +4154,60 @@ body.modal-open {
 
 /* ===== Zeugnistextgenerator Desktop-Optimierung ===== */
 @media (min-width: 992px) {
+    /* Dehne das Tool-Fenster und die Card für zeugnis-texte-module bis zum unteren Bildschirmrand aus */
+    .tool-window-overlay.open .tool-window {
+        height: 100vh;
+        overflow-y: hidden;
+    }
+    
+    .tool-window-overlay.open .tool-window-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    #zeugnis-texte-module.tool-window-panel.active {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        height: 100%;
+    }
+
+    #zeugnis-texte-module .card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0;
+        min-height: 520px;
+    }
+
+    #zeugnis-texte-module .zt-stack {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #zeugnis-texte-module #zt-input-container,
+    #zeugnis-texte-module #zt-result-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #zeugnis-texte-module .zt-panel-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
     /* Eingabemaske zweispaltig */
     .zt-grid-desktop {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 24px;
         align-items: stretch;
+        flex: 1;
     }
     
     .zt-col-left, .zt-col-right {
@@ -4208,6 +4256,7 @@ body.modal-open {
         grid-template-columns: 2fr 1fr;
         gap: 24px;
         align-items: stretch;
+        flex: 1;
     }
 
     .zt-result-left {
