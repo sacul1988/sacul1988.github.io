@@ -1,4 +1,4 @@
-const CACHE = 'schulverwaltung-v202606151033';
+const CACHE = 'schulverwaltung-v202606151050';
 const ASSETS = [
     './',
     './index.html',
