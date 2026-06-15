@@ -4529,6 +4529,24 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         margin-top: 6px;
         padding-top: 6px;
     }
+
+    /* Mobil-Layout für den Zeugnisgenerator im Dokumenten-Scroll-Modus (docScroll = true) */
+    .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) #zeugnis-texte-module.tool-window-panel.active,
+    .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) #zeugnis-texte-module .zt-stack,
+    .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) #zt-input-container,
+    .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) #zt-result-container,
+    .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) #zt-result-container .zt-panel-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    
+    .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) #zeugnis-texte-module .card {
+        min-height: calc(100dvh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0;
+    }
 }
 
 /* ===== Zeugnistextgenerator Desktop-Optimierung ===== */
