@@ -4669,3 +4669,53 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     display: inline !important;
     margin-left: 8px !important;
 }
+
+/* ================================================================
+   MOBILE (Touch): keine Hover-/Tap-Animationen
+   ----------------------------------------------------------------
+   Auf dem Smartphone bedient man mit dem Finger – Hover-Effekte
+   (Anheben, Skalieren, Farbwechsel) sind dort sinnlos und stören
+   (z. B. „klebende" Hover-Zustände nach dem Antippen). Daher hier
+   gebündelt entfernt. Echte @keyframes-Animationen (z. B. Lade-
+   Spinner) bleiben unberührt, da nur `transition` deaktiviert wird.
+   Bewusst am Dateiende, damit diese Regeln in Spezifitäts-/
+   Quellreihenfolge-Konflikten gewinnen.
+   ================================================================ */
+@media (max-width: 600px) {
+    /* Keine Übergangs-Easings -> Zustandswechsel erfolgen sofort, ohne Animation */
+    *, *::before, *::after {
+        transition: none !important;
+    }
+
+    /* Kein Anheben / Zoomen / Drücken bei Hover, Antippen oder Fokus
+       (nur Interaktions-Zustände – Basis-Transforms wie Zentrierung bleiben erhalten) */
+    button:hover, button:active, button:focus,
+    a:hover, a:active,
+    [class*="btn"]:hover, [class*="btn"]:active, [class*="btn"]:focus,
+    .topbar-btn:hover, .topbar-btn:active, .topbar-btn:focus,
+    .class-card:hover, .class-card:active,
+    .card:hover,
+    .desk:hover, .desk:active {
+        transform: none !important;
+    }
+
+    /* Buttons: kein Verblassen beim Hover */
+    .btn:hover,
+    [class*="btn"]:hover {
+        opacity: 1 !important;
+    }
+
+    /* Topbar-Icons bleiben blau – kein Farbwechsel beim Antippen */
+    .topbar-btn:hover,
+    .topbar-btn:focus {
+        background: transparent !important;
+        color: var(--primary-color) !important;
+        border-color: transparent !important;
+    }
+
+    /* Karten & Klassenkacheln: kein „Anheben" über den Schatten */
+    .card:hover,
+    .class-card:hover {
+        box-shadow: var(--box-shadow) !important;
+    }
+}
