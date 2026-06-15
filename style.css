@@ -4159,7 +4159,7 @@ body.modal-open {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 24px;
-        align-items: start;
+        align-items: stretch;
     }
     
     .zt-col-left, .zt-col-right {
@@ -4168,12 +4168,38 @@ body.modal-open {
         gap: 14px;
     }
     
-    .zt-themen-textarea {
-        min-height: 120px;
+    /* Name, Art, Halbjahr, Fach untereinander auf der linken Seite */
+    .zt-col-left .zt-row {
+        grid-template-columns: 1fr;
     }
     
-    .zt-textarea {
+    /* Dynamisches Strecken der Eingabefelder auf der rechten Seite bis zum Rand */
+    .zt-col-right {
+        align-self: stretch;
+    }
+    
+    .zt-col-right .zt-textarea-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    
+    .zt-col-right .zt-textarea-wrap {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    
+    #zt-input-container textarea.zt-textarea {
+        flex: 1;
         min-height: 160px;
+        height: 100%;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+    
+    .zt-themen-textarea {
+        min-height: 120px;
     }
 
     /* Ergebnismaske zweispaltig */
@@ -4181,14 +4207,23 @@ body.modal-open {
         display: grid;
         grid-template-columns: 2fr 1fr;
         gap: 24px;
-        align-items: start;
+        align-items: stretch;
     }
 
-    /* Im Desktop-Ergebnis soll die Textarea flexibel hoch sein */
-    #zt-result-container textarea.zt-result-text {
-        min-height: 380px;
+    .zt-result-left {
+        display: flex;
+        flex-direction: column;
         height: 100%;
         align-self: stretch;
+    }
+
+    /* Im Desktop-Ergebnis soll die Textarea flexibel hoch sein und bis zum Rand gehen */
+    #zt-result-container textarea.zt-result-text {
+        flex: 1;
+        min-height: 380px;
+        height: 100%;
+        resize: vertical;
+        box-sizing: border-box;
     }
 
     /* Aktionen vertikal stapeln */
