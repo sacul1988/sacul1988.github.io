@@ -298,7 +298,7 @@ function showPage(page, classId = null, shouldPushState = true) {
             }
             
             // Standardmodul laden
-            showModule('sitzplan');
+            showModule('sitzplan', false);
         }
     }
     
@@ -311,7 +311,7 @@ function showPage(page, classId = null, shouldPushState = true) {
 
     // Verlauf verwalten
     if (shouldPushState) {
-        const state = { page: page, classId: classId };
+        const state = { page: page, classId: classId, module: page === 'class' ? 'sitzplan' : null, toolWindow: null };
         if (page === 'home') {
             if (history.state && history.state.page !== 'home') {
                 history.pushState(state, '');
@@ -325,7 +325,7 @@ function showPage(page, classId = null, shouldPushState = true) {
 }
 
 // Modul wechseln
-function showModule(module) {
+function showModule(module, shouldPushState = true) {
     // Beim Verlassen des Noten-Tabs alle Schüler einklappen
     if (activeModule === 'noten' && module !== 'noten') {
         collapseAllStudents();
@@ -420,6 +420,10 @@ function showModule(module) {
     activeModule = module;
     localStorage.setItem('activeModule', module);
     renderModuleContent();
+
+    if (shouldPushState) {
+        history.pushState({ page: currentPage, classId: activeClassId, module: module, toolWindow: null }, '');
+    }
 }
 
 function isZeugnisNotesTextarea(element) {
@@ -512,7 +516,7 @@ function initToolWindows() {
     }
 }
 
-function openToolWindow(which) {
+function openToolWindow(which, shouldPushState = true) {
     initToolWindows();
     const overlay = document.getElementById('tool-window-overlay');
     if (!overlay) return;
@@ -544,10 +548,14 @@ function openToolWindow(which) {
 
     overlay.classList.add('open');
 
+    if (shouldPushState) {
+        history.pushState({ page: currentPage, classId: activeClassId, module: activeModule, toolWindow: which }, '');
+    }
+
     // Kalender & Adressbuch laufen im normalen Dokument-Scroll (wie die übrigen
     // Seiten), damit Safari die obere Leiste durchscheinen lässt. Der
     // Zeugnisgenerator bleibt ein fixiertes Vollbild mit gesperrtem Body-Scroll.
-    const docScroll = (which === 'kalender' || which === 'kontakte');
+    const docScroll = (which === 'kalender' || which === 'kontakte' || which === 'zeugnis-texte');
     const container = document.querySelector('.container');
     if (docScroll) {
         overlay.classList.add('doc-scroll');
@@ -600,9 +608,7 @@ function closeToolWindowOnBackdrop(event) {
 
 function closeToolWindowBack() {
     closeToolWindow();
-    if (window._toolWindowOrigin !== 'class') {
-        showPage('home');
-    }
+    showPage('home');
 }
 
 // ===== Such-Modal =====
@@ -1025,11 +1031,29 @@ window.openSyncModal = openSyncModal;
 window.confirmLogout = confirmLogout;
 
 
+// Hilfsfunktionen für dynamische Theme-Color Anpassung bei geöffneten Modals/Backdrops
+function setDimmedThemeColor() {
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+        themeColorMeta.setAttribute('content', '#7c828d');
+    }
+}
+
+function restoreThemeColor() {
+    const isLoginActive = document.documentElement.classList.contains('login-active') || document.body.classList.contains('login-active');
+    const color = isLoginActive ? '#1e293b' : '#f2f4fa';
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+        themeColorMeta.setAttribute('content', color);
+    }
+}
+
 // Modal anzeigen/verstecken
 function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
 
+    setDimmedThemeColor();
     modalContainer.style.display = 'flex';
     modalContainer.setAttribute('aria-hidden', 'false');
     document.documentElement.classList.add('modal-open');
@@ -1079,6 +1103,7 @@ function hideModal() {
 
     document.documentElement.classList.remove('modal-open');
     document.body.classList.remove('modal-open');
+    restoreThemeColor();
 
     // Sitzplan-spezifische Logik: selectedDesk zurücksetzen und Auswahl aufheben
     selectedDesk = null;
@@ -1849,7 +1874,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Ersten Zustand im Verlauf festlegen (Startseite)
     if (!history.state) {
-        history.replaceState({ page: 'home', classId: null }, '');
+        history.replaceState({ page: 'home', classId: null, module: null, toolWindow: null }, '');
     }
 
     loadData();
@@ -1860,26 +1885,39 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('popstate', function(event) {
         const modalContainer = document.getElementById('modal-container');
         const isModalOpen = modalContainer && modalContainer.style.display === 'flex';
-        const toolWindowOverlay = document.getElementById('tool-window-overlay');
-        const isToolWindowOpen = toolWindowOverlay && toolWindowOverlay.classList.contains('open');
 
         if (isModalOpen) {
             hideModal();
             // Zustand wiederherstellen, da nur das Modal geschlossen wurde
-            history.pushState({ page: currentPage, classId: activeClassId }, '');
+            history.pushState({ page: currentPage, classId: activeClassId, module: activeModule, toolWindow: window._activeToolWindow }, '');
             return;
         }
         
-        if (isToolWindowOpen) {
-            closeToolWindow();
-            // Zustand wiederherstellen, da nur das Tool-Overlay geschlossen wurde
-            history.pushState({ page: currentPage, classId: activeClassId }, '');
-            return;
-        }
+        const state = event.state;
+        const toolWindowOverlay = document.getElementById('tool-window-overlay');
+        const isToolWindowOpen = toolWindowOverlay && toolWindowOverlay.classList.contains('open');
 
-        if (event.state && event.state.page) {
-            showPage(event.state.page, event.state.classId, false);
+        if (state) {
+            if (state.toolWindow) {
+                // Falls ein Tool-Window im neuen Zustand geöffnet sein soll
+                openToolWindow(state.toolWindow, false);
+            } else {
+                // Kein Tool-Window im neuen Zustand -> falls eins offen ist, schließen
+                if (isToolWindowOpen) {
+                    closeToolWindow();
+                }
+                if (state.page) {
+                    showPage(state.page, state.classId, false);
+                    if (state.page === 'class' && state.module) {
+                        showModule(state.module, false);
+                    }
+                }
+            }
         } else {
+            // Fallback auf Startseite
+            if (isToolWindowOpen) {
+                closeToolWindow();
+            }
             showPage('home', null, false);
         }
     });
@@ -3996,6 +4034,7 @@ function renderSitzplanModule() {
         let isTouchPanning = false;
         let touchStartX, touchStartY, touchStartOffsetX, touchStartOffsetY;
         let touchLastX, touchLastY, touchVX, touchVY;
+        let lastTouchTime = 0;
 
         workspace.addEventListener('touchstart', (e) => {
             if (e.touches.length !== 1) return;
@@ -4007,15 +4046,24 @@ function renderSitzplanModule() {
             touchStartOffsetX = workspace._panX || 0;
             touchStartOffsetY = workspace._panY || 0;
             touchVX = touchVY = 0;
+            lastTouchTime = Date.now();
         }, { passive: true });
 
         workspace.addEventListener('touchmove', (e) => {
             if (!isTouchPanning || e.touches.length !== 1) return;
             e.preventDefault();
-            touchVX = e.touches[0].clientX - touchLastX;
-            touchVY = e.touches[0].clientY - touchLastY;
+            const now = Date.now();
+            const dx = e.touches[0].clientX - touchLastX;
+            const dy = e.touches[0].clientY - touchLastY;
+            
+            // Dämpfung/Glättung über gleitenden Durchschnitt
+            touchVX = touchVX * 0.4 + dx * 0.6;
+            touchVY = touchVY * 0.4 + dy * 0.6;
+            
             touchLastX = e.touches[0].clientX;
             touchLastY = e.touches[0].clientY;
+            lastTouchTime = now;
+            
             applyPan(
                 touchStartOffsetX + (e.touches[0].clientX - touchStartX),
                 touchStartOffsetY + (e.touches[0].clientY - touchStartY)
@@ -4025,6 +4073,19 @@ function renderSitzplanModule() {
         workspace.addEventListener('touchend', () => {
             if (!isTouchPanning) return;
             isTouchPanning = false;
+            
+            // Falls der Nutzer vor dem Loslassen kurz angehalten hat, kein Nachrollen ausführen
+            const timeSinceLastMove = Date.now() - lastTouchTime;
+            if (timeSinceLastMove > 80) {
+                touchVX = 0;
+                touchVY = 0;
+            }
+            
+            // Geschwindigkeit begrenzen
+            const maxV = 45;
+            touchVX = Math.min(maxV, Math.max(-maxV, touchVX));
+            touchVY = Math.min(maxV, Math.max(-maxV, touchVY));
+            
             startMomentum(touchVX, touchVY);
         });
 
@@ -4407,7 +4468,7 @@ function renderDesk(desk) {
         deskElement.style.top = `${desk.y}px`;
         
         e.preventDefault(); // Nur verhindern, wenn tatsächlich ein Drag stattfindet
-    }, { signal: deskSignal });
+    }, { passive: false, signal: deskSignal });
     
     // Mouse Up
     document.addEventListener('mouseup', () => {
@@ -7846,6 +7907,7 @@ function openMobileActionSheet(title, sourceButtonsSelector) {
     backdrop.style.display = 'flex';
     backdrop.offsetHeight; // Force reflow to trigger CSS transition
     backdrop.classList.add('show');
+    setDimmedThemeColor();
 }
 
 function closeMobileActionSheet() {
@@ -7853,6 +7915,7 @@ function closeMobileActionSheet() {
     if (!backdrop) return;
     
     backdrop.classList.remove('show');
+    restoreThemeColor();
     setTimeout(() => {
         if (!backdrop.classList.contains('show')) {
             backdrop.style.display = 'none';
@@ -8584,7 +8647,10 @@ function ztRenderArchiveModal() {
         }).join('') + '</div>';
     modal.innerHTML = `
         <div class="zt-modal-head">
-            ${countLabel ? `<span class="zt-archive-count">${countLabel}</span>` : '<span></span>'}
+            <span style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-box-archive"></i> Archiv
+                ${countLabel ? `<span class="zt-archive-count" style="font-size: 0.82rem; font-weight: 400; color: var(--grey-color); background: var(--light-color); padding: 2px 8px; border-radius: 12px; margin-left: 6px;">${countLabel}</span>` : ''}
+            </span>
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
         </div>
         ${body}`;
