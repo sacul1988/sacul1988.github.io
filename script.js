@@ -1045,6 +1045,14 @@ function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
 
+    // Aktuelle Scroll-Position merken (nur beim ersten Öffnen), damit sie beim
+    // Schließen wiederhergestellt werden kann. Der mobile Scroll-Lock
+    // (body.modal-open { height: 100dvh }) würde sie sonst auf 0 setzen ->
+    // die Ansicht spränge beim Schließen nach ganz oben.
+    if (!document.body.classList.contains('modal-open')) {
+        window._preModalScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    }
+
     // Alle Modale (inkl. Archiv im Zeugnistextgenerator) bekommen denselben
     // eingefärbten Backdrop + iOS-Bottom-Fix.
     modalContainer.classList.remove('mobile-menu-active');
@@ -1104,6 +1112,15 @@ function hideModal() {
     document.body.classList.remove('modal-open');
     document.documentElement.classList.remove('modal-open-scroll-lock');
     document.body.classList.remove('modal-open-scroll-lock');
+
+    // Scroll-Position wiederherstellen (der mobile Scroll-Lock hatte sie evtl.
+    // auf 0 gesetzt) -> Ansicht bleibt z. B. beim aktuellen Schüler im Zeugnis-Tab.
+    if (typeof window._preModalScrollY === 'number') {
+        const y = window._preModalScrollY;
+        window._preModalScrollY = null;
+        void document.body.offsetHeight; // Reflow erzwingen, damit der Body wieder volle Höhe hat
+        window.scrollTo(0, y);
+    }
 
     // Sitzplan-spezifische Logik: selectedDesk zurücksetzen und Auswahl aufheben
     selectedDesk = null;
