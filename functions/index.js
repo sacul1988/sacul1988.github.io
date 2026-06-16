@@ -142,7 +142,8 @@ Antworte in genau diesem JSON-Format:
   {"status": "unclear", "questions": ["Frage 1...", "Frage 2...", "Frage 3..."]} (Gib maximal 3 gezielte, kurze Fragen zurück)
   
 - Wenn alle Informationen ausreichend sind oder bereits Fragen beantwortet wurden:
-  {"status": "success", "endnote": "...", "mitarbeit_text": "..."}
+  {"status": "success", "abwaegung": "...", "endnote": "...", "mitarbeit_text": "..."}
+  Das Feld "abwaegung" kommt ZUERST und dient nur deinem internen Abwägen (es wird der Schülerin oder dem Schüler NICHT angezeigt): Halte dort in 1-3 kurzen Sätzen fest, welche Kategorie am besten passt, in welche Richtung und um wie viele Notenschritte du die gerundete Durchschnittsnote verschiebst und wie du dadurch auf die Endnote kommst. Erst danach füllst du "endnote" und "mitarbeit_text".
 
 Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohne Einleitung, Erklärung oder sonstigen Text davor/danach).
 
@@ -161,6 +162,7 @@ EIN eindeutiger Wert als String, ohne Spanne (z. B. "2+", "3", "3-"). Nutze akti
 
 HERLEITUNG DER ENDNOTE (Orientierung, kein starres Rechenschema):
 Gehe IMMER von der gerundeten schriftlichen Durchschnittsnote aus und verschiebe sie in Notenschritten (halbe Stufen in der Reihe: 1, 1-, 2+, 2, 2-, 3+, 3, 3-, 4+, 4, 4-, 5+, 5, 5-) nach oben (= bessere Note) oder unten (= schlechtere Note). Die wichtigsten Stellschrauben sind die Häufigkeit und Qualität der mündlichen Beteiligung sowie das Ausmaß von Störungen und Ablenkungen.
+Zähle die Notenschritte sorgfältig, jede halbe Stufe der Reihe einzeln. Beispiele: Von 3 drei Schritte nach oben: 3 -> 3+ -> 2- -> 2. Von 3 zwei Schritte nach unten: 3 -> 3- -> 4+. Von 2- einen Schritt nach oben: 2- -> 2. Von 4 zwei Schritte nach oben: 4 -> 4+ -> 3-.
 
 WICHTIG – DU MUSST SELBST URTEILEN: Die folgenden Kategorien und Schritt-Spannen sind nur Orientierung, kein Automatismus und keine Rechenaufgabe. Man kann unmöglich alle denkbaren Beobachtungen in feste Formulierungen fassen. Lies die Beobachtungen daher wie eine erfahrene Lehrkraft, wäge selbst ab und entscheide nach Gesamteindruck und Gefühl, ob insgesamt das Positive oder das Negative überwiegt und wie stark – und leite daraus eine stimmige Endnote ab. Rechne nicht stur Schritte ab, sondern triff eine begründete, menschliche Einschätzung. Liegt eine Beschreibung zwischen zwei Kategorien, wähle die passende Zwischenstufe. Die Beispielformulierungen unten beschreiben nur den TENOR; die echten Beobachtungen sind oft anders formuliert – ordne sie sinngemäß ein.
 
@@ -175,7 +177,7 @@ Tenor z. B.: "beteiligt sich gut/häufig", "gutes Grundwissen", "arbeitet meist 
 3. AUSGEGLICHEN / NORMAL / SCHWANKEND -> ±0 (in beiden Fällen), die Note bleibt
 Tenor z. B.: "meldet sich eher selten", "mal mehr, mal weniger beteiligt", "teilweise abgelenkt", "gelegentlich kleinere Störungen", "Mitarbeit schwankt". Positives und Negatives halten sich ungefähr die Waage.
 
-4. ÜBERWIEGEND NEGATIV -> -2 (Hauptfach) / -3 (Nebenfach) Notenschritte nach unten
+4. ÜBERWIEGEND NEGATIV -> -1 bis -2 (Hauptfach) / -2 bis -3 (Nebenfach) Notenschritte nach unten
 Tenor z. B.: "stört regelmäßig", "arbeitet unzuverlässig", "wenig Motivation", "häufig abgelenkt", "muss oft ermahnt werden", "bringt selten etwas ein".
 
 5. SEHR NEGATIV -> bis zu -3 (Hauptfach) / bis zu -4 (Nebenfach) Notenschritte nach unten
@@ -313,7 +315,7 @@ exports.generateZeugnisnote = onCall(
       return { status: "unclear", questions };
     }
 
-    const erlaubt = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5", "5-", "6"];
+    const erlaubt = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5", "5-"];
     if (!erlaubt.includes(note)) note = "";
 
     return { status: "success", note, begruendung };
