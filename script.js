@@ -4117,7 +4117,12 @@ function renderSitzplanModule() {
 
         workspace.addEventListener('touchstart', (e) => {
             if (e.touches.length !== 1) return;
-            if (e.target.closest('.desk') && cls.sitzplan.currentMode === 'edit') return;
+            // Modus FRISCH aus classes[activeClassId] lesen (nicht aus der ggf. durch
+            // Cloud-Sync veralteten Closure-Variable cls) – sonst startet beim Ziehen
+            // eines Tisches im Bearbeiten-Modus zusätzlich das Hintergrund-Panning.
+            const cm = classes[activeClassId] && classes[activeClassId].sitzplan
+                ? classes[activeClassId].sitzplan.currentMode : null;
+            if (e.target.closest('.desk') && cm === 'edit') return;
             if (momentumRaf) cancelAnimationFrame(momentumRaf);
             isTouchPanning = true;
             touchStartX = touchLastX = e.touches[0].clientX;
