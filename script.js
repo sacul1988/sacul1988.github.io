@@ -8,7 +8,8 @@ const AppState = {
     zeugnisViewMode: localStorage.getItem('zeugnisViewMode') || 'individual', // 'individual' or 'average'
     isInitialSyncComplete: false, // Neu: Sperre für Cloud-Sync beim Start
     termine: [],
-    contacts: JSON.parse(localStorage.getItem('contacts') || '[]')
+    contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
+    dashboardNotes: JSON.parse(localStorage.getItem('dashboardNotes') || '[]')
 };
 
 // Start-Sperre setzen (3 Sekunden), damit Cloud-Daten Zeit zum Laden haben
@@ -25,9 +26,20 @@ let classes = AppState.classes;
 window.classes = classes; // Explizit global für index.html verfügbar machen
 let contacts = AppState.contacts;
 window.contacts = contacts;
+let dashboardNotes = AppState.dashboardNotes;
+window.dashboardNotes = dashboardNotes;
 let activeClassId = AppState.activeClassId;
 let activeModule = AppState.activeModule;
 let currentPage = AppState.currentPage;
+
+// Funktion zum globalen Aktualisieren der Notizen (wird von Firestore aufgerufen)
+window.setDashboardNotes = function(newNotes) {
+    if (Array.isArray(newNotes)) {
+        dashboardNotes = newNotes;
+        AppState.dashboardNotes = newNotes;
+        window.dashboardNotes = newNotes;
+    }
+};
 
 // Für Sitzplan-Evaluation
 let currentEvaluationStudentIndex = AppState.currentEvaluationStudentIndex;
@@ -307,6 +319,7 @@ function showPage(page, classId = null, shouldPushState = true) {
     // Inhalte aktualisieren
     if (page === 'home') {
         renderClassesGrid();
+        renderDashboardNotes();
     } else if (page === 'class') {
         renderModuleContent();
     }
@@ -1472,6 +1485,21 @@ function loadData() {
                 classes = [];
             }
         }
+
+        // Lade Kontakte und Notizen ebenfalls
+        const savedContacts = localStorage.getItem('contacts');
+        if (savedContacts) {
+            contacts = JSON.parse(savedContacts);
+            AppState.contacts = contacts;
+            window.contacts = contacts;
+        }
+
+        const savedNotes = localStorage.getItem('dashboardNotes');
+        if (savedNotes) {
+            dashboardNotes = JSON.parse(savedNotes);
+            AppState.dashboardNotes = dashboardNotes;
+            window.dashboardNotes = dashboardNotes;
+        }
     } catch (error) {
         console.error('Fehler beim Laden der Daten:', error);
         // Fallback: Leere Daten verwenden
@@ -1500,55 +1528,102 @@ function renderClassesGrid() {
     classesGrid.innerHTML = '';
     
     if (!classes || classes.length === 0) {
-        classesGrid.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-school"></i>
-                <p>${t('noClasses')}</p>
-                <p>${t('addNewClass')}</p>
-            </div>
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-state';
+        emptyDiv.style.gridColumn = '1 / -1'; // Spanne über alle Spalten
+        emptyDiv.innerHTML = `
+            <i class="fas fa-school"></i>
+            <p>${t('noClasses')}</p>
+            <p>${t('addNewClass')}</p>
         `;
-        return;
-    }
-    
-    classes.forEach((cls, index) => {
-        // Fallback für fehlende students-Arrays
-        if (!cls.students) {
-            cls.students = [];
-        }
-        
-        // Statistiken berechnen
-        const studentCount = cls.students.length;
-        
-        const classCard = document.createElement('div');
-        classCard.className = 'class-card';
-        
-        classCard.innerHTML = `
-            <div class="class-card-header">
-                <span>${cls.name}</span>
-                <span class="class-card-count">${studentCount} Schüler</span>
-            </div>
-            <div class="class-card-body">
-                <div class="module-buttons">
-                    <button class="btn btn-green btn-block" onclick="showPage('class', ${index})">
-                        ${cls.name}
-                    </button>
-                    <div class="class-card-actions">
-                        <button class="btn btn-primary btn-icon-only" onclick="editClass(${index})">
-                            <i class="fas fa-edit"></i>
+        classesGrid.appendChild(emptyDiv);
+    } else {
+        classes.forEach((cls, index) => {
+            // Fallback für fehlende students-Arrays
+            if (!cls.students) {
+                cls.students = [];
+            }
+            
+            // Statistiken berechnen
+            const studentCount = cls.students.length;
+            
+            const classCard = document.createElement('div');
+            classCard.className = 'class-card';
+            
+            classCard.innerHTML = `
+                <div class="class-card-header">
+                    <span>${cls.name}</span>
+                    <span class="class-card-count">${studentCount} Schüler</span>
+                </div>
+                <div class="class-card-body">
+                    <div class="module-buttons">
+                        <button class="btn btn-green btn-block" onclick="showPage('class', ${index})">
+                            ${cls.name}
                         </button>
-                        <button class="btn btn-secondary btn-icon-only" onclick="showCloneModal(${index})">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                        <button class="btn btn-secondary btn-icon-only" onclick="deleteClass(${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="class-card-actions">
+                            <button class="btn btn-primary btn-icon-only" onclick="editClass(${index})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-secondary btn-icon-only" onclick="showCloneModal(${index})">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="btn btn-secondary btn-icon-only" onclick="deleteClass(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
+            `;
+            
+            classesGrid.appendChild(classCard);
+        });
+    }
+
+    // Notizen-Kachel am Ende des Grids anhängen
+    const notesCard = document.createElement('div');
+    notesCard.className = 'class-card dashboard-notes-card';
+    notesCard.innerHTML = `
+        <div class="class-card-header">
+            <span><i class="fas fa-list-check" style="margin-right: 8px;"></i> Notizen &amp; Checkliste</span>
+        </div>
+        <div class="class-card-body" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
+            <div class="notes-input-group" style="margin-bottom: 15px;">
+                <input type="text" id="dashboard-note-input" class="form-control" placeholder="Neue Aufgabe hinzufügen..." onkeydown="if(event.key==='Enter') addDashboardNote()">
+                <button class="btn btn-primary btn-icon-only" onclick="addDashboardNote()" style="margin: 0; flex-shrink: 0;" title="Hinzufügen">
+                    <i class="fas fa-plus"></i>
+                </button>
             </div>
-        `;
-        
-        classesGrid.appendChild(classCard);
-    });
+            <ul id="dashboard-notes-list" class="dashboard-notes-list" style="flex-grow: 1;">
+                <!-- Hier werden die Notizen dynamisch eingefügt -->
+            </ul>
+        </div>
+    `;
+    classesGrid.appendChild(notesCard);
+    
+    // Notizen-Liste befüllen
+    renderDashboardNotes();
+
+    // Kalender-Kachel am Ende des Grids anhängen
+    const calendarCard = document.createElement('div');
+    calendarCard.className = 'class-card dashboard-calendar-card';
+    calendarCard.style.cursor = 'pointer';
+    calendarCard.onclick = () => openToolWindow('kalender');
+    calendarCard.innerHTML = `
+        <div class="class-card-header">
+            <span><i class="fas fa-calendar-alt" style="margin-right: 8px;"></i> Kalender</span>
+            <span id="dashboard-calendar-today-badge" class="class-card-count">-</span>
+        </div>
+        <div class="class-card-body" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
+            <div id="dashboard-calendar-today-text" class="calendar-today-text" style="font-size: 0.9rem; font-weight: 600; color: var(--primary-color); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-clock"></i> Laden...
+            </div>
+            <ul id="dashboard-calendar-list" class="dashboard-calendar-list" style="flex-grow: 1;">
+                <!-- Hier werden die Termine dynamisch eingefügt -->
+            </ul>
+        </div>
+    `;
+    classesGrid.appendChild(calendarCard);
+    renderDashboardCalendar();
 }
 
 // Drag & Drop Funktionen für Schüler-Sortierung
@@ -3891,6 +3966,7 @@ function exportAllData(event) {
             timestamp: new Date().toISOString(),
             classes: classes,
             contacts: contacts,
+            dashboardNotes: AppState.dashboardNotes || [],
             termine: (window.AppState && window.AppState.termine) ? window.AppState.termine : [],
             deletedTermineIds: JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'),
             planung: planungObj,
@@ -3990,6 +4066,17 @@ function importBackupFile(event) {
                         AppState.contacts = importData.contacts;
                         window.contacts = importData.contacts;
                         localStorage.setItem('contacts', JSON.stringify(contacts));
+                    }
+
+                    // Notizen übernehmen (falls vorhanden)
+                    if (importData.dashboardNotes && Array.isArray(importData.dashboardNotes)) {
+                        dashboardNotes = importData.dashboardNotes;
+                        AppState.dashboardNotes = importData.dashboardNotes;
+                        window.dashboardNotes = importData.dashboardNotes;
+                        if (typeof window.setDashboardNotes === 'function') {
+                            window.setDashboardNotes(importData.dashboardNotes);
+                        }
+                        localStorage.setItem('dashboardNotes', JSON.stringify(importData.dashboardNotes));
                     }
 
                     // Termine übernehmen (falls vorhanden)
@@ -9039,4 +9126,211 @@ window.ztDeleteArchive = ztDeleteArchive;
 window.ztCloseResult = ztCloseResult;
 window.ztNextStudent = ztNextStudent;
 window.ztOnTextEdited = ztOnTextEdited;
+window.ztOnTextEdited = ztOnTextEdited;
 window.ztSubmitAnswers = ztSubmitAnswers;
+
+// ===== DASHBOARD NOTES & CHECKLIST LOGIC =====
+function renderDashboardNotes() {
+    const list = safeGetElement('dashboard-notes-list');
+    if (!list) return;
+    list.innerHTML = '';
+    
+    const notes = AppState.dashboardNotes || [];
+    if (notes.length === 0) {
+        list.innerHTML = `
+            <li class="empty-state" style="padding: 20px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <i class="fas fa-clipboard-list" style="font-size: 2rem; color: var(--grey-color); margin-bottom: 8px;"></i>
+                <p style="font-size: 0.9rem; color: var(--grey-color); margin: 0;">Keine Aufgaben vorhanden</p>
+            </li>
+        `;
+        return;
+    }
+    
+    // Sortiere: Unerledigte Aufgaben zuerst, erledigte ans Ende
+    const sortedNotes = [...notes].sort((a, b) => {
+        if (a.checked === b.checked) return 0;
+        return a.checked ? 1 : -1;
+    });
+    
+    sortedNotes.forEach((note) => {
+        const item = document.createElement('li');
+        item.className = 'dashboard-note-item';
+        
+        const checkboxClass = note.checked ? 'dashboard-note-checkbox checked' : 'dashboard-note-checkbox';
+        const textClass = note.checked ? 'dashboard-note-text completed' : 'dashboard-note-text';
+        
+        item.innerHTML = `
+            <div class="${checkboxClass}" onclick="toggleDashboardNote(${note.id})" title="Abhaken">
+                <i class="fas fa-check"></i>
+            </div>
+            <span class="${textClass}" contenteditable="true" 
+                  onblur="updateDashboardNoteText(${note.id}, this.innerText)" 
+                  onkeydown="handleDashboardNoteKeydown(event, ${note.id}, this)">${escapeHtml(note.text)}</span>
+            <button class="dashboard-note-delete" onclick="deleteDashboardNote(${note.id})" title="Löschen">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        list.appendChild(item);
+    });
+}
+
+function addDashboardNote() {
+    const input = safeGetElement('dashboard-note-input');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    
+    const notes = AppState.dashboardNotes || [];
+    const newNote = {
+        id: Date.now(),
+        text: text,
+        checked: false
+    };
+    
+    notes.push(newNote);
+    AppState.dashboardNotes = notes;
+    localStorage.setItem('dashboardNotes', JSON.stringify(notes));
+    
+    input.value = '';
+    renderDashboardNotes();
+    saveData(); // Löst Cloud-Sync aus
+}
+
+function toggleDashboardNote(id) {
+    const notes = AppState.dashboardNotes || [];
+    const note = notes.find(n => n.id === id);
+    if (note) {
+        note.checked = !note.checked;
+        AppState.dashboardNotes = notes;
+        localStorage.setItem('dashboardNotes', JSON.stringify(notes));
+        renderDashboardNotes();
+        saveData(); // Löst Cloud-Sync aus
+    }
+}
+
+function updateDashboardNoteText(id, newText) {
+    const notes = AppState.dashboardNotes || [];
+    const note = notes.find(n => n.id === id);
+    if (note) {
+        const textVal = (newText || '').trim();
+        if (textVal) {
+            // Nur aktualisieren, wenn sich der Text tatsächlich geändert hat
+            if (note.text !== textVal) {
+                note.text = textVal;
+                AppState.dashboardNotes = notes;
+                localStorage.setItem('dashboardNotes', JSON.stringify(notes));
+                saveData(); // Löst Cloud-Sync aus
+            }
+        } else {
+            // Wenn der Text leer ist, löschen wir die Notiz automatisch
+            deleteDashboardNote(id);
+        }
+    }
+}
+
+function handleDashboardNoteKeydown(event, id, element) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        element.blur(); // Löst updateDashboardNoteText aus
+    }
+}
+
+function deleteDashboardNote(id) {
+    const notes = AppState.dashboardNotes || [];
+    const note = notes.find(n => n.id === id);
+    if (!note) return;
+    
+    swal({
+        title: "Aufgabe löschen?",
+        text: `Möchtest du die Aufgabe "${note.text}" wirklich löschen?`,
+        icon: "warning",
+        buttons: [false, "Löschen"],
+        dangerMode: true,
+    })
+    .then((willDelete) => {
+        if (willDelete) {
+            let updatedNotes = AppState.dashboardNotes || [];
+            updatedNotes = updatedNotes.filter(n => n.id !== id);
+            AppState.dashboardNotes = updatedNotes;
+            localStorage.setItem('dashboardNotes', JSON.stringify(updatedNotes));
+            renderDashboardNotes();
+            saveData(); // Löst Cloud-Sync aus
+        }
+    });
+}
+
+function renderDashboardCalendar() {
+    const badge = safeGetElement('dashboard-calendar-today-badge');
+    const textToday = safeGetElement('dashboard-calendar-today-text');
+    const list = safeGetElement('dashboard-calendar-list');
+    if (!list) return;
+    
+    // Aktuelles Datum in lokaler Zeitzone bestimmen
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    
+    // Heutiges Datum formatieren
+    const todayGermanShort = `${day}.${month}.${year}`;
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const todayFull = now.toLocaleDateString('de-DE', options);
+    
+    if (badge) badge.textContent = todayGermanShort;
+    if (textToday) textToday.innerHTML = `<i class="fas fa-clock"></i> Heute: ${todayFull}`;
+    
+    list.innerHTML = '';
+    
+    // Termine filtern und sortieren (nur ab heute)
+    const termine = AppState.termine || [];
+    const upcoming = termine.filter(t => t.date && t.date >= todayStr);
+    
+    if (upcoming.length === 0) {
+        list.innerHTML = `
+            <li class="empty-state" style="padding: 20px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <i class="fas fa-calendar-xmark" style="font-size: 2rem; color: var(--grey-color); margin-bottom: 8px;"></i>
+                <p style="font-size: 0.9rem; color: var(--grey-color); margin: 0;">Keine anstehenden Termine</p>
+            </li>
+        `;
+        return;
+    }
+    
+    // Chronologisch sortieren
+    const sorted = [...upcoming].sort((a, b) => {
+        if (a.date !== b.date) {
+            return a.date.localeCompare(b.date);
+        }
+        const timeA = a.timeStart || '';
+        const timeB = b.timeStart || '';
+        return timeA.localeCompare(timeB);
+    });
+    
+    // Auf die nächsten 5 Termine begrenzen
+    const nextTermine = sorted.slice(0, 5);
+    
+    nextTermine.forEach(termin => {
+        const item = document.createElement('li');
+        item.className = 'dashboard-calendar-item';
+        
+        // Datum ins deutsche Format bringen
+        const dateParts = termin.date.split('-');
+        const germanDate = dateParts.length === 3 ? `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}` : termin.date;
+        
+        item.innerHTML = `
+            <span class="calendar-item-title" title="${escapeHtml(termin.title)}">${escapeHtml(termin.title)}</span>
+            <span class="calendar-item-date">${germanDate}</span>
+        `;
+        list.appendChild(item);
+    });
+}
+
+// Global verfügbar machen
+window.renderDashboardNotes = renderDashboardNotes;
+window.addDashboardNote = addDashboardNote;
+window.toggleDashboardNote = toggleDashboardNote;
+window.updateDashboardNoteText = updateDashboardNoteText;
+window.handleDashboardNoteKeydown = handleDashboardNoteKeydown;
+window.deleteDashboardNote = deleteDashboardNote;
+window.renderDashboardCalendar = renderDashboardCalendar;

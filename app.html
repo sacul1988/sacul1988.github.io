@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=2.7">
+    <link rel="stylesheet" href="style.css?v=2.9">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -125,6 +125,8 @@
                         <!-- Hier werden die Klassen dynamisch eingefügt -->
                     </div>
                 </div>
+
+
                 
                 <input type="file" id="import-backup-file" accept=".json" style="display: none;" onchange="importBackupFile(event)">
             </div>
@@ -1218,15 +1220,18 @@
                             // 1. Daten in localStorage synchronisieren
                             localStorage.setItem('classes', JSON.stringify(cloudData.classes));
                             localStorage.setItem('contacts', JSON.stringify(cloudData.contacts || []));
+                            localStorage.setItem('dashboardNotes', JSON.stringify(cloudData.dashboardNotes || []));
                             localStorage.setItem('lastUpdate', cloudTimestamp);
                             applyCloudTermineAndPlanung(cloudData);
 
                             // 2. Globale Variablen sofort aktualisieren (wichtig für script.js)
                             window.classes = cloudData.classes;
                             window.contacts = cloudData.contacts || [];
+                            window.dashboardNotes = cloudData.dashboardNotes || [];
                             if (window.AppState) {
                                 window.AppState.classes = cloudData.classes;
                                 window.AppState.contacts = cloudData.contacts || [];
+                                window.AppState.dashboardNotes = cloudData.dashboardNotes || [];
                             }
                             
                             // 3. Lokale Variablen in script.js über die Brücken-Funktion aktualisieren
@@ -1234,6 +1239,9 @@
                                 window.setClasses(cloudData.classes);
                                 if (typeof window.setContacts === 'function') {
                                     window.setContacts(cloudData.contacts || []);
+                                }
+                                if (typeof window.setDashboardNotes === 'function') {
+                                    window.setDashboardNotes(cloudData.dashboardNotes || []);
                                 }
                             } else {
                                 // Fallback falls script.js geladen ist aber window.setClasses noch nicht (selten)
@@ -1290,7 +1298,11 @@
                                 // Spezialbehandlung für Sitzplan-Drag: Wenn gerade ein Tisch bewegt wird, NICHT neu rendern
                                 const isDraggingSitzplan = window.isDraggingDesk === true;
 
-                                if (isUserTypingInZeugnis || isUserTypingInPlanung || isUserTypingInContacts || isDraggingSitzplan) {
+                                const isUserTypingInNotes = activeElement && 
+                                                             ((activeElement.tagName === 'INPUT' && activeElement.id === 'dashboard-note-input') || 
+                                                              (activeElement.tagName === 'SPAN' && activeElement.classList.contains('dashboard-note-text')));
+
+                                if (isUserTypingInZeugnis || isUserTypingInPlanung || isUserTypingInContacts || isUserTypingInNotes || isDraggingSitzplan) {
                                     console.log("Realtime Update: Nutzer interagiert gerade (Tippen/Drag). UI-Refresh unterdrückt.");
                                     if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Synchronisiert (Hintergrund)';
                                     
@@ -1302,6 +1314,9 @@
                                     if (typeof window.setContacts === 'function') {
                                         window.setContacts(cloudData.contacts || []);
                                     }
+                                    if (typeof window.setDashboardNotes === 'function') {
+                                        window.setDashboardNotes(cloudData.dashboardNotes || []);
+                                    }
                                     return true;
                                 }
 
@@ -1311,6 +1326,12 @@
                                 // 4. Hauptübersicht/Home-Seite aktualisieren
                                 if (typeof window.renderClassesGrid === 'function') {
                                     window.renderClassesGrid();
+                                }
+                                if (typeof window.renderDashboardNotes === 'function') {
+                                    window.renderDashboardNotes();
+                                }
+                                if (typeof window.renderDashboardCalendar === 'function') {
+                                    window.renderDashboardCalendar();
                                 }
                                 
                                 // 5. Falls wir uns in einer Klasse befinden, das aktuelle Modul neu rendern
@@ -1426,6 +1447,7 @@
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
                     zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
                     contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
+                    dashboardNotes: JSON.parse(localStorage.getItem('dashboardNotes') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
                 };
 
@@ -1505,13 +1527,27 @@
                     console.log("Force Refresh: Cloud-Stand wird geladen...");
                     
                     localStorage.setItem('classes', JSON.stringify(cloudData.classes));
+                    localStorage.setItem('contacts', JSON.stringify(cloudData.contacts || []));
+                    localStorage.setItem('dashboardNotes', JSON.stringify(cloudData.dashboardNotes || []));
                     localStorage.setItem('lastUpdate', cloudTimestamp);
                     applyCloudTermineAndPlanung(cloudData);
                     window.classes = cloudData.classes;
-                    if (window.AppState) window.AppState.classes = cloudData.classes;
+                    window.contacts = cloudData.contacts || [];
+                    window.dashboardNotes = cloudData.dashboardNotes || [];
+                    if (window.AppState) {
+                        window.AppState.classes = cloudData.classes;
+                        window.AppState.contacts = cloudData.contacts || [];
+                        window.AppState.dashboardNotes = cloudData.dashboardNotes || [];
+                    }
                     
                     if (typeof window.setClasses === 'function') {
                         window.setClasses(cloudData.classes);
+                    }
+                    if (typeof window.setContacts === 'function') {
+                        window.setContacts(cloudData.contacts || []);
+                    }
+                    if (typeof window.setDashboardNotes === 'function') {
+                        window.setDashboardNotes(cloudData.dashboardNotes || []);
                     }
                     
                     if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Daten aktuell';
@@ -1533,7 +1569,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=2.7"></script>
+    <script src="script.js?v=2.9"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {

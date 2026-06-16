@@ -199,11 +199,25 @@ body {
 /* Home page - Class grid */
 .classes-grid {
     display: grid;
-    /* min(calc(50% - 8px), 280px) garantiert immer mind. 2 Spalten,
-       füllt aber auf breiten Bildschirmen die volle Breite */
-    grid-template-columns: repeat(auto-fit, minmax(min(calc(50% - 8px), 280px), 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 15px;
     margin-top: 15px;
+}
+
+@media (max-width: 1200px) {
+    .classes-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991px) {
+    .classes-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.classes-grid > * {
+    min-width: 0;
 }
 
 .class-card {
@@ -213,6 +227,7 @@ body {
     border: 1px solid var(--border-color);
     overflow: hidden;
     transition: var(--transition);
+    min-width: 0;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -3282,6 +3297,14 @@ html.modal-open, body.modal-open {
         grid-template-columns: 1fr;
     }
 
+    .dashboard-notes-card {
+        grid-column: auto;
+    }
+
+    .dashboard-calendar-card {
+        grid-column: auto;
+    }
+
     /* Zeugnis-Tab: Notizen und Mündlich untereinander */
     .zeugnis-notes-container {
         flex-direction: column;
@@ -4955,4 +4978,186 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     right: calc(20px + env(safe-area-inset-right));
     bottom: auto;
     z-index: 9001;
+}
+
+/* ===== DASHBOARD NOTES & CHECKLIST ===== */
+.dashboard-notes-card {
+    grid-column: span 2;
+    min-width: 0;
+}
+.notes-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+.notes-input-group input {
+    flex: 1;
+    min-width: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+}
+.notes-input-group .btn {
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 600;
+}
+.dashboard-notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.dashboard-note-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    animation: slideIn 0.2s ease-out;
+}
+.dashboard-note-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+.dashboard-note-checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--grey-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    color: white;
+    background: white;
+    flex-shrink: 0;
+}
+.dashboard-note-checkbox:hover {
+    border-color: var(--primary-color);
+    background: rgba(67, 97, 238, 0.05);
+}
+.dashboard-note-checkbox.checked {
+    background: var(--success-color);
+    border-color: var(--success-color);
+}
+.dashboard-note-checkbox i {
+    font-size: 0.8rem;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.dashboard-note-checkbox.checked i {
+    opacity: 1;
+    transform: scale(1);
+}
+.dashboard-note-text {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--dark-color);
+    outline: none;
+    padding: 3px 6px;
+    border-radius: 6px;
+    transition: var(--transition);
+    word-break: break-word;
+    cursor: text;
+}
+.dashboard-note-text[contenteditable="true"]:focus {
+    background: white;
+    box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.15);
+}
+.dashboard-note-text.completed {
+    text-decoration: line-through;
+    color: var(--grey-color);
+    opacity: 0.6;
+}
+.dashboard-note-delete {
+    background: transparent;
+    border: none;
+    color: var(--danger-color);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: var(--transition);
+    opacity: 0.5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+.dashboard-note-delete:hover {
+    background: #fee2e2;
+    opacity: 1;
+    color: #ef4444;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== DASHBOARD CALENDAR & UPCOMING EVENTS ===== */
+.dashboard-calendar-card {
+    grid-column: span 2;
+    min-width: 0;
+    transition: var(--transition);
+}
+.dashboard-calendar-card:hover {
+    border-color: var(--primary-color);
+}
+.dashboard-calendar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.dashboard-calendar-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+.dashboard-calendar-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+.calendar-item-title {
+    font-weight: 500;
+    color: var(--dark-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 15px;
+}
+.calendar-item-date {
+    font-size: 0.82rem;
+    color: var(--grey-color);
+    background: #e2e8f0;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
