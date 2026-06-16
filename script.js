@@ -4091,8 +4091,13 @@ function renderSitzplanModule() {
             if (!pan) return;
             const b = computePanBounds();
             if (b) {
-                x = Math.min(b.maxX, Math.max(b.minX, x));
-                y = Math.min(b.maxY, Math.max(b.minY, y));
+                // Grenzen normalisieren: ist der Sitzplan kleiner als der Viewport
+                // (z. B. im Vollbild), sind min/max invertiert – dann würde die
+                // zentrierte Position weggeclamped. min/max korrekt sortieren.
+                const loX = Math.min(b.minX, b.maxX), hiX = Math.max(b.minX, b.maxX);
+                const loY = Math.min(b.minY, b.maxY), hiY = Math.max(b.minY, b.maxY);
+                x = Math.min(hiX, Math.max(loX, x));
+                y = Math.min(hiY, Math.max(loY, y));
             }
             workspace._panX = x;
             workspace._panY = y;
@@ -4100,6 +4105,22 @@ function renderSitzplanModule() {
             AppState.sitzplanPanY = y;
             pan.style.transform = `translate(${x}px, ${y}px)`;
             workspace.style.backgroundPosition = `${x}px ${y}px`;
+        };
+        // Für das Vollbild zugänglich machen
+        workspace._applyPan = applyPan;
+        // Sitzplan mittig in den (Vollbild-)Workspace rücken
+        workspace._centerView = () => {
+            const ds = document.querySelectorAll('#workspace-pan .desk');
+            if (!ds.length) return;
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            ds.forEach(d => {
+                const l = parseFloat(d.style.left) || 0, t = parseFloat(d.style.top) || 0;
+                const w = d.offsetWidth || 80, h = d.offsetHeight || 80;
+                minX = Math.min(minX, l); minY = Math.min(minY, t);
+                maxX = Math.max(maxX, l + w); maxY = Math.max(maxY, t + h);
+            });
+            const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+            applyPan(workspace.clientWidth / 2 - cx, workspace.clientHeight / 2 - cy);
         };
         const startMomentum = (vx, vy) => {
             if (momentumRaf) cancelAnimationFrame(momentumRaf);
@@ -4382,13 +4403,29 @@ function setMode(mode) {
 function toggleSitzplanFullscreen() {
     const moduleEl = document.getElementById('sitzplan-module');
     if (!moduleEl) return;
+    const ws = document.getElementById('workspace');
     const isFs = moduleEl.classList.toggle('sitzplan-fullscreen');
     const btn = document.getElementById('sitzplan-fullscreen-btn');
     if (btn) {
         btn.innerHTML = isFs ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
         btn.title = isFs ? 'Vollbild schließen' : 'Vollbild';
     }
-    // Pan-Position und Tische bleiben unverändert – das Overlay zeigt nur mehr Fläche.
+    if (ws) {
+        if (isFs) {
+            // Vorherige Pan-Position merken und im Vollbild auf den Sitzplan zentrieren
+            // (nach dem Layout-Umbruch, damit die Vollbild-Maße schon stehen).
+            ws._fsPrevPan = { x: ws._panX || 0, y: ws._panY || 0 };
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                if (typeof ws._centerView === 'function') ws._centerView();
+            }));
+        } else {
+            // Normalansicht: ursprüngliche Pan-Position wiederherstellen
+            const prev = ws._fsPrevPan;
+            requestAnimationFrame(() => {
+                if (prev && typeof ws._applyPan === 'function') ws._applyPan(prev.x, prev.y);
+            });
+        }
+    }
 }
 window.toggleSitzplanFullscreen = toggleSitzplanFullscreen;
 
@@ -4399,6 +4436,11 @@ function exitSitzplanFullscreen() {
         moduleEl.classList.remove('sitzplan-fullscreen');
         const btn = document.getElementById('sitzplan-fullscreen-btn');
         if (btn) { btn.innerHTML = '<i class="fas fa-expand"></i>'; btn.title = 'Vollbild'; }
+        // Vor dem Vollbild gemerkte Pan-Position wiederherstellen
+        const ws = document.getElementById('workspace');
+        if (ws && ws._fsPrevPan && typeof ws._applyPan === 'function') {
+            ws._applyPan(ws._fsPrevPan.x, ws._fsPrevPan.y);
+        }
     }
 }
 window.exitSitzplanFullscreen = exitSitzplanFullscreen;
