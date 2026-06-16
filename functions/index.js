@@ -157,18 +157,34 @@ Wenn die Beobachtungen sehr knapp oder widersprüchlich sind (und du dich entsch
 
 Regeln für "endnote":
 
-EIN eindeutiger Wert zwischen 1 (sehr gut) und 5 (mangelhaft) als String, ohne Spanne. Nutze aktiv Tendenzen (z. B. "2+" oder "3-") anstelle von glatten ganzen Noten, um sprachliche Feinheiten und Nuancen in deiner Rückmeldung feiner und präziser zu justieren. Vermeide den übermäßigen Hang zu einer glatten ganzen Note, außer die Leistung liegt eindeutig genau auf dieser Stufe. Die Note 6 wird nicht verwendet; "5-" ist die schwächste mögliche Einstufung.
-Berücksichtige sowohl den schriftlichen Durchschnitt als auch die Beobachtungen zur mündlichen Mitarbeit/Verhalten/Störungen entsprechend der Fachart (Hauptfach oder Nebenfach):
+EIN eindeutiger Wert als String, ohne Spanne (z. B. "2+", "3", "3-"). Nutze aktiv Tendenzen ("2+", "3-" usw.), um Nuancen abzubilden; vermeide den übermäßigen Hang zu glatten ganzen Noten, außer die Leistung liegt eindeutig genau dort.
 
-- Bei HAUPTFÄCHERN (ca. 50% schriftlich / 50% mündlich Gewichtung):
-  Die schriftliche Leistung behält ihr halbes Gewicht.
-  Wenn die Beobachtungen zum Verhalten oder der mündlichen Mitarbeit überwiegend kritisch sind (z. B. häufige Störungen, Ermahnungen, mangelnde Beteiligung, fehlende Aufgabenbearbeitung), soll die Endnote im Normalfall um bis zu 3 Notenschritte unter die schriftliche Note abgesenkt werden (z. B. schriftliche Note 2- wird zu Endnote 3-). In gravierenden Ausnahmefällen (z. B. massive Störungen, extreme Verweigerung) ist eine Absenkung um bis zu 4 Notenschritte (z. B. schriftliche Note 2- wird zu Endnote 4+) zulässig.
+HERLEITUNG DER ENDNOTE (Orientierung, kein starres Rechenschema):
+Gehe IMMER von der gerundeten schriftlichen Durchschnittsnote aus und verschiebe sie in Notenschritten (halbe Stufen in der Reihe: 1, 1-, 2+, 2, 2-, 3+, 3, 3-, 4+, 4, 4-, 5+, 5, 5-) nach oben (= bessere Note) oder unten (= schlechtere Note). Die wichtigsten Stellschrauben sind die Häufigkeit und Qualität der mündlichen Beteiligung sowie das Ausmaß von Störungen und Ablenkungen.
 
-- Bei NEBENFÄCHERN (mündliche Mitarbeit, Verhalten und Störungen dominieren stark, ca. 30% schriftlich / 70% mündlich Gewichtung):
-  Die mündliche Leistung und das Verhalten überschreiben die schriftliche Note stark.
-  Wenn die Beobachtungen zum Verhalten oder der mündlichen Mitarbeit überwiegend kritisch sind (z. B. häufige Störungen, Ermahnungen, mangelnde Beteiligung), muss die Endnote konsequent und stark abgewertet werden. Hier ist eine Absenkung um mindestens 4 oder mehr Notenschritte gefordert (z. B. schriftliche Note 2- wird zu Endnote 4 oder schlechter), da das mündliche Fehlverhalten die schriftliche Leistung im Nebenfach stark überschreiben soll.
+WICHTIG – DU MUSST SELBST URTEILEN: Die folgenden Kategorien und Schritt-Spannen sind nur Orientierung, kein Automatismus und keine Rechenaufgabe. Man kann unmöglich alle denkbaren Beobachtungen in feste Formulierungen fassen. Lies die Beobachtungen daher wie eine erfahrene Lehrkraft, wäge selbst ab und entscheide nach Gesamteindruck und Gefühl, ob insgesamt das Positive oder das Negative überwiegt und wie stark – und leite daraus eine stimmige Endnote ab. Rechne nicht stur Schritte ab, sondern triff eine begründete, menschliche Einschätzung. Liegt eine Beschreibung zwischen zwei Kategorien, wähle die passende Zwischenstufe. Die Beispielformulierungen unten beschreiben nur den TENOR; die echten Beobachtungen sind oft anders formuliert – ordne sie sinngemäß ein.
 
-- Genauso gilt umgekehrt: Eine durchgehend sehr positive mündliche Mitarbeit kann die Endnote über den schriftlichen Durchschnitt heben, in der Regel um 1 bis 2 Notenschritte.
+Bei jeder Kategorie gilt: erster Wert = Hauptfach, zweiter Wert = Nebenfach. Im Nebenfach zählt die mündliche Leistung deutlich stärker, deshalb dort die kräftigere Verschiebung.
+
+1. SEHR POSITIV -> bis zu +3 (Hauptfach) / bis zu +4 (Nebenfach) Notenschritte nach oben
+Tenor z. B.: "meldet sich sehr regelmäßig", "bringt selbstständig weiterführende Beiträge", "arbeitet durchgehend konzentriert und eigenständig", "sehr ruhig und zuverlässig", "stört nie, lässt sich nicht ablenken", "hilft anderen / übernimmt Verantwortung".
+
+2. ÜBERWIEGEND POSITIV (deutlich mehr positiv als negativ) -> +1 bis +2 (Hauptfach) / +2 bis +3 (Nebenfach) nach oben
+Tenor z. B.: "beteiligt sich gut/häufig", "gutes Grundwissen", "arbeitet meist selbstständig und zuverlässig", "nur selten abgelenkt", "kaum Störungen".
+
+3. AUSGEGLICHEN / NORMAL / SCHWANKEND -> ±0 (in beiden Fällen), die Note bleibt
+Tenor z. B.: "meldet sich eher selten", "mal mehr, mal weniger beteiligt", "teilweise abgelenkt", "gelegentlich kleinere Störungen", "Mitarbeit schwankt". Positives und Negatives halten sich ungefähr die Waage.
+
+4. ÜBERWIEGEND NEGATIV -> -2 (Hauptfach) / -3 (Nebenfach) Notenschritte nach unten
+Tenor z. B.: "stört regelmäßig", "arbeitet unzuverlässig", "wenig Motivation", "häufig abgelenkt", "muss oft ermahnt werden", "bringt selten etwas ein".
+
+5. SEHR NEGATIV -> bis zu -3 (Hauptfach) / bis zu -4 (Nebenfach) Notenschritte nach unten
+Tenor z. B.: "massive, wiederholte Störungen, die den Unterricht unterbrechen", "verweigert die Mitarbeit", "keine Beteiligung", "kaum Motivation trotz Ansprache", "lenkt andere stark ab".
+
+6. SONDERFALL – still, aber ordentlich -> in der Regel +1 (kleine Aufwertung in beiden Fächern)
+Tenor z. B.: "meldet sich wenig, arbeitet aber ruhig und ordentlich mit", "zurückhaltend, aber zuverlässig und störungsfrei", "beteiligt sich kaum mündlich, erledigt seine Aufgaben aber gut". Die geringe mündliche Beteiligung ist hier der einzige Schwachpunkt; das gute Arbeits- und Sozialverhalten rechtfertigt eine kleine Aufwertung.
+
+GRENZEN: Beste mögliche Note ist "1" (kein "1+"), schlechteste ist "5-" (keine "6"). Korrekturen werden an diesen Grenzen gekappt.
 Die im Schlusssatz von "mitarbeit_text" genannte Note muss exakt dem Wert von "endnote" entsprechen.`;
 
 function formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote) {
