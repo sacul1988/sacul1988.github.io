@@ -6011,10 +6011,14 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
     let activeMessages = customMessages;
     if (!activeMessages) {
         let userMsg = '';
-        if (durchschnitt) {
-            userMsg += `Schriftliche Durchschnittsnote: ${durchschnittNote}\n`;
+        if (Array.isArray(schriftlicheNoten) && schriftlicheNoten.length > 0) {
+            const liste = schriftlicheNoten.map(n => `${n.name || 'Arbeit'}: ${n.grade}`).join(', ');
+            userMsg += `Schriftliche Einzelnoten (Name der Arbeit: Note): ${liste}\n`;
         } else {
             userMsg += `Es liegen keine schriftlichen Noten vor.\n`;
+        }
+        if (durchschnitt) {
+            userMsg += `Schriftliche Durchschnittsnote: ${durchschnittNote}\n`;
         }
         userMsg += `Beobachtungen zur mündlichen Mitarbeit:\n\n${(student.zeugnisSonstiges || '').trim() || "Keine Angabe"}\n`;
 

@@ -128,10 +128,7 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
 
 // ===== Zeugnisnoten-Vorschlag: Note abwägen + Begründung schreiben =====
 const ZEUGNISNOTE_SYSTEM = `Du unterstützt eine Lehrkraft dabei, einer Schülerin oder einem Schüler eine Rückmeldung zur Endnote zu geben. Der Text wird DIREKT AN DIE SCHÜLERIN ODER DEN SCHÜLER gerichtet, also in der Anrede "Du".
-Der erste Teil des Rückmeldetextes wurde bereits automatisch erstellt und lautet:
-
-"[automatisch berechneter Satz zu den schriftlichen Noten, z. B. 'Du hast in Klassenarbeit 1, Klassenarbeit 2 und Projektarbeit die Noten 3, 2- und 1+ geschrieben. Daraus ergibt sich die schriftliche Durchschnittsnote 2.']"
-Deine Aufgabe ist es, NUR den zweiten Teil zu schreiben, der direkt an diesen ersten Teil anschließt, sowie eine Endnote vorzuschlagen.
+Der Rückmeldetext besteht aus drei Teilen, die später aneinandergehängt werden und zusammen wie EIN flüssiger Text wirken sollen: (1) dein Feld "noten_auflistung" zählt die einzelnen schriftlichen Noten auf, (2) direkt danach wird automatisch ein Satz mit der gerundeten Durchschnittsnote ergänzt (z. B. "Daraus ergibt sich die schriftliche Durchschnittsnote 2.") – diesen Satz schreibst du NICHT selbst und nimmst ihn auch nicht vorweg, (3) dein Feld "mitarbeit_text" zur sonstigen Mitarbeit inkl. Endnote.
 
 [WICHTIGE AUSGABE-REGEL (JSON)]
 Du musst als Antwort IMMER ein valides JSON-Objekt zurückgeben.
@@ -143,19 +140,27 @@ Antworte in genau diesem JSON-Format:
   {"status": "unclear", "questions": ["Frage 1...", "Frage 2...", "Frage 3..."]} (Gib maximal 3 gezielte, kurze Fragen zurück)
   
 - Wenn alle Informationen ausreichend sind oder bereits Fragen beantwortet wurden:
-  {"status": "success", "abwaegung": "...", "endnote": "...", "mitarbeit_text": "..."}
-  Das Feld "abwaegung" kommt ZUERST und dient nur deinem internen Abwägen (es wird der Schülerin oder dem Schüler NICHT angezeigt): Halte dort in 1-3 kurzen Sätzen fest, welche Kategorie am besten passt, in welche Richtung und um wie viele Notenschritte du die gerundete Durchschnittsnote verschiebst und wie du dadurch auf die Endnote kommst. Erst danach füllst du "endnote" und "mitarbeit_text".
+  {"status": "success", "abwaegung": "...", "noten_auflistung": "...", "endnote": "...", "mitarbeit_text": "..."}
+  Das Feld "abwaegung" kommt ZUERST und dient nur deinem internen Abwägen (es wird der Schülerin oder dem Schüler NICHT angezeigt): Halte dort in 1-3 kurzen Sätzen fest, welche Kategorie am besten passt, in welche Richtung und um wie viele Notenschritte du die gerundete Durchschnittsnote verschiebst und wie du dadurch auf die Endnote kommst. Erst danach füllst du "noten_auflistung", "endnote" und "mitarbeit_text".
 
 Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohne Einleitung, Erklärung oder sonstigen Text davor/danach).
 
+Regeln für "noten_auflistung":
+
+Ein bis zwei kurze Sätze in der Anrede "Du", die exakt die unten angegebenen einzelnen schriftlichen Noten (Name der Arbeit + Note) nennen, z. B. "Du hast im Musiktest die Note 2 und bei dem Lapbook über die Musikinstrumente die Note 3- geschrieben."
+Nutze die Namen und Noten EXAKT wie unten angegeben, erfinde oder verändere nichts. Wähle für jede Arbeit eine passende, natürlich klingende Formulierung/Präposition statt alle Arbeiten gleich anzuhängen (z. B. "im Test", "in der Klassenarbeit", "bei dem Projekt/Lapbook über ..."), je nachdem, was zur Art der Arbeit passt. Einfache, klare Sprache.
+Schließe NICHT mit der Durchschnittsnote ab – der Satz dazu wird automatisch ergänzt.
+Wenn unten keine schriftlichen Noten angegeben sind, gib einen leeren String "" zurück.
+
 Regeln für "mitarbeit_text":
 
-Schreibe AUSSCHLIESSLICH Stichpunkte, keinen Fließtext und keine einleitende Überleitung.
-3 bis 5 kurze Stichpunkte zur mündlichen Mitarbeit, die sich konkret auf die unten genannten Beobachtungen beziehen, danach ein letzter Stichpunkt zur Endnote. Jeder Stichpunkt beginnt mit "- ", steht auf einer eigenen Zeile (echte Zeilenumbrüche zwischen den Stichpunkten, im JSON-String als \n kodiert) und ist kurz (ein halber bis ein ganzer Satz). Weiterhin in der direkten Anrede "Du", z. B. "- Beteiligst dich regelmäßig und sachlich am Unterricht."
-Der letzte Stichpunkt erklärt knapp, wie sich aus dem schriftlichen Durchschnitt und der sonstigen Mitarbeit zusammen die Endnote ergibt, z. B. "- Insgesamt ergibt das für dich die Note X."
-Formuliere wertschätzend und konstruktiv, auch wenn die Rückmeldung nicht durchgehend positiv ist.
+Beginnt sinngemäß mit einem kurzen Übergang zur sonstigen Mitarbeit, z. B. "Zur sonstigen Mitarbeit: Du ..." oder "Im Unterricht ist mir aufgefallen: Du ..." – die genaue Formulierung darf variieren, der Sinn (Überleitung zur mündlichen Mitarbeit, Anrede "Du") soll aber erhalten bleiben.
+Insgesamt 3 bis 5 Sätze in der direkten Anrede "Du", die sich konkret auf die unten genannten Beobachtungen zur mündlichen Mitarbeit beziehen. Formuliere in ganzen, runden Sätzen (keine Stichpunkte), ohne Zeilenumbrüche.
+Verwende einfache, klare Sprache, die Schülerinnen und Schüler gut verstehen: kurze Sätze (Subjekt-Verb-Objekt), alltägliche Wörter, keine Schachtelsätze, keine abstrakten Fachbegriffe oder Erwachsenen-/Lehrersprache (z. B. lieber "Du hörst gut zu" statt "Du zeigst eine gute Aufnahmefähigkeit").
+Endet mit einem Satz, der erklärt, wie sich aus dem schriftlichen Durchschnitt und der sonstigen Mitarbeit zusammen die Endnote ergibt, z. B. "Insgesamt ergibt das für dich die Note X."
+Formuliere wertschätzend, aber ehrlich und klar: Beschönige negative Beobachtungen nicht, sondern benenne sie sachlich und konkret – der Ton bleibt dabei konstruktiv, nicht verletzend.
 Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.
-Wenn die Beobachtungen sehr knapp oder widersprüchlich sind (und du dich entscheidest, keine Rückfragen zu stellen), weise das kurz und sachlich in einem eigenen Stichpunkt darauf hin.
+Wenn die Beobachtungen sehr knapp oder widersprüchlich sind (und du dich entscheidest, keine Rückfragen zu stellen), weise das kurz und sachlich an passender Stelle darauf hin.
 
 Regeln für "endnote":
 
@@ -190,7 +195,13 @@ Tenor z. B.: "meldet sich wenig, arbeitet aber ruhig und ordentlich mit", "zurü
 GRENZEN: Beste mögliche Note ist "1" (kein "1+"), schlechteste ist "5-" (keine "6"). Korrekturen werden an diesen Grenzen gekappt.
 Die im Schlusssatz von "mitarbeit_text" genannte Note muss exakt dem Wert von "endnote" entsprechen.`;
 
-function formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote) {
+function formatAverageSentence(durchschnitt, durchschnittNote) {
+  return durchschnitt ? `Daraus ergibt sich die schriftliche Durchschnittsnote ${durchschnittNote}.` : "";
+}
+
+// Robotische, aber garantiert korrekte Notiz-Auflistung – nur als Fallback, falls die KI
+// die "noten_auflistung" leer lässt oder eine Note darin nicht wiederfindbar ist.
+function formatFallbackListing(schriftlicheNoten) {
   if (!Array.isArray(schriftlicheNoten) || schriftlicheNoten.length === 0) {
     return "";
   }
@@ -198,30 +209,23 @@ function formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote) {
   const names = schriftlicheNoten.map(n => n.name || "Arbeit");
   const grades = schriftlicheNoten.map(n => n.grade);
 
-  let namesStr = "";
-  if (names.length === 1) {
-    namesStr = names[0];
-  } else {
-    namesStr = names.slice(0, -1).join(", ") + " und " + names[names.length - 1];
-  }
+  const namesStr = names.length === 1
+    ? names[0]
+    : names.slice(0, -1).join(", ") + " und " + names[names.length - 1];
+  const gradesStr = grades.length === 1
+    ? grades[0]
+    : grades.slice(0, -1).join(", ") + " und " + grades[grades.length - 1];
 
-  let gradesStr = "";
-  if (grades.length === 1) {
-    gradesStr = grades[0];
-  } else {
-    gradesStr = grades.slice(0, -1).join(", ") + " und " + grades[grades.length - 1];
-  }
-
-  const singular = names.length === 1;
-  const sentence1 = singular 
+  return names.length === 1
     ? `Du hast in ${namesStr} die Note ${gradesStr} geschrieben.`
     : `Du hast in ${namesStr} die Noten ${gradesStr} geschrieben.`;
+}
 
-  const sentence2 = durchschnitt
-    ? ` Daraus ergibt sich die schriftliche Durchschnittsnote ${durchschnittNote}.`
-    : "";
-
-  return sentence1 + sentence2;
+// Sicherheitsnetz: Steht jede einzelne Note der Schülerin/des Schülers wortwörtlich
+// in der von der KI geschriebenen Auflistung? Wenn nicht, ist eine Note verlorengegangen.
+function listingHasAllGrades(text, schriftlicheNoten) {
+  if (!Array.isArray(schriftlicheNoten) || schriftlicheNoten.length === 0) return true;
+  return schriftlicheNoten.every(n => text.includes(n.grade));
 }
 
 exports.generateZeugnisnote = onCall(
@@ -235,10 +239,14 @@ exports.generateZeugnisnote = onCall(
     const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
 
     let userMsg = "";
-    if (durchschnitt) {
-      userMsg += `Schriftliche Durchschnittsnote: ${durchschnittNote}\n`;
+    if (Array.isArray(schriftlicheNoten) && schriftlicheNoten.length > 0) {
+      const liste = schriftlicheNoten.map(n => `${n.name || "Arbeit"}: ${n.grade}`).join(", ");
+      userMsg += `Schriftliche Einzelnoten (Name der Arbeit: Note): ${liste}\n`;
     } else {
       userMsg += `Es liegen keine schriftlichen Noten vor.\n`;
+    }
+    if (durchschnitt) {
+      userMsg += `Schriftliche Durchschnittsnote: ${durchschnittNote}\n`;
     }
     userMsg += `Beobachtungen zur mündlichen Mitarbeit:\n\n${sonstiges && sonstiges.trim() ? sonstiges.trim() : "Keine Angabe"}\n`;
 
@@ -298,13 +306,15 @@ exports.generateZeugnisnote = onCall(
       } else {
         note = (parsed.note || parsed.endnote || "").toString().trim();
         const mitarbeitText = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
-        
-        const firstPart = formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote);
-        if (firstPart && mitarbeitText) {
-          begruendung = firstPart + "\n" + mitarbeitText;
-        } else {
-          begruendung = mitarbeitText || firstPart;
+
+        let notenAuflistung = (parsed.noten_auflistung || "").toString().trim();
+        if (!listingHasAllGrades(notenAuflistung, schriftlicheNoten)) {
+          notenAuflistung = formatFallbackListing(schriftlicheNoten);
         }
+        const averageSentence = formatAverageSentence(durchschnitt, durchschnittNote);
+
+        const intro = [notenAuflistung, averageSentence].filter(Boolean).join(" ");
+        begruendung = [intro, mitarbeitText].filter(Boolean).join(" ");
       }
     } catch (e) {
       console.error("JSON parsing failed, falling back to raw text:", e);
