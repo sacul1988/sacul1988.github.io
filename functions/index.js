@@ -79,7 +79,8 @@ Antworte in genau diesem JSON-Format:
   {"status": "unclear", "questions": ["Frage 1...", "Frage 2...", "Frage 3..."]} (Gib maximal 3 gezielte, kurze Fragen zurück)
   
 - Wenn alle Informationen ausreichend sind oder bereits Fragen beantwortet wurden:
-  {"status": "success", "text": "Hier steht der komplette, ausformulierte Zeugnistext..."}
+  {"status": "success", "abwaegung": "...", "text": "Hier steht der komplette, ausformulierte Zeugnistext..."}
+  Das Feld "abwaegung" kommt ZUERST und dient nur deiner internen Planung (es wird NICHT angezeigt und nicht in den Zeugnistext übernommen): Halte dort in 1-3 kurzen Sätzen fest, welche Beobachtungen du aufgreifst, wie du den Text aufbaust und worauf du achtest (z. B. Lernfortschritt, Hilfestellungen und Differenzierung, Materialien, Mitarbeit und Sozialverhalten sowie ein wertschätzender, deinen Richtlinien entsprechender Ton). Erst danach formulierst du den eigentlichen Zeugnistext im Feld "text".
 
 Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohne Einleitung, Erklärung oder sonstigen Text davor/danach).`;
 
