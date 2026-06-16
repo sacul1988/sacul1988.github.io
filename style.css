@@ -4982,8 +4982,15 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 
 /* ===== DASHBOARD NOTES & CHECKLIST ===== */
 .dashboard-notes-card {
-    grid-column: span 2;
     min-width: 0;
+}
+/* span 2 nur ab Tablet/Desktop – auf Mobile (<=600px) bleibt das Grid einspaltig,
+   sonst würde ein span-2-Element eine zweite implizite Spalte erzwingen. */
+@media (min-width: 601px) {
+    .dashboard-notes-card,
+    .dashboard-calendar-card {
+        grid-column: span 2;
+    }
 }
 .notes-input-group {
     display: flex;
@@ -5113,7 +5120,6 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 
 /* ===== DASHBOARD CALENDAR & UPCOMING EVENTS ===== */
 .dashboard-calendar-card {
-    grid-column: span 2;
     min-width: 0;
     transition: var(--transition);
 }
