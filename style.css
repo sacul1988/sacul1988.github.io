@@ -4800,17 +4800,12 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
         height: calc(100vh + 200px) !important;   /* iOS: 100vh = große Viewport-Höhe */
         height: calc(100lvh + 200px) !important;   /* moderne Browser: explizit große Viewport-Höhe */
     }
-    /* Bei offenem Modal den dunklen Seiteninhalt (z. B. Klassenkacheln)
-       oberhalb der Safari-Leiste abschneiden (100dvh = kleine, sichtbare
-       Höhe) und den hellen Wurzel-Hintergrund setzen. iOS malt den
-       Wurzel-Hintergrund randlos bis zum Displayende -> hinter der Leiste
-       erscheint nur noch #f2f4fa, keine harte Kante / kein dunkler Streifen. */
+    /* Bei offenem Modal hellen Wurzel-Hintergrund setzen, damit hinter der
+       Safari-Leiste nur #f2f4fa erscheint. Die Scroll-Sperre läuft über einen
+       position:fixed-Lock (in showModal/hideModal) – kein height:100dvh mehr,
+       da dieses den Hintergrund beim Öffnen sichtbar nach oben springen ließ. */
     html.modal-open, body.modal-open {
         background-color: var(--bg-color) !important;
-    }
-    body.modal-open {
-        height: 100dvh !important;
-        overflow: hidden !important;
     }
 }
 

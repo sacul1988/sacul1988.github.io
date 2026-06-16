@@ -1045,19 +1045,26 @@ function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
 
-    // Aktuelle Scroll-Position merken (nur beim ersten Öffnen), damit sie beim
-    // Schließen wiederhergestellt werden kann. Der mobile Scroll-Lock
-    // (body.modal-open { height: 100dvh }) würde sie sonst auf 0 setzen ->
-    // die Ansicht spränge beim Schließen nach ganz oben.
-    if (!document.body.classList.contains('modal-open')) {
-        window._preModalScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-    }
+    // Scroll-Lock per position:fixed: friert den Hintergrund optisch GENAU an der
+    // aktuellen Stelle ein -> kein Springen beim Öffnen/Schließen. Nur beim ersten
+    // Öffnen anwenden (verschachtelte Modale nicht doppelt sperren).
+    const _alreadyOpen = document.body.classList.contains('modal-open');
 
     // Alle Modale (inkl. Archiv im Zeugnistextgenerator) bekommen denselben
-    // eingefärbten Backdrop + iOS-Bottom-Fix.
+    // eingefärbten Backdrop.
     modalContainer.classList.remove('mobile-menu-active');
     document.documentElement.classList.add('modal-open');
     document.body.classList.add('modal-open');
+
+    if (!_alreadyOpen) {
+        const y = window.scrollY || document.documentElement.scrollTop || 0;
+        window._preModalScrollY = y;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${y}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+    }
 
     // Alle Modals ausblenden
     const modals = document.querySelectorAll('.modal');
@@ -1113,12 +1120,17 @@ function hideModal() {
     document.documentElement.classList.remove('modal-open-scroll-lock');
     document.body.classList.remove('modal-open-scroll-lock');
 
-    // Scroll-Position wiederherstellen (der mobile Scroll-Lock hatte sie evtl.
-    // auf 0 gesetzt) -> Ansicht bleibt z. B. beim aktuellen Schüler im Zeugnis-Tab.
+    // position:fixed-Lock lösen und exakt zur vorherigen Scroll-Position springen
+    // (synchron, daher kein sichtbares Springen) -> Ansicht bleibt z. B. beim
+    // aktuellen Schüler im Zeugnis-Tab.
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
     if (typeof window._preModalScrollY === 'number') {
         const y = window._preModalScrollY;
         window._preModalScrollY = null;
-        void document.body.offsetHeight; // Reflow erzwingen, damit der Body wieder volle Höhe hat
         window.scrollTo(0, y);
     }
 
