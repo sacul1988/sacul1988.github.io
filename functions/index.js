@@ -150,12 +150,12 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
 
 Regeln für "mitarbeit_text":
 
-Beginnt sinngemäß mit einem Übergang zur sonstigen Mitarbeit, z. B. "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen: Du ..." – die genaue Formulierung darf variieren, der Sinn (Überleitung zur sonstigen/mündlichen Mitarbeit, Anrede "Du") soll aber erhalten bleiben.
-Insgesamt 3 bis 5 Sätze in der direkten Anrede "Du", die sich konkret auf die unten genannten Beobachtungen zur mündlichen Mitarbeit beziehen. Formuliere in ganzen, runden Sätzen, nicht als Stichpunktliste, ohne Zeilenumbrüche.
-Endet mit einem Satz, der erklärt, wie sich aus dem schriftlichen Durchschnitt und der sonstigen Mitarbeit zusammen die Endnote ergibt, z. B. "Insgesamt ergibt das für dich die Note X."
+Schreibe AUSSCHLIESSLICH Stichpunkte, keinen Fließtext und keine einleitende Überleitung.
+3 bis 5 kurze Stichpunkte zur mündlichen Mitarbeit, die sich konkret auf die unten genannten Beobachtungen beziehen, danach ein letzter Stichpunkt zur Endnote. Jeder Stichpunkt beginnt mit "- ", steht auf einer eigenen Zeile (echte Zeilenumbrüche zwischen den Stichpunkten, im JSON-String als \n kodiert) und ist kurz (ein halber bis ein ganzer Satz). Weiterhin in der direkten Anrede "Du", z. B. "- Beteiligst dich regelmäßig und sachlich am Unterricht."
+Der letzte Stichpunkt erklärt knapp, wie sich aus dem schriftlichen Durchschnitt und der sonstigen Mitarbeit zusammen die Endnote ergibt, z. B. "- Insgesamt ergibt das für dich die Note X."
 Formuliere wertschätzend und konstruktiv, auch wenn die Rückmeldung nicht durchgehend positiv ist.
 Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.
-Wenn die Beobachtungen sehr knapp oder widersprüchlich sind (und du dich entscheidest, keine Rückfragen zu stellen), weise das kurz und sachlich an passender Stelle darauf hin.
+Wenn die Beobachtungen sehr knapp oder widersprüchlich sind (und du dich entscheidest, keine Rückfragen zu stellen), weise das kurz und sachlich in einem eigenen Stichpunkt darauf hin.
 
 Regeln für "endnote":
 
@@ -301,7 +301,7 @@ exports.generateZeugnisnote = onCall(
         
         const firstPart = formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote);
         if (firstPart && mitarbeitText) {
-          begruendung = firstPart + " " + mitarbeitText;
+          begruendung = firstPart + "\n" + mitarbeitText;
         } else {
           begruendung = mitarbeitText || firstPart;
         }
