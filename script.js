@@ -5966,7 +5966,17 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
         if (hasExisting) {
             const begruendungEl = document.getElementById(`zn-begruendung-${index}`);
             if (begruendungEl) {
-                begruendungEl.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; min-height: inherit;"><i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i></div>`;
+                // Aktuelle Höhe exakt einfrieren, damit das Feld beim Generieren
+                // NICHT seine Größe ändert (sonst springt die Ansicht). offsetHeight
+                // enthält Padding/Border – mit box-sizing:border-box bleibt die
+                // sichtbare Höhe daher unverändert. Der neue Text füllt das Feld
+                // danach ohnehin wieder (finally baut das Inline-HTML neu auf).
+                const _lockH = begruendungEl.offsetHeight;
+                begruendungEl.style.boxSizing = 'border-box';
+                begruendungEl.style.height = _lockH + 'px';
+                begruendungEl.style.minHeight = '0';
+                begruendungEl.style.overflow = 'hidden';
+                begruendungEl.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%;"><i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i></div>`;
             }
             const actionsEl = container.querySelector('.zn-actions');
             if (actionsEl) {
