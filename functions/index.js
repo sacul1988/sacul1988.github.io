@@ -131,9 +131,21 @@ Der erste Teil des Rückmeldetextes wurde bereits automatisch erstellt und laute
 
 "[automatisch berechneter Satz zu den schriftlichen Noten, z. B. 'Du hast in Klassenarbeit 1, Klassenarbeit 2 und Projektarbeit die Noten 3, 2- und 1+ geschrieben. Daraus ergibt sich ein schriftlicher Durchschnitt von 2,00 und die Note 2.']"
 Deine Aufgabe ist es, NUR den zweiten Teil zu schreiben, der direkt an diesen ersten Teil anschließt, sowie eine Endnote vorzuschlagen.
-Antworte AUSSCHLIESSLICH mit einem JSON-Objekt in genau diesem Format, ohne zusätzlichen Text, ohne Markdown-Codeblöcke, ohne Einleitung oder Erklärung davor oder danach:
 
-{"endnote": "...", "mitarbeit_text": "..."}
+[WICHTIGE AUSGABE-REGEL (JSON)]
+Du musst als Antwort IMMER ein valides JSON-Objekt zurückgeben.
+Analysiere die eingegebenen Beobachtungen und Informationen des Nutzers. Wenn wichtige Kerndetails fehlen, um die sonstige Mitarbeit oder die Note fair und angemessen zu bewerten (z.B. wenn die Beobachtungen zur mündlichen Mitarbeit völlig unklar, widersprüchlich oder extrem mager sind), oder wenn du dir bezüglich der Endnote unsicher bist, stelle gezielte Rückfragen.
+WICHTIG: Wenn der Nutzer in der Historie bereits Fragen beantwortet hat (oder die Nachrichtenhistorie mehrere Runden hat), stelle KEINE weiteren Fragen mehr, sondern erstelle in jedem Fall die endgültige Note und die Begründung!
+
+Antworte in genau diesem JSON-Format:
+- Wenn wichtige Informationen fehlen oder du bezüglich der Note unsicher bist und Rückfragen nötig sind:
+  {"status": "unclear", "questions": ["Frage 1...", "Frage 2...", "Frage 3..."]} (Gib maximal 3 gezielte, kurze Fragen zurück)
+  
+- Wenn alle Informationen ausreichend sind oder bereits Fragen beantwortet wurden:
+  {"status": "success", "endnote": "...", "mitarbeit_text": "..."}
+
+Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohne Einleitung, Erklärung oder sonstigen Text davor/danach).
+
 Regeln für "mitarbeit_text":
 
 Beginnt sinngemäß mit einem Übergang zur sonstigen Mitarbeit, z. B. "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen: Du ..." – die genaue Formulierung darf variieren, der Sinn (Überleitung zur sonstigen/mündlichen Mitarbeit, Anrede "Du") soll aber erhalten bleiben.
@@ -141,14 +153,22 @@ Insgesamt 3 bis 5 Sätze in der direkten Anrede "Du", die sich konkret auf die u
 Endet mit einem Satz, der erklärt, wie sich aus dem schriftlichen Durchschnitt und der sonstigen Mitarbeit zusammen die Endnote ergibt, z. B. "Insgesamt ergibt das für dich die Note X."
 Formuliere wertschätzend und konstruktiv, auch wenn die Rückmeldung nicht durchgehend positiv ist.
 Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.
-Wenn die Beobachtungen sehr knapp oder widersprüchlich sind, weise das kurz und sachlich an passender Stelle darauf hin.
+Wenn die Beobachtungen sehr knapp oder widersprüchlich sind (und du dich entscheidest, keine Rückfragen zu stellen), weise das kurz und sachlich an passender Stelle darauf hin.
 
 Regeln für "endnote":
 
-EIN eindeutiger Wert zwischen 1 (sehr gut) und 5 (mangelhaft) als String, ohne Spanne. Nutze aktiv Tendenzen (z. B. "2+" oder "3-") anstelle von glatten ganzen Noten, um sprachliche Feinheiten und Nuancen in deiner Rückmeldung feiner und präziser zu justieren. Vermeide den übermäßigen Hang zu einer glatten ganzen Noten, außer die Leistung liegt eindeutig genau auf dieser Stufe. Die Note 6 wird nicht verwendet; "5-" ist die schwächste mögliche Einstufung.
-Berücksichtige sowohl den schriftlichen Durchschnitt als auch die Beobachtungen zur mündlichen Mitarbeit. Ohne ausdrücklichen Hinweis gehe von einer ungefähr gleichgewichtigen Berücksichtigung beider Bereiche aus. Liegen keine schriftlichen Noten vor, basiert die Endnote im Wesentlichen auf der mündlichen Mitarbeit.
-Sei bei der Einschätzung der mündlichen Mitarbeit konsequent und nicht zu wohlwollend, aber auch nicht übertrieben streng: Wenn die Beobachtungen überwiegend kritisch sind (z. B. mangelnde Aufgabenbearbeitung, häufige Ablenkungen, fehlende Mitarbeit, häufige Ermahnungen), soll sich das spürbar in der Endnote zeigen, auch wenn der schriftliche Durchschnitt gut ist – in der Regel um etwa eine Notenstufe unter dem schriftlichen Durchschnitt (z. B. Durchschnitt 2 → Endnote 3 oder 3-). Ein Abstand von mehr als einer Notenstufe ist nur gerechtfertigt, wenn die Beobachtungen sehr gravierend sind (z. B. nahezu keine Mitarbeit, massive und wiederholte Störungen, Ausschluss vom Unterricht).
-Genauso gilt umgekehrt: Eine durchgehend sehr positive mündliche Mitarbeit kann die Endnote über den schriftlichen Durchschnitt heben, in der Regel ebenfalls um etwa eine Notenstufe.
+EIN eindeutiger Wert zwischen 1 (sehr gut) und 5 (mangelhaft) als String, ohne Spanne. Nutze aktiv Tendenzen (z. B. "2+" oder "3-") anstelle von glatten ganzen Noten, um sprachliche Feinheiten und Nuancen in deiner Rückmeldung feiner und präziser zu justieren. Vermeide den übermäßigen Hang zu einer glatten ganzen Note, außer die Leistung liegt eindeutig genau auf dieser Stufe. Die Note 6 wird nicht verwendet; "5-" ist die schwächste mögliche Einstufung.
+Berücksichtige sowohl den schriftlichen Durchschnitt als auch die Beobachtungen zur mündlichen Mitarbeit/Verhalten/Störungen entsprechend der Fachart (Hauptfach oder Nebenfach):
+
+- Bei HAUPTFÄCHERN (ca. 50% schriftlich / 50% mündlich Gewichtung):
+  Die schriftliche Leistung behält ihr halbes Gewicht.
+  Wenn die Beobachtungen zum Verhalten oder der mündlichen Mitarbeit überwiegend kritisch sind (z. B. häufige Störungen, Ermahnungen, mangelnde Beteiligung, fehlende Aufgabenbearbeitung), soll die Endnote im Normalfall um bis zu 3 Notenschritte unter die schriftliche Note abgesenkt werden (z. B. schriftliche Note 2- wird zu Endnote 3-). In gravierenden Ausnahmefällen (z. B. massive Störungen, extreme Verweigerung) ist eine Absenkung um bis zu 4 Notenschritte (z. B. schriftliche Note 2- wird zu Endnote 4+) zulässig.
+
+- Bei NEBENFÄCHERN (mündliche Mitarbeit, Verhalten und Störungen dominieren stark, ca. 30% schriftlich / 70% mündlich Gewichtung):
+  Die mündliche Leistung und das Verhalten überschreiben die schriftliche Note stark.
+  Wenn die Beobachtungen zum Verhalten oder der mündlichen Mitarbeit überwiegend kritisch sind (z. B. häufige Störungen, Ermahnungen, mangelnde Beteiligung), muss die Endnote konsequent und stark abgewertet werden. Hier ist eine Absenkung um mindestens 4 oder mehr Notenschritte gefordert (z. B. schriftliche Note 2- wird zu Endnote 4 oder schlechter), da das mündliche Fehlverhalten die schriftliche Leistung im Nebenfach stark überschreiben soll.
+
+- Genauso gilt umgekehrt: Eine durchgehend sehr positive mündliche Mitarbeit kann die Endnote über den schriftlichen Durchschnitt heben, in der Regel um 1 bis 2 Notenschritte.
 Die im Schlusssatz von "mitarbeit_text" genannte Note muss exakt dem Wert von "endnote" entsprechen.`;
 
 function formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote) {
@@ -193,7 +213,7 @@ exports.generateZeugnisnote = onCall(
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
     }
 
-    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, fachContext } = request.data || {};
+    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, fachContext, messages } = request.data || {};
     const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
 
     const durchschnittKomma = durchschnitt ? String(durchschnitt).replace(".", ",") : "";
@@ -221,6 +241,10 @@ exports.generateZeugnisnote = onCall(
       userMsg += `\nZusätzlicher Hinweis der Lehrkraft, den du berücksichtigen sollst: ${hinweis.trim()}`;
     }
 
+    const messagesToSend = Array.isArray(messages) && messages.length > 0
+      ? messages
+      : [{ role: "user", content: userMsg }];
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -232,7 +256,7 @@ exports.generateZeugnisnote = onCall(
         model: "claude-sonnet-4-6",
         max_tokens: 1000,
         system: ZEUGNISNOTE_SYSTEM,
-        messages: [{ role: "user", content: userMsg }]
+        messages: messagesToSend
       })
     });
 
@@ -243,27 +267,42 @@ exports.generateZeugnisnote = onCall(
     const data = await response.json();
     const raw = data.content?.map(b => b.text || "").join("").trim() || "";
 
+    let status = "success";
     let note = "";
     let begruendung = "";
+    let questions = [];
+
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
-      note = (parsed.note || parsed.endnote || "").toString().trim();
-      const mitarbeitText = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
       
-      const firstPart = formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote);
-      if (firstPart && mitarbeitText) {
-        begruendung = firstPart + " " + mitarbeitText;
+      if (parsed.status === "unclear" && Array.isArray(parsed.questions)) {
+        status = "unclear";
+        questions = parsed.questions;
       } else {
-        begruendung = mitarbeitText || firstPart;
+        note = (parsed.note || parsed.endnote || "").toString().trim();
+        const mitarbeitText = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
+        
+        const firstPart = formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote);
+        if (firstPart && mitarbeitText) {
+          begruendung = firstPart + " " + mitarbeitText;
+        } else {
+          begruendung = mitarbeitText || firstPart;
+        }
       }
     } catch (e) {
-      throw new HttpsError("internal", "Antwort konnte nicht verarbeitet werden.");
+      console.error("JSON parsing failed, falling back to raw text:", e);
+      note = "";
+      begruendung = raw;
+    }
+
+    if (status === "unclear") {
+      return { status: "unclear", questions };
     }
 
     const erlaubt = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5", "5-", "6"];
     if (!erlaubt.includes(note)) note = "";
 
-    return { note, begruendung };
+    return { status: "success", note, begruendung };
   }
 );

@@ -5823,6 +5823,10 @@ function renderZeugnisModule() {
 
 // ===== Zeugnisnote (KI-Notenvorschlag) – inline in der Schülerkarte =====
 let _zeugnisnoteBusy = false;
+let _znPendingQuestions = null;
+let _znPendingMessages = null;
+let _znPendingIndex = null;
+let _znPendingRichtung = null;
 
 function getZeugnisnoteContext(student) {
     const schriftlicheNoten = (student.projects || [])
@@ -5881,7 +5885,7 @@ function saveTemporaryAiHint() {
     }
 }
 
-async function zeugnisnoteGenerate(index, richtung) {
+async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
     if (_zeugnisnoteBusy || activeClassId === null) return;
     const student = classes[activeClassId]?.students?.[index];
     if (!student) return;
@@ -5964,6 +5968,35 @@ async function zeugnisnoteGenerate(index, richtung) {
     }
     _zeugnisnoteBusy = true;
 
+    // Baue die initialen Messages auf, falls nicht übergeben
+    let activeMessages = customMessages;
+    if (!activeMessages) {
+        let userMsg = `Fach/Kontext: ${classes[activeClassId]?.name || 'Keine Angabe'}\n`;
+        const durchschnittKomma = durchschnitt ? String(durchschnitt).replace(".", ",") : "";
+        if (durchschnitt) {
+            userMsg += `Schriftlicher Durchschnitt: ${durchschnittKomma} (entspricht der Note ${durchschnittNote})\n`;
+        } else {
+            userMsg += `Es liegen keine schriftlichen Noten vor.\n`;
+        }
+        userMsg += `Beobachtungen zur mündlichen Mitarbeit:\n\n${(student.zeugnisSonstiges || '').trim() || "Keine Angabe"}\n`;
+
+        if (fachart === "nebenfach") {
+            userMsg += `\nArt des Fachs: Nebenfach. Bei diesem Fach zählt die mündliche Leistung für die Endnote deutlich mehr als die schriftliche Leistung.\n`;
+        } else {
+            userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
+        }
+
+        if (apiRichtung === "besser") {
+            userMsg += `\nWICHTIG: Schlage eine etwas BESSERE Note vor als beim normalen Abwägen und passe die Begründung entsprechend an.`;
+        } else if (apiRichtung === "schlechter") {
+            userMsg += `\nWICHTIG: Schlage eine etwas SCHLECHTERE Note vor als beim normalen Abwägen und passe die Begründung entsprechend an.`;
+        }
+        if (hinweis && hinweis.trim()) {
+            userMsg += `\nZusätzlicher Hinweis der Lehrkraft, den du berücksichtigen sollst: ${hinweis.trim()}`;
+        }
+        activeMessages = [{ role: 'user', content: userMsg }];
+    }
+
     try {
         if (typeof window.callGenerateZeugnisnote !== 'function') {
             throw new Error('Funktion nicht verfügbar.');
@@ -5976,8 +6009,20 @@ async function zeugnisnoteGenerate(index, richtung) {
             fachart,
             richtung: apiRichtung,
             hinweis: hinweis,
-            fachContext: classes[activeClassId]?.name || ''
+            fachContext: classes[activeClassId]?.name || '',
+            messages: activeMessages
         });
+
+        if (result && result.status === 'unclear' && Array.isArray(result.questions) && result.questions.length > 0) {
+            _zeugnisnoteBusy = false;
+            // Setze Ladeansicht zurück, falls es das erste Mal war und keine Note existiert
+            if (!student.zeugnisnote && container) {
+                container.innerHTML = zeugnisnoteInlineHtml(student, index);
+            }
+            showZnClarifyingQuestionsModal(result.questions, activeMessages, index, richtung);
+            return;
+        }
+
         if (!result || !result.note) {
             throw new Error('Kein gültiger Notenvorschlag erhalten.');
         }
@@ -6008,27 +6053,81 @@ async function zeugnisnoteGenerate(index, richtung) {
                                 textToSet = textToSet.substring(0, lastIndex) + `Note ${expectedGrade}` + textToSet.substring(lastIndex + `Note ${result.note}`.length);
                             }
                         }
-                    }
-                }
-            }
-        }
+                      }
+                  }
+              }
+          }
 
-        // Note direkt setzen + speichern
-        student.zeugnisnote = noteToSet;
-        student.zeugnisBegruendung = textToSet;
-        saveData(index);
-        if (window.temporaryAiHints) {
-            delete window.temporaryAiHints[index];
-        }
-    } catch (err) {
-        console.error('Zeugnisnote-Fehler:', err);
-        swal('Fehler', err.message || 'Fehler beim Generieren.', 'error');
-    } finally {
-        _zeugnisnoteBusy = false;
-        const c = document.getElementById(`zn-inline-${index}`);
-        if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
-    }
-}
+          // Note direkt setzen + speichern
+          student.zeugnisnote = noteToSet;
+          student.zeugnisBegruendung = textToSet;
+          saveData(index);
+          if (window.temporaryAiHints) {
+              delete window.temporaryAiHints[index];
+          }
+      } catch (err) {
+          console.error('Zeugnisnote-Fehler:', err);
+          swal('Fehler', err.message || 'Fehler beim Generieren.', 'error');
+      } finally {
+          _zeugnisnoteBusy = false;
+          const c = document.getElementById(`zn-inline-${index}`);
+          if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
+      }
+  }
+
+  function showZnClarifyingQuestionsModal(questions, originalMessages, index, richtung) {
+      const body = document.getElementById('zn-questions-body');
+      if (!body) return;
+      
+      body.innerHTML = '';
+      _znPendingQuestions = questions;
+      _znPendingMessages = originalMessages;
+      _znPendingIndex = index;
+      _znPendingRichtung = richtung;
+      
+      questions.forEach((q, idx) => {
+          const group = document.createElement('div');
+          group.className = 'form-group';
+          group.style.marginBottom = '15px';
+          
+          group.innerHTML = `
+              <label style="font-weight: 600; margin-bottom: 5px; display: block;">${ztEsc(q)}</label>
+              <textarea class="form-control zn-answer-input" rows="2" placeholder="Deine Antwort..." style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd; font-family:inherit;"></textarea>
+          `;
+          body.appendChild(group);
+      });
+      
+      showModal('zn-questions-modal');
+  }
+
+  async function znSubmitAnswers() {
+      const inputs = document.querySelectorAll('.zn-answer-input');
+      const answers = [];
+      inputs.forEach(input => {
+          answers.push((input.value || '').trim());
+      });
+      
+      const hasAtLeastOneAnswer = answers.some(ans => ans.length > 0);
+      if (!hasAtLeastOneAnswer) {
+          swal('Info', 'Bitte beantworte mindestens eine der Rückfragen.', 'info');
+          return;
+      }
+      
+      hideModal();
+      
+      const questions = _znPendingQuestions || [];
+      let answerContent = 'Hier sind die Antworten auf deine Rückfragen:\n';
+      questions.forEach((q, idx) => {
+          const ans = answers[idx] || 'Keine Angabe';
+          answerContent += `${idx + 1}. Frage: "${q}"\n   Antwort: "${ans}"\n`;
+      });
+      
+      const KIQuestionsStr = JSON.stringify({ status: 'unclear', questions: questions });
+      _znPendingMessages.push({ role: 'assistant', content: KIQuestionsStr });
+      _znPendingMessages.push({ role: 'user', content: answerContent });
+      
+      await zeugnisnoteGenerate(_znPendingIndex, _znPendingRichtung, _znPendingMessages);
+  }
 
 function saveZeugnisnoteBegruendung(index) {
     if (activeClassId === null) return;
@@ -6242,6 +6341,7 @@ window.closeZeugnisBatch = closeZeugnisBatch;
 window.zeugnisBatchNav = zeugnisBatchNav;
 window.zeugnisBatchGenerate = zeugnisBatchGenerate;
 window._zbSaveCurrentLocal = _zbSaveCurrentLocal;
+window.znSubmitAnswers = znSubmitAnswers;
 
 // ===== Notizen-Modal (Zeugnis-Tab) =====
 let _notesModalStudentIndex = null;
