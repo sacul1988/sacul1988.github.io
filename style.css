@@ -3988,10 +3988,13 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     gap: 12px;
     margin-bottom: 10px;
 }
-/* Leerzustand (nur der "Zeugnis erstellen"-Button): nach rechts unten */
+/* Leerzustand (nur der "Zeugnis erstellen"-Button): über die volle Breite */
 .zn-top-row--empty {
-    justify-content: flex-end;
     margin-bottom: 0;
+}
+.zn-top-row--empty .zn-generate-trigger {
+    width: 100%;
+    justify-content: center;
 }
 .zn-generate-trigger {
     display: inline-flex;
@@ -4123,6 +4126,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     color: var(--dark-color);
     min-height: 180px;
     outline: none;
+    white-space: pre-wrap;
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 .zn-begruendung:focus {
@@ -4478,6 +4482,19 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) #zeugnis-texte-module .card {
             min-height: calc(100dvh - 82px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
         }
+    }
+}
+
+/* ===== Zeugnis-Modul Desktop-Optimierung: Schülerkarten zweispaltig ===== */
+@media (min-width: 992px) {
+    #zeugnis-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+    }
+    #zeugnis-container .student-card {
+        margin-bottom: 0;
     }
 }
 
