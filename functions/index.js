@@ -154,11 +154,10 @@ Wenn unten keine schriftlichen Noten angegeben sind, gib einen leeren String "" 
 
 Regeln für "mitarbeit_text":
 
-Beginnt sinngemäß mit einem kurzen Übergang zur sonstigen Mitarbeit, z. B. "Zur sonstigen Mitarbeit: Du ..." oder "Im Unterricht ist mir aufgefallen: Du ..." – die genaue Formulierung darf variieren, der Sinn (Überleitung zur mündlichen Mitarbeit, Anrede "Du") soll aber erhalten bleiben.
-Insgesamt 3 bis 5 Sätze in der direkten Anrede "Du", die sich konkret auf die unten genannten Beobachtungen zur mündlichen Mitarbeit beziehen. Formuliere in ganzen, runden Sätzen (keine Stichpunkte), ohne Zeilenumbrüche.
-Verwende einfache, klare Sprache, die Schülerinnen und Schüler gut verstehen: kurze Sätze (Subjekt-Verb-Objekt), alltägliche Wörter, keine Schachtelsätze, keine abstrakten Fachbegriffe oder Erwachsenen-/Lehrersprache (z. B. lieber "Du hörst gut zu" statt "Du zeigst eine gute Aufnahmefähigkeit").
+Beginnt sinngemäß mit einem Übergang zur sonstigen Mitarbeit, z. B. "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen: Du ..." – die genaue Formulierung darf variieren, der Sinn (Überleitung zur sonstigen/mündlichen Mitarbeit, Anrede "Du") soll aber erhalten bleiben.
+Insgesamt 3 bis 5 Sätze in der direkten Anrede "Du", die sich konkret auf die unten genannten Beobachtungen zur mündlichen Mitarbeit beziehen. Formuliere in ganzen, runden Sätzen, nicht als Stichpunktliste, ohne Zeilenumbrüche.
 Endet mit einem Satz, der erklärt, wie sich aus dem schriftlichen Durchschnitt und der sonstigen Mitarbeit zusammen die Endnote ergibt, z. B. "Insgesamt ergibt das für dich die Note X."
-Formuliere wertschätzend, aber ehrlich und klar: Beschönige negative Beobachtungen nicht, sondern benenne sie sachlich und konkret – der Ton bleibt dabei konstruktiv, nicht verletzend.
+Formuliere wertschätzend und konstruktiv, auch wenn die Rückmeldung nicht durchgehend positiv ist.
 Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.
 Wenn die Beobachtungen sehr knapp oder widersprüchlich sind (und du dich entscheidest, keine Rückfragen zu stellen), weise das kurz und sachlich an passender Stelle darauf hin.
 
