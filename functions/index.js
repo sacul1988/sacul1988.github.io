@@ -16,7 +16,7 @@ Regeln:
 - WICHTIG: Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze, OHNE Leerzeilen und ohne doppelte Zeilenumbrüche. Auch zwischen Einleitung und restlichem Text kein Absatz – alles fließt in einem zusammenhängenden Text. Keine Aufzählungen.
 - Ca. 100-130 Wörter
 - Geschlechtergerechte Sprache (z.B. "Mitschülerinnen und Mitschüler", "Lehrkräfte")
-- Gib NUR den fertigen Zeugnistext aus, ohne Kommentare oder Erklärungen`,
+- Siehe die Ausgaberegel unten für das JSON-Format.`,
 
   hauptfach: `Du bist ein erfahrener Lehrer an einer Förderschule und schreibst Zeugnistexte für Schülerinnen und Schüler.
 Schreibe einen Zeugnistext für ein Hauptfach (z.B. Mathematik, Deutsch) basierend auf den angegebenen Beobachtungen.
@@ -34,7 +34,7 @@ Regeln:
 - WICHTIG: Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze, OHNE Leerzeilen und ohne doppelte Zeilenumbrüche. Auch zwischen Einleitung und restlichem Text kein Absatz – alles fließt in einem zusammenhängenden Text. Keine Aufzählungen.
 - Ca. 150-180 Wörter
 - Geschlechtergerechte Sprache
-- Gib NUR den fertigen Zeugnistext aus, ohne Kommentare oder Erklärungen`,
+- Siehe die Ausgaberegel unten für das JSON-Format.`,
 
   sozialverhalten: `Du bist ein erfahrener Lehrer an einer Förderschule und schreibst Berichte zum Arbeits- und Sozialverhalten für Schülerinnen und Schüler.
 Schreibe einen Bericht zum Arbeits- und Sozialverhalten basierend auf den angegebenen Beobachtungen.
@@ -53,7 +53,7 @@ Regeln:
 - WICHTIG: Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze, OHNE Leerzeilen und ohne doppelte Zeilenumbrüche. Auch zwischen Einleitung und restlichem Text kein Absatz – alles fließt in einem zusammenhängenden Text. Keine Aufzählungen.
 - Ca. 200-250 Wörter
 - Geschlechtergerechte Sprache
-- Gib NUR den fertigen Text aus, ohne Kommentare oder Erklärungen`
+- Siehe die Ausgaberegel unten für das JSON-Format.`
 };
 
 exports.generateZeugnistext = onCall(
@@ -68,7 +68,20 @@ exports.generateZeugnistext = onCall(
       throw new HttpsError("invalid-argument", "Fehlende oder ungültige Parameter.");
     }
 
-    const systemPrompt = PROMPTS[typ] || PROMPTS.nebenfach;
+    const basePrompt = PROMPTS[typ] || PROMPTS.nebenfach;
+    const systemPrompt = basePrompt + `\n\n[WICHTIGE AUSGABE-REGEL (JSON)]
+Du musst als Antwort IMMER ein valides JSON-Objekt zurückgeben. 
+Analysiere die eingegebenen Beobachtungen und Informationen des Nutzers. Wenn fundamentale Kerndetails fehlen, die für einen guten Text gemäß deinen Richtlinien und Beispielen nötig sind (z.B. konkrete Angaben zu Hilfestellungen, Materialien, Motivation, Mitarbeit oder Sozialverhalten), und der Text dadurch extrem mager oder unvollständig werden würde, frage nach diesen Details.
+WICHTIG: Wenn der Nutzer in der Historie bereits Fragen beantwortet hat (oder die Nachrichtenhistorie mehrere Runden hat), stelle KEINE weiteren Fragen mehr, sondern erstelle in jedem Fall den endgültigen Text!
+
+Antworte in genau diesem JSON-Format:
+- Wenn wichtige Informationen fehlen und Rückfragen nötig sind:
+  {"status": "unclear", "questions": ["Frage 1...", "Frage 2...", "Frage 3..."]} (Gib maximal 3 gezielte, kurze Fragen zurück)
+  
+- Wenn alle Informationen ausreichend sind oder bereits Fragen beantwortet wurden:
+  {"status": "success", "text": "Hier steht der komplette, ausformulierte Zeugnistext..."}
+
+Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohne Einleitung, Erklärung oder sonstigen Text davor/danach).`;
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -90,8 +103,25 @@ exports.generateZeugnistext = onCall(
     }
 
     const data = await response.json();
-    const text = data.content?.map(b => b.text || "").join("").trim() || "Fehler beim Generieren.";
-    return { text };
+    const rawText = data.content?.map(b => b.text || "").join("").trim() || "";
+
+    let result = { text: rawText };
+    try {
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.status === "unclear" && Array.isArray(parsed.questions)) {
+          result = { text: "", questions: parsed.questions };
+        } else if (parsed.status === "success" && parsed.text) {
+          result = { text: parsed.text };
+        } else if (parsed.text) {
+          result = { text: parsed.text };
+        }
+      }
+    } catch (e) {
+      console.error("JSON parsing failed, falling back to raw text:", e);
+    }
+    return result;
   }
 );
 

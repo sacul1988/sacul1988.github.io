@@ -8376,7 +8376,9 @@ const ZtState = {
     currentLabel: '',
     currentId: null,
     archive: [],
-    initialized: false
+    initialized: false,
+    pendingMessages: null,
+    pendingQuestions: null
 };
 
 function renderZeugnisTTexteModule() {
@@ -8487,9 +8489,16 @@ async function ztGenerate() {
     ztSetLoading();
 
     try {
-        ZtState.currentText = ztNormalizeText(await ztCallAPI([{ role: 'user', content: userMsg }]));
-        ztCreateArchiveEntry();
-        ztRenderResult();
+        const initialMessages = [{ role: 'user', content: userMsg }];
+        const apiResult = await ztCallAPI(initialMessages);
+        
+        if (apiResult.questions && apiResult.questions.length > 0) {
+            showClarifyingQuestionsModal(apiResult.questions, initialMessages);
+        } else {
+            ZtState.currentText = ztNormalizeText(apiResult.text);
+            ztCreateArchiveEntry();
+            ztRenderResult();
+        }
     } catch(e) {
         ztCloseResult();
         swal('Fehler', 'Fehler beim Generieren. Bitte erneut versuchen.', 'error');
@@ -8788,6 +8797,72 @@ window.setZeugnistexteArchiv = function(arr) {
     if (am && am.style.display !== 'none') ztRenderArchiveModal();
 };
 
+function showClarifyingQuestionsModal(questions, originalMessages) {
+    const body = document.getElementById('zt-questions-body');
+    if (!body) return;
+    
+    body.innerHTML = '';
+    ZtState.pendingQuestions = questions;
+    ZtState.pendingMessages = originalMessages;
+    
+    questions.forEach((q, index) => {
+        const group = document.createElement('div');
+        group.className = 'form-group';
+        group.style.marginBottom = '15px';
+        
+        group.innerHTML = `
+            <label style="font-weight: 600; margin-bottom: 5px; display: block;">${ztEsc(q)}</label>
+            <textarea class="form-control zt-answer-input" rows="2" placeholder="Deine Antwort..." style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd; font-family:inherit;"></textarea>
+        `;
+        body.appendChild(group);
+    });
+    
+    ztCloseResult();
+    showModal('zt-questions-modal');
+}
+
+async function ztSubmitAnswers() {
+    const inputs = document.querySelectorAll('.zt-answer-input');
+    const answers = [];
+    inputs.forEach(input => {
+        answers.push((input.value || '').trim());
+    });
+    
+    const hasAtLeastOneAnswer = answers.some(ans => ans.length > 0);
+    if (!hasAtLeastOneAnswer) {
+        swal('Info', 'Bitte beantworte mindestens eine der Rückfragen.', 'info');
+        return;
+    }
+    
+    hideModal();
+    ztSetLoading();
+    
+    const questions = ZtState.pendingQuestions || [];
+    let answerContent = 'Hier sind die Antworten auf deine Rückfragen:\n';
+    questions.forEach((q, idx) => {
+        const ans = answers[idx] || 'Keine Angabe';
+        answerContent += `${idx + 1}. Frage: "${q}"\n   Antwort: "${ans}"\n`;
+    });
+    
+    const KIQuestionsStr = JSON.stringify({ status: 'unclear', questions: questions });
+    ZtState.pendingMessages.push({ role: 'assistant', content: KIQuestionsStr });
+    ZtState.pendingMessages.push({ role: 'user', content: answerContent });
+    
+    try {
+        const apiResult = await ztCallAPI(ZtState.pendingMessages);
+        if (apiResult.questions && apiResult.questions.length > 0) {
+            showClarifyingQuestionsModal(apiResult.questions, ZtState.pendingMessages);
+        } else {
+            ZtState.currentText = ztNormalizeText(apiResult.text);
+            ztCreateArchiveEntry();
+            ztRenderResult();
+        }
+    } catch(e) {
+        ztCloseResult();
+        swal('Fehler', 'Fehler beim Generieren. Bitte erneut versuchen.', 'error');
+    }
+}
+
 window.setZtTyp = setZtTyp;
 window.ztGenerate = ztGenerate;
 window.ztRegenerate = ztRegenerate;
@@ -8801,3 +8876,4 @@ window.ztDeleteArchive = ztDeleteArchive;
 window.ztCloseResult = ztCloseResult;
 window.ztNextStudent = ztNextStudent;
 window.ztOnTextEdited = ztOnTextEdited;
+window.ztSubmitAnswers = ztSubmitAnswers;
