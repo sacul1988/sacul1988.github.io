@@ -255,6 +255,8 @@ function getGradeColor(grade) {
 
 // Seitennavigation
 function showPage(page, classId = null, shouldPushState = true) {
+    // Sitzplan-Vollbild beim Seitenwechsel sicher verlassen
+    if (typeof exitSitzplanFullscreen === 'function') exitSitzplanFullscreen();
     const previousClassId = activeClassId;
 
     // Vor Seiten-/Klassenwechsel offene Zeugnis-Änderungen der aktuellen Klasse sichern.
@@ -326,6 +328,9 @@ function showPage(page, classId = null, shouldPushState = true) {
 
 // Modul wechseln
 function showModule(module, shouldPushState = true) {
+    // Sitzplan-Vollbild beim Tab-Wechsel sicher verlassen
+    exitSitzplanFullscreen();
+
     // Beim Verlassen des Noten-Tabs alle Schüler einklappen
     if (activeModule === 'noten' && module !== 'noten') {
         collapseAllStudents();
@@ -4371,6 +4376,32 @@ function setMode(mode) {
     // Tische neu rendern, um Punkte basierend auf Modus anzuzeigen
     renderSitzplanModule();
 }
+
+// Sitzplan-Vollbild (In-App-Overlay) – funktioniert auch auf iPhone/iPad,
+// wo echtes Element-Vollbild (Fullscreen-API) nicht unterstützt wird.
+function toggleSitzplanFullscreen() {
+    const moduleEl = document.getElementById('sitzplan-module');
+    if (!moduleEl) return;
+    const isFs = moduleEl.classList.toggle('sitzplan-fullscreen');
+    const btn = document.getElementById('sitzplan-fullscreen-btn');
+    if (btn) {
+        btn.innerHTML = isFs ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
+        btn.title = isFs ? 'Vollbild schließen' : 'Vollbild';
+    }
+    // Pan-Position und Tische bleiben unverändert – das Overlay zeigt nur mehr Fläche.
+}
+window.toggleSitzplanFullscreen = toggleSitzplanFullscreen;
+
+// Vollbild beim Verlassen des Sitzplans sicher zurücksetzen (z. B. Tab-/Seitenwechsel)
+function exitSitzplanFullscreen() {
+    const moduleEl = document.getElementById('sitzplan-module');
+    if (moduleEl && moduleEl.classList.contains('sitzplan-fullscreen')) {
+        moduleEl.classList.remove('sitzplan-fullscreen');
+        const btn = document.getElementById('sitzplan-fullscreen-btn');
+        if (btn) { btn.innerHTML = '<i class="fas fa-expand"></i>'; btn.title = 'Vollbild'; }
+    }
+}
+window.exitSitzplanFullscreen = exitSitzplanFullscreen;
 
 // Tisch rendern
 // Global für Klick-Historie pro Desk
