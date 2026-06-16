@@ -6011,7 +6011,7 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
 
     // Bestimme die Zielnote und den passenden Prompt-Hinweis für "besser" und "schlechter", wenn bereits eine Note existiert
     if ((richtung === 'besser' || richtung === 'schlechter') && student.zeugnisnote) {
-        const allowedGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5", "5-"];
+        const allowedGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5"];
         const currentGrade = student.zeugnisnote.trim();
         const currentIndex = allowedGrades.indexOf(currentGrade);
         
@@ -6162,7 +6162,7 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
         // Falls die KI trotz Hinweis eine andere Note generiert hat (Fallbacksicherung),
         // erzwingen wir die gewünschte Zielnote und korrigieren den Schlusssatz.
         if ((richtung === 'besser' || richtung === 'schlechter') && student.zeugnisnote) {
-            const allowedGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5", "5-"];
+            const allowedGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5"];
             const currentGrade = student.zeugnisnote.trim();
             const currentIndex = allowedGrades.indexOf(currentGrade);
             if (currentIndex !== -1) {
