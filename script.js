@@ -5882,7 +5882,7 @@ function zeugnisnoteInlineHtml(student, index) {
             ${triggerBtn}
             <div class="zn-grade-circle ${circleClass}">${note}</div>
         </div>
-        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})">${escapeHtml(text)}</div>
+        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})">${escapeHtml(text)}</div>
         <div class="zn-actions">
             <button class="zn-action-btn zn-new" onclick="zeugnisnoteGenerate(${index}, null)"><i class="fas fa-rotate-left"></i> Neu</button>
             <button class="zn-action-btn zn-better" onclick="zeugnisnoteGenerate(${index}, 'besser')"><i class="fas fa-caret-up"></i> Besser</button>
@@ -6177,6 +6177,26 @@ function saveZeugnisnoteBegruendung(index) {
     saveData(index);
 }
 
+// Beim Verlassen des Begründungsfeldes: Ist der Text leer (auch nur Whitespace/\n
+// aus einem geleerten contenteditable), wird die Endnote ebenfalls entfernt –
+// ohne Begründungstext soll es keine Endnote geben. Es muss dann ein neuer Text
+// generiert werden. Bewusst onblur statt oninput, damit das Kästchen nicht mitten
+// im Bearbeiten wegspringt und den Fokus reißt.
+function zeugnisnoteBegruendungBlur(index) {
+    if (activeClassId === null) return;
+    const el = document.getElementById(`zn-begruendung-${index}`);
+    const student = classes[activeClassId]?.students?.[index];
+    if (!el || !student) return;
+    const txt = (el.innerText || '').trim();
+    if (!txt) {
+        student.zeugnisnote = '';
+        student.zeugnisBegruendung = '';
+        saveData(index);
+        const c = document.getElementById(`zn-inline-${index}`);
+        if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
+    }
+}
+
 // ===== Beobachtungen-Modal (Eingabe für KI-Notenvorschlag) =====
 let _zeugnisInputIndex = null;
 
@@ -6421,6 +6441,7 @@ window.saveNotesModalLocal = saveNotesModalLocal;
 window.zeugnisnoteGenerate = zeugnisnoteGenerate;
 window.openZeugnisnoteHinweisModal = openZeugnisnoteHinweisModal;
 window.saveZeugnisnoteBegruendung = saveZeugnisnoteBegruendung;
+window.zeugnisnoteBegruendungBlur = zeugnisnoteBegruendungBlur;
 window.saveTemporaryAiHint = saveTemporaryAiHint;
 
 
@@ -6693,7 +6714,7 @@ function exportAllStudentCards() {
                     </div>
                 </div>
                 ${zeugnisBegruendung ? `<div class="zg-text-label">Beurteilung</div><div class="zg-text">${escapeHtml(zeugnisBegruendung)}</div>` : ''}
-                <div class="zg-note">Zeugnisnote: <strong>${zeugnisnoteWort}</strong></div>
+                ${zeugnisBegruendung ? `<div class="zg-note">Zeugnisnote: <strong>${zeugnisnoteWort}</strong></div>` : ''}
             </div>
         `;
     });
