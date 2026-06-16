@@ -3988,6 +3988,11 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     gap: 12px;
     margin-bottom: 10px;
 }
+/* Leerzustand (nur der "Zeugnis erstellen"-Button): nach rechts unten */
+.zn-top-row--empty {
+    justify-content: flex-end;
+    margin-bottom: 0;
+}
 .zn-generate-trigger {
     display: inline-flex;
     align-items: center;

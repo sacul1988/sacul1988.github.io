@@ -5775,7 +5775,7 @@ function renderZeugnisModule() {
                 if (average) {
                     const avgGradeValue = Utils.convertGrade(average.rounded);
                     const avgGradeClass = Utils.getGradeColorClass(avgGradeValue);
-                    averageHtml = `<div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;"><strong>Durchschnitt (Schriftlich): <span class="grade-badge ${avgGradeClass}">${average.rounded}</span> (${average.exact})</strong></div>`;
+                    averageHtml = `<div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;"><strong>Durchschnitt (Schriftlich): <span class="grade-badge ${avgGradeClass}">${average.rounded}</span></strong></div>`;
                 }
             }
         } else {
@@ -5873,7 +5873,7 @@ function zeugnisnoteInlineHtml(student, index) {
     const triggerBtn = `<button class="zn-generate-trigger" onclick="openZeugnisnoteInput(${index})"><i class="fas fa-wand-magic-sparkles"></i> <span>Zeugnis erstellen</span></button>`;
 
     if (!note) {
-        return `<div class="zn-top-row">${triggerBtn}</div>`;
+        return `<div class="zn-top-row zn-top-row--empty">${triggerBtn}</div>`;
     }
 
     const circleClass = Utils.getGradeColorClass(Utils.convertGrade(note));
