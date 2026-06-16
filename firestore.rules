@@ -15,7 +15,6 @@ service cloud.firestore {
     //   - deletedTermineIds: list (required) - Array of deleted event IDs
     //   - planung: map (required) - Seating plan settings mapped by class index
     //   - planung_global_calendar_range: map (required) - Global calendar configuration
-    //   - formulierungshilfen: list (required) - Custom report templates
     //   - zeugnistexteArchiv: list (required) - Archived report texts
     //   - contacts: list (required) - Address book contacts
     //   - extraDataLastUpdate: string (required) - Timestamp for local extra data synchronization
@@ -54,7 +53,7 @@ service cloud.firestore {
     function isValidUserData(data) {
       return hasRequiredFields(data, [
         'lastUpdate', 'classes', 'termine', 'deletedTermineIds',
-        'planung', 'planung_global_calendar_range', 'formulierungshilfen',
+        'planung', 'planung_global_calendar_range',
         'zeugnistexteArchiv', 'contacts', 'extraDataLastUpdate'
       ]) &&
       data.lastUpdate is string && data.lastUpdate.size() <= 40 &&
@@ -64,7 +63,6 @@ service cloud.firestore {
       data.deletedTermineIds is list && data.deletedTermineIds.size() <= 1000 &&
       data.planung is map &&
       data.planung_global_calendar_range is map &&
-      data.formulierungshilfen is list && data.formulierungshilfen.size() <= 500 &&
       data.zeugnistexteArchiv is list && data.zeugnistexteArchiv.size() <= 2000 &&
       data.contacts is list && data.contacts.size() <= 500;
     }

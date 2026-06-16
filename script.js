@@ -3851,7 +3851,6 @@ function exportAllData(event) {
             deletedTermineIds: JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'),
             planung: planungObj,
             planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
-            formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]'),
             zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
             zeugnisViewMode: localStorage.getItem('zeugnisViewMode') || 'individual',
             extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || new Date().toISOString()
@@ -3981,11 +3980,6 @@ function importBackupFile(event) {
                     }
                     if (importData.planung_global_calendar_range && typeof importData.planung_global_calendar_range === 'object') {
                         localStorage.setItem('planung_global_calendar_range', JSON.stringify(importData.planung_global_calendar_range));
-                    }
-
-                    // Formulierungshilfen übernehmen (falls vorhanden)
-                    if (importData.formulierungshilfen && Array.isArray(importData.formulierungshilfen)) {
-                        localStorage.setItem('formulierungshilfen', JSON.stringify(importData.formulierungshilfen));
                     }
 
                     // Zeugnistexte Archiv übernehmen (falls vorhanden)

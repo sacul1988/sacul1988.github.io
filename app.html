@@ -1311,17 +1311,11 @@
             const localExtra = localStorage.getItem('extraDataLastUpdate') || '0';
             const cloudExtra = cloudData.extraDataLastUpdate || '0';
 
-            // Formulierungshilfen synchronisieren
-            const shouldApplyFormulierungen = cloudExtra > localExtra || !localStorage.getItem('extraDataLastUpdate');
-            if (shouldApplyFormulierungen && Array.isArray(cloudData.formulierungshilfen)) {
-                localStorage.setItem('formulierungshilfen', JSON.stringify(cloudData.formulierungshilfen));
-                if (typeof window.setFormulierungshilfen === 'function') {
-                    window.setFormulierungshilfen(cloudData.formulierungshilfen);
-                }
-            }
+            // Zusätzliche Daten (Zeugnistext-Archiv) synchronisieren
+            const shouldApplyExtra = cloudExtra > localExtra || !localStorage.getItem('extraDataLastUpdate');
 
             // Zeugnistext-Archiv synchronisieren
-            if (shouldApplyFormulierungen && Array.isArray(cloudData.zeugnistexteArchiv)) {
+            if (shouldApplyExtra && Array.isArray(cloudData.zeugnistexteArchiv)) {
                 localStorage.setItem('zeugnistexteArchiv', JSON.stringify(cloudData.zeugnistexteArchiv));
                 if (typeof window.setZeugnistexteArchiv === 'function') {
                     window.setZeugnistexteArchiv(cloudData.zeugnistexteArchiv);
@@ -1397,7 +1391,6 @@
                     deletedTermineIds: JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'),
                     planung: planungObj,
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
-                    formulierungshilfen: JSON.parse(localStorage.getItem('formulierungshilfen') || '[]'),
                     zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
                     contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
