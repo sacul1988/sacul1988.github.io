@@ -6010,10 +6010,9 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
     // Baue die initialen Messages auf, falls nicht übergeben
     let activeMessages = customMessages;
     if (!activeMessages) {
-        let userMsg = `Fach/Kontext: ${classes[activeClassId]?.name || 'Keine Angabe'}\n`;
-        const durchschnittKomma = durchschnitt ? String(durchschnitt).replace(".", ",") : "";
+        let userMsg = '';
         if (durchschnitt) {
-            userMsg += `Schriftlicher Durchschnitt: ${durchschnittKomma} (entspricht der Note ${durchschnittNote})\n`;
+            userMsg += `Schriftliche Durchschnittsnote: ${durchschnittNote}\n`;
         } else {
             userMsg += `Es liegen keine schriftlichen Noten vor.\n`;
         }

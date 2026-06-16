@@ -129,7 +129,7 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
 const ZEUGNISNOTE_SYSTEM = `Du unterstützt eine Lehrkraft dabei, einer Schülerin oder einem Schüler eine Rückmeldung zur Endnote zu geben. Der Text wird DIREKT AN DIE SCHÜLERIN ODER DEN SCHÜLER gerichtet, also in der Anrede "Du".
 Der erste Teil des Rückmeldetextes wurde bereits automatisch erstellt und lautet:
 
-"[automatisch berechneter Satz zu den schriftlichen Noten, z. B. 'Du hast in Klassenarbeit 1, Klassenarbeit 2 und Projektarbeit die Noten 3, 2- und 1+ geschrieben. Daraus ergibt sich ein schriftlicher Durchschnitt von 2,00 und die Note 2.']"
+"[automatisch berechneter Satz zu den schriftlichen Noten, z. B. 'Du hast in Klassenarbeit 1, Klassenarbeit 2 und Projektarbeit die Noten 3, 2- und 1+ geschrieben. Daraus ergibt sich die schriftliche Durchschnittsnote 2.']"
 Deine Aufgabe ist es, NUR den zweiten Teil zu schreiben, der direkt an diesen ersten Teil anschließt, sowie eine Endnote vorzuschlagen.
 
 [WICHTIGE AUSGABE-REGEL (JSON)]
@@ -198,9 +198,8 @@ function formatFirstPart(schriftlicheNoten, durchschnitt, durchschnittNote) {
     ? `Du hast in ${namesStr} die Note ${gradesStr} geschrieben.`
     : `Du hast in ${namesStr} die Noten ${gradesStr} geschrieben.`;
 
-  const durchschnittKomma = durchschnitt ? String(durchschnitt).replace(".", ",") : "";
-  const sentence2 = durchschnitt 
-    ? ` Daraus ergibt sich ein schriftlicher Durchschnitt von ${durchschnittKomma} und die Note ${durchschnittNote}.`
+  const sentence2 = durchschnitt
+    ? ` Daraus ergibt sich die schriftliche Durchschnittsnote ${durchschnittNote}.`
     : "";
 
   return sentence1 + sentence2;
@@ -213,14 +212,12 @@ exports.generateZeugnisnote = onCall(
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
     }
 
-    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, fachContext, messages } = request.data || {};
+    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, messages } = request.data || {};
     const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
 
-    const durchschnittKomma = durchschnitt ? String(durchschnitt).replace(".", ",") : "";
-
-    let userMsg = `Fach/Kontext: ${fachContext || "Keine Angabe"}\n`;
+    let userMsg = "";
     if (durchschnitt) {
-      userMsg += `Schriftlicher Durchschnitt: ${durchschnittKomma} (entspricht der Note ${durchschnittNote})\n`;
+      userMsg += `Schriftliche Durchschnittsnote: ${durchschnittNote}\n`;
     } else {
       userMsg += `Es liegen keine schriftlichen Noten vor.\n`;
     }
