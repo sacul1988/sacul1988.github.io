@@ -4076,7 +4076,7 @@ function renderSitzplanModule() {
         const computePanBounds = () => {
             const desks = document.querySelectorAll('#workspace-pan .desk');
             if (!desks.length) return null;
-            const buf = 120;
+            const buf = 60;
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             desks.forEach(d => {
                 const l = parseFloat(d.style.left) || 0;
@@ -4255,6 +4255,9 @@ function renderSitzplanModule() {
         cls.sitzplan.desks.forEach(desk => {
             renderDesk(desk);
         });
+
+        // Initialen Pan-Wert mit Begrenzung anwenden (nachdem die Tische im DOM sind)
+        applyPan(workspace._panX, workspace._panY);
     }
     
     // UI für den aktuellen Modus aktualisieren
