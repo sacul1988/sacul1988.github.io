@@ -5775,7 +5775,7 @@ function renderZeugnisModule() {
                 if (average) {
                     const avgGradeValue = Utils.convertGrade(average.rounded);
                     const avgGradeClass = Utils.getGradeColorClass(avgGradeValue);
-                    averageHtml = `<div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;"><strong>Durchschnitt (Schriftlich): <span class="grade-badge ${avgGradeClass}">${average.rounded}</span></strong></div>`;
+                    averageHtml = `<div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;"><strong>Durchschnitt: <span class="grade-badge ${avgGradeClass}">${average.rounded}</span></strong></div>`;
                 }
             }
         } else {
