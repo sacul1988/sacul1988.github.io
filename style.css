@@ -4815,11 +4815,12 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 }
 
 /* ================================================================
-   Zeitraum-Modal (Kalender/Planung): auf dem Desktop ZWEI direkt
-   eingebettete Kalender nebeneinander statt der Klick-zum-Öffnen-Felder.
-   Nur ab 720px (genug Platz). Darunter / mobil bleiben die Datumsfelder.
+   Zeitraum-Modal (Kalender/Planung): ab der Desktop-Ansicht (>600px, also
+   Desktop UND iPad) ZWEI eingebettete Kalender nebeneinander. In der mobilen
+   Ansicht (<=600px, iPhone Hochformat) bleiben die zwei Datumsfelder, der
+   Kalender öffnet erst beim Antippen. Gleiche Grenze wie die übrige App.
    ================================================================ */
-@media (min-width: 720px) {
+@media (min-width: 601px) {
     #planung-zeitraum-modal {
         max-width: 700px !important;
         width: auto !important;
@@ -4833,6 +4834,21 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     #planung-zeitraum-modal .flatpickr-calendar.inline {
         margin: 4px 10px 0;
         box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 20px rgba(15, 23, 42, .06);
+    }
+}
+
+/* Mobile (<=600px): Datums-Popup sofort in der Bildschirmmitte öffnen (kein
+   Springen vom Feld zur Mitte). Gilt nur für aufklappende Popups, nicht für
+   die eingebetteten .inline-Kalender (die gibt es mobil ohnehin nicht). */
+@media (max-width: 600px) {
+    .flatpickr-calendar:not(.inline) {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translate(-50%, -50%) !important;
+        margin: 0 !important;
+        z-index: 999999 !important;
     }
 }
 

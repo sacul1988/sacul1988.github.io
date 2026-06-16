@@ -1839,39 +1839,49 @@ function deleteClass(classId) {
 
 // Event-Listener für Dokumentenladung
 function initFlatpickr() {
+    setupZeitraumPickers();
+}
+
+// Zeitraum-Datumspicker passend zum aktuellen Format aufsetzen.
+// Mobile (<= 600px, z. B. iPhone Hochformat) -> zwei Felder, Kalender öffnet
+// erst beim Antippen (Popup, mittig). Ab 601px (Desktop UND iPad) -> zwei
+// eingebettete Kalender nebeneinander. Wird beim Laden UND bei jedem Öffnen des
+// Modals aufgerufen, damit die Ansicht immer zum tatsächlichen Format passt
+// (auch nach Drehen / in der Responsive-Vorschau).
+function setupZeitraumPickers() {
     if (typeof flatpickr === 'undefined') return;
     const locale = (flatpickr.l10ns && flatpickr.l10ns.de) ? flatpickr.l10ns.de : 'de';
-    const fpConfig = {
+    const twoCalendars = window.matchMedia('(min-width: 601px)').matches;
+    const cfg = {
         locale: locale,
         dateFormat: 'Y-m-d',
-        altInput: true,
+        altInput: !twoCalendars,
         altFormat: 'd.m.Y',
+        inline: twoCalendars,
         disableMobile: true,
         onChange: function() { autoGeneratePlanungTable(); },
+        // Popup (Mobile) sofort mittig positionieren – ohne Verzögerung, kein Springen
         onOpen: function(selectedDates, dateStr, instance) {
-            setTimeout(function() {
-                const cal = instance.calendarContainer;
-                cal.style.position = 'fixed';
-                cal.style.top = '50%';
-                cal.style.left = '50%';
-                cal.style.transform = 'translate(-50%, -50%)';
-                cal.style.zIndex = '999999';
-                cal.style.marginTop = '0';
-            }, 0);
+            const cal = instance.calendarContainer;
+            cal.style.position = 'fixed';
+            cal.style.top = '50%';
+            cal.style.left = '50%';
+            cal.style.transform = 'translate(-50%, -50%)';
+            cal.style.zIndex = '999999';
+            cal.style.marginTop = '0';
         }
     };
-    // Zeitraum-Picker: auf dem Desktop (genug Platz) zwei direkt eingebettete
-    // Kalender (inline); auf Mobile wie bisher Popup beim Klick ins Feld.
-    const twoCalendars = window.matchMedia('(min-width: 720px)').matches;
-    const rangeConfig = Object.assign({}, fpConfig, {
-        inline: twoCalendars,
-        altInput: !twoCalendars,
+    ['planung-start-date', 'planung-end-date'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        // bisher gewählten Wert merken, Picker neu aufsetzen, Wert zurücksetzen
+        const prev = el._flatpickr ? el._flatpickr.selectedDates[0] : (el.value || '');
+        if (el._flatpickr) el._flatpickr.destroy();
+        const fp = flatpickr(el, cfg);
+        if (prev) fp.setDate(prev, false);
     });
-    const startEl = document.getElementById('planung-start-date');
-    const endEl = document.getElementById('planung-end-date');
-    if (startEl) flatpickr(startEl, rangeConfig);
-    if (endEl) flatpickr(endEl, rangeConfig);
 }
+window.setupZeitraumPickers = setupZeitraumPickers;
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -7459,6 +7469,9 @@ function togglePlanungZeitraum() {
     const title = document.getElementById('planung-zeitraum-modal-title');
     if (title) title.textContent = 'Zeitraum';
 
+    // Picker passend zum aktuellen Format neu aufsetzen (Felder mobil / Kalender Desktop/iPad)
+    setupZeitraumPickers();
+
     // Aktuelle Werte in die Picker setzen (Monat/Markierung)
     const p = AppState.planung || {};
     const cs = mode === 'calendar' ? (p.calendarStartDate || '') : (p.startDate || '');
@@ -7470,8 +7483,8 @@ function togglePlanungZeitraum() {
 
     showModal('planung-zeitraum-modal');
 
-    // Desktop: eingebettete (inline) Kalender nach dem Einblenden neu zeichnen
-    if (window.matchMedia('(min-width: 720px)').matches) {
+    // Desktop/iPad: eingebettete (inline) Kalender nach dem Einblenden neu zeichnen
+    if (window.matchMedia('(min-width: 601px)').matches) {
         if (s && s._flatpickr) s._flatpickr.redraw();
         if (e && e._flatpickr) e._flatpickr.redraw();
     }
