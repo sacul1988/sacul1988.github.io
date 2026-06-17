@@ -551,6 +551,9 @@ function openToolWindow(which, shouldPushState = true) {
     } else if (which === 'zeugnis-texte') {
         panel = document.getElementById('zeugnis-texte-module');
         if (typeof renderZeugnisTTexteModule === 'function') renderZeugnisTTexteModule();
+    } else if (which === 'stundenplan') {
+        panel = document.getElementById('stundenplan-module');
+        if (typeof renderStundenplanModule === 'function') renderStundenplanModule();
     }
     if (!panel) return;
 
@@ -560,7 +563,7 @@ function openToolWindow(which, shouldPushState = true) {
 
     const titleEl = document.getElementById('tool-window-title');
     if (titleEl) {
-        const titles = { kalender: 'Kalender', kontakte: 'Adressbuch', 'zeugnis-texte': 'Zeugnistextgenerator (Inklusion)' };
+        const titles = { kalender: 'Kalender', stundenplan: 'Stundenplan', kontakte: 'Adressbuch', 'zeugnis-texte': 'Zeugnistextgenerator (Inklusion)' };
         titleEl.textContent = titles[which] || '';
     }
 
@@ -573,7 +576,7 @@ function openToolWindow(which, shouldPushState = true) {
     // Kalender & Adressbuch laufen im normalen Dokument-Scroll (wie die übrigen
     // Seiten), damit Safari die obere Leiste durchscheinen lässt. Der
     // Zeugnisgenerator bleibt ein fixiertes Vollbild mit gesperrtem Body-Scroll.
-    const docScroll = (which === 'kalender' || which === 'kontakte' || which === 'zeugnis-texte');
+    const docScroll = (which === 'kalender' || which === 'stundenplan' || which === 'kontakte' || which === 'zeugnis-texte');
     const container = document.querySelector('.container');
     if (docScroll) {
         overlay.classList.add('doc-scroll');
@@ -1624,6 +1627,23 @@ function renderClassesGrid() {
     `;
     classesGrid.appendChild(calendarCard);
     renderDashboardCalendar();
+
+    // Stundenplan-Kachel (heutige Stunden) am Ende des Grids anhängen
+    const stundenplanCard = document.createElement('div');
+    stundenplanCard.className = 'class-card dashboard-stundenplan-card';
+    stundenplanCard.style.cursor = 'pointer';
+    stundenplanCard.onclick = () => openToolWindow('stundenplan');
+    stundenplanCard.innerHTML = `
+        <div class="class-card-header">
+            <span><i class="fas fa-table-cells" style="margin-right: 8px;"></i> Stundenplan</span>
+            <span id="dashboard-sp-day" class="class-card-count">–</span>
+        </div>
+        <div class="class-card-body" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
+            <div id="dashboard-sp-list" style="flex-grow: 1; display: flex; flex-direction: column;"></div>
+        </div>
+    `;
+    classesGrid.appendChild(stundenplanCard);
+    if (typeof stundenplanRenderHomeTile === 'function') stundenplanRenderHomeTile();
 }
 
 // Drag & Drop Funktionen für Schüler-Sortierung
@@ -1723,39 +1743,56 @@ function handleStudentDrop(event, targetIndex) {
 }
 
 // Klasse erstellen
+let _addClassArt = 'hauptfach';
+
+function addClassArtToggle(art) {
+    _addClassArt = art;
+    const h = document.getElementById('new-class-art-haupt');
+    const n = document.getElementById('new-class-art-neben');
+    if (h) h.classList.toggle('active', art === 'haupt');
+    if (n) n.classList.toggle('active', art === 'neben');
+}
+
 function createClass() {
     const classNameInput = safeGetElement('new-class-name');
-    const fachartSelect = safeGetElement('new-class-fachart');
     if (!classNameInput) return;
 
     const className = classNameInput.value.trim();
-    const gewichtung = fachartSelect ? fachartSelect.value : 'hauptfach';
+    const klasse = (safeGetElement('new-class-klasse') || {}).value?.trim() || '';
+    const fach = (safeGetElement('new-class-fach') || {}).value?.trim() || '';
+    const artEl = safeGetElement('new-class-art');
+    const artVal = artEl ? artEl.value : '';
+    const gewichtung = artVal === 'neben' ? 'nebenfach' : 'hauptfach';
 
     if (!className) {
-        if (typeof swal !== 'undefined') {
-            swal('Fehler', 'Bitte geben Sie einen Klassennamen ein', 'error');
-        }
+        if (typeof swal !== 'undefined') swal('Hinweis', 'Bitte einen Anzeigenamen eingeben.', 'info');
         return;
     }
-
-    // Zusätzliche Validierung: Prüfe auf ungültige Zeichen
+    if (!klasse) {
+        if (typeof swal !== 'undefined') swal('Hinweis', 'Bitte eine Klasse eingeben.', 'info');
+        return;
+    }
+    if (!fach) {
+        if (typeof swal !== 'undefined') swal('Hinweis', 'Bitte ein Fach eingeben.', 'info');
+        return;
+    }
+    if (!artVal) {
+        if (typeof swal !== 'undefined') swal('Hinweis', 'Bitte Hauptfach oder Nebenfach wählen.', 'info');
+        return;
+    }
     if (className.length > 50) {
-        if (typeof swal !== 'undefined') {
-            swal('Fehler', 'Klassenname ist zu lang (max. 50 Zeichen)', 'error');
-        }
+        if (typeof swal !== 'undefined') swal('Fehler', 'Anzeigename ist zu lang (max. 50 Zeichen)', 'error');
         return;
     }
-
-    // Prüfe, ob Klasse bereits existiert
     if (classes.some(cls => cls.name.toLowerCase() === className.toLowerCase())) {
-        if (typeof swal !== 'undefined') {
-            swal('Fehler', 'Eine Klasse mit diesem Namen existiert bereits', 'error');
-        }
+        if (typeof swal !== 'undefined') swal('Fehler', 'Eine Klasse mit diesem Anzeigenamen existiert bereits', 'error');
         return;
     }
 
     const newClass = {
         name: className,
+        klasse: klasse,
+        fach: fach,
         subject: '',
         gewichtung: gewichtung,
         students: [],
@@ -1764,27 +1801,22 @@ function createClass() {
         alphabeticallySorted: false,
         homeworkSorted: false,
         studentsListSorted: false,
-        sitzplan: {
-            desks: [],
-            currentMode: 'evaluation'
-        }
+        sitzplan: { desks: [], currentMode: 'evaluation' }
     };
 
     classes.push(newClass);
-    window.classes = classes; // Sicherstellen, dass die globale Referenz aktuell ist
+    window.classes = classes;
     saveData();
     hideModal();
 
     // Felder zurücksetzen
-    if (classNameInput) classNameInput.value = '';
-    if (fachartSelect) fachartSelect.value = 'hauptfach';
+    classNameInput.value = '';
+    const kEl = safeGetElement('new-class-klasse'); if (kEl) kEl.value = '';
+    const fEl = safeGetElement('new-class-fach'); if (fEl) fEl.value = '';
+    if (artEl) artEl.value = '';
 
     renderClassesGrid();
-
-    // Erfolgsmeldung
-    if (typeof swal !== 'undefined') {
-        swal('Erfolg', `Klasse "${className}" wurde erstellt`, 'success');
-    }
+    if (typeof swal !== 'undefined') swal('Erfolg', `Klasse „${className}" wurde erstellt`, 'success');
 }
 
 // Klasse klonen - Zeige Modal
@@ -1862,6 +1894,16 @@ function cloneClass() {
 // Variable für die zu bearbeitende Klasse
 let classToEditId = null;
 
+let _editClassArt = 'hauptfach';
+
+function editClassArtToggle(art) {
+    _editClassArt = art;
+    const h = document.getElementById('edit-class-art-haupt');
+    const n = document.getElementById('edit-class-art-neben');
+    if (h) h.classList.toggle('active', art === 'haupt');
+    if (n) n.classList.toggle('active', art === 'neben');
+}
+
 function editClass(classId) {
     if (classId === null || classId === undefined || !classes[classId]) return;
 
@@ -1869,8 +1911,13 @@ function editClass(classId) {
     const cls = classes[classId];
     const input = safeGetElement('edit-class-input');
     if (input) input.value = cls.name;
-    const select = safeGetElement('edit-class-fachart');
-    if (select) select.value = cls.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
+    const kEl = safeGetElement('edit-class-klasse');
+    if (kEl) kEl.value = cls.klasse || '';
+    const fEl = safeGetElement('edit-class-fach');
+    if (fEl) fEl.value = cls.fach || '';
+
+    const artSel = document.getElementById('edit-class-art');
+    if (artSel) artSel.value = cls.gewichtung === 'nebenfach' ? 'neben' : 'haupt';
 
     showModal('edit-class-modal');
 }
@@ -1883,8 +1930,12 @@ function saveEditedClass() {
     const newName = input.value.trim();
     if (newName) {
         classes[classToEditId].name = newName;
-        const fachartSelect = safeGetElement('edit-class-fachart');
-        classes[classToEditId].gewichtung = fachartSelect ? fachartSelect.value : 'hauptfach';
+        const kEl = safeGetElement('edit-class-klasse');
+        if (kEl) classes[classToEditId].klasse = kEl.value.trim();
+        const fEl = safeGetElement('edit-class-fach');
+        if (fEl) classes[classToEditId].fach = fEl.value.trim();
+        const editArtEl = safeGetElement('edit-class-art');
+        classes[classToEditId].gewichtung = (editArtEl && editArtEl.value === 'neben') ? 'nebenfach' : 'hauptfach';
         saveData();
         renderClassesGrid();
         
@@ -9229,7 +9280,7 @@ function ztPlanungRenderList() {
         ? `<div class="zt-plan-empty">
                 <i class="fas fa-clipboard-list"></i>
                 <p>Noch keine Kurse geplant.</p>
-                <p>Tippe oben auf „Kurs anlegen", um zu starten.</p>
+                <p>Kurse werden automatisch aus dem Stundenplan übernommen.</p>
            </div>`
         : '<div class="zt-plan-list">' + courses.map(c => ztPlanungCourseCardHtml(c)).join('') + '</div>';
 
@@ -9273,17 +9324,23 @@ function ztPlanungCourseCardHtml(course) {
             <button class="zt-plan-del" onclick="ztPlanungDeleteStudent('${course.id}','${s.id}')" title="Schüler löschen"><i class="fas fa-trash"></i></button>
         </li>`).join('');
 
-    return `
-        <div class="zt-plan-course">
-            <div class="zt-plan-course-head">
-                <div class="zt-plan-course-title" onclick="ztPlanungOpenForm('${course.id}')" title="Kurs bearbeiten">
-                    <span class="zt-plan-course-name">${title}</span>
-                    <span class="zt-plan-course-progress">${done}/${total} erledigt</span>
-                </div>
+    const isLinked = course.source === 'stundenplan';
+    const linkedBadge = isLinked ? `<span class="zt-plan-linked-badge" title="Automatisch aus dem Stundenplan"><i class="fas fa-clock"></i> Stundenplan</span>` : '';
+    const titleOnclick = `onclick="ztPlanungOpenForm('${course.id}')" title="Kurs bearbeiten"`;
+    const actions = isLinked ? '' : `
                 <div class="zt-plan-course-actions">
                     <button class="btn btn-sm btn-primary btn-circle-sm" title="Bearbeiten" onclick="ztPlanungOpenForm('${course.id}')"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger btn-circle-sm" title="Kurs löschen" onclick="ztPlanungDeleteCourse('${course.id}')"><i class="fas fa-trash"></i></button>
+                </div>`;
+
+    return `
+        <div class="zt-plan-course ${isLinked ? 'linked' : ''}">
+            <div class="zt-plan-course-head">
+                <div class="zt-plan-course-title" ${titleOnclick}>
+                    <span class="zt-plan-course-name">${title} ${linkedBadge}</span>
+                    <span class="zt-plan-course-progress">${done}/${total} erledigt</span>
                 </div>
+                ${actions}
             </div>
             <ul class="zt-plan-students">${rows || '<li class="zt-plan-empty-students">Keine Schüler im Kurs</li>'}</ul>
         </div>`;
@@ -9381,13 +9438,13 @@ function ztPlanungOpenForm(courseId) {
     showModal('zt-planung-form-modal');
 }
 
-function ztPlanungFormStudentsHtml() {
+function ztPlanungFormStudentsHtml(isLinked) {
     const students = (ZtPlanungState.formDraft && ZtPlanungState.formDraft.students) || [];
     if (!students.length) return '';
     return students.map(s => `
         <li class="zt-plan-form-student">
             <span class="zt-plan-student-name">${ztEsc(s.name)}</span>
-            <button class="zt-plan-del" onclick="ztPlanungFormRemoveStudent('${s.id}')" title="Entfernen"><i class="fas fa-times"></i></button>
+            ${!isLinked ? `<button class="zt-plan-del" onclick="ztPlanungFormRemoveStudent('${s.id}')" title="Entfernen"><i class="fas fa-times"></i></button>` : ''}
         </li>`).join('');
 }
 
@@ -9397,17 +9454,24 @@ function ztPlanungRenderForm() {
     const d = ZtPlanungState.formDraft || { halbjahr: 'ersten', typ: 'nebenfach', fach: '', themen: '', students: [] };
     const isEdit = !!ZtPlanungState.formCourseId;
     const isSozial = d.typ === 'sozialverhalten';
+    const editCourse = isEdit ? ZtPlanungState.courses.find(x => x.id === ZtPlanungState.formCourseId) : null;
+    const isLinked = !!(editCourse && editCourse.source === 'stundenplan');
+
+    const linkedNote = '';
+    const ro = isLinked ? 'readonly' : '';
+    const artTyp = d.typ === 'hauptfach' ? 'Hauptfach' : d.typ === 'sozialverhalten' ? 'Arbeits-/Sozialverhalten' : 'Nebenfach';
 
     modal.innerHTML = `
         <div class="zt-modal-head">
-            <span style="font-size:1.25rem;font-weight:700;">${isEdit ? 'Kurs bearbeiten' : 'Kurs anlegen'}</span>
+            <span style="font-size:1.25rem;font-weight:700;">${isEdit ? 'Kurs: ' + ztEsc((d.name || '').replace(' · ', ' ')) : 'Kurs anlegen'}</span>
             <button class="zt-modal-close" onclick="ztPlanungCancelForm()" title="Zurück"><i class="fas fa-times"></i></button>
         </div>
         <div class="zt-plan-form">
-            <div class="form-group">
-                <label for="zt-plan-form-name">Kursname <span style="font-size:0.8rem;color:var(--grey-color);font-weight:400;">(nur intern, für die Kachel)</span></label>
+            ${linkedNote}
+            ${!isLinked ? `<div class="form-group">
+                <label for="zt-plan-form-name">Kursname</label>
                 <input type="text" id="zt-plan-form-name" class="form-control" placeholder="z. B. 5a Mathe, Fördergruppe 2 ..." value="${ztEsc(d.name || '')}">
-            </div>
+            </div>` : `<input type="hidden" id="zt-plan-form-name" value="${ztEsc(d.name || '')}">`}
             <div class="zt-plan-form-grid">
                 <div class="form-group">
                     <label for="zt-plan-form-halbjahr">Halbjahr</label>
@@ -9417,17 +9481,19 @@ function ztPlanungRenderForm() {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="zt-plan-form-typ">Art</label>
-                    <select id="zt-plan-form-typ" class="form-control" onchange="ztPlanungFormToggleTyp(this.value)">
-                        <option value="nebenfach" ${d.typ === 'nebenfach' ? 'selected' : ''}>Nebenfach</option>
-                        <option value="hauptfach" ${d.typ === 'hauptfach' ? 'selected' : ''}>Hauptfach</option>
-                        <option value="sozialverhalten" ${d.typ === 'sozialverhalten' ? 'selected' : ''}>Arbeits- / Sozialverhalten</option>
-                    </select>
+                    <label>Art</label>
+                    ${isLinked
+                        ? `<input class="form-control" value="${ztEsc(artTyp)}" readonly>`
+                        : `<select id="zt-plan-form-typ" class="form-control" onchange="ztPlanungFormToggleTyp(this.value)">
+                            <option value="nebenfach" ${d.typ === 'nebenfach' ? 'selected' : ''}>Nebenfach</option>
+                            <option value="hauptfach" ${d.typ === 'hauptfach' ? 'selected' : ''}>Hauptfach</option>
+                            <option value="sozialverhalten" ${d.typ === 'sozialverhalten' ? 'selected' : ''}>Arbeits- / Sozialverhalten</option>
+                           </select>`}
                 </div>
             </div>
             <div class="form-group zt-plan-form-fach" style="${isSozial ? 'display:none;' : ''}">
                 <label for="zt-plan-form-fach">Fach</label>
-                <input type="text" id="zt-plan-form-fach" class="form-control" value="${ztEsc(d.fach)}">
+                <input type="text" id="zt-plan-form-fach" class="form-control" value="${ztEsc(d.fach)}" ${ro}>
             </div>
             <div class="form-group zt-plan-form-themen" style="${isSozial ? 'display:none;' : ''}">
                 <label for="zt-plan-form-themen">Behandelte Themen</label>
@@ -9436,10 +9502,10 @@ function ztPlanungRenderForm() {
 
             <div class="form-group">
                 <label>Schüler im Kurs</label>
-                <div style="margin-bottom:12px;">
+                ${!isLinked ? `<div style="margin-bottom:12px;">
                     <input type="text" id="zt-plan-form-student-input" class="form-control" placeholder="Name eingeben, Enter zum Hinzufügen..." onkeydown="if(event.key==='Enter'){event.preventDefault();ztPlanungFormAddStudent();}">
-                </div>
-                <ul id="zt-plan-form-students" class="zt-plan-form-students-list">${ztPlanungFormStudentsHtml()}</ul>
+                </div>` : ''}
+                <ul id="zt-plan-form-students" class="zt-plan-form-students-list">${ztPlanungFormStudentsHtml(isLinked)}</ul>
             </div>
 
             <div class="zt-plan-form-actions">
@@ -9515,12 +9581,15 @@ function ztPlanungSaveCourse() {
     if (ZtPlanungState.formCourseId) {
         const c = ZtPlanungState.courses.find(x => x.id === ZtPlanungState.formCourseId);
         if (c) {
-            c.name = (d.name || '').trim();
+            const linked = c.source === 'stundenplan';
+            if (!linked) {
+                c.name = (d.name || '').trim();
+                c.typ = d.typ;
+                c.fach = isSozial ? '' : (d.fach || '').trim();
+                c.students = d.students.map(s => ({ id: s.id, name: (s.name || '').trim(), done: !!s.done }));
+            }
             c.halbjahr = d.halbjahr;
-            c.typ = d.typ;
-            c.fach = isSozial ? '' : (d.fach || '').trim();
             c.themen = isSozial ? '' : (d.themen || '').trim();
-            c.students = d.students.map(s => ({ id: s.id, name: (s.name || '').trim(), done: !!s.done }));
         }
     } else {
         ZtPlanungState.courses.push({
@@ -9806,3 +9875,858 @@ window.updateDashboardNoteText = updateDashboardNoteText;
 window.handleDashboardNoteKeydown = handleDashboardNoteKeydown;
 window.deleteDashboardNote = deleteDashboardNote;
 window.renderDashboardCalendar = renderDashboardCalendar;
+
+// =====================================================================
+// ============================ STUNDENPLAN ============================
+// =====================================================================
+
+const STUNDENPLAN_DAYS = [
+    { key: 'Mo', label: 'Montag' },
+    { key: 'Di', label: 'Dienstag' },
+    { key: 'Mi', label: 'Mittwoch' },
+    { key: 'Do', label: 'Donnerstag' },
+    { key: 'Fr', label: 'Freitag' }
+];
+const STUNDENPLAN_COLORS = ['#fca5a5', '#fdba74', '#fcd34d', '#86efac', '#7dd3fc', '#a5b4fc', '#f0abfc', '#cbd5e1'];
+
+const StundenplanState = {
+    initialized: false,
+    zeiten: [],
+    kurse: [],
+    kacheln: {},
+    inklusionProKlasse: {},
+    halbjahr: 'ersten',       // globales Halbjahr für alle Stunden
+    cellDraft: null
+};
+
+function stundenplanGenId() {
+    return 'sp' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+// Sicher als Argument in onclick="...('HIER')..." (JS-String in HTML-Attribut)
+function spJsAttr(s) {
+    return String(s == null ? '' : s)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;');
+}
+
+function stundenplanInit() {
+    if (StundenplanState.initialized) return;
+    try {
+        const parsed = JSON.parse(localStorage.getItem('stundenplan') || '{}');
+        StundenplanState.zeiten = Array.isArray(parsed.zeiten) ? parsed.zeiten : [];
+        StundenplanState.kurse = Array.isArray(parsed.kurse) ? parsed.kurse : [];
+        StundenplanState.kacheln = (parsed.kacheln && typeof parsed.kacheln === 'object') ? parsed.kacheln : {};
+        StundenplanState.inklusionProKlasse = (parsed.inklusionProKlasse && typeof parsed.inklusionProKlasse === 'object') ? parsed.inklusionProKlasse : {};
+        StundenplanState.halbjahr = parsed.halbjahr || 'ersten';
+    } catch (e) {
+        StundenplanState.zeiten = []; StundenplanState.kurse = []; StundenplanState.kacheln = {}; StundenplanState.inklusionProKlasse = {};
+    }
+    StundenplanState.initialized = true;
+}
+
+function stundenplanPersist() {
+    try {
+        localStorage.setItem('stundenplan', JSON.stringify({
+            zeiten: StundenplanState.zeiten,
+            kurse: StundenplanState.kurse,
+            kacheln: StundenplanState.kacheln,
+            inklusionProKlasse: StundenplanState.inklusionProKlasse,
+            halbjahr: StundenplanState.halbjahr
+        }));
+        // Verknüpfte Planung-Kurse aktualisieren (schreibt localStorage ztPlanung, ohne eigenen Cloud-Push)
+        stundenplanSyncPlanungCourses();
+        localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+    } catch (e) {
+        console.warn('Fehler beim Speichern des Stundenplans:', e);
+    }
+    if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.saveDataToCloud === 'function') {
+        window.saveDataToCloud();
+    }
+    stundenplanRenderHomeTile();
+}
+
+// Brücke für Cloud-Sync (kein eigener Cloud-Push, Daten kommen ja aus der Cloud)
+window.setStundenplan = function (obj) {
+    StundenplanState.zeiten = (obj && Array.isArray(obj.zeiten)) ? obj.zeiten : [];
+    StundenplanState.kurse = (obj && Array.isArray(obj.kurse)) ? obj.kurse : [];
+    StundenplanState.kacheln = (obj && obj.kacheln && typeof obj.kacheln === 'object') ? obj.kacheln : {};
+    StundenplanState.inklusionProKlasse = (obj && obj.inklusionProKlasse && typeof obj.inklusionProKlasse === 'object') ? obj.inklusionProKlasse : {};
+    StundenplanState.halbjahr = (obj && obj.halbjahr) || 'ersten';
+    StundenplanState.initialized = true;
+    stundenplanSyncPlanungCourses();
+    stundenplanRenderHomeTile();
+    if (window._activeToolWindow === 'stundenplan') renderStundenplanModule();
+};
+
+function stundenplanGetAppClass(name) {
+    if (!name) return null;
+    const key = String(name).trim().toLowerCase();
+    const list = window.classes || (window.AppState ? window.AppState.classes : []) || [];
+    return list.find(c =>
+        (c.name || '').trim().toLowerCase() === key ||
+        (c.klasse || '').trim().toLowerCase() === key
+    ) || null;
+}
+
+// Löst eine Kachel auf: gibt { fach, name, klasse, art } zurück (alle Formate)
+function stundenplanResolveKachel(k) {
+    if (!k) return null;
+    // Neues direktes Format (name/fach/klasse/art direkt in der Kachel)
+    if (k.fach || k.name) return { fach: k.fach || '', name: k.name || k.klasse || '', klasse: k.klasse || '', art: k.art || 'neben' };
+    // Altes kursId-Format (Rückwärtskompatibilität)
+    if (k.kursId) {
+        const kurs = StundenplanState.kurse.find(x => x.id === k.kursId);
+        if (!kurs) return null;
+        return { fach: kurs.fach, name: kurs.name, klasse: kurs.klasse || kurs.name, art: kurs.art };
+    }
+    // Altes direktes Format (nur klasse, kein name)
+    if (k.klasse) return { fach: k.fach || '', name: k.klasse, klasse: k.klasse, art: k.art || 'neben' };
+    return null;
+}
+
+// ---- Kurse verwalten ------------------------------------------------
+
+function stundenplanOpenKurse() {
+    stundenplanInit();
+    _spNewKursArt = 'haupt';
+    stundenplanRenderKurseModal();
+    showModal('stundenplan-kurse-modal');
+}
+
+function stundenplanRenderKurseModal() {
+    const modal = document.getElementById('stundenplan-kurse-modal');
+    if (!modal) return;
+
+    const rows = StundenplanState.kurse.map(k => {
+        const artLabel = k.art === 'haupt' ? 'Hauptfach' : 'Nebenfach';
+        return `
+            <div class="sp-kurs-row">
+                <div class="sp-kurs-info">
+                    <span class="sp-kurs-name">${ztEsc(k.name)}</span>
+                    ${k.klasse ? `<span class="sp-kurs-klasse-badge">${ztEsc(k.klasse)}</span>` : ''}
+                    <span class="sp-kurs-fach">${ztEsc(k.fach)}</span>
+                    <span class="sp-kurs-art-badge">${artLabel}</span>
+                </div>
+                <button class="sp-zeit-del" onclick="stundenplanKursDelete('${k.id}')" title="Kurs löschen"><i class="fas fa-trash"></i></button>
+            </div>`;
+    }).join('');
+
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            <span style="font-size:1.25rem;font-weight:700;">Kurse verwalten</span>
+            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sp-kurse-list">
+            ${rows || '<p class="sp-hint">Noch keine Kurse. Lege deinen ersten Kurs an.</p>'}
+        </div>
+        <div class="sp-kurs-add-form">
+            <p style="font-weight:700;margin:14px 0 10px;color:var(--dark-color);">Neuer Kurs</p>
+            <div class="sp-kurs-add-rows">
+                <div class="sp-kurs-add-row">
+                    <label class="sp-kurs-add-label">Anzeigename</label>
+                    <input type="text" id="sp-new-kurs-name" class="form-control" placeholder="z. B. Mathe 8c" onkeydown="if(event.key==='Enter'){document.getElementById('sp-new-kurs-klasse').focus();}">
+                </div>
+                <div class="sp-kurs-add-row">
+                    <label class="sp-kurs-add-label">Klasse</label>
+                    <input type="text" id="sp-new-kurs-klasse" class="form-control" placeholder="z. B. 8c" onkeydown="if(event.key==='Enter'){document.getElementById('sp-new-kurs-fach').focus();}">
+                </div>
+                <div class="sp-kurs-add-row">
+                    <label class="sp-kurs-add-label">Fach</label>
+                    <input type="text" id="sp-new-kurs-fach" class="form-control" placeholder="z. B. Mathematik" onkeydown="if(event.key==='Enter'){stundenplanKursAdd();}">
+                </div>
+                <div class="sp-kurs-add-row">
+                    <label class="sp-kurs-add-label">Art</label>
+                    <div class="sp-art-toggle">
+                        <button type="button" id="sp-new-kurs-art-haupt" class="active" onclick="stundenplanKursArtToggle('haupt')">Hauptfach</button>
+                        <button type="button" id="sp-new-kurs-art-neben" onclick="stundenplanKursArtToggle('neben')">Nebenfach</button>
+                    </div>
+                </div>
+                <div class="sp-kurs-add-row sp-kurs-add-btn-row">
+                    <button class="btn btn-primary btn-icon" onclick="stundenplanKursAdd()"><i class="fas fa-plus"></i> Anlegen</button>
+                </div>
+            </div>
+        </div>`;
+    setTimeout(() => { const el = document.getElementById('sp-new-kurs-name'); if (el) el.focus(); }, 80);
+}
+
+let _spNewKursArt = 'haupt';
+
+function stundenplanKursArtToggle(art) {
+    _spNewKursArt = art;
+    const h = document.getElementById('sp-new-kurs-art-haupt');
+    const n = document.getElementById('sp-new-kurs-art-neben');
+    if (h) h.classList.toggle('active', art === 'haupt');
+    if (n) n.classList.toggle('active', art === 'neben');
+}
+
+function stundenplanKursAdd() {
+    const nameEl = document.getElementById('sp-new-kurs-name');
+    const klasseEl = document.getElementById('sp-new-kurs-klasse');
+    const fachEl = document.getElementById('sp-new-kurs-fach');
+    const name = (nameEl ? nameEl.value : '').trim();
+    const klasse = (klasseEl ? klasseEl.value : '').trim();
+    const fach = (fachEl ? fachEl.value : '').trim();
+    if (!name || !fach) { swal('Hinweis', 'Bitte Anzeigename und Fach eingeben.', 'info'); return null; }
+    const newKurs = { id: stundenplanGenId(), name, klasse, fach, art: _spNewKursArt };
+    StundenplanState.kurse.push(newKurs);
+    stundenplanPersist();
+    stundenplanRenderKurseModal();
+    _spNewKursArt = 'haupt';
+    return newKurs;
+}
+
+function stundenplanKursDelete(id) {
+    const inUse = Object.values(StundenplanState.kacheln).some(k => k.kursId === id);
+    if (inUse) { swal('Hinweis', 'Dieser Kurs ist noch im Stundenplan eingetragen. Bitte zuerst die Kachel(n) leeren.', 'info'); return; }
+    StundenplanState.kurse = StundenplanState.kurse.filter(k => k.id !== id);
+    stundenplanPersist();
+    stundenplanRenderKurseModal();
+}
+
+// ---- Raster-Rendering ----------------------------------------------
+
+function renderStundenplanModule() {
+    stundenplanInit();
+    const card = document.getElementById('stundenplan-card');
+    if (!card) return;
+
+    const hasStunden = StundenplanState.zeiten.some(z => z.typ === 'stunde');
+
+    const header = `
+        <div class="card-header">
+            <h2>Stundenplan</h2>
+            <div class="card-header-actions">
+                <div class="desktop-header-buttons">
+                    <button class="btn btn-secondary btn-icon" onclick="stundenplanOpenZeiten()">
+                        <i class="fas fa-clock"></i> <span class="btn-text">Unterrichtszeiten</span>
+                    </button>
+                    <button class="btn btn-secondary btn-icon" onclick="stundenplanResetConfirm('stunden')">
+                        <i class="fas fa-eraser"></i> <span class="btn-text">Stunden zurücksetzen</span>
+                    </button>
+                    <button class="btn btn-danger btn-icon" onclick="stundenplanResetConfirm('all')">
+                        <i class="fas fa-trash"></i> <span class="btn-text">Stundenplan löschen</span>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+
+    if (!StundenplanState.zeiten.length) {
+        card.innerHTML = header + `
+            <div class="sp-empty">
+                <i class="fas fa-table-cells"></i>
+                <p>Noch kein Stundenplan angelegt.</p>
+                <p>Lege zuerst deine Unterrichtszeiten fest.</p>
+            </div>`;
+        return;
+    }
+
+    card.innerHTML = header + (hasStunden
+        ? stundenplanGridHtml()
+        : `<div class="sp-empty"><i class="fas fa-clock"></i><p>Es sind nur Pausen eingetragen.</p><p>Füge unter „Unterrichtszeiten" mindestens eine Stunde hinzu.</p></div>`);
+}
+
+function stundenplanGridHtml() {
+    const days = STUNDENPLAN_DAYS;
+    let html = `<div class="sp-grid-wrap"><div class="sp-grid" style="grid-template-columns: 96px repeat(${days.length}, minmax(120px, 1fr));">`;
+
+    // Kopfzeile
+    html += `<div class="sp-corner"></div>`;
+    days.forEach(d => { html += `<div class="sp-dayhead">${d.label}</div>`; });
+
+    // Nur Stunden (Pausen werden aus Lücken berechnet)
+    const stunden = StundenplanState.zeiten.filter(z => z.typ === 'stunde');
+    stunden.forEach((z, idx) => {
+        // Automatische Pause: Lücke > 5 Minuten zwischen vorheriger Stunde und dieser
+        if (idx > 0) {
+            const prev = stunden[idx - 1];
+            if (prev.bis && z.von && prev.bis < z.von) {
+                const [ph, pm] = prev.bis.split(':').map(Number);
+                const [ch, cm] = z.von.split(':').map(Number);
+                const diffMin = (ch * 60 + cm) - (ph * 60 + pm);
+                if (diffMin > 5) {
+                    html += `<div class="sp-pause-row">Pause · ${prev.bis}–${z.von}</div>`;
+                }
+            }
+        }
+        const stundeNr = idx + 1;
+        const range = (z.von || z.bis) ? `${z.von || '?'}–${z.bis || '?'}` : 'Zeit fehlt';
+        html += `<div class="sp-timecol"><span class="sp-timecol-nr">${stundeNr}.</span><span class="sp-timecol-time">${range}</span></div>`;
+        days.forEach(d => {
+            const key = d.key + '|' + z.id;
+            const k = StundenplanState.kacheln[key];
+            const resolved = stundenplanResolveKachel(k);
+            if (resolved) {
+                const bg = (k && k.farbe) ? k.farbe : '#eef2ff';
+                const displayName = resolved.name || resolved.fach || '';
+                const artBadge = resolved.art === 'haupt' ? 'Hauptfach' : 'Nebenfach';
+                html += `
+                    <div class="sp-cell filled" style="background:${bg};" onclick="stundenplanOpenCell('${d.key}','${z.id}')">
+                        <span class="sp-cell-klasse">${ztEsc(displayName)}</span>
+                        <span class="sp-cell-art-badge">${artBadge}</span>
+                    </div>`;
+            } else {
+                html += `<div class="sp-cell empty" onclick="stundenplanOpenCell('${d.key}','${z.id}')"><i class="fas fa-plus"></i></div>`;
+            }
+        });
+    });
+
+    html += `</div></div>`;
+    return html;
+}
+
+// ---- Unterrichtszeiten-Editor --------------------------------------
+
+function stundenplanOpenZeiten() {
+    stundenplanInit();
+    if (!StundenplanState.zeiten.length) {
+        StundenplanState.zeiten.push({ id: stundenplanGenId(), typ: 'stunde', von: '', bis: '' });
+        StundenplanState.zeiten.push({ id: stundenplanGenId(), typ: 'stunde', von: '', bis: '' });
+        stundenplanPersist();
+    }
+    stundenplanRenderZeiten();
+    showModal('stundenplan-zeiten-modal');
+}
+
+function stundenplanRenderZeiten() {
+    const modal = document.getElementById('stundenplan-zeiten-modal');
+    if (!modal) return;
+
+    const stunden = StundenplanState.zeiten.filter(z => z.typ === 'stunde');
+    const rows = stunden.map((z, idx) => `
+            <div class="sp-zeit-row">
+                <span class="sp-zeit-label">${idx + 1}. Stunde</span>
+                <input type="time" class="form-control sp-zeit-time" value="${z.von || ''}" onchange="stundenplanUpdateZeit('${z.id}','von',this.value)">
+                <span class="sp-zeit-dash">–</span>
+                <input type="time" class="form-control sp-zeit-time" value="${z.bis || ''}" onchange="stundenplanUpdateZeit('${z.id}','bis',this.value)">
+                <button class="btn btn-sm btn-danger btn-circle-sm" onclick="stundenplanDeleteZeit('${z.id}')" title="Entfernen"><i class="fas fa-trash"></i></button>
+            </div>`).join('');
+
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            <span style="font-size:1.25rem;font-weight:700;">Unterrichtszeiten</span>
+            <button class="zt-modal-close" onclick="stundenplanCloseZeiten()" title="Fertig"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sp-zeiten-list">
+            ${rows || ''}
+        </div>
+        <div class="sp-zeiten-foot">
+            <button class="btn btn-secondary btn-icon" onclick="stundenplanAddZeit()"><i class="fas fa-plus"></i> Stunde hinzufügen</button>
+            <button class="btn btn-primary btn-icon" onclick="stundenplanCloseZeiten()"><i class="fas fa-check"></i> Fertig</button>
+        </div>`;
+}
+
+function stundenplanAddZeit() {
+    // Vorbelegung: an die letzte Stunden-Endzeit anschließen
+    const stunden = StundenplanState.zeiten.filter(z => z.typ === 'stunde');
+    const last = stunden[stunden.length - 1];
+    const von = last && last.bis ? last.bis : '';
+    StundenplanState.zeiten.push({ id: stundenplanGenId(), typ: 'stunde', von, bis: '' });
+    stundenplanPersist();
+    stundenplanRenderZeiten();
+}
+
+function stundenplanUpdateZeit(id, field, value) {
+    const z = StundenplanState.zeiten.find(x => x.id === id);
+    if (!z) return;
+    z[field] = value;
+    stundenplanPersist();
+}
+
+function stundenplanDeleteZeit(id) {
+    const stunden = StundenplanState.zeiten.filter(z => z.typ === 'stunde');
+    const idx = stunden.findIndex(z => z.id === id);
+    const label = idx >= 0 ? `${idx + 1}. Stunde` : 'diese Stunde';
+    swal({
+        title: `${label} löschen?`,
+        text: 'Alle eingetragenen Stunden für diesen Zeitslot werden ebenfalls entfernt.',
+        icon: 'warning',
+        buttons: { cancel: 'Abbrechen', confirm: { text: 'Löschen', className: 'swal-button--danger' } },
+        dangerMode: true
+    }).then(confirmed => {
+        if (!confirmed) return;
+        StundenplanState.zeiten = StundenplanState.zeiten.filter(x => x.id !== id);
+        Object.keys(StundenplanState.kacheln).forEach(key => {
+            if (key.endsWith('|' + id)) delete StundenplanState.kacheln[key];
+        });
+        stundenplanPersist();
+        stundenplanRenderZeiten();
+    });
+}
+
+function stundenplanMoveZeit(stundeIdx, dir) {
+    // idx bezieht sich auf die gefilterte Stunden-Liste; im rohen Array tauschen
+    const stunden = StundenplanState.zeiten.filter(z => z.typ === 'stunde');
+    const niStunde = stundeIdx + dir;
+    if (niStunde < 0 || niStunde >= stunden.length) return;
+    const rawA = StundenplanState.zeiten.indexOf(stunden[stundeIdx]);
+    const rawB = StundenplanState.zeiten.indexOf(stunden[niStunde]);
+    if (rawA < 0 || rawB < 0) return;
+    const tmp = StundenplanState.zeiten[rawA];
+    StundenplanState.zeiten[rawA] = StundenplanState.zeiten[rawB];
+    StundenplanState.zeiten[rawB] = tmp;
+    stundenplanPersist();
+    stundenplanRenderZeiten();
+}
+
+function stundenplanCloseZeiten() {
+    hideModal();
+    renderStundenplanModule();
+}
+
+// ---- Kachel-Editor --------------------------------------------------
+
+function stundenplanOpenCell(dayKey, zeitId) {
+    stundenplanInit();
+    const key = dayKey + '|' + zeitId;
+    const existing = StundenplanState.kacheln[key] || {};
+    // Resolve aus altem kursId-Format falls nötig
+    let resolved = null;
+    if (existing.kursId) {
+        const kurs = StundenplanState.kurse.find(x => x.id === existing.kursId);
+        if (kurs) resolved = { name: kurs.name, klasse: kurs.klasse || '', fach: kurs.fach, art: kurs.art };
+    }
+    const name = existing.name || (resolved && resolved.name) || '';
+    const klasse = existing.klasse || (resolved && resolved.klasse) || '';
+    const fach = existing.fach || (resolved && resolved.fach) || '';
+    const art = existing.art || (resolved && resolved.art) || 'neben';
+    const kinderKey = klasse || name;
+    const kinder = (kinderKey && StundenplanState.inklusionProKlasse[kinderKey]) ? [...StundenplanState.inklusionProKlasse[kinderKey]] : [];
+    StundenplanState.cellDraft = { dayKey, zeitId, key, name, klasse, fach, art, farbe: existing.farbe || '', kinder };
+    stundenplanRenderCellModal();
+    showModal('stundenplan-cell-modal');
+}
+
+function stundenplanRenderCellModal() {
+    const modal = document.getElementById('stundenplan-cell-modal');
+    const d = StundenplanState.cellDraft;
+    if (!modal || !d) return;
+
+    const dayLabel = (STUNDENPLAN_DAYS.find(x => x.key === d.dayKey) || {}).label || d.dayKey;
+    const stunden = StundenplanState.zeiten.filter(z => z.typ === 'stunde');
+    const stundeIdx = stunden.findIndex(z => z.id === d.zeitId);
+    const stundeLabel = stundeIdx >= 0 ? `, ${stundeIdx + 1}. Stunde` : '';
+
+    const swatches = STUNDENPLAN_COLORS.map(c =>
+        `<button type="button" class="sp-swatch ${d.farbe === c ? 'active' : ''}" style="background:${c};" onclick="stundenplanCellSetColor('${c}')"></button>`
+    ).join('');
+
+    // Bereits verwendete Klassen aus anderen Kacheln (ohne aktuelle)
+    const usedClasses = [];
+    const seen = new Set();
+    Object.entries(StundenplanState.kacheln).forEach(([key, k]) => {
+        if (key === d.key) return;
+        const klasse = k.klasse || '';
+        if (klasse && !seen.has(klasse)) {
+            seen.add(klasse);
+            usedClasses.push({ name: k.name || '', klasse, fach: k.fach || '', art: k.art || 'neben', farbe: k.farbe || '' });
+        }
+    });
+    usedClasses.sort((a, b) => {
+        const parse = s => { const m = s.match(/^(\d+)(.*)$/); return m ? [parseInt(m[1]), m[2]] : [9999, s]; };
+        const [an, al] = parse(a.klasse);
+        const [bn, bl] = parse(b.klasse);
+        return an !== bn ? an - bn : al.localeCompare(bl);
+    });
+    const quickSelect = usedClasses.length ? `
+        <div class="sp-field">
+            <span>Klasse übernehmen</span>
+            <div class="sp-quickselect">
+                ${usedClasses.map(c => `<button type="button" class="sp-quickselect-chip" onclick="stundenplanCellQuickSelect('${spJsAttr(c.klasse)}')">${ztEsc(c.name || c.klasse)}</button>`).join('')}
+            </div>
+        </div>` : '';
+
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            <span style="font-size:1.2rem;font-weight:700;">Stunde bearbeiten: ${dayLabel}${stundeLabel}</span>
+            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sp-cell-form">
+            ${quickSelect}
+            <div class="sp-field">
+                <span>Anzeigename</span>
+                <input id="sp-cell-name" class="form-control" placeholder="z. B. Mathe 8c" value="${ztEsc(d.name)}">
+            </div>
+            <div class="sp-cell-row2">
+                <div class="sp-field">
+                    <span>Klasse</span>
+                    <input id="sp-cell-klasse" class="form-control" placeholder="z. B. 8c" value="${ztEsc(d.klasse)}">
+                </div>
+                <div class="sp-field">
+                    <span>Fach</span>
+                    <input id="sp-cell-fach" class="form-control" placeholder="z. B. Mathematik" value="${ztEsc(d.fach)}">
+                </div>
+            </div>
+            <div class="sp-cell-row2">
+                <div class="sp-field">
+                    <span>Art</span>
+                    <select id="sp-cell-art" class="form-control" onchange="stundenplanCellArtToggle(this.value)">
+                        <option value="haupt" ${d.art === 'haupt' ? 'selected' : ''}>Hauptfach</option>
+                        <option value="neben" ${d.art !== 'haupt' ? 'selected' : ''}>Nebenfach</option>
+                    </select>
+                </div>
+                <div class="sp-field">
+                    <span>Halbjahr</span>
+                    <select id="sp-cell-halbjahr" class="form-control" onchange="stundenplanCellHalbjahrChanged(this.value)">
+                        <option value="ersten" ${StundenplanState.halbjahr === 'ersten' ? 'selected' : ''}>1. Halbjahr</option>
+                        <option value="zweiten" ${StundenplanState.halbjahr === 'zweiten' ? 'selected' : ''}>2. Halbjahr</option>
+                    </select>
+                </div>
+            </div>
+            <div class="sp-field sp-field-inline">
+                <span>Farbe:</span>
+                <div class="sp-swatches">
+                    <button type="button" class="sp-swatch sp-swatch-none ${!d.farbe ? 'active' : ''}" onclick="stundenplanCellSetColor('')" title="Keine Farbe"><i class="fas fa-ban"></i></button>
+                    ${swatches}
+                </div>
+            </div>
+            <div class="sp-field">
+                <span>Welche Kinder benötigen ein Textzeugnis?</span>
+                <div id="sp-cell-kinder">${stundenplanCellKinderHtml()}</div>
+            </div>
+            <div class="sp-cell-foot">
+                <button class="btn btn-danger btn-icon" onclick="stundenplanClearCell()"><i class="fas fa-trash"></i> Stunde löschen</button>
+                <button class="btn btn-primary btn-icon" onclick="stundenplanSaveCell()"><i class="fas fa-check"></i> Speichern</button>
+            </div>
+        </div>`;
+}
+
+function stundenplanCellKinderHtml() {
+    const d = StundenplanState.cellDraft;
+    if (!d) return '';
+    const kinder = d.kinder || [];
+
+    let html = '';
+    if (kinder.length) {
+        html += '<div class="sp-freekids">' + kinder.map(n =>
+            `<span class="sp-freekid">${ztEsc(n)} <i class="fas fa-times" onclick="stundenplanCellRemoveKid('${spJsAttr(n)}')"></i></span>`
+        ).join('') + '</div>';
+    }
+
+    html += `<div class="sp-addkid">
+                <input type="text" id="sp-cell-newkid" class="form-control" placeholder="Name eingeben, Enter zum Hinzufügen..." onkeydown="if(event.key==='Enter'){event.preventDefault();stundenplanCellAddFreeKid();}">
+             </div>`;
+    return html;
+}
+
+function stundenplanRefreshKinderSection() {
+    const host = document.getElementById('sp-cell-kinder');
+    if (host) host.innerHTML = stundenplanCellKinderHtml();
+}
+
+function stundenplanCellAppClassSelected(idxStr) {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    // Aktuelle Freitext-Eingaben vor dem Re-Render sichern
+    stundenplanCellDraftFromDom();
+    const idx = parseInt(idxStr, 10);
+    const appClasses = window.classes || [];
+    const cls = (!isNaN(idx) && idx >= 0) ? appClasses[idx] : null;
+    if (cls) {
+        d._appClassIdx = idx;
+        d.name = cls.name;
+        d.klasse = cls.klasse || '';
+        d.fach = cls.fach || '';
+        d.art = cls.gewichtung === 'nebenfach' ? 'neben' : 'haupt';
+        const kinderKey = d.klasse || d.name;
+        d.kinder = (kinderKey && StundenplanState.inklusionProKlasse[kinderKey]) ? [...StundenplanState.inklusionProKlasse[kinderKey]] : [];
+    } else {
+        d._appClassIdx = undefined;
+    }
+    stundenplanRenderCellModal();
+}
+
+function stundenplanCellQuickSelect(klasse) {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    // Suche das erste Kachel mit dieser Klasse
+    const src = Object.entries(StundenplanState.kacheln)
+        .filter(([key]) => key !== d.key)
+        .map(([, k]) => k)
+        .find(k => k.klasse === klasse);
+    if (!src) return;
+    d.name = src.name || '';
+    d.klasse = src.klasse || '';
+    d.fach = src.fach || '';
+    d.art = src.art || 'neben';
+    // Farbe nur übernehmen wenn noch keine gesetzt
+    if (!d.farbe && src.farbe) d.farbe = src.farbe;
+    const kinderKey = d.klasse || d.name;
+    d.kinder = (kinderKey && StundenplanState.inklusionProKlasse[kinderKey]) ? [...StundenplanState.inklusionProKlasse[kinderKey]] : [];
+    stundenplanRenderCellModal();
+}
+
+function stundenplanCellHalbjahrChanged(value) {
+    const prev = StundenplanState.halbjahr;
+    if (value === prev) return;
+    const label = value === 'ersten' ? '1. Halbjahr' : '2. Halbjahr';
+    swal({
+        title: `Halbjahr wechseln?`,
+        text: `Das gilt für alle Stunden im Stundenplan. Alle Planung-Kurse werden auf „${label}" umgestellt.`,
+        icon: 'warning',
+        buttons: { cancel: 'Abbrechen', confirm: { text: 'Ja, wechseln' } }
+    }).then(ok => {
+        if (!ok) {
+            // Dropdown zurücksetzen
+            const el = document.getElementById('sp-cell-halbjahr');
+            if (el) el.value = prev;
+            return;
+        }
+        StundenplanState.halbjahr = value;
+        stundenplanPersist();
+    });
+}
+
+function stundenplanCellArtToggle(art) {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    stundenplanCellDraftFromDom();
+    d.art = art;
+}
+
+function stundenplanCellDraftFromDom() {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    const nEl = document.getElementById('sp-cell-name');
+    const kEl = document.getElementById('sp-cell-klasse');
+    const fEl = document.getElementById('sp-cell-fach');
+    const aEl = document.getElementById('sp-cell-art');
+    if (nEl) d.name = nEl.value;
+    if (kEl) d.klasse = kEl.value;
+    if (fEl) d.fach = fEl.value;
+    if (aEl) d.art = aEl.value;
+}
+
+function stundenplanCellSetColor(color) {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    stundenplanCellDraftFromDom();
+    d.farbe = color;
+    // Nur Swatches aktualisieren, keine vollen Re-Render (würde Inputs leeren)
+    document.querySelectorAll('.sp-swatch, .sp-swatch-none').forEach(btn => btn.classList.remove('active'));
+    if (color) {
+        document.querySelectorAll(`.sp-swatch[style*="${color}"]`).forEach(btn => btn.classList.add('active'));
+    } else {
+        const none = document.querySelector('.sp-swatch-none');
+        if (none) none.classList.add('active');
+    }
+}
+
+function stundenplanCellToggleRosterKid(name) {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    if (d.kinder.includes(name)) d.kinder = d.kinder.filter(n => n !== name);
+    else d.kinder.push(name);
+    stundenplanRefreshKinderSection();
+}
+
+function stundenplanCellAddFreeKid() {
+    const d = StundenplanState.cellDraft;
+    const input = document.getElementById('sp-cell-newkid');
+    if (!d || !input) return;
+    const name = input.value.trim();
+    if (name && !d.kinder.includes(name)) d.kinder.push(name);
+    input.value = '';
+    stundenplanRefreshKinderSection();
+    const again = document.getElementById('sp-cell-newkid');
+    if (again) again.focus();
+}
+
+function stundenplanCellRemoveKid(name) {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    d.kinder = d.kinder.filter(n => n !== name);
+    stundenplanRefreshKinderSection();
+}
+
+function stundenplanSaveCell() {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    stundenplanCellDraftFromDom();
+    const name = (d.name || '').trim();
+    const fach = (d.fach || '').trim();
+    const art = (d.art || '').trim();
+    if (!name) { swal('Hinweis', 'Bitte einen Anzeigenamen eingeben.', 'info'); return; }
+    if (!fach) { swal('Hinweis', 'Bitte ein Fach eingeben.', 'info'); return; }
+    if (!art) { swal('Hinweis', 'Bitte Hauptfach oder Nebenfach wählen.', 'info'); return; }
+    const klasse = (d.klasse || '').trim();
+    const kinderKey = klasse || name;
+
+    StundenplanState.kacheln[d.key] = { name, klasse, fach, art: d.art || 'neben', farbe: d.farbe };
+    if (kinderKey) {
+        if (d.kinder && d.kinder.length) StundenplanState.inklusionProKlasse[kinderKey] = [...d.kinder];
+        else delete StundenplanState.inklusionProKlasse[kinderKey];
+    }
+    StundenplanState.cellDraft = null;
+    stundenplanPersist();
+    hideModal();
+    renderStundenplanModule();
+}
+
+function stundenplanResetConfirm(mode) {
+    const isAll = mode === 'all';
+    swal({
+        title: isAll ? 'Stundenplan löschen?' : 'Stunden zurücksetzen?',
+        text: isAll
+            ? 'Alle Stunden und Unterrichtszeiten werden unwiderruflich gelöscht.'
+            : 'Alle eingetragenen Stunden werden gelöscht. Die Unterrichtszeiten bleiben erhalten.',
+        icon: 'warning',
+        buttons: { cancel: 'Abbrechen', confirm: { text: isAll ? 'Löschen' : 'Zurücksetzen', className: 'swal-button--danger' } },
+        dangerMode: true
+    }).then(confirmed => {
+        if (!confirmed) return;
+        if (isAll) {
+            StundenplanState.zeiten = [];
+            StundenplanState.kacheln = {};
+            StundenplanState.inklusionProKlasse = {};
+        } else {
+            StundenplanState.kacheln = {};
+            StundenplanState.inklusionProKlasse = {};
+        }
+        stundenplanPersist();
+        renderStundenplanModule();
+    });
+}
+
+function stundenplanClearCell() {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    delete StundenplanState.kacheln[d.key];
+    StundenplanState.cellDraft = null;
+    stundenplanPersist();
+    hideModal();
+    renderStundenplanModule();
+}
+
+// ---- Verknüpfung zur Planung (Kurs pro Klasse + Fach) ---------------
+
+function stundenplanSyncPlanungCourses() {
+    if (typeof ztPlanungInit === 'function') ztPlanungInit();
+    if (typeof ZtPlanungState === 'undefined') return;
+
+    // Gewünschte verknüpfte Kurse aus den Kacheln ableiten
+    const desired = {}; // id -> {klasse, fach, art}
+    Object.values(StundenplanState.kacheln).forEach(k => {
+        const resolved = stundenplanResolveKachel(k);
+        if (!resolved || !resolved.fach) return;
+        const kinderKey = resolved.klasse || resolved.name;
+        const kinder = StundenplanState.inklusionProKlasse[kinderKey] || [];
+        if (!kinder.length) return;
+        const id = 'sp:' + (kinderKey).toLowerCase().replace(/\s+/g, '_') + '__' + resolved.fach.toLowerCase().replace(/\s+/g, '_');
+        if (!desired[id]) desired[id] = { klasse: kinderKey, fach: resolved.fach, art: resolved.art };
+    });
+
+    const before = JSON.stringify(ZtPlanungState.courses);
+    // Bestehende verknüpfte Kurse zum Abgleich (done-Status erhalten)
+    const existingLinked = {};
+    ZtPlanungState.courses.forEach(c => { if (c.source === 'stundenplan') existingLinked[c.id] = c; });
+
+    // Manuelle Kurse unangetastet behalten
+    const manualCourses = ZtPlanungState.courses.filter(c => c.source !== 'stundenplan');
+
+    // Verknüpfte Kurse neu aufbauen
+    const linkedCourses = Object.keys(desired).map(id => {
+        const info = desired[id];
+        const old = existingLinked[id];
+        const oldDone = {};
+        if (old && Array.isArray(old.students)) old.students.forEach(s => { oldDone[s.name] = !!s.done; });
+        const kinder = StundenplanState.inklusionProKlasse[info.klasse] || [];
+        const students = kinder.map(name => ({ id: stundenplanGenId(), name, done: !!oldDone[name] }));
+        return {
+            id,
+            source: 'stundenplan',
+            name: [info.klasse, info.fach].filter(Boolean).join(' '),
+            halbjahr: StundenplanState.halbjahr || 'ersten',
+            typ: info.art === 'haupt' ? 'hauptfach' : 'nebenfach',
+            fach: info.fach,
+            themen: (old && old.themen) || '',
+            students
+        };
+    });
+
+    ZtPlanungState.courses = [...manualCourses, ...linkedCourses];
+
+    const after = JSON.stringify(ZtPlanungState.courses);
+    if (before !== after) {
+        // Nur localStorage aktualisieren – Cloud-Push übernimmt der Aufrufer (stundenplanPersist)
+        try { localStorage.setItem('ztPlanung', JSON.stringify({ courses: ZtPlanungState.courses })); } catch (e) {}
+        if (typeof ztPlanungUpdateBadge === 'function') ztPlanungUpdateBadge();
+        // Falls das Planung-Modal gerade offen ist, neu zeichnen
+        const pm = document.getElementById('zt-planung-modal');
+        if (pm && pm.style.display !== 'none' && typeof ztPlanungRenderList === 'function') ztPlanungRenderList();
+    }
+}
+
+// ---- Startseiten-Kachel: heutige Stunden ----------------------------
+
+function stundenplanRenderHomeTile() {
+    const list = document.getElementById('dashboard-sp-list');
+    const dayBadge = document.getElementById('dashboard-sp-day');
+    if (!list) return;
+    stundenplanInit();
+
+    const jsDay = new Date().getDay(); // 0=So ... 6=Sa
+    const map = { 1: 'Mo', 2: 'Di', 3: 'Mi', 4: 'Do', 5: 'Fr' };
+    const todayKey = map[jsDay];
+    const todayLabel = (STUNDENPLAN_DAYS.find(d => d.key === todayKey) || {}).label || '';
+    if (dayBadge) dayBadge.textContent = todayLabel || 'Wochenende';
+
+    if (!todayKey) { list.innerHTML = '<li class="sp-tile-empty">Wochenende – kein Unterricht.</li>'; return; }
+
+    let stundeNr = 0;
+    const items = [];
+    StundenplanState.zeiten.forEach(z => {
+        if (z.typ !== 'stunde') return;
+        stundeNr++;
+        const k = StundenplanState.kacheln[todayKey + '|' + z.id];
+        const resolved = stundenplanResolveKachel(k);
+        const time = z.von && z.bis ? `${z.von} – ${z.bis}` : z.von ? z.von : `${stundeNr}. Stunde`;
+        if (resolved) {
+            const bg = (k && k.farbe) ? k.farbe : '#e0e7ff';
+            items.push(`
+                <div class="sp-home-stunde" style="background:${bg};">
+                    <span class="sp-home-stunde-time">${ztEsc(time)}</span>
+                    <span class="sp-home-stunde-name">${ztEsc(resolved.name || resolved.fach || '')}</span>
+                </div>`);
+        } else {
+            items.push(`
+                <div class="sp-home-stunde sp-home-stunde-empty">
+                    <span class="sp-home-stunde-time">${ztEsc(time)}</span>
+                </div>`);
+        }
+    });
+
+    list.innerHTML = items.length
+        ? `<div class="sp-home-stunden">${items.join('')}</div>`
+        : '<div class="sp-tile-empty">Heute keine Stunden eingetragen.</div>';
+}
+
+// Globale Verfügbarkeit (für onclick-Handler)
+window.renderStundenplanModule = renderStundenplanModule;
+window.stundenplanOpenZeiten = stundenplanOpenZeiten;
+window.stundenplanAddZeit = stundenplanAddZeit;
+window.stundenplanUpdateZeit = stundenplanUpdateZeit;
+window.stundenplanDeleteZeit = stundenplanDeleteZeit;
+window.stundenplanMoveZeit = stundenplanMoveZeit;
+window.stundenplanCloseZeiten = stundenplanCloseZeiten;
+window.stundenplanOpenKurse = stundenplanOpenKurse;
+window.stundenplanKursArtToggle = stundenplanKursArtToggle;
+window.stundenplanKursAdd = stundenplanKursAdd;
+window.stundenplanKursDelete = stundenplanKursDelete;
+window.stundenplanOpenCell = stundenplanOpenCell;
+window.stundenplanCellKursChanged = stundenplanCellKursChanged;
+window.stundenplanCellQuickSelect = stundenplanCellQuickSelect;
+window.stundenplanCellArtToggle = stundenplanCellArtToggle;
+window.stundenplanCellHalbjahrChanged = stundenplanCellHalbjahrChanged;
+window.stundenplanCellSetColor = stundenplanCellSetColor;
+window.stundenplanCellToggleRosterKid = stundenplanCellToggleRosterKid;
+window.stundenplanCellAddFreeKid = stundenplanCellAddFreeKid;
+window.stundenplanCellRemoveKid = stundenplanCellRemoveKid;
+window.stundenplanSaveCell = stundenplanSaveCell;
+window.stundenplanClearCell = stundenplanClearCell;
+window.stundenplanResetConfirm = stundenplanResetConfirm;
+window.stundenplanResetExecute = stundenplanResetExecute;
+window.stundenplanRenderHomeTile = stundenplanRenderHomeTile;
+window.StundenplanState = StundenplanState;

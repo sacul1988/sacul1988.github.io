@@ -76,6 +76,9 @@
                 <button class="topbar-btn" type="button" data-tool="kalender" title="Kalender (zentrale Termine)" aria-label="Kalender" onclick="openToolWindow('kalender')">
                     <i class="fas fa-calendar-alt"></i>
                 </button>
+                <button class="topbar-btn" type="button" data-tool="stundenplan" title="Stundenplan" aria-label="Stundenplan" onclick="openToolWindow('stundenplan')">
+                    <i class="fas fa-clock"></i>
+                </button>
                 <button class="topbar-btn" type="button" data-tool="kontakte" title="Adressbuch" aria-label="Adressbuch" onclick="openToolWindow('kontakte')">
                     <i class="fas fa-address-book"></i>
                 </button>
@@ -381,9 +384,7 @@
                             <div class="card-header">
                                 <h2>Zeugnistextgenerator (Inklusion)</h2>
                                 <div class="card-header-actions">
-                                    <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpenForm()">
-                                        <i class="fas fa-plus"></i> <span class="btn-text">Kurs anlegen</span>
-                                    </button>
+
                                     <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpen()">
                                         <i class="fas fa-list-check"></i> <span class="btn-text">Planung</span>
                                         <span class="zt-archive-badge" id="zt-planung-badge" style="display:none;"></span>
@@ -526,6 +527,10 @@
                             <div id="kalender-window-calendar-host"><!-- #planung-calendar-container wird hier eingehängt --></div>
                         </div>
                     </div>
+                    <!-- Stundenplan-Panel: Inhalt wird per JS gerendert -->
+                    <div id="stundenplan-module" class="tool-window-panel">
+                        <div class="card" id="stundenplan-card"><!-- renderStundenplanModule() füllt dies --></div>
+                    </div>
                     <!-- Adressbuch- und Zeugnistexte-Module werden per JS hierher verschoben -->
                 </div>
             </div>
@@ -545,6 +550,16 @@
 
             <!-- Zeugnistext Planung: Formular zum Anlegen/Bearbeiten (dynamisch befüllt) -->
             <div id="zt-planung-form-modal" class="modal zt-modal" style="display: none;"></div>
+
+            <!-- Stundenplan: Unterrichtszeiten festlegen (dynamisch befüllt) -->
+            <div id="stundenplan-zeiten-modal" class="modal zt-modal" style="display: none;"></div>
+
+            <!-- Stundenplan: Kachel bearbeiten (dynamisch befüllt) -->
+            <div id="stundenplan-cell-modal" class="modal zt-modal" style="display: none;"></div>
+
+            <!-- Stundenplan: Kurse verwalten (dynamisch befüllt) -->
+            <div id="stundenplan-kurse-modal" class="modal zt-modal" style="display: none;"></div>
+            <div id="stundenplan-reset-modal" class="modal zt-modal" style="display: none;"></div>
 
             <!-- Zeugnistext Rückfragen Modal -->
             <div id="zt-questions-modal" class="modal" style="display: none; max-width: 600px;">
@@ -608,14 +623,23 @@
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
                 <div class="form-group">
-                    <label for="new-class-name">Klassenname</label>
-                    <input type="text" id="new-class-name" class="form-control" placeholder="z.B. 9a, 10b, Englisch GK12">
+                    <label for="new-class-name">Anzeigename</label>
+                    <input type="text" id="new-class-name" class="form-control" placeholder="z. B. Mathe 8c" onkeydown="if(event.key==='Enter') document.getElementById('new-class-klasse').focus()">
                 </div>
                 <div class="form-group">
-                    <label for="new-class-fachart">Fachart</label>
-                    <select id="new-class-fachart" class="form-control">
-                        <option value="hauptfach">Hauptfach</option>
-                        <option value="nebenfach">Nebenfach</option>
+                    <label for="new-class-klasse">Klasse</label>
+                    <input type="text" id="new-class-klasse" class="form-control" placeholder="z. B. 8c" onkeydown="if(event.key==='Enter') document.getElementById('new-class-fach').focus()">
+                </div>
+                <div class="form-group">
+                    <label for="new-class-fach">Fach</label>
+                    <input type="text" id="new-class-fach" class="form-control" placeholder="z. B. Mathematik" onkeydown="if(event.key==='Enter') createClass()">
+                </div>
+                <div class="form-group">
+                    <label for="new-class-art">Art</label>
+                    <select id="new-class-art" class="form-control">
+                        <option value="">– bitte wählen –</option>
+                        <option value="haupt">Hauptfach</option>
+                        <option value="neben">Nebenfach</option>
                     </select>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
@@ -737,12 +761,22 @@
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
                 <div class="form-group">
-                    <input type="text" id="edit-class-input" class="form-control" placeholder="Klassenname">
+                    <label for="edit-class-input">Anzeigename</label>
+                    <input type="text" id="edit-class-input" class="form-control" placeholder="Anzeigename">
                 </div>
                 <div class="form-group">
-                    <select id="edit-class-fachart" class="form-control">
-                        <option value="hauptfach">Hauptfach</option>
-                        <option value="nebenfach">Nebenfach</option>
+                    <label for="edit-class-klasse">Klasse</label>
+                    <input type="text" id="edit-class-klasse" class="form-control" placeholder="z. B. 8c">
+                </div>
+                <div class="form-group">
+                    <label for="edit-class-fach">Fach</label>
+                    <input type="text" id="edit-class-fach" class="form-control" placeholder="z. B. Mathematik">
+                </div>
+                <div class="form-group">
+                    <label for="edit-class-art">Art</label>
+                    <select id="edit-class-art" class="form-control">
+                        <option value="haupt">Hauptfach</option>
+                        <option value="neben">Nebenfach</option>
                     </select>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
@@ -1443,6 +1477,14 @@
                 }
             }
 
+            // Stundenplan synchronisieren
+            if (shouldApplyExtra && cloudData.stundenplan && typeof cloudData.stundenplan === 'object') {
+                localStorage.setItem('stundenplan', JSON.stringify(cloudData.stundenplan));
+                if (typeof window.setStundenplan === 'function') {
+                    window.setStundenplan(cloudData.stundenplan);
+                }
+            }
+
             // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
             // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
             if (Array.isArray(cloudData.termine)) {
@@ -1514,6 +1556,7 @@
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
                     zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
                     ztPlanung: JSON.parse(localStorage.getItem('ztPlanung') || '{"courses":[]}'),
+                    stundenplan: JSON.parse(localStorage.getItem('stundenplan') || '{"zeiten":[],"kacheln":{},"inklusionProKlasse":{}}'),
                     contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
                     dashboardNotes: JSON.parse(localStorage.getItem('dashboardNotes') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
