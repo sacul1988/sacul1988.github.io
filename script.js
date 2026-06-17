@@ -10960,7 +10960,7 @@ function stundenplanResetConfirm(mode) {
             ? 'Alle Stunden und Unterrichtszeiten werden unwiderruflich gelöscht.'
             : 'Alle eingetragenen Stunden werden gelöscht. Die Unterrichtszeiten bleiben erhalten.',
         icon: 'warning',
-        buttons: { cancel: 'Abbrechen', confirm: { text: isAll ? 'Löschen' : 'Zurücksetzen', className: 'swal-button--danger' } },
+        buttons: { confirm: { text: isAll ? 'Löschen' : 'Zurücksetzen', className: 'swal-button--danger' } },
         dangerMode: true
     }).then(confirmed => {
         if (!confirmed) return;
