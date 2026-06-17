@@ -1552,10 +1552,11 @@ function renderClassesGrid() {
             
             const classCard = document.createElement('div');
             classCard.className = 'class-card';
-            
+            classCard.dataset.tileKey = 'class:' + cls.name;
+
             classCard.innerHTML = `
                 <div class="class-card-header">
-                    <span>${cls.name}</span>
+                    <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span>${cls.name}</span>
                     <span class="class-card-count">${studentCount} Schüler</span>
                 </div>
                 <div class="class-card-body">
@@ -1585,9 +1586,10 @@ function renderClassesGrid() {
     // Notizen-Kachel am Ende des Grids anhängen
     const notesCard = document.createElement('div');
     notesCard.className = 'class-card dashboard-notes-card';
+    notesCard.dataset.tileKey = 'notes';
     notesCard.innerHTML = `
         <div class="class-card-header">
-            <span><i class="fas fa-list-check" style="margin-right: 8px;"></i> Notizen &amp; Checkliste</span>
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-list-check"></i> Notizen &amp; Checkliste</span>
         </div>
         <div class="class-card-body" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
             <div class="notes-input-group" style="margin-bottom: 15px;">
@@ -1609,17 +1611,15 @@ function renderClassesGrid() {
     // Kalender-Kachel am Ende des Grids anhängen
     const calendarCard = document.createElement('div');
     calendarCard.className = 'class-card dashboard-calendar-card';
+    calendarCard.dataset.tileKey = 'calendar';
     calendarCard.style.cursor = 'pointer';
     calendarCard.onclick = () => openToolWindow('kalender');
     calendarCard.innerHTML = `
         <div class="class-card-header">
-            <span><i class="fas fa-calendar-alt" style="margin-right: 8px;"></i> Kalender</span>
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-calendar-alt"></i> Kalender</span>
             <span id="dashboard-calendar-today-badge" class="class-card-count">-</span>
         </div>
         <div class="class-card-body" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
-            <div id="dashboard-calendar-today-text" class="calendar-today-text" style="font-size: 0.9rem; font-weight: 600; color: var(--primary-color); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                <i class="fas fa-clock"></i> Laden...
-            </div>
             <ul id="dashboard-calendar-list" class="dashboard-calendar-list" style="flex-grow: 1;">
                 <!-- Hier werden die Termine dynamisch eingefügt -->
             </ul>
@@ -1631,11 +1631,12 @@ function renderClassesGrid() {
     // Stundenplan-Kachel (heutige Stunden) am Ende des Grids anhängen
     const stundenplanCard = document.createElement('div');
     stundenplanCard.className = 'class-card dashboard-stundenplan-card';
+    stundenplanCard.dataset.tileKey = 'stundenplan';
     stundenplanCard.style.cursor = 'pointer';
     stundenplanCard.onclick = () => openToolWindow('stundenplan');
     stundenplanCard.innerHTML = `
         <div class="class-card-header">
-            <span><i class="fas fa-table-cells" style="margin-right: 8px;"></i> Stundenplan</span>
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-clock"></i> Stundenplan</span>
             <span id="dashboard-sp-day" class="class-card-count">–</span>
         </div>
         <div class="class-card-body" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
@@ -1644,6 +1645,393 @@ function renderClassesGrid() {
     `;
     classesGrid.appendChild(stundenplanCard);
     if (typeof stundenplanRenderHomeTile === 'function') stundenplanRenderHomeTile();
+
+    // Gespeicherte Reihenfolge anwenden + Drag & Drop + Masonry-Layout aktivieren
+    applyDashboardTileOrder();
+    initDashboardTileDnd();
+    setupDashboardMasonry();
+}
+
+// ===================================================================
+// ===== Startseiten-Kacheln frei anordnen (Drag & Drop) =============
+// ===================================================================
+const DASHBOARD_TILE_ORDER_KEY = 'dashboardTileOrder';
+
+function getDashboardTileOrder() {
+    try {
+        const arr = JSON.parse(localStorage.getItem(DASHBOARD_TILE_ORDER_KEY) || '[]');
+        return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+}
+
+function saveDashboardTileOrder() {
+    const grid = safeGetElement('classes-grid');
+    if (!grid) return;
+    const order = Array.from(grid.children)
+        .map(el => el.dataset && el.dataset.tileKey)
+        .filter(Boolean);
+    localStorage.setItem(DASHBOARD_TILE_ORDER_KEY, JSON.stringify(order));
+}
+
+// Karten gemäß gespeicherter Reihenfolge umsortieren; neue/unbekannte Kacheln ans Ende
+function applyDashboardTileOrder() {
+    const grid = safeGetElement('classes-grid');
+    if (!grid) return;
+    const order = getDashboardTileOrder();
+    if (!order.length) return;
+    const cards = Array.from(grid.children).filter(el => el.dataset && el.dataset.tileKey);
+    const byKey = new Map();
+    cards.forEach(c => byKey.set(c.dataset.tileKey, c));
+    order.forEach(key => {
+        const el = byKey.get(key);
+        if (el) { grid.appendChild(el); byKey.delete(key); }
+    });
+    // übrig gebliebene (neue) Kacheln behalten ihre relative Reihenfolge
+    cards.forEach(c => { if (byKey.has(c.dataset.tileKey)) grid.appendChild(c); });
+}
+
+let _tileDrag = null;
+const TILE_VGAP = 15; // gewünschter vertikaler Abstand zwischen Kacheln
+
+// Masonry: jede Kachel belegt nur so viele feine Rasterzeilen, wie ihr Inhalt braucht,
+// damit darunterliegende Kacheln Lücken auffüllen.
+function tileRowSpan(grid, height) {
+    const rowH = parseFloat(getComputedStyle(grid).gridAutoRows) || 1;
+    return Math.max(1, Math.ceil((height + TILE_VGAP) / rowH));
+}
+
+function layoutDashboardMasonry() {
+    if (_tileDrag) return;
+    const grid = safeGetElement('classes-grid');
+    if (!grid) return;
+
+    const calCard = grid.querySelector('[data-tile-key="calendar"]');
+    const spCard = grid.querySelector('[data-tile-key="stundenplan"]');
+    // min-height kurz entfernen, damit natürliche Inhaltshöhe gemessen wird.
+    // Alles im selben JS-Task → ResizeObserver sieht nur den Endzustand.
+    if (calCard) calCard.style.minHeight = '';
+    if (spCard) spCard.style.minHeight = '';
+
+    const naturalH = new Map();
+    Array.from(grid.children).forEach(item => {
+        if (item.classList && item.classList.contains('tile-placeholder')) return;
+        const h = item.getBoundingClientRect().height;
+        if (!h) return;
+        naturalH.set(item, h);
+        item.style.gridRowEnd = 'span ' + tileRowSpan(grid, h);
+    });
+
+    // Kalender und Stundenplan auf gleiche Höhe bringen
+    if (calCard && spCard && naturalH.has(calCard) && naturalH.has(spCard)) {
+        const calH = naturalH.get(calCard);
+        const spH = naturalH.get(spCard);
+        const maxH = Math.max(calH, spH);
+        const maxSpan = tileRowSpan(grid, maxH);
+        calCard.style.gridRowEnd = 'span ' + maxSpan;
+        spCard.style.gridRowEnd = 'span ' + maxSpan;
+        if (calH < maxH) calCard.style.minHeight = maxH + 'px';
+        if (spH < maxH) spCard.style.minHeight = maxH + 'px';
+    }
+}
+
+let _tileResizeObserver = null;
+let _masonryRaf = null;
+
+function setupDashboardMasonry() {
+    if (_masonryRaf) clearTimeout(_masonryRaf);
+    _masonryRaf = setTimeout(layoutDashboardMasonry, 60);
+    const grid = safeGetElement('classes-grid');
+    if (!grid) return;
+    if (typeof ResizeObserver === 'undefined') {
+        if (!grid._masonryResizeBound) {
+            grid._masonryResizeBound = true;
+            window.addEventListener('resize', () => {
+                if (_masonryRaf) clearTimeout(_masonryRaf);
+                _masonryRaf = setTimeout(layoutDashboardMasonry, 60);
+            });
+        }
+        return;
+    }
+    if (!_tileResizeObserver) {
+        _tileResizeObserver = new ResizeObserver(() => {
+            if (_masonryRaf) clearTimeout(_masonryRaf);
+            _masonryRaf = setTimeout(layoutDashboardMasonry, 60);
+        });
+    }
+    _tileResizeObserver.disconnect();
+    Array.from(grid.children).forEach(item => {
+        if (item.classList && item.classList.contains('tile-placeholder')) return;
+        _tileResizeObserver.observe(item);
+    });
+}
+
+function initDashboardTileDnd() {
+    const grid = safeGetElement('classes-grid');
+    if (!grid || grid._tileDndInit) return;
+    grid._tileDndInit = true;
+    grid.addEventListener('pointerdown', onTilePointerDown);
+    // Klick nach einem Zug (oder direkt auf dem Griff) unterdrücken, damit z. B.
+    // die Kalender-/Stundenplan-Kachel sich nicht versehentlich öffnet.
+    grid.addEventListener('click', (e) => {
+        if (window._suppressTileClick || (e.target.closest && e.target.closest('.tile-drag-grip'))) {
+            e.preventDefault();
+            e.stopPropagation();
+            window._suppressTileClick = false;
+        }
+    }, true);
+}
+
+// FLIP: Geschwister-Kacheln sanft an ihre neuen Positionen gleiten lassen
+function flipSiblings(grid, exclude, mutate) {
+    const sibs = Array.from(grid.children).filter(c => c !== exclude && c.dataset && c.dataset.tileKey);
+    const first = new Map();
+    sibs.forEach(c => first.set(c, c.getBoundingClientRect()));
+    mutate();
+    sibs.forEach(c => {
+        const f = first.get(c);
+        const last = c.getBoundingClientRect();
+        const dx = f.left - last.left, dy = f.top - last.top;
+        if (!dx && !dy) return;
+        c.style.transition = 'none';
+        c.style.transform = `translate(${dx}px, ${dy}px)`;
+        requestAnimationFrame(() => {
+            c.style.transition = 'transform 0.18s ease';
+            c.style.transform = '';
+        });
+    });
+}
+
+function onTilePointerDown(e) {
+    if (e.button != null && e.button !== 0) return;
+    const grip = e.target.closest && e.target.closest('.tile-drag-grip');
+    if (!grip) return;
+    const grid = safeGetElement('classes-grid');
+    const card = grip.closest('.class-card');
+    if (!grid || !card) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const rect = card.getBoundingClientRect();
+
+    // Unsichtbarer Platzhalter hält den Original-Rasterplatz, damit die anderen
+    // Kacheln beim Anheben NICHT nachrutschen – sie bleiben fest stehen.
+    const ph = document.createElement('div');
+    ph.className = 'tile-placeholder';
+    ph.style.visibility = 'hidden';
+    ph.style.height = rect.height + 'px'; // volle Kachelhöhe (sonst kollabiert er zur Linie)
+    ph.style.gridRowEnd = card.style.gridRowEnd || ('span ' + tileRowSpan(grid, rect.height));
+    // Notizen belegt 2 Spalten (ab Tablet/Desktop) – Platzhalter genauso breit halten
+    if (card.classList.contains('dashboard-notes-card') && window.innerWidth >= 601) {
+        ph.style.gridColumn = 'span 2';
+    }
+    grid.insertBefore(ph, card);
+
+    // Sichtbares, frei schwebendes gestricheltes Feld zeigt die Zielposition.
+    const box = document.createElement('div');
+    box.className = 'tile-drop-indicator';
+    box.style.transition = 'none';
+    box.style.left = rect.left + 'px';
+    box.style.top = rect.top + 'px';
+    box.style.width = rect.width + 'px';
+    box.style.height = rect.height + 'px';
+    document.body.appendChild(box);
+    requestAnimationFrame(() => { box.style.transition = ''; });
+
+    // Kachel aus dem Fluss heben und an Position fixieren (folgt dann dem Finger)
+    card.classList.add('tile-dragging');
+    card.style.width = rect.width + 'px';
+    card.style.height = rect.height + 'px';
+    card.style.left = rect.left + 'px';
+    card.style.top = rect.top + 'px';
+    document.body.classList.add('tile-dragging-active');
+
+    _tileDrag = {
+        grid, card, ph, box,
+        offsetX: e.clientX - rect.left,
+        offsetY: e.clientY - rect.top,
+        lastX: e.clientX,
+        lastY: e.clientY,
+        px: e.clientX,
+        py: e.clientY,
+        refNode: card.nextSibling, // aktuelle Einfügeposition (vor diesem Knoten)
+        dragged: false,
+        scrollRaf: null
+    };
+    window.addEventListener('pointermove', onTilePointerMove, { passive: false });
+    window.addEventListener('pointerup', onTilePointerUp);
+    window.addEventListener('pointercancel', onTilePointerUp);
+    _tileDrag.scrollRaf = requestAnimationFrame(tileAutoScrollTick);
+}
+
+// Auto-Scrollen: zieht man die Kachel an den oberen/unteren Bildschirmrand,
+// scrollt die Seite mit – so sind auch Landeplätze außerhalb des sichtbaren
+// Bereichs erreichbar (wichtig bei hohen Kacheln wie Notizen).
+function tileAutoScrollTick() {
+    const d = _tileDrag;
+    if (!d) return;
+    if (d.dragged) {
+        const EDGE = 80, MAX = 22;
+        const vh = window.innerHeight;
+        let dy = 0;
+        if (d.py < EDGE) dy = -MAX * (1 - d.py / EDGE);
+        else if (d.py > vh - EDGE) dy = MAX * (1 - (vh - d.py) / EDGE);
+        if (dy) {
+            window.scrollBy(0, dy);
+            updateDropIndicator(d); // viewport-relative Landeplätze neu berechnen
+        }
+    }
+    d.scrollRaf = requestAnimationFrame(tileAutoScrollTick);
+}
+
+function onTilePointerMove(e) {
+    if (!_tileDrag) return;
+    e.preventDefault();
+    const d = _tileDrag;
+    // Kachel folgt dem Finger (jeden Frame, für flüssiges Mitziehen)
+    d.card.style.left = (e.clientX - d.offsetX) + 'px';
+    d.card.style.top = (e.clientY - d.offsetY) + 'px';
+
+    // Erst reagieren, wenn wirklich gezogen wird (kleine Totzone gegen Wackler)
+    if (!d.dragged) {
+        if (Math.abs(e.clientX - d.lastX) <= 3 && Math.abs(e.clientY - d.lastY) <= 3) return;
+        d.dragged = true;
+    }
+
+    // Indikator-Update gedrosselt per rAF (das Durchmessen erzwingt Layout)
+    d.px = e.clientX;
+    d.py = e.clientY;
+    if (d.scanRaf) return;
+    d.scanRaf = requestAnimationFrame(() => {
+        d.scanRaf = null;
+        updateDropIndicator(d);
+    });
+}
+
+// Aktualisiert das gestrichelte Ziel-Feld.
+//  • Direkt über einer Kachel entscheidet die waagerechte Hälfte (linke -> davor,
+//    rechte -> dahinter). So sind auch bei breiten Kacheln wie Notizen beide
+//    Hälften zuverlässig erreichbar. Eine kleine Haltespanne um die Mittellinie
+//    verhindert Zittern beim Hin-und-Her.
+//  • Über leerem Raum wird der nächstgelegene echte Landeplatz unter allen
+//    Positionen gesucht (auch Lücken zwischen den Kacheln).
+function updateDropIndicator(d) {
+    if (!_tileDrag) return;
+    const { grid, card, ph, px, py } = d;
+
+    const under = document.elementFromPoint(px, py);
+    let target = under && under.closest ? under.closest('.class-card') : null;
+    if (target === card || (target && target.parentElement !== grid)) target = null;
+
+    if (target) {
+        const r = target.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const afterRef = nextTileAfter(d, target);
+        const margin = 18; // Haltespanne um die Mittellinie
+        let after;
+        if (d.refNode === target) after = px > cx + margin;        // war „davor"
+        else if (d.refNode === afterRef) after = px > cx - margin; // war „dahinter"
+        else after = px > cx;
+        const ref = after ? afterRef : target;
+        applyDropIndicator(d, ref, measureSlotRect(d, ref));
+        return;
+    }
+
+    // Leerer Raum: nächstgelegenen Landeplatz unter allen Positionen suchen
+    const tiles = Array.from(grid.children).filter(c =>
+        c !== card && c !== ph && c.dataset && c.dataset.tileKey);
+    const savedNext = ph.nextSibling;
+    let bestRef = null, bestRect = null, bestDist = Infinity;
+    let curRect = null, curDist = Infinity; // Distanz der aktuell gewählten Position
+    [...tiles, null].forEach(cand => {
+        grid.insertBefore(ph, cand);           // an Kandidatposition
+        const rr = ph.getBoundingClientRect(); // erzwingt Layout (kein Paint)
+        const ccx = rr.left + rr.width / 2;
+        const ccy = rr.top + rr.height / 2;
+        const dist = Math.hypot(ccx - px, ccy - py);
+        if (dist < bestDist) { bestDist = dist; bestRef = cand; bestRect = rr; }
+        if (cand === d.refNode) { curDist = dist; curRect = rr; }
+    });
+    grid.insertBefore(ph, savedNext);          // ph zurück an Original
+
+    // Stabileres Einrasten (Hysterese): nur wechseln, wenn spürbar näher.
+    const STICKY = 28; // px
+    if (curRect && (curDist - bestDist) < STICKY) { bestRef = d.refNode; bestRect = curRect; }
+    applyDropIndicator(d, bestRef, bestRect);
+}
+
+// Nächste echte Kachel nach einem Knoten (überspringt gezogene Karte, Platzhalter,
+// Nicht-Kacheln). Gibt null zurück = ans Ende einsetzen.
+function nextTileAfter(d, node) {
+    let n = node.nextSibling;
+    while (n && (n === d.card || n === d.ph || !(n.dataset && n.dataset.tileKey))) n = n.nextSibling;
+    return n;
+}
+
+// Misst, wo die Karte bei gegebener Einfügeposition landet: Halte-Platzhalter
+// kurz dorthin, messen, zurück – synchron, also ohne sichtbares Umsortieren.
+function measureSlotRect(d, refNode) {
+    const { grid, ph } = d;
+    const savedNext = ph.nextSibling;
+    grid.insertBefore(ph, refNode);
+    const r = ph.getBoundingClientRect();
+    grid.insertBefore(ph, savedNext);
+    return r;
+}
+
+function applyDropIndicator(d, ref, rect) {
+    if (!rect) return;
+    d.refNode = ref;
+    d.box.style.left = rect.left + 'px';
+    d.box.style.top = rect.top + 'px';
+    d.box.style.width = rect.width + 'px';
+    d.box.style.height = rect.height + 'px';
+}
+
+function onTilePointerUp() {
+    if (!_tileDrag) return;
+    const d = _tileDrag;
+    _tileDrag = null;
+    const { grid, card, ph, box, dragged } = d;
+    if (d.scanRaf) cancelAnimationFrame(d.scanRaf);
+    if (d.scrollRaf) cancelAnimationFrame(d.scrollRaf);
+    window.removeEventListener('pointermove', onTilePointerMove);
+    window.removeEventListener('pointerup', onTilePointerUp);
+    window.removeEventListener('pointercancel', onTilePointerUp);
+
+    const refNode = (d.refNode && d.refNode.parentElement === grid && d.refNode !== card) ? d.refNode : null;
+
+    // Die EINZIGE Kachel-Bewegung beim Loslassen: alle Kacheln einmal sanft in die
+    // Endanordnung bringen (Halte-Platzhalter an die Zielposition setzen).
+    flipSiblings(grid, card, () => grid.insertBefore(ph, refNode));
+
+    // Karte zum nun gehaltenen Zielplatz gleiten lassen
+    const slot = ph.getBoundingClientRect();
+    card.style.transition = 'left 0.18s ease, top 0.18s ease, transform 0.18s ease';
+    requestAnimationFrame(() => {
+        card.style.left = slot.left + 'px';
+        card.style.top = slot.top + 'px';
+        card.style.transform = 'scale(1)';
+    });
+
+    let done = false;
+    const finish = () => {
+        if (done) return; done = true;
+        card.removeEventListener('transitionend', finish);
+        card.classList.remove('tile-dragging');
+        ['width', 'height', 'left', 'top', 'transform', 'transition'].forEach(p => card.style.removeProperty(p));
+        if (ph.parentElement) grid.insertBefore(card, ph);
+        if (ph.parentElement) ph.remove();
+        if (box.parentElement) box.remove();
+        document.body.classList.remove('tile-dragging-active');
+        layoutDashboardMasonry();
+        if (dragged) {
+            saveDashboardTileOrder();
+            window._suppressTileClick = true;
+            setTimeout(() => { window._suppressTileClick = false; }, 60);
+        }
+    };
+    card.addEventListener('transitionend', finish);
+    setTimeout(finish, 280); // Fallback, falls keine Transition feuert
 }
 
 // Drag & Drop Funktionen für Schüler-Sortierung
@@ -9820,7 +10208,6 @@ function renderDashboardCalendar() {
     const todayFull = now.toLocaleDateString('de-DE', options);
     
     if (badge) badge.textContent = todayGermanShort;
-    if (textToday) textToday.innerHTML = `<i class="fas fa-clock"></i> Heute: ${todayFull}`;
     
     list.innerHTML = '';
     

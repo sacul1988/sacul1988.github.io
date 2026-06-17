@@ -200,8 +200,12 @@ body {
 .classes-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 15px;
+    column-gap: 15px;
+    row-gap: 0;
     margin-top: 15px;
+    grid-auto-rows: 8px;
+    grid-auto-flow: row dense;
+    align-items: start;
 }
 
 @media (max-width: 1200px) {
@@ -230,7 +234,7 @@ body {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: auto;
 }
 
 .class-card:hover {
@@ -256,6 +260,65 @@ body {
     font-size: 0.95rem;
     font-weight: 600;
     white-space: nowrap;
+}
+
+/* Drag-Griff zum Anordnen der Startseiten-Kacheln */
+.tile-head-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tile-drag-grip {
+    cursor: grab;
+    opacity: 0.5;
+    touch-action: none;
+    flex-shrink: 0;
+    padding: 2px 3px;
+    margin-left: -2px;
+    transition: opacity 0.15s ease;
+}
+.tile-drag-grip:hover { opacity: 1; }
+.tile-drag-grip:active { cursor: grabbing; }
+
+.class-card.tile-dragging {
+    position: fixed;
+    margin: 0;
+    z-index: 1000;
+    transform: scale(1.03);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+    pointer-events: none;
+    transition: none;
+    will-change: left, top;
+}
+.tile-placeholder {
+    border: 2px dashed #c7d2fe;
+    border-radius: var(--border-radius-lg);
+    background: rgba(99, 102, 241, 0.07);
+    min-width: 0;
+}
+/* Frei schwebendes gestricheltes Feld, das beim Ziehen die Zielposition anzeigt
+   und sanft dorthin gleitet. Die echten Kacheln bleiben dabei fest stehen. */
+.tile-drop-indicator {
+    position: fixed;
+    z-index: 999;
+    box-sizing: border-box;
+    border: 2px dashed #818cf8;
+    border-radius: var(--border-radius-lg);
+    background: rgba(99, 102, 241, 0.10);
+    pointer-events: none;
+    transition: left 0.14s ease, top 0.14s ease, width 0.14s ease, height 0.14s ease;
+}
+body.tile-dragging-active {
+    cursor: grabbing;
+    user-select: none;
+    -webkit-user-select: none;
+}
+body.tile-dragging-active .class-card:not(.tile-dragging):hover {
+    transform: none;
+    box-shadow: var(--box-shadow);
 }
 
 .class-card-body {
@@ -3322,10 +3385,6 @@ html.modal-open, body.modal-open {
         grid-column: auto;
     }
 
-    .dashboard-calendar-card {
-        grid-column: auto;
-    }
-
     /* Zeugnis-Tab: Notizen und Mündlich untereinander */
     .zeugnis-notes-container {
         flex-direction: column;
@@ -5130,8 +5189,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 /* span 2 nur ab Tablet/Desktop – auf Mobile (<=600px) bleibt das Grid einspaltig,
    sonst würde ein span-2-Element eine zweite implizite Spalte erzwingen. */
 @media (min-width: 601px) {
-    .dashboard-notes-card,
-    .dashboard-calendar-card {
+    .dashboard-notes-card {
         grid-column: span 2;
     }
 }
@@ -5528,8 +5586,8 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     min-height: 36px;
 }
 .sp-home-stunde-empty { background: #f1f5f9; }
-.sp-home-stunde-time { font-size: 0.8rem; color: #475569; white-space: nowrap; min-width: 100px; }
-.sp-home-stunde-name { font-weight: 700; font-size: 0.85rem; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: right; }
+.sp-home-stunde-time { font-size: 0.95rem; color: #475569; white-space: nowrap; min-width: 100px; }
+.sp-home-stunde-name { font-weight: 700; font-size: 0.95rem; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: right; }
 .sp-tile-empty { color: var(--grey-color); font-size: 0.88rem; padding: 8px 0; }
 .sp-tile-empty { color: var(--grey-color); font-size: 0.88rem; }
 
