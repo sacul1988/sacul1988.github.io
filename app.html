@@ -1523,6 +1523,32 @@
                     console.log(`Cloud Sync: Vollständiger Upload (Student-Hinweis: ${specificStudentIndex})`);
                 }
 
+                // ===== SCHUTZ VOR DATENVERLUST =====
+                // Eine leere Klassenliste niemals über einen gefüllten Cloud-Stand schreiben.
+                // Das passiert sonst bei Lade-Races (Sync feuert, bevor window.classes geladen ist)
+                // oder mehreren Tabs und leert die komplette Cloud. Ausnahme: bewusste Löschung
+                // der letzten Klasse (setzt window._allowEmptyClassesSync = true, wird hier verbraucht).
+                const allowEmptyOnce = window._allowEmptyClassesSync === true;
+                window._allowEmptyClassesSync = false;
+                if (Array.isArray(data.classes) && data.classes.length === 0 && !allowEmptyOnce) {
+                    try {
+                        const existing = await getDoc(userDocRef);
+                        if (existing.exists()) {
+                            const cloudClasses = existing.data().classes;
+                            if (Array.isArray(cloudClasses) && cloudClasses.length > 0) {
+                                console.warn(`Cloud-Sync ABGEBROCHEN (Schutz): lokale Klassenliste leer, Cloud hat ${cloudClasses.length} Klassen.`);
+                                if (statusText) statusText.innerHTML = '<i class="fas fa-shield-halved text-warning"></i> Leer-Upload blockiert';
+                                return;
+                            }
+                        }
+                    } catch (guardErr) {
+                        // Cloud-Stand nicht prüfbar -> im Zweifel keinen Leer-Upload riskieren
+                        console.warn('Cloud-Sync Schutzprüfung fehlgeschlagen, Leer-Upload übersprungen:', guardErr);
+                        if (statusText) statusText.innerHTML = '<i class="fas fa-shield-halved text-warning"></i> Leer-Upload übersprungen';
+                        return;
+                    }
+                }
+
                 await setDoc(userDocRef, data, { merge: true });
                 localStorage.setItem('lastUpdate', timestamp);
 

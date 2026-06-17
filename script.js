@@ -1922,6 +1922,8 @@ function deleteClass(classId) {
         if (willDelete) {
             classes.splice(classId, 1);
             window.classes = classes;
+            // Bewusste Löschung der letzten Klasse: Schutzsperre für diesen einen Upload aufheben
+            if (classes.length === 0) window._allowEmptyClassesSync = true;
             saveData();
             
             // Falls aktive Klasse gelöscht wurde, zurück zur Startseite
