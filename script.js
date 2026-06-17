@@ -1907,16 +1907,26 @@ function onTilePointerMove(e) {
     });
 }
 
+// Anteil der Kachelbreite, ab dem in Bewegungsrichtung umgeschaltet wird
+// (0.3 = ~30 %, statt erst bei der Mitte). Mitwandernde Grenze = stabil.
+const TILE_FLIP_FRACTION = 0.3;
+
 // Aktualisiert das gestrichelte Ziel-Feld.
-//  • Direkt über einer Kachel entscheidet die waagerechte Hälfte (linke -> davor,
-//    rechte -> dahinter). So sind auch bei breiten Kacheln wie Notizen beide
-//    Hälften zuverlässig erreichbar. Eine kleine Haltespanne um die Mittellinie
-//    verhindert Zittern beim Hin-und-Her.
+//  • Direkt über einer Kachel rastet es früh in Bewegungsrichtung ein: ~20 % der
+//    Kachelbreite reichen (nach rechts ziehen -> dahinter, nach links -> davor),
+//    statt bis zur Mitte ziehen zu müssen. Die mit der Zugrichtung wandernde
+//    Grenze verhindert Zittern. So sind auch beide Seiten breiter Kacheln
+//    (Notizen) erreichbar.
 //  • Über leerem Raum wird der nächstgelegene echte Landeplatz unter allen
 //    Positionen gesucht (auch Lücken zwischen den Kacheln).
 function updateDropIndicator(d) {
     if (!_tileDrag) return;
     const { grid, card, ph, px, py } = d;
+
+    // waagerechte Bewegungsrichtung verfolgen (kleine Totzone gegen Zittern)
+    if (d.prevX == null) d.prevX = px;
+    if (px - d.prevX > 4) { d.dirRight = true; d.prevX = px; }
+    else if (px - d.prevX < -4) { d.dirRight = false; d.prevX = px; }
 
     const under = document.elementFromPoint(px, py);
     let target = under && under.closest ? under.closest('.class-card') : null;
@@ -1924,13 +1934,11 @@ function updateDropIndicator(d) {
 
     if (target) {
         const r = target.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
         const afterRef = nextTileAfter(d, target);
-        const margin = 18; // Haltespanne um die Mittellinie
-        let after;
-        if (d.refNode === target) after = px > cx + margin;        // war „davor"
-        else if (d.refNode === afterRef) after = px > cx - margin; // war „dahinter"
-        else after = px > cx;
+        const f = r.width * TILE_FLIP_FRACTION;
+        const after = (d.dirRight === false)
+            ? px > r.right - f    // nach links: bereits ab 20 % von rechts „davor"
+            : px > r.left + f;    // nach rechts: bereits ab 20 % von links „dahinter"
         const ref = after ? afterRef : target;
         applyDropIndicator(d, ref, measureSlotRect(d, ref));
         return;
