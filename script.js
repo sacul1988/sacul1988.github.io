@@ -4413,6 +4413,8 @@ function exportAllData(event) {
             planung: planungObj,
             planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
             zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
+            ztPlanung: JSON.parse(localStorage.getItem('ztPlanung') || '{"courses":[]}'),
+            stundenplan: JSON.parse(localStorage.getItem('stundenplan') || '{"zeiten":[],"kacheln":{},"inklusionProKlasse":{}}'),
             zeugnisViewMode: localStorage.getItem('zeugnisViewMode') || 'individual',
             extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || new Date().toISOString()
         };
@@ -4557,6 +4559,19 @@ function importBackupFile(event) {
                     // Zeugnistexte Archiv übernehmen (falls vorhanden)
                     if (importData.zeugnistexteArchiv && Array.isArray(importData.zeugnistexteArchiv)) {
                         localStorage.setItem('zeugnistexteArchiv', JSON.stringify(importData.zeugnistexteArchiv));
+                    }
+
+                    // Inklusions-Planung (Zeugnistextgenerator) übernehmen.
+                    // Zuerst setzen, da setStundenplan die verknüpften Kurse damit abgleicht.
+                    if (importData.ztPlanung && typeof importData.ztPlanung === 'object') {
+                        localStorage.setItem('ztPlanung', JSON.stringify(importData.ztPlanung));
+                        if (typeof window.setZtPlanung === 'function') window.setZtPlanung(importData.ztPlanung);
+                    }
+
+                    // Stundenplan übernehmen (falls vorhanden)
+                    if (importData.stundenplan && typeof importData.stundenplan === 'object') {
+                        localStorage.setItem('stundenplan', JSON.stringify(importData.stundenplan));
+                        if (typeof window.setStundenplan === 'function') window.setStundenplan(importData.stundenplan);
                     }
 
                     // Zeugnisansicht-Einstellung übernehmen
