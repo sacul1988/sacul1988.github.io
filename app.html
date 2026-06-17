@@ -1117,6 +1117,29 @@
             }
         };
 
+        // Führt lokale und Cloud-Notizen zusammen, ohne frisch erstellte Notizen zu verlieren
+        // und ohne auf anderen Geräten gelöschte Notizen wiederzubeleben.
+        // Die Notiz-"id" ist die Erstellzeit (Date.now()), daher mit dem letzten Sync-Zeitstempel vergleichbar.
+        function mergeDashboardNotes(localNotes, cloudNotes, localTs, cloudTs) {
+            const local = Array.isArray(localNotes) ? localNotes : [];
+            const cloud = Array.isArray(cloudNotes) ? cloudNotes : [];
+            const localMs = localTs ? new Date(localTs).getTime() : 0;
+            const cloudMs = cloudTs ? new Date(cloudTs).getTime() : 0;
+
+            if (cloudMs >= localMs) {
+                // Cloud ist gleich aktuell oder neuer -> Cloud ist Basis (respektiert dort gelöschte Notizen).
+                // Lokal NACH dem letzten Cloud-Stand erstellte Notizen ergänzen, damit sie nicht verloren gehen.
+                const cloudIds = new Set(cloud.map(n => n.id));
+                const freshLocal = local.filter(n => !cloudIds.has(n.id) && Number(n.id) > cloudMs);
+                return [...cloud, ...freshLocal];
+            } else {
+                // Lokal ist neuer -> lokal ist Basis. Nur Cloud-Notizen ergänzen, die neuer als der lokale Stand sind.
+                const localIds = new Set(local.map(n => n.id));
+                const freshCloud = cloud.filter(n => !localIds.has(n.id) && Number(n.id) > localMs);
+                return [...local, ...freshCloud];
+            }
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('login-container').style.display = 'none';
@@ -1152,11 +1175,22 @@
                     if (docSnap.exists()) {
                         const cloudData = docSnap.data();
                         console.log("Login-Initialisierung: Lade Cloud-Stand in lokalen Speicher.");
-                        
+
+                        // Zeitstempel VOR dem Überschreiben sichern (für den Notizen-Merge)
+                        const localTimestamp = localStorage.getItem('lastUpdate') || "0";
+                        const cloudTimestamp = cloudData.lastUpdate || "0";
+
                         localStorage.setItem('classes', JSON.stringify(cloudData.classes));
                         localStorage.setItem('contacts', JSON.stringify(cloudData.contacts || []));
-                        localStorage.setItem('lastUpdate', cloudData.lastUpdate || "0");
+                        localStorage.setItem('lastUpdate', cloudTimestamp);
                         applyCloudTermineAndPlanung(cloudData);
+
+                        // Notizen beim Neuladen IMMER mit der Cloud abgleichen (Sync über alle Geräte),
+                        // ohne lokal frisch erstellte, noch nicht hochgeladene Notizen zu verlieren.
+                        const localNotes = JSON.parse(localStorage.getItem('dashboardNotes') || '[]');
+                        const cloudNotes = Array.isArray(cloudData.dashboardNotes) ? cloudData.dashboardNotes : [];
+                        const mergedNotes = mergeDashboardNotes(localNotes, cloudNotes, localTimestamp, cloudTimestamp);
+                        localStorage.setItem('dashboardNotes', JSON.stringify(mergedNotes));
 
                         // Brücke zu script.js
                         if (typeof window.setClasses === 'function') {
@@ -1165,10 +1199,22 @@
                         if (typeof window.setContacts === 'function') {
                             window.setContacts(cloudData.contacts || []);
                         }
+                        if (typeof window.setDashboardNotes === 'function') {
+                            window.setDashboardNotes(mergedNotes);
+                        }
 
                         // Hauptansicht neu rendern
                         if (typeof window.renderClassesGrid === 'function') {
                             window.renderClassesGrid();
+                        }
+                        if (typeof window.renderDashboardNotes === 'function') {
+                            window.renderDashboardNotes();
+                        }
+
+                        // Falls lokal Notizen existierten, die (noch) nicht in der Cloud waren,
+                        // direkt hochladen, damit die Cloud aufschließt.
+                        if (mergedNotes.length !== cloudNotes.length && typeof window.saveDataToCloud === 'function') {
+                            window.saveDataToCloud();
                         }
 
                         if (statusText) statusText.innerHTML = '<i class="fas fa-cloud-check text-success"></i> Daten geladen (Init)';
@@ -1564,6 +1610,20 @@
         window.triggerCloudSync = () => {
             window.saveDataToCloud();
         };
+
+        // Beim Verlassen/Wechseln der Seite einen noch ausstehenden (verzögerten) Cloud-Sync
+        // sofort abschließen, damit z. B. neue Notizen zuverlässig auf allen Geräten ankommen.
+        const flushOnLeave = () => {
+            try {
+                if (auth.currentUser && window._cloudSyncDebounceTimer && typeof window.flushCloudSyncNow === 'function') {
+                    window.flushCloudSyncNow();
+                }
+            } catch (e) { /* still verlassen */ }
+        };
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') flushOnLeave();
+        });
+        window.addEventListener('pagehide', flushOnLeave);
     </script>
     <!-- Time Minutes Popover for Quick Select -->
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
