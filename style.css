@@ -1935,6 +1935,23 @@ html.login-active, body.login-active {
     .desktop-header-buttons .btn:active {
         background-color: rgba(67, 97, 238, 0.08) !important;
     }
+
+    /* Kurs-Formular: Submit-Button immer mit Text und Gap */
+    .zt-plan-form-submit { gap: 6px !important; }
+
+    /* Zeugnistextgenerator: alle Icon-Buttons ohne Hintergrund, nur blaues Symbol */
+    #zeugnis-texte-module .card-header-actions .btn {
+        background: transparent !important;
+        border-color: transparent !important;
+        color: var(--primary-color) !important;
+        box-shadow: none !important;
+    }
+    #zeugnis-texte-module .card-header-actions .btn i {
+        color: var(--primary-color) !important;
+    }
+    #zeugnis-texte-module .card-header-actions .btn:active {
+        background: rgba(67, 97, 238, 0.08) !important;
+    }
 }
 
 /* Hausaufgaben buttons in modals and modules */
@@ -3615,20 +3632,31 @@ html.modal-open, body.modal-open {
 .zt-archive-del:hover { color: #e74c3c; border-color: #e74c3c; background: #fef2f2; }
 
 /* ===== Zeugnistext-Planung ===== */
-.zt-plan-toolbar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-    justify-content: flex-end;
+/* Empty-State: Modal groß genug, Inhalt zentriert in sich selbst */
+#zt-planung-modal.zt-planung-empty-state {
+    min-height: 340px;
 }
+#zt-planung-modal.zt-planung-empty-state .zt-plan-empty {
+    min-height: 260px;
+}
+
+.zt-archive-empty,
 .zt-plan-empty {
     text-align: center;
-    padding: 30px 12px;
+    padding: 40px 20px;
     color: var(--grey-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
-.zt-plan-empty i { font-size: 2.2rem; margin-bottom: 10px; display: block; }
-.zt-plan-empty p { margin: 4px 0; }
+.zt-archive-empty i,
+.zt-plan-empty i { font-size: 2.4rem; color: var(--grey-color); opacity: 0.5; margin-bottom: 8px; }
+.zt-archive-empty p,
+.zt-plan-empty p { margin: 0; font-size: 0.9rem; }
+.zt-archive-empty p:first-of-type,
+.zt-plan-empty p:first-of-type { font-weight: 600; font-size: 1rem; color: var(--dark-color); opacity: 0.6; }
 
 .zt-plan-list { display: flex; flex-direction: column; gap: 14px; }
 

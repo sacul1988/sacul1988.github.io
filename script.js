@@ -8979,7 +8979,11 @@ function ztRenderArchiveModal() {
     const items = ZtState.archive;
     const countLabel = items.length ? items.length + (items.length === 1 ? ' Eintrag' : ' Einträge') : '';
     const body = !items.length
-        ? ''
+        ? `<div class="zt-archive-empty">
+                <i class="fas fa-box-open"></i>
+                <p>Noch keine Texte im Archiv</p>
+                <p>Generierte Zeugnistexte werden hier automatisch gespeichert.</p>
+           </div>`
         : '<div class="zt-archive-list">' + items.map(item => {
             const d = item.date ? new Date(item.date) : null;
             const dateStr = d ? d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
@@ -9199,20 +9203,35 @@ function ztPlanungOpen() {
     showModal('zt-planung-modal');
 }
 
+function ztPlanungSortKey(course) {
+    const label = (course.name || course.fach || '').trim();
+    const m = label.match(/(\d+)\s*([a-zA-Z])/);
+    if (m) return { num: parseInt(m[1], 10), letter: m[2].toLowerCase(), rest: label };
+    return { num: 999, letter: '', rest: label };
+}
+
 function ztPlanungRenderList() {
     const modal = document.getElementById('zt-planung-modal');
     if (!modal) return;
-    const courses = ZtPlanungState.courses;
+    const courses = [...ZtPlanungState.courses].sort((a, b) => {
+        const ka = ztPlanungSortKey(a), kb = ztPlanungSortKey(b);
+        if (ka.num !== kb.num) return ka.num - kb.num;
+        if (ka.letter !== kb.letter) return ka.letter.localeCompare(kb.letter);
+        return ka.rest.localeCompare(kb.rest, 'de');
+    });
     const { total, done } = ztPlanungCounts();
     const progressLabel = total ? `${done}/${total} erledigt` : '';
 
-    const body = !courses.length
+    const isEmpty = !courses.length;
+    const body = isEmpty
         ? `<div class="zt-plan-empty">
                 <i class="fas fa-clipboard-list"></i>
                 <p>Noch keine Kurse geplant.</p>
-                <p style="font-size:0.85rem;">Lege oben einen Kurs an und füge die Schüler hinzu.</p>
+                <p>Tippe oben auf „Kurs anlegen", um zu starten.</p>
            </div>`
         : '<div class="zt-plan-list">' + courses.map(c => ztPlanungCourseCardHtml(c)).join('') + '</div>';
+
+    modal.classList.toggle('zt-planung-empty-state', isEmpty);
 
     modal.innerHTML = `
         <div class="zt-modal-head">
@@ -9221,9 +9240,6 @@ function ztPlanungRenderList() {
                 ${progressLabel ? `<span class="zt-archive-count" style="font-size:0.82rem;font-weight:400;color:var(--grey-color);background:var(--light-color);padding:2px 8px;border-radius:12px;margin-left:6px;">${progressLabel}</span>` : ''}
             </span>
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="zt-plan-toolbar">
-            <button class="btn btn-primary btn-icon" onclick="ztPlanungOpenForm()"><i class="fas fa-plus"></i> <span class="btn-text">Kurs anlegen</span></button>
         </div>
         ${body}`;
 }
@@ -9365,7 +9381,7 @@ function ztPlanungOpenForm(courseId) {
 
 function ztPlanungFormStudentsHtml() {
     const students = (ZtPlanungState.formDraft && ZtPlanungState.formDraft.students) || [];
-    if (!students.length) return '<li class="zt-plan-empty-students">Noch keine Schüler hinzugefügt</li>';
+    if (!students.length) return '';
     return students.map(s => `
         <li class="zt-plan-form-student">
             <span class="zt-plan-student-name">${ztEsc(s.name)}</span>
@@ -9418,15 +9434,14 @@ function ztPlanungRenderForm() {
 
             <div class="form-group">
                 <label>Schüler im Kurs</label>
-                <div class="notes-input-group" style="margin-bottom:12px;">
-                    <input type="text" id="zt-plan-form-student-input" class="form-control" placeholder="Name eingeben..." onkeydown="if(event.key==='Enter'){event.preventDefault();ztPlanungFormAddStudent();}">
-                    <button class="btn btn-primary btn-icon-only" onclick="ztPlanungFormAddStudent()" title="Hinzufügen" style="margin:0;flex-shrink:0;"><i class="fas fa-plus"></i></button>
+                <div style="margin-bottom:12px;">
+                    <input type="text" id="zt-plan-form-student-input" class="form-control" placeholder="Name eingeben, Enter zum Hinzufügen..." onkeydown="if(event.key==='Enter'){event.preventDefault();ztPlanungFormAddStudent();}">
                 </div>
                 <ul id="zt-plan-form-students" class="zt-plan-form-students-list">${ztPlanungFormStudentsHtml()}</ul>
             </div>
 
             <div class="zt-plan-form-actions">
-                <button class="btn btn-success btn-icon" onclick="ztPlanungSaveCourse()"><i class="fas fa-check"></i> <span class="btn-text">${isEdit ? 'Speichern' : 'Anlegen'}</span></button>
+                <button class="btn btn-primary btn-icon zt-plan-form-submit" onclick="ztPlanungSaveCourse()"><i class="fas fa-check"></i> ${isEdit ? 'Speichern' : 'Erstellen'}</button>
             </div>
         </div>`;
 }
