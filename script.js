@@ -8628,7 +8628,8 @@ const ZtState = {
     archive: [],
     initialized: false,
     pendingMessages: null,
-    pendingQuestions: null
+    pendingQuestions: null,
+    planungRef: null // {courseId, studentId}: gemerkt beim Sprung aus der Planung -> nach Generierung auto-abhaken
 };
 
 function renderZeugnisTTexteModule() {
@@ -8636,6 +8637,7 @@ function renderZeugnisTTexteModule() {
     ZtState.initialized = true;
     setZtTyp('nebenfach');
     ztInitArchive();
+    ztPlanungInit();
 
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && (activeModule === 'zeugnis-texte' || window._activeToolWindow === 'zeugnis-texte')) {
@@ -8950,6 +8952,8 @@ function ztCreateArchiveEntry() {
     if (ZtState.archive.length > 50) ZtState.archive = ZtState.archive.slice(0, 50);
     ZtState.currentId = entry.id;
     ztPersistArchive();
+    // Wenn aus der Planung gesprungen wurde: Schüler automatisch als erledigt markieren
+    ztPlanungMarkRefDone();
 }
 
 // Bearbeitung (Kürzen/Verlängern/Anweisung/Neu) -> bestehenden Eintrag aktualisieren
@@ -9128,6 +9132,457 @@ window.ztNextStudent = ztNextStudent;
 window.ztOnTextEdited = ztOnTextEdited;
 window.ztOnTextEdited = ztOnTextEdited;
 window.ztSubmitAnswers = ztSubmitAnswers;
+
+// ===== ZEUGNIS TEXTE: PLANUNG =====
+// Übersicht, für welche Schüler noch Texte geschrieben werden müssen.
+// Kurse bündeln gemeinsame Infos (Halbjahr, Art, Fach, Themen) für mehrere Schüler.
+const ZtPlanungState = {
+    courses: [],
+    initialized: false,
+    formCourseId: null, // null = neuer Kurs, sonst Bearbeitung
+    formDraft: null     // { halbjahr, typ, fach, themen, students: [{id, name, done}] }
+};
+
+function ztPlanungInit() {
+    if (ZtPlanungState.initialized) return;
+    try {
+        const raw = localStorage.getItem('ztPlanung');
+        const parsed = raw ? JSON.parse(raw) : null;
+        ZtPlanungState.courses = (parsed && Array.isArray(parsed.courses)) ? parsed.courses : [];
+    } catch (e) { ZtPlanungState.courses = []; }
+    ZtPlanungState.initialized = true;
+    ztPlanungUpdateBadge();
+}
+
+function ztPlanungPersist() {
+    try {
+        localStorage.setItem('ztPlanung', JSON.stringify({ courses: ZtPlanungState.courses }));
+        localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+    } catch (e) {
+        console.warn('Fehler beim Speichern von ztPlanung:', e);
+    }
+    ztPlanungUpdateBadge();
+    if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.saveDataToCloud === 'function') {
+        window.saveDataToCloud();
+    }
+}
+
+function ztPlanungCounts() {
+    let total = 0, done = 0;
+    ZtPlanungState.courses.forEach(c => {
+        (c.students || []).forEach(s => { total++; if (s.done) done++; });
+    });
+    return { total, done, open: total - done };
+}
+
+function ztPlanungUpdateBadge() {
+    const badge = document.getElementById('zt-planung-badge');
+    if (!badge) return;
+    const { open } = ztPlanungCounts();
+    if (open > 0) { badge.textContent = open; badge.style.display = ''; }
+    else { badge.style.display = 'none'; }
+}
+
+// Wird vom Cloud-Sync (app.html) aufgerufen, wenn die Planung von einem anderen Gerät aktualisiert wurde.
+window.setZtPlanung = function(obj) {
+    ZtPlanungState.courses = (obj && Array.isArray(obj.courses)) ? obj.courses : [];
+    ZtPlanungState.initialized = true;
+    ztPlanungUpdateBadge();
+    const m = document.getElementById('zt-planung-modal');
+    if (m && m.style.display !== 'none') ztPlanungRenderList();
+};
+
+// ----- Listenansicht -----
+function ztPlanungOpen() {
+    ztPlanungInit();
+    ztPlanungRenderList();
+    showModal('zt-planung-modal');
+}
+
+function ztPlanungRenderList() {
+    const modal = document.getElementById('zt-planung-modal');
+    if (!modal) return;
+    const courses = ZtPlanungState.courses;
+    const { total, done } = ztPlanungCounts();
+    const progressLabel = total ? `${done}/${total} erledigt` : '';
+
+    const body = !courses.length
+        ? `<div class="zt-plan-empty">
+                <i class="fas fa-clipboard-list"></i>
+                <p>Noch keine Kurse geplant.</p>
+                <p style="font-size:0.85rem;">Lege oben einen Kurs an und füge die Schüler hinzu.</p>
+           </div>`
+        : '<div class="zt-plan-list">' + courses.map(c => ztPlanungCourseCardHtml(c)).join('') + '</div>';
+
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            <span style="font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:8px;">
+                Planung
+                ${progressLabel ? `<span class="zt-archive-count" style="font-size:0.82rem;font-weight:400;color:var(--grey-color);background:var(--light-color);padding:2px 8px;border-radius:12px;margin-left:6px;">${progressLabel}</span>` : ''}
+            </span>
+            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="zt-plan-toolbar">
+            <button class="btn btn-primary btn-icon" onclick="ztPlanungOpenForm()"><i class="fas fa-plus"></i> <span class="btn-text">Kurs anlegen</span></button>
+        </div>
+        ${body}`;
+}
+
+function ztPlanungCourseCardHtml(course) {
+    const students = course.students || [];
+    const total = students.length;
+    const done = students.filter(s => s.done).length;
+    const typLabel = ztTypLabel(course.typ);
+    const isSozial = course.typ === 'sozialverhalten';
+    const halbjahrLabel = isSozial ? '' : (course.halbjahr === 'zweiten' ? '2. Halbjahr' : '1. Halbjahr');
+
+    const title = course.name ? ztEsc(course.name) : (() => {
+        const parts = [];
+        if (!isSozial && course.fach) parts.push(ztEsc(course.fach));
+        if (typLabel) parts.push(typLabel);
+        if (halbjahrLabel) parts.push(halbjahrLabel);
+        return parts.join(' · ') || 'Kurs';
+    })();
+
+    // Offene Schüler zuerst, erledigte ans Ende
+    const sorted = [...students].sort((a, b) => (a.done === b.done) ? 0 : (a.done ? 1 : -1));
+
+    const rows = sorted.map(s => `
+        <li class="zt-plan-student ${s.done ? 'done' : ''}">
+            <div class="zt-plan-check ${s.done ? 'checked' : ''}" onclick="ztPlanungToggleStudent('${course.id}','${s.id}')" title="Erledigt abhaken"><i class="fas fa-check"></i></div>
+            <span class="zt-plan-student-name" onclick="ztPlanungWriteText('${course.id}','${s.id}')" title="Text schreiben">${ztEsc(s.name)}</span>
+            <button class="zt-plan-write" onclick="ztPlanungWriteText('${course.id}','${s.id}')" title="Text schreiben"><i class="fas fa-wand-magic-sparkles"></i></button>
+            <button class="zt-plan-del" onclick="ztPlanungDeleteStudent('${course.id}','${s.id}')" title="Schüler löschen"><i class="fas fa-trash"></i></button>
+        </li>`).join('');
+
+    return `
+        <div class="zt-plan-course">
+            <div class="zt-plan-course-head">
+                <div class="zt-plan-course-title" onclick="ztPlanungOpenForm('${course.id}')" title="Kurs bearbeiten">
+                    <span class="zt-plan-course-name">${title}</span>
+                    <span class="zt-plan-course-progress">${done}/${total} erledigt</span>
+                </div>
+                <div class="zt-plan-course-actions">
+                    <button class="btn btn-sm btn-primary btn-circle-sm" title="Bearbeiten" onclick="ztPlanungOpenForm('${course.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger btn-circle-sm" title="Kurs löschen" onclick="ztPlanungDeleteCourse('${course.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            <ul class="zt-plan-students">${rows || '<li class="zt-plan-empty-students">Keine Schüler im Kurs</li>'}</ul>
+        </div>`;
+}
+
+function ztPlanungToggleStudent(courseId, studentId) {
+    const c = ZtPlanungState.courses.find(x => x.id === courseId);
+    if (!c) return;
+    const s = (c.students || []).find(x => x.id === studentId);
+    if (!s) return;
+    s.done = !s.done;
+    ztPlanungPersist();
+    ztPlanungRenderList();
+}
+
+function ztPlanungDeleteStudent(courseId, studentId) {
+    const c = ZtPlanungState.courses.find(x => x.id === courseId);
+    if (!c) return;
+    const s = (c.students || []).find(x => x.id === studentId);
+    if (!s) return;
+    hideModal();
+    swal({
+        title: 'Schüler löschen?',
+        text: `„${s.name}" wird aus dem Kurs entfernt.`,
+        icon: 'warning',
+        buttons: [false, 'Löschen'],
+        dangerMode: true
+    }).then(ok => {
+        if (ok) {
+            c.students = (c.students || []).filter(x => x.id !== studentId);
+            ztPlanungPersist();
+        }
+        ztPlanungOpen();
+    });
+}
+
+function ztPlanungDeleteCourse(courseId) {
+    const c = ZtPlanungState.courses.find(x => x.id === courseId);
+    if (!c) return;
+    const label = c.name || (c.typ === 'sozialverhalten' ? 'Arbeits-/Sozialverhalten' : (c.fach || 'Kurs'));
+    hideModal();
+    swal({
+        title: 'Kurs löschen?',
+        text: `„${label}" mit ${(c.students || []).length} Schüler(n) wird aus der Planung entfernt.`,
+        icon: 'warning',
+        buttons: [false, 'Löschen'],
+        dangerMode: true
+    }).then(ok => {
+        if (ok) {
+            ZtPlanungState.courses = ZtPlanungState.courses.filter(x => x.id !== courseId);
+            ztPlanungPersist();
+        }
+        ztPlanungOpen();
+    });
+}
+
+function ztPlanungClearAll() {
+    if (!ZtPlanungState.courses.length) return;
+    hideModal();
+    swal({
+        title: 'Gesamte Liste löschen?',
+        text: 'Alle Kurse und Schüler in der Planung werden entfernt.',
+        icon: 'warning',
+        buttons: [false, 'Alles löschen'],
+        dangerMode: true
+    }).then(ok => {
+        if (ok) {
+            ZtPlanungState.courses = [];
+            ztPlanungPersist();
+        }
+        ztPlanungOpen();
+    });
+}
+
+// ----- Formular (Anlegen / Bearbeiten) -----
+function ztPlanungOpenForm(courseId) {
+    ztPlanungInit();
+    if (courseId) {
+        const c = ZtPlanungState.courses.find(x => x.id === courseId);
+        if (!c) return;
+        ZtPlanungState.formCourseId = courseId;
+        ZtPlanungState.formDraft = {
+            name: c.name || '',
+            halbjahr: c.halbjahr || 'ersten',
+            typ: c.typ || 'nebenfach',
+            fach: c.fach || '',
+            themen: c.themen || '',
+            students: (c.students || []).map(s => ({ id: s.id, name: s.name, done: !!s.done }))
+        };
+    } else {
+        ZtPlanungState.formCourseId = null;
+        ZtPlanungState.formDraft = { name: '', halbjahr: 'ersten', typ: 'nebenfach', fach: '', themen: '', students: [] };
+    }
+    ztPlanungRenderForm();
+    showModal('zt-planung-form-modal');
+}
+
+function ztPlanungFormStudentsHtml() {
+    const students = (ZtPlanungState.formDraft && ZtPlanungState.formDraft.students) || [];
+    if (!students.length) return '<li class="zt-plan-empty-students">Noch keine Schüler hinzugefügt</li>';
+    return students.map(s => `
+        <li class="zt-plan-form-student">
+            <span class="zt-plan-student-name">${ztEsc(s.name)}</span>
+            <button class="zt-plan-del" onclick="ztPlanungFormRemoveStudent('${s.id}')" title="Entfernen"><i class="fas fa-times"></i></button>
+        </li>`).join('');
+}
+
+function ztPlanungRenderForm() {
+    const modal = document.getElementById('zt-planung-form-modal');
+    if (!modal) return;
+    const d = ZtPlanungState.formDraft || { halbjahr: 'ersten', typ: 'nebenfach', fach: '', themen: '', students: [] };
+    const isEdit = !!ZtPlanungState.formCourseId;
+    const isSozial = d.typ === 'sozialverhalten';
+
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            <span style="font-size:1.25rem;font-weight:700;">${isEdit ? 'Kurs bearbeiten' : 'Kurs anlegen'}</span>
+            <button class="zt-modal-close" onclick="ztPlanungCancelForm()" title="Zurück"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="zt-plan-form">
+            <div class="form-group">
+                <label for="zt-plan-form-name">Kursname <span style="font-size:0.8rem;color:var(--grey-color);font-weight:400;">(nur intern, für die Kachel)</span></label>
+                <input type="text" id="zt-plan-form-name" class="form-control" placeholder="z. B. 5a Mathe, Fördergruppe 2 ..." value="${ztEsc(d.name || '')}">
+            </div>
+            <div class="zt-plan-form-grid">
+                <div class="form-group">
+                    <label for="zt-plan-form-halbjahr">Halbjahr</label>
+                    <select id="zt-plan-form-halbjahr" class="form-control">
+                        <option value="ersten" ${d.halbjahr === 'ersten' ? 'selected' : ''}>1. Halbjahr</option>
+                        <option value="zweiten" ${d.halbjahr === 'zweiten' ? 'selected' : ''}>2. Halbjahr</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="zt-plan-form-typ">Art</label>
+                    <select id="zt-plan-form-typ" class="form-control" onchange="ztPlanungFormToggleTyp(this.value)">
+                        <option value="nebenfach" ${d.typ === 'nebenfach' ? 'selected' : ''}>Nebenfach</option>
+                        <option value="hauptfach" ${d.typ === 'hauptfach' ? 'selected' : ''}>Hauptfach</option>
+                        <option value="sozialverhalten" ${d.typ === 'sozialverhalten' ? 'selected' : ''}>Arbeits- / Sozialverhalten</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group zt-plan-form-fach" style="${isSozial ? 'display:none;' : ''}">
+                <label for="zt-plan-form-fach">Fach</label>
+                <input type="text" id="zt-plan-form-fach" class="form-control" value="${ztEsc(d.fach)}">
+            </div>
+            <div class="form-group zt-plan-form-themen" style="${isSozial ? 'display:none;' : ''}">
+                <label for="zt-plan-form-themen">Behandelte Themen</label>
+                <textarea id="zt-plan-form-themen" class="form-control" rows="3">${ztEsc(d.themen)}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Schüler im Kurs</label>
+                <div class="notes-input-group" style="margin-bottom:12px;">
+                    <input type="text" id="zt-plan-form-student-input" class="form-control" placeholder="Name eingeben..." onkeydown="if(event.key==='Enter'){event.preventDefault();ztPlanungFormAddStudent();}">
+                    <button class="btn btn-primary btn-icon-only" onclick="ztPlanungFormAddStudent()" title="Hinzufügen" style="margin:0;flex-shrink:0;"><i class="fas fa-plus"></i></button>
+                </div>
+                <ul id="zt-plan-form-students" class="zt-plan-form-students-list">${ztPlanungFormStudentsHtml()}</ul>
+            </div>
+
+            <div class="zt-plan-form-actions">
+                <button class="btn btn-success btn-icon" onclick="ztPlanungSaveCourse()"><i class="fas fa-check"></i> <span class="btn-text">${isEdit ? 'Speichern' : 'Anlegen'}</span></button>
+            </div>
+        </div>`;
+}
+
+// Liest die Info-Felder aus dem DOM in den Entwurf (damit sie beim Neu-Rendern der Schülerliste nicht verloren gehen)
+function ztPlanungFormSyncInfo() {
+    const d = ZtPlanungState.formDraft;
+    if (!d) return;
+    const nameEl = document.getElementById('zt-plan-form-name');
+    const hj = document.getElementById('zt-plan-form-halbjahr');
+    const typ = document.getElementById('zt-plan-form-typ');
+    const fach = document.getElementById('zt-plan-form-fach');
+    const themen = document.getElementById('zt-plan-form-themen');
+    if (nameEl) d.name = nameEl.value;
+    if (hj) d.halbjahr = hj.value;
+    if (typ) d.typ = typ.value;
+    if (fach) d.fach = fach.value;
+    if (themen) d.themen = themen.value;
+}
+
+function ztPlanungFormToggleTyp(typ) {
+    if (ZtPlanungState.formDraft) ZtPlanungState.formDraft.typ = typ;
+    const isSozial = typ === 'sozialverhalten';
+    document.querySelectorAll('#zt-planung-form-modal .zt-plan-form-fach, #zt-planung-form-modal .zt-plan-form-themen').forEach(el => {
+        el.style.display = isSozial ? 'none' : '';
+    });
+}
+
+function ztPlanungFormAddStudent() {
+    const input = document.getElementById('zt-plan-form-student-input');
+    if (!input) return;
+    const name = input.value.trim();
+    if (!name) return;
+    ztPlanungFormSyncInfo();
+    if (!ZtPlanungState.formDraft) ZtPlanungState.formDraft = { halbjahr: 'ersten', typ: 'nebenfach', fach: '', themen: '', students: [] };
+    ZtPlanungState.formDraft.students.push({
+        id: 'stud_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        name: name,
+        done: false
+    });
+    input.value = '';
+    const ul = document.getElementById('zt-plan-form-students');
+    if (ul) ul.innerHTML = ztPlanungFormStudentsHtml();
+    input.focus();
+}
+
+function ztPlanungFormRemoveStudent(studentId) {
+    if (!ZtPlanungState.formDraft) return;
+    ZtPlanungState.formDraft.students = ZtPlanungState.formDraft.students.filter(s => s.id !== studentId);
+    const ul = document.getElementById('zt-plan-form-students');
+    if (ul) ul.innerHTML = ztPlanungFormStudentsHtml();
+}
+
+function ztPlanungSaveCourse() {
+    ztPlanungFormSyncInfo();
+    const d = ZtPlanungState.formDraft;
+    if (!d) return;
+    const isSozial = d.typ === 'sozialverhalten';
+
+    if (!isSozial && !(d.fach || '').trim()) {
+        swal('Hinweis', 'Bitte ein Fach angeben.', 'info');
+        return;
+    }
+    if (!d.students.length) {
+        swal('Hinweis', 'Bitte mindestens einen Schüler hinzufügen.', 'info');
+        return;
+    }
+
+    if (ZtPlanungState.formCourseId) {
+        const c = ZtPlanungState.courses.find(x => x.id === ZtPlanungState.formCourseId);
+        if (c) {
+            c.name = (d.name || '').trim();
+            c.halbjahr = d.halbjahr;
+            c.typ = d.typ;
+            c.fach = isSozial ? '' : (d.fach || '').trim();
+            c.themen = isSozial ? '' : (d.themen || '').trim();
+            c.students = d.students.map(s => ({ id: s.id, name: (s.name || '').trim(), done: !!s.done }));
+        }
+    } else {
+        ZtPlanungState.courses.push({
+            id: 'course_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+            name: (d.name || '').trim(),
+            halbjahr: d.halbjahr,
+            typ: d.typ,
+            fach: isSozial ? '' : (d.fach || '').trim(),
+            themen: isSozial ? '' : (d.themen || '').trim(),
+            students: d.students.map(s => ({ id: s.id, name: (s.name || '').trim(), done: false }))
+        });
+    }
+
+    ZtPlanungState.formCourseId = null;
+    ZtPlanungState.formDraft = null;
+    ztPlanungPersist();
+    ztPlanungOpen(); // zurück zur Liste
+}
+
+function ztPlanungCancelForm() {
+    ZtPlanungState.formCourseId = null;
+    ZtPlanungState.formDraft = null;
+    ztPlanungOpen();
+}
+
+// ----- Sprung in die Texterstellung -----
+function ztPlanungWriteText(courseId, studentId) {
+    const c = ZtPlanungState.courses.find(x => x.id === courseId);
+    if (!c) return;
+    const s = (c.students || []).find(x => x.id === studentId);
+    if (!s) return;
+
+    hideModal();
+    if (typeof ztCloseResult === 'function') ztCloseResult();
+
+    const isSozial = c.typ === 'sozialverhalten';
+    setZtTyp(c.typ || 'nebenfach');
+
+    const hj = document.getElementById('zt-halbjahr');
+    const fach = document.getElementById('zt-fach');
+    const themen = document.getElementById('zt-themen');
+    const name = document.getElementById('zt-name');
+    const beob = document.getElementById('zt-beobachtungen');
+    if (hj) hj.value = c.halbjahr || 'ersten';
+    if (fach) fach.value = isSozial ? '' : (c.fach || '');
+    if (themen) themen.value = isSozial ? '' : (c.themen || '');
+    if (name) name.value = s.name || '';
+    if (beob) { beob.value = ''; beob.focus(); }
+
+    // Für Auto-Erledigt nach erfolgreicher Generierung merken
+    ZtState.planungRef = { courseId: courseId, studentId: studentId };
+}
+
+function ztPlanungMarkRefDone() {
+    const ref = ZtState.planungRef;
+    if (!ref) return;
+    const c = ZtPlanungState.courses.find(x => x.id === ref.courseId);
+    if (c) {
+        const s = (c.students || []).find(x => x.id === ref.studentId);
+        if (s && !s.done) {
+            s.done = true;
+            ztPlanungPersist();
+        }
+    }
+    ZtState.planungRef = null;
+}
+
+window.ztPlanungOpen = ztPlanungOpen;
+window.ztPlanungOpenForm = ztPlanungOpenForm;
+window.ztPlanungCancelForm = ztPlanungCancelForm;
+window.ztPlanungSaveCourse = ztPlanungSaveCourse;
+window.ztPlanungFormAddStudent = ztPlanungFormAddStudent;
+window.ztPlanungFormRemoveStudent = ztPlanungFormRemoveStudent;
+window.ztPlanungFormToggleTyp = ztPlanungFormToggleTyp;
+window.ztPlanungToggleStudent = ztPlanungToggleStudent;
+window.ztPlanungDeleteStudent = ztPlanungDeleteStudent;
+window.ztPlanungDeleteCourse = ztPlanungDeleteCourse;
+window.ztPlanungClearAll = ztPlanungClearAll;
+window.ztPlanungWriteText = ztPlanungWriteText;
 
 // ===== DASHBOARD NOTES & CHECKLIST LOGIC =====
 function renderDashboardNotes() {

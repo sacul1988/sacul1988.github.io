@@ -381,6 +381,10 @@
                             <div class="card-header">
                                 <h2>Zeugnistextgenerator (Inklusion)</h2>
                                 <div class="card-header-actions">
+                                    <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpen()">
+                                        <i class="fas fa-list-check"></i> <span class="btn-text">Planung</span>
+                                        <span class="zt-archive-badge" id="zt-planung-badge" style="display:none;"></span>
+                                    </button>
                                     <button class="btn btn-primary btn-icon" onclick="ztOpenArchiveModal()">
                                         <i class="fas fa-box-archive"></i> <span class="btn-text">Archiv</span>
                                         <span class="zt-archive-badge" id="zt-archive-badge" style="display:none;"></span>
@@ -532,6 +536,12 @@
 
             <!-- Zeugnistext Archiv Modal (dynamisch befüllt) -->
             <div id="zt-archive-modal" class="modal zt-modal" style="display: none;"></div>
+
+            <!-- Zeugnistext Planung: Listenansicht (dynamisch befüllt) -->
+            <div id="zt-planung-modal" class="modal zt-modal" style="display: none;"></div>
+
+            <!-- Zeugnistext Planung: Formular zum Anlegen/Bearbeiten (dynamisch befüllt) -->
+            <div id="zt-planung-form-modal" class="modal zt-modal" style="display: none;"></div>
 
             <!-- Zeugnistext Rückfragen Modal -->
             <div id="zt-questions-modal" class="modal" style="display: none; max-width: 600px;">
@@ -1422,6 +1432,14 @@
                 }
             }
 
+            // Zeugnistext-Planung synchronisieren
+            if (shouldApplyExtra && cloudData.ztPlanung && typeof cloudData.ztPlanung === 'object') {
+                localStorage.setItem('ztPlanung', JSON.stringify(cloudData.ztPlanung));
+                if (typeof window.setZtPlanung === 'function') {
+                    window.setZtPlanung(cloudData.ztPlanung);
+                }
+            }
+
             // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
             // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
             if (Array.isArray(cloudData.termine)) {
@@ -1492,6 +1510,7 @@
                     planung: planungObj,
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
                     zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
+                    ztPlanung: JSON.parse(localStorage.getItem('ztPlanung') || '{"courses":[]}'),
                     contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
                     dashboardNotes: JSON.parse(localStorage.getItem('dashboardNotes') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
