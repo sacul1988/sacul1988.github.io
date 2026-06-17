@@ -4640,6 +4640,13 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     }
 }
 
+/* ===== Zeugnistextgenerator Desktop doc-scroll: Card bis Bildschirmrand dehnen ===== */
+@media (min-width: 992px) {
+    .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) #zeugnis-texte-module .card {
+        min-height: calc(100dvh - 60px);
+    }
+}
+
 /* ===== Zeugnis-Modul Desktop-Optimierung: Schülerkarten zweispaltig ===== */
 @media (min-width: 992px) {
     #zeugnis-container {
