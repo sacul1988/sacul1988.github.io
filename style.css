@@ -5455,6 +5455,16 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .sp-cell-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .sp-cell-klasse { font-size: 0.82rem; color: #1e293b; font-weight: 700; }
 .sp-cell-art-badge { font-size: 0.7rem; font-weight: 600; color: #334155; margin-top: 2px; }
+.sp-cell-kinder-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 5px;
+    color: #64748b;
+    font-weight: 600;
+    opacity: 0.85;
+}
+.sp-cell-kinder-badge i { font-size: 0.62rem; }
 .sp-cell-art {
     font-size: 0.62rem;
     font-weight: 700;

@@ -10587,11 +10587,14 @@ function stundenplanGridHtml() {
             if (resolved) {
                 const bg = (k && k.farbe) ? k.farbe : '#eef2ff';
                 const displayName = resolved.name || resolved.fach || '';
-                const artBadge = resolved.art === 'haupt' ? 'Hauptfach' : 'Nebenfach';
+                const kinderKey = resolved.klasse || resolved.name;
+                const kinderCount = (kinderKey && StundenplanState.inklusionProKlasse[kinderKey]) ? StundenplanState.inklusionProKlasse[kinderKey].length : 0;
+                const artLabel = resolved.art === 'haupt' ? 'Hauptfach' : 'Nebenfach';
+                const kinderBadge = kinderCount ? `<span class="sp-cell-kinder-badge"><i class="fas fa-child"></i>${kinderCount}</span>` : '';
                 html += `
                     <div class="sp-cell filled" style="background:${bg};" onclick="stundenplanOpenCell('${d.key}','${z.id}')">
                         <span class="sp-cell-klasse">${ztEsc(displayName)}</span>
-                        <span class="sp-cell-art-badge">${artBadge}</span>
+                        <span class="sp-cell-art-badge">${artLabel}${kinderBadge}</span>
                     </div>`;
             } else {
                 html += `<div class="sp-cell empty" onclick="stundenplanOpenCell('${d.key}','${z.id}')"><i class="fas fa-plus"></i></div>`;
