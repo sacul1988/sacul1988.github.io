@@ -1037,7 +1037,7 @@
     <script type="module">
         import { initializeApp } from "firebase/app";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-        import { initializeFirestore, doc, setDoc, getDoc, updateDoc, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+        import { initializeFirestore, doc, setDoc, getDoc, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
         // ===== DEINE FIREBASE KONFIGURATION =====
         const firebaseConfig = {
@@ -1454,6 +1454,29 @@
 
 
 
+        // stundenplan/ztPlanung kommen als JSON-String (neues Format) oder als Objekt
+        // (älterer Cloud-Stand) -> beides zu einem Objekt normalisieren.
+        function parseCloudBlob(v) {
+            if (v == null) return null;
+            if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } }
+            if (typeof v === 'object') return v;
+            return null;
+        }
+
+        // Cloud-Blob (stundenplan/ztPlanung) anwenden, sobald er sich inhaltlich vom
+        // lokalen Stand unterscheidet. Zuverlässig & unabhängig von Geräte-Uhren –
+        // greift immer dann, wenn applyCloudTermineAndPlanung läuft (Realtime nur bei
+        // neuerem lastUpdate, sowie beim Laden/Refresh).
+        function applyCloudBlob(cloudVal, storageKey, setter) {
+            const obj = parseCloudBlob(cloudVal);
+            if (!obj) return;
+            const str = JSON.stringify(obj);
+            if (str !== (localStorage.getItem(storageKey) || '')) {
+                localStorage.setItem(storageKey, str);
+                if (typeof setter === 'function') setter(obj);
+            }
+        }
+
         function applyCloudTermineAndPlanung(cloudData) {
             const localExtra = localStorage.getItem('extraDataLastUpdate') || '0';
             const cloudExtra = cloudData.extraDataLastUpdate || '0';
@@ -1469,42 +1492,10 @@
                 }
             }
 
-            // Zeugnistext-Planung synchronisieren – auch wenn lokal NOCH LEER ist
-            // (erstes Erscheinen auf einem anderen Gerät, unabhängig von evtl.
-            // abweichenden Geräte-Uhren/Zeitstempeln).
-            if (cloudData.ztPlanung && typeof cloudData.ztPlanung === 'object') {
-                let localZtEmpty = true;
-                try {
-                    const lz = JSON.parse(localStorage.getItem('ztPlanung') || '{}');
-                    localZtEmpty = !(Array.isArray(lz.courses) && lz.courses.length > 0);
-                } catch (e) {}
-                const cloudZtHas = Array.isArray(cloudData.ztPlanung.courses) && cloudData.ztPlanung.courses.length > 0;
-                if (shouldApplyExtra || (localZtEmpty && cloudZtHas)) {
-                    localStorage.setItem('ztPlanung', JSON.stringify(cloudData.ztPlanung));
-                    if (typeof window.setZtPlanung === 'function') {
-                        window.setZtPlanung(cloudData.ztPlanung);
-                    }
-                }
-            }
-
-            // Stundenplan synchronisieren – auch wenn lokal NOCH LEER ist
-            if (cloudData.stundenplan && typeof cloudData.stundenplan === 'object') {
-                let localSpEmpty = true;
-                try {
-                    const ls = JSON.parse(localStorage.getItem('stundenplan') || '{}');
-                    localSpEmpty = !((Array.isArray(ls.zeiten) && ls.zeiten.length > 0) ||
-                                     (ls.kacheln && Object.keys(ls.kacheln).length > 0));
-                } catch (e) {}
-                const sp = cloudData.stundenplan;
-                const cloudSpHas = (Array.isArray(sp.zeiten) && sp.zeiten.length > 0) ||
-                                   (sp.kacheln && Object.keys(sp.kacheln).length > 0);
-                if (shouldApplyExtra || (localSpEmpty && cloudSpHas)) {
-                    localStorage.setItem('stundenplan', JSON.stringify(cloudData.stundenplan));
-                    if (typeof window.setStundenplan === 'function') {
-                        window.setStundenplan(cloudData.stundenplan);
-                    }
-                }
-            }
+            // Zeugnistext-Planung & Stundenplan: inhaltsbasiert übernehmen (zuverlässig,
+            // unabhängig von Geräte-Uhren). NICHT mehr an extraDataLastUpdate gekoppelt.
+            applyCloudBlob(cloudData.ztPlanung, 'ztPlanung', window.setZtPlanung);
+            applyCloudBlob(cloudData.stundenplan, 'stundenplan', window.setStundenplan);
 
             // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
             // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
@@ -1576,8 +1567,12 @@
                     planung: planungObj,
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
                     zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
-                    ztPlanung: JSON.parse(localStorage.getItem('ztPlanung') || '{"courses":[]}'),
-                    stundenplan: JSON.parse(localStorage.getItem('stundenplan') || '{"zeiten":[],"kacheln":{},"inklusionProKlasse":{}}'),
+                    // Als JSON-STRING speichern: so ersetzt Firestores merge:true das Feld
+                    // atomar in EINEM Write (der auch lastUpdate erhöht). Als Objekt würde
+                    // merge verschachtelte Maps nur tief zusammenführen -> gelöschte
+                    // Stunden/Kacheln/Kurse kämen nie auf anderen Geräten an.
+                    ztPlanung: localStorage.getItem('ztPlanung') || '{"courses":[]}',
+                    stundenplan: localStorage.getItem('stundenplan') || '{"zeiten":[],"kacheln":{},"inklusionProKlasse":{}}',
                     contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
                     dashboardNotes: JSON.parse(localStorage.getItem('dashboardNotes') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp
@@ -1614,20 +1609,6 @@
                 }
 
                 await setDoc(userDocRef, data, { merge: true });
-
-                // stundenplan & ztPlanung als GANZES ersetzen: merge:true führt
-                // verschachtelte Maps (z. B. stundenplan.kacheln) nur tief zusammen,
-                // sodass GELÖSCHTE Stunden/Kacheln/Kurse NICHT auf andere Geräte
-                // übertragen würden. updateDoc ersetzt diese Felder komplett.
-                try {
-                    await updateDoc(userDocRef, {
-                        stundenplan: data.stundenplan,
-                        ztPlanung: data.ztPlanung
-                    });
-                } catch (replaceErr) {
-                    console.warn('Replace-Write für stundenplan/ztPlanung fehlgeschlagen:', replaceErr);
-                }
-
                 localStorage.setItem('lastUpdate', timestamp);
 
                 // ===== SYNC-ZÄHLER =====
