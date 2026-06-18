@@ -3724,6 +3724,9 @@ html.modal-open, body.modal-open {
 .zt-archive-empty p:first-of-type,
 .zt-plan-empty p:first-of-type { font-weight: 600; font-size: 1rem; color: var(--dark-color); opacity: 0.6; }
 
+.zt-plan-add-row { margin: 2px 0 16px; }
+.zt-plan-add-row .btn { width: 100%; justify-content: center; }
+
 .zt-plan-list { display: flex; flex-direction: column; gap: 14px; }
 
 .zt-plan-course {

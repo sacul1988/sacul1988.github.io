@@ -9761,6 +9761,9 @@ function ztPlanungRenderList() {
             </span>
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
         </div>
+        <div class="zt-plan-add-row">
+            <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpenForm()"><i class="fas fa-plus"></i> Klasse manuell anlegen</button>
+        </div>
         ${body}`;
     modal.scrollTop = prevScroll;
 }
