@@ -9728,6 +9728,11 @@ function ztPlanungSortKey(course) {
 function ztPlanungRenderList() {
     const modal = document.getElementById('zt-planung-modal');
     if (!modal) return;
+    // Scroll-Position der Liste über das Neuzeichnen (innerHTML) hinweg erhalten,
+    // z. B. beim Abhaken eines Schülers. Beim Zurückkehren aus dem Kurs-Formular
+    // ist das Modal kurz display:none (scrollTop = 0) -> dort übernimmt
+    // ztPlanungCancelForm die Wiederherstellung aus ZtPlanungState.listScrollTop.
+    const prevScroll = modal.scrollTop;
     const courses = [...ZtPlanungState.courses].sort((a, b) => {
         const ka = ztPlanungSortKey(a), kb = ztPlanungSortKey(b);
         if (ka.num !== kb.num) return ka.num - kb.num;
@@ -9757,6 +9762,7 @@ function ztPlanungRenderList() {
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
         </div>
         ${body}`;
+    modal.scrollTop = prevScroll;
 }
 
 function ztPlanungCourseCardHtml(course) {
@@ -9880,6 +9886,9 @@ function ztPlanungClearAll() {
 // ----- Formular (Anlegen / Bearbeiten) -----
 function ztPlanungOpenForm(courseId) {
     ztPlanungInit();
+    // Scroll-Position der Liste merken, bevor showModal sie auf display:none setzt
+    const listModal = document.getElementById('zt-planung-modal');
+    ZtPlanungState.listScrollTop = listModal ? listModal.scrollTop : 0;
     if (courseId) {
         const c = ZtPlanungState.courses.find(x => x.id === courseId);
         if (!c) return;
@@ -9925,7 +9934,7 @@ function ztPlanungRenderForm() {
 
     modal.innerHTML = `
         <div class="zt-modal-head">
-            <span style="font-size:1.25rem;font-weight:700;">${isEdit ? 'Kurs: ' + ztEsc((d.name || '').replace(' · ', ' ')) : 'Kurs anlegen'}</span>
+            <span style="font-size:1.25rem;font-weight:700;">${isEdit ? 'Klasse: ' + ztEsc((d.name || '').replace(' · ', ' ')) : 'Klasse anlegen'}</span>
             <button class="zt-modal-close" onclick="ztPlanungCancelForm()" title="Zurück"><i class="fas fa-times"></i></button>
         </div>
         <div class="zt-plan-form">
@@ -10075,6 +10084,10 @@ function ztPlanungCancelForm() {
     ZtPlanungState.formCourseId = null;
     ZtPlanungState.formDraft = null;
     ztPlanungOpen();
+    // Liste wieder an die gemerkte Stelle scrollen (showModal hat sie zuvor
+    // ausgeblendet und ztPlanungRenderList neu aufgebaut -> Scroll war 0).
+    const modal = document.getElementById('zt-planung-modal');
+    if (modal) modal.scrollTop = ZtPlanungState.listScrollTop || 0;
 }
 
 // ----- Sprung in die Texterstellung -----
