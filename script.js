@@ -10739,28 +10739,33 @@ function stundenplanRenderCellModal() {
         `<button type="button" class="sp-swatch ${d.farbe === c ? 'active' : ''}" style="background:${c};" onclick="stundenplanCellSetColor('${c}')"></button>`
     ).join('');
 
-    // Bereits verwendete Klassen aus anderen Kacheln (ohne aktuelle)
+    // Bereits eingerichtete Kurse aus anderen Kacheln als Schnellauswahl anbieten –
+    // eindeutig je Kurs (Name|Klasse|Fach), damit auch mehrere Kurse derselben Klasse
+    // (z. B. "Mathe 5c" und "Sport 5c") und Kacheln OHNE separates Klasse-Feld erscheinen.
     const usedClasses = [];
     const seen = new Set();
     Object.entries(StundenplanState.kacheln).forEach(([key, k]) => {
         if (key === d.key) return;
-        const klasse = k.klasse || '';
-        if (klasse && !seen.has(klasse)) {
-            seen.add(klasse);
-            usedClasses.push({ name: k.name || '', klasse, fach: k.fach || '', art: k.art || 'neben', farbe: k.farbe || '' });
-        }
+        const name = (k.name || '').trim();
+        const klasse = (k.klasse || '').trim();
+        const fach = (k.fach || '').trim();
+        if (!name && !klasse && !fach) return; // leere Kachel überspringen
+        const identity = `${name}|${klasse}|${fach}`.toLowerCase();
+        if (seen.has(identity)) return;
+        seen.add(identity);
+        usedClasses.push({ key, name, klasse, fach, label: name || klasse || fach });
     });
     usedClasses.sort((a, b) => {
-        const parse = s => { const m = s.match(/^(\d+)(.*)$/); return m ? [parseInt(m[1]), m[2]] : [9999, s]; };
-        const [an, al] = parse(a.klasse);
-        const [bn, bl] = parse(b.klasse);
-        return an !== bn ? an - bn : al.localeCompare(bl);
+        const parse = s => { const m = (s || '').match(/^(\d+)(.*)$/); return m ? [parseInt(m[1]), m[2]] : [9999, s || '']; };
+        const [an, al] = parse(a.klasse || a.label);
+        const [bn, bl] = parse(b.klasse || b.label);
+        return an !== bn ? an - bn : (al || '').localeCompare(bl || '');
     });
     const quickSelect = usedClasses.length ? `
         <div class="sp-field">
             <span>Klasse übernehmen</span>
             <div class="sp-quickselect">
-                ${usedClasses.map(c => `<button type="button" class="sp-quickselect-chip" onclick="stundenplanCellQuickSelect('${spJsAttr(c.klasse)}')">${ztEsc(c.name || c.klasse)}</button>`).join('')}
+                ${usedClasses.map(c => `<button type="button" class="sp-quickselect-chip" onclick="stundenplanCellQuickSelect('${spJsAttr(c.key)}')">${ztEsc(c.label)}</button>`).join('')}
             </div>
         </div>` : '';
 
@@ -10864,14 +10869,11 @@ function stundenplanCellAppClassSelected(idxStr) {
     stundenplanRenderCellModal();
 }
 
-function stundenplanCellQuickSelect(klasse) {
+function stundenplanCellQuickSelect(key) {
     const d = StundenplanState.cellDraft;
     if (!d) return;
-    // Suche das erste Kachel mit dieser Klasse
-    const src = Object.entries(StundenplanState.kacheln)
-        .filter(([key]) => key !== d.key)
-        .map(([, k]) => k)
-        .find(k => k.klasse === klasse);
+    // Quell-Kachel direkt per Key (eindeutig je Kurs)
+    const src = StundenplanState.kacheln[key];
     if (!src) return;
     d.name = src.name || '';
     d.klasse = src.klasse || '';
