@@ -11126,18 +11126,18 @@ function stundenplanRenderHomeTile() {
         stundeNr++;
         const k = StundenplanState.kacheln[todayKey + '|' + z.id];
         const resolved = stundenplanResolveKachel(k);
-        const time = z.von && z.bis ? `${z.von} – ${z.bis}` : z.von ? z.von : `${stundeNr}. Stunde`;
+        const label = `${stundeNr}. Stunde`;
         if (resolved) {
             const bg = (k && k.farbe) ? k.farbe : '#e0e7ff';
             items.push(`
                 <div class="sp-home-stunde" style="background:${bg};">
-                    <span class="sp-home-stunde-time">${ztEsc(time)}</span>
+                    <span class="sp-home-stunde-time">${ztEsc(label)}</span>
                     <span class="sp-home-stunde-name">${ztEsc(resolved.name || resolved.fach || '')}</span>
                 </div>`);
         } else {
             items.push(`
                 <div class="sp-home-stunde sp-home-stunde-empty">
-                    <span class="sp-home-stunde-time">${ztEsc(time)}</span>
+                    <span class="sp-home-stunde-time">${ztEsc(label)}</span>
                 </div>`);
         }
     });
