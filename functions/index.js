@@ -1,7 +1,57 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
+const admin = require("firebase-admin");
+
+admin.initializeApp();
+const db = admin.firestore();
 
 const anthropicApiKey = defineSecret("ANTHROPIC_API_KEY");
+
+// ===== Rate-Limit pro Nutzer (Kostenschutz für die KI-Aufrufe) =====
+// Gemeinsames Limit über beide KI-Funktionen. Gleitende Fenster (Minute + Tag).
+const RATE_LIMIT_PER_MINUTE = 30;
+const RATE_LIMIT_PER_DAY = 600;
+
+async function enforceRateLimit(uid) {
+  const ref = db.collection("rateLimits").doc(uid);
+  const now = Date.now();
+  const result = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const d = snap.exists ? snap.data() : {};
+    let minStart = d.minStart || 0;
+    let minCount = d.minCount || 0;
+    let dayStart = d.dayStart || 0;
+    let dayCount = d.dayCount || 0;
+    if (now - minStart >= 60 * 1000) { minStart = now; minCount = 0; }
+    if (now - dayStart >= 24 * 60 * 60 * 1000) { dayStart = now; dayCount = 0; }
+    if (minCount >= RATE_LIMIT_PER_MINUTE || dayCount >= RATE_LIMIT_PER_DAY) {
+      return { ok: false, perDay: dayCount >= RATE_LIMIT_PER_DAY };
+    }
+    tx.set(ref, {
+      minStart, minCount: minCount + 1,
+      dayStart, dayCount: dayCount + 1,
+      updatedAt: now
+    }, { merge: true });
+    return { ok: true };
+  });
+  if (!result.ok) {
+    throw new HttpsError("resource-exhausted", result.perDay
+      ? "Tageslimit für KI-Anfragen erreicht. Bitte morgen erneut versuchen."
+      : "Zu viele KI-Anfragen in kurzer Zeit. Bitte einen Moment warten.");
+  }
+}
+
+// Wirft nur bei echtem Limit (resource-exhausted); Infrastruktur-Fehler werden
+// geloggt, aber durchgelassen (fail-open), damit ein Firestore-Schluckauf die
+// legitime Nutzung nicht blockiert.
+async function checkRateLimit(uid) {
+  try {
+    await enforceRateLimit(uid);
+  } catch (e) {
+    if (e instanceof HttpsError) throw e;
+    console.error("Rate-Limit-Prüfung fehlgeschlagen (fail-open):", e);
+  }
+}
 
 const PROMPTS = {
   nebenfach: `Du bist ein erfahrener Lehrer an einer Förderschule und schreibst Zeugnistexte für Schülerinnen und Schüler.
@@ -62,6 +112,7 @@ exports.generateZeugnistext = onCall(
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
     }
+    await checkRateLimit(request.auth.uid);
 
     const { typ, messages } = request.data;
     if (!typ || !Array.isArray(messages)) {
@@ -233,6 +284,7 @@ exports.generateZeugnisnote = onCall(
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
     }
+    await checkRateLimit(request.auth.uid);
 
     const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, messages } = request.data || {};
     const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
