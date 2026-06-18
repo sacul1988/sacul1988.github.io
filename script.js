@@ -8523,6 +8523,19 @@ function deleteCalendarDayTermin(id) {
 window.setPlanungViewMode = setPlanungViewMode;
 window.renderPlanung = renderPlanung;
 window.renderPlanungCalendar = renderPlanungCalendar;
+
+// Nach einem Cloud-Sync die offene Planungs-Liste (Klassen-Modul) neu rendern.
+// Bewusst nur den Listen-Modus, um den Kalender-Ansichtsmodus nicht umzuschalten.
+window.reloadPlanungIfActive = function() {
+    try {
+        if (typeof activeModule !== 'undefined' && activeModule === 'planung'
+            && window._activeToolWindow !== 'kalender') {
+            loadPlanung();
+        }
+    } catch (e) {
+        console.warn('reloadPlanungIfActive Fehler:', e);
+    }
+};
 window.openCalendarDayDetails = openCalendarDayDetails;
 window.addCalendarDayTermin = addCalendarDayTermin;
 window.deleteCalendarDayTermin = deleteCalendarDayTermin;

@@ -24,6 +24,66 @@
             document.documentElement.classList.remove('login-active');
         }
     </script>
+    <script>
+        // Globaler Error-Handler: fängt unbehandelte Fehler & Promise-Rejections zentral
+        // ab, protokolliert sie konsistent und zeigt eine dezente, gedrosselte Meldung.
+        // Bewusst früh installiert (vor allen anderen Skripten), damit auch Fehler aus
+        // script.js erfasst werden.
+        (function () {
+            var lastShown = 0;
+            var THROTTLE_MS = 8000;
+
+            function ignorable(msg) {
+                if (!msg) return true; // leere/cross-origin "Script error." ohne Infos
+                msg = String(msg);
+                if (msg.indexOf('ResizeObserver loop') !== -1) return true; // harmlose Browser-Warnung
+                if (msg === 'Script error.') return true;                   // Cross-Origin ohne Details
+                return false;
+            }
+
+            function showErrorToast() {
+                var now = Date.now();
+                if (now - lastShown < THROTTLE_MS) return; // nicht spammen
+                lastShown = now;
+                try {
+                    if (!document.body) return;
+                    var t = document.getElementById('global-error-toast');
+                    if (!t) {
+                        t = document.createElement('div');
+                        t.id = 'global-error-toast';
+                        t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);' +
+                            'z-index:99999;background:#1e293b;color:#fff;padding:11px 16px;border-radius:10px;' +
+                            'box-shadow:0 6px 24px rgba(0,0,0,0.25);font-size:0.85rem;font-family:Inter,sans-serif;' +
+                            'max-width:90vw;display:flex;align-items:center;gap:9px;opacity:0;transition:opacity .25s ease;' +
+                            'pointer-events:none;';
+                        t.innerHTML = '<i class="fas fa-triangle-exclamation" style="color:#fbbf24;"></i>' +
+                            '<span>Ein unerwarteter Fehler ist aufgetreten. Die Aktion wurde evtl. nicht abgeschlossen.</span>';
+                        document.body.appendChild(t);
+                    }
+                    requestAnimationFrame(function () { t.style.opacity = '1'; });
+                    clearTimeout(t._hideTimer);
+                    t._hideTimer = setTimeout(function () { t.style.opacity = '0'; }, 5000);
+                } catch (e) { /* Der Handler darf selbst niemals etwas auslösen */ }
+            }
+
+            window.addEventListener('error', function (e) {
+                // Ressourcen-Ladefehler (img/script/link) ignorieren – kein JS-Laufzeitfehler
+                if (e && e.target && e.target !== window && e.target.tagName) return;
+                var msg = e && (e.message || (e.error && e.error.message));
+                if (ignorable(msg)) return;
+                console.error('[GlobalError]', msg, (e && e.error) ? e.error : e);
+                showErrorToast();
+            });
+
+            window.addEventListener('unhandledrejection', function (e) {
+                var reason = e && e.reason;
+                var msg = reason && (reason.message || reason);
+                if (ignorable(msg)) return;
+                console.error('[UnhandledRejection]', reason);
+                showErrorToast();
+            });
+        })();
+    </script>
 </head>
 <body class="login-active">
     <script>
@@ -1477,6 +1537,43 @@
             }
         }
 
+        // Deterministischer JSON-String (Schlüssel rekursiv sortiert) – damit der
+        // inhaltliche Vergleich nicht an unterschiedlicher Map-Reihenfolge scheitert,
+        // die Firestore beim Round-Trip verändern kann.
+        function stableStringify(v) {
+            if (v === null || typeof v !== 'object') return JSON.stringify(v);
+            if (Array.isArray(v)) return '[' + v.map(stableStringify).join(',') + ']';
+            return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + stableStringify(v[k])).join(',') + '}';
+        }
+
+        // Planung (pro-Klasse, Keys = Klassen-Index) inhaltsbasiert anwenden – wie
+        // stundenplan/ztPlanung. Die Planung liegt lokal in einzelnen planung_<id>-Keys,
+        // daher wird das Gesamtobjekt rekonstruiert und mit dem Cloud-Stand verglichen.
+        function applyCloudPlanung(cloudVal) {
+            const obj = parseCloudBlob(cloudVal);
+            if (!obj || typeof obj !== 'object') return;
+            // Lokales Planung-Objekt aus allen planung_<id>-Keys rekonstruieren
+            const local = {};
+            const localIds = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                const m = k && k.match(/^planung_(\d+)$/);
+                if (m) {
+                    localIds.push(m[1]);
+                    try { local[m[1]] = JSON.parse(localStorage.getItem(k)); } catch (e) {}
+                }
+            }
+            if (stableStringify(local) === stableStringify(obj)) return; // inhaltlich gleich
+            // 1) Lokale Einträge entfernen, die in der Cloud nicht (mehr) existieren
+            localIds.forEach(id => { if (!(id in obj)) localStorage.removeItem('planung_' + id); });
+            // 2) Cloud-Einträge übernehmen
+            Object.keys(obj).forEach(id => {
+                try { localStorage.setItem('planung_' + id, JSON.stringify(obj[id])); } catch (e) {}
+            });
+            // 3) Planung neu rendern, falls gerade geöffnet
+            if (typeof window.reloadPlanungIfActive === 'function') window.reloadPlanungIfActive();
+        }
+
         function applyCloudTermineAndPlanung(cloudData) {
             const localExtra = localStorage.getItem('extraDataLastUpdate') || '0';
             const cloudExtra = cloudData.extraDataLastUpdate || '0';
@@ -1492,10 +1589,12 @@
                 }
             }
 
-            // Zeugnistext-Planung & Stundenplan: inhaltsbasiert übernehmen (zuverlässig,
-            // unabhängig von Geräte-Uhren). NICHT mehr an extraDataLastUpdate gekoppelt.
+            // Zeugnistext-Planung, Stundenplan & Planung: inhaltsbasiert übernehmen
+            // (zuverlässig, unabhängig von Geräte-Uhren). NICHT mehr an
+            // extraDataLastUpdate gekoppelt – so propagieren auch Löschungen.
             applyCloudBlob(cloudData.ztPlanung, 'ztPlanung', window.setZtPlanung);
             applyCloudBlob(cloudData.stundenplan, 'stundenplan', window.setStundenplan);
+            applyCloudPlanung(cloudData.planung);
 
             // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
             // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
@@ -1517,18 +1616,12 @@
                 if (window.AppState) window.AppState.termine = merged;
             }
 
-            // Planung per Timestamp-Vergleich (unverändertes Verhalten)
+            // planung_global_calendar_range per Timestamp-Vergleich (flaches Objekt,
+            // deep-merge-sicher). Die eigentliche Planung läuft oben inhaltsbasiert.
             const shouldApplyPlanung = cloudExtra > localExtra || !localStorage.getItem('extraDataLastUpdate');
             if (shouldApplyPlanung) {
                 if (cloudData.planung_global_calendar_range) {
                     localStorage.setItem('planung_global_calendar_range', JSON.stringify(cloudData.planung_global_calendar_range));
-                }
-                if (cloudData.planung && typeof cloudData.planung === 'object') {
-                    Object.keys(cloudData.planung).forEach(id => {
-                        try {
-                            localStorage.setItem(`planung_${id}`, JSON.stringify(cloudData.planung[id]));
-                        } catch(e) {}
-                    });
                 }
                 if (cloudExtra > '0') {
                     localStorage.setItem('extraDataLastUpdate', cloudExtra);
@@ -1564,7 +1657,11 @@
                     classes: window.classes || (window.AppState ? window.AppState.classes : []),
                     termine: (window.AppState && window.AppState.termine) ? window.AppState.termine : [],
                     deletedTermineIds: JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'),
-                    planung: planungObj,
+                    // Als JSON-STRING speichern (wie stundenplan/ztPlanung): merge:true ersetzt
+                    // das Feld atomar in EINEM Write. Als verschachteltes Objekt würde merge die
+                    // Maps nur tief zusammenführen -> gelöschte Planungs-Einträge ("Planung
+                    // löschen" setzt entries={}) kämen nie auf anderen Geräten an.
+                    planung: JSON.stringify(planungObj),
                     planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
                     zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
                     // Als JSON-STRING speichern: so ersetzt Firestores merge:true das Feld
