@@ -1101,10 +1101,14 @@ function showModal(modalId) {
         }
         targetModal.setAttribute('aria-hidden', 'false');
 
-        // Fokus auf das erste fokussierbare Element setzen
+        // Fokus auf das erste fokussierbare Element setzen.
+        // preventScroll: true, damit das Fokussieren des (oben liegenden) Schließen-
+        // Buttons nicht den Modal-Inhalt nach oben scrollt (sonst verliert z. B. die
+        // Planungs-Liste ihre Scroll-Position beim Zurückkehren aus einem Untermodal).
         const focusableElement = targetModal.querySelector('input, button, select, textarea');
         if (focusableElement) {
-            focusableElement.focus();
+            try { focusableElement.focus({ preventScroll: true }); }
+            catch (e) { focusableElement.focus(); }
         }
     }
 
@@ -10081,16 +10085,24 @@ function ztPlanungSaveCourse() {
     ZtPlanungState.formDraft = null;
     ztPlanungPersist();
     ztPlanungOpen(); // zurück zur Liste
+    ztPlanungRestoreListScroll();
+}
+
+// Liste wieder an die vor dem Öffnen des Formulars gemerkte Stelle scrollen
+// (showModal hat sie ausgeblendet und ztPlanungRenderList neu aufgebaut -> Scroll
+// war 0). Synchron + im nächsten Frame, falls der Browser den Scroll verzögert.
+function ztPlanungRestoreListScroll() {
+    const y = ZtPlanungState.listScrollTop || 0;
+    const restore = () => { const m = document.getElementById('zt-planung-modal'); if (m) m.scrollTop = y; };
+    restore();
+    requestAnimationFrame(restore);
 }
 
 function ztPlanungCancelForm() {
     ZtPlanungState.formCourseId = null;
     ZtPlanungState.formDraft = null;
     ztPlanungOpen();
-    // Liste wieder an die gemerkte Stelle scrollen (showModal hat sie zuvor
-    // ausgeblendet und ztPlanungRenderList neu aufgebaut -> Scroll war 0).
-    const modal = document.getElementById('zt-planung-modal');
-    if (modal) modal.scrollTop = ZtPlanungState.listScrollTop || 0;
+    ztPlanungRestoreListScroll();
 }
 
 // ----- Sprung in die Texterstellung -----
