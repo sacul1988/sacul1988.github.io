@@ -9159,6 +9159,10 @@ async function ztCallAPI(messages) {
 // Leerzeilen werden zu einem einzelnen Leerzeichen zusammengezogen.
 function ztNormalizeText(text) {
     if (!text) return '';
+    // ztCallAPI liefert ein Objekt { text, questions } – manche Aufrufer (Kürzen/
+    // Verlängern/Neu/Anwenden) geben dieses direkt herein. Dann das Textfeld nehmen,
+    // sonst wird daraus "[object Object]".
+    if (typeof text === 'object') text = text.text || '';
     return String(text).replace(/\s*\n\s*/g, ' ').replace(/[ \t]{2,}/g, ' ').trim();
 }
 
@@ -9375,6 +9379,7 @@ function ztRenderResult() {
                         <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
                         <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
                         <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
+                        <button class="btn btn-secondary btn-icon" onclick="ztShowBeobachtungen()"><i class="fas fa-clipboard"></i> <span class="btn-text">Beobachtungen</span></button>
                     </div>
                     <div class="zt-refine">
                         <textarea id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();ztRefineText();}"></textarea>
@@ -9394,6 +9399,22 @@ function ztCopyText(btn) {
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-check"></i> <span class="btn-text">Kopiert!</span>';
     setTimeout(() => { btn.innerHTML = orig; }, 2000);
+}
+
+// Zeigt die zum Text gespeicherten Beobachtungen & Gedanken an (aus dem Archiv-
+// Eintrag; Fallback auf das aktuell ausgefüllte Eingabefeld).
+function ztShowBeobachtungen() {
+    let beob = '';
+    if (ZtState.currentId) {
+        const entry = ZtState.archive.find(a => a.id === ZtState.currentId);
+        if (entry && entry.beobachtungen) beob = entry.beobachtungen;
+    }
+    if (!beob) beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
+    if (!beob) {
+        swal('Beobachtungen & Gedanken', 'Für diesen Text wurden keine Beobachtungen gespeichert.', 'info');
+        return;
+    }
+    swal('Beobachtungen & Gedanken', beob, 'info');
 }
 
 // ===== Archiv (dauerhaft, Cloud-synchronisiert, sofort gespeichert) =====
@@ -9432,11 +9453,13 @@ function ztPersistArchive() {
 
 // Neue Generierung -> sofort einen Archiv-Eintrag anlegen
 function ztCreateArchiveEntry() {
+    const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
     const entry = {
         id: 'zt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
         label: ZtState.currentLabel || 'Zeugnistext',
         typ: ZtState.currentTyp,
         text: ZtState.currentText,
+        beobachtungen: beob,
         date: new Date().toISOString()
     };
     ZtState.archive.unshift(entry);
@@ -9619,6 +9642,7 @@ window.ztShortenText = ztShortenText;
 window.ztLengthenText = ztLengthenText;
 window.ztRefineText = ztRefineText;
 window.ztCopyText = ztCopyText;
+window.ztShowBeobachtungen = ztShowBeobachtungen;
 window.ztOpenArchiveModal = ztOpenArchiveModal;
 window.ztOpenArchive = ztOpenArchive;
 window.ztDeleteArchive = ztDeleteArchive;
