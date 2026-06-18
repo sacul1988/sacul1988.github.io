@@ -84,6 +84,46 @@
             });
         })();
     </script>
+    <script>
+        // Adressbuch-/Kontakt-Vorschläge des Browsers in allen Textfeldern unterbinden
+        // (berufliche App -> keine privaten Kontakte in Namensfeldern). Greift global,
+        // auch für dynamisch erzeugte Felder (Stundenplan-Zelle, ztPlanung-Formular,
+        // Schüler/Kontakte bearbeiten ...). Login-Felder (E-Mail/Passwort) bleiben
+        // ausgenommen, damit Passwort-Manager weiter funktionieren.
+        (function () {
+            var SKIP_TYPES = { password: 1, email: 1, checkbox: 1, radio: 1, file: 1,
+                date: 1, time: 1, 'datetime-local': 1, month: 1, week: 1, hidden: 1,
+                range: 1, color: 1, submit: 1, button: 1, reset: 1 };
+            function harden(el) {
+                if (!el || el.tagName !== 'INPUT') return;
+                var t = (el.getAttribute('type') || 'text').toLowerCase();
+                if (SKIP_TYPES[t]) return;
+                if (el.getAttribute('autocomplete') !== 'off') el.setAttribute('autocomplete', 'off');
+                if (!el.hasAttribute('autocorrect')) el.setAttribute('autocorrect', 'off');
+            }
+            function hardenAll(root) {
+                try { (root || document).querySelectorAll('input').forEach(harden); } catch (e) {}
+            }
+            function start() {
+                hardenAll(document);
+                if (!window.MutationObserver || !document.body) return;
+                var obs = new MutationObserver(function (muts) {
+                    for (var i = 0; i < muts.length; i++) {
+                        var added = muts[i].addedNodes;
+                        for (var j = 0; j < added.length; j++) {
+                            var n = added[j];
+                            if (n.nodeType !== 1) continue;
+                            if (n.tagName === 'INPUT') harden(n);
+                            else if (n.querySelectorAll) { try { n.querySelectorAll('input').forEach(harden); } catch (e) {} }
+                        }
+                    }
+                });
+                obs.observe(document.body, { childList: true, subtree: true });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+            else start();
+        })();
+    </script>
 </head>
 <body class="login-active">
     <script>
