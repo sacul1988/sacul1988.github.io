@@ -1435,7 +1435,10 @@ html.login-active, body.login-active {
     background-color: rgba(15, 23, 42, 0.55);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
-    z-index: 1200;
+    /* Über ALLEM: Modals (#modal-container 9500), Login-Overlay (10000) und
+       Flatpickr (999999). Bestätigungen/Hinweise müssen immer im Vordergrund
+       liegen, sonst verschwinden sie hinter dem geöffneten Modal. */
+    z-index: 1000000;
     display: flex;
     align-items: center;
     justify-content: center;
