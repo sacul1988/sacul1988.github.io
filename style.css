@@ -5204,7 +5204,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     min-width: 0;
     border-radius: 10px;
     padding: 10px 14px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 .notes-input-group .btn {
     border-radius: 10px;
@@ -5269,7 +5269,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 }
 .dashboard-note-text {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--dark-color);
     outline: none;
     padding: 3px 6px;
@@ -5521,8 +5521,8 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .sp-kurs-klasse-badge { font-size: 0.78rem; font-weight: 700; background: #f1f5f9; color: #475569; border-radius: 6px; padding: 2px 7px; }
 
 /* Kachel-Editor */
-.sp-cell-form { display: flex; flex-direction: column; gap: 28px; }
-.sp-field { display: flex; flex-direction: column; gap: 6px; }
+.sp-cell-form { display: flex; flex-direction: column; gap: 22px; }
+.sp-field { display: flex; flex-direction: column; gap: 10px; }
 .sp-field > span { font-weight: 600; color: var(--dark-color); font-size: 0.9rem; }
 .sp-field-inline { flex-direction: row; align-items: center; gap: 10px; }
 .sp-kurs-select-row { display: flex; gap: 8px; align-items: center; }
@@ -5561,7 +5561,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     cursor: pointer;
 }
 .sp-quickselect-chip:hover { background: var(--primary-color); color: #fff; }
-.sp-freekids { display: flex; flex-wrap: wrap; gap: 7px; }
+.sp-freekids { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
 .sp-freekid {
     background: #eef2ff; color: var(--primary-color); border-radius: 18px;
     padding: 5px 11px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 7px;

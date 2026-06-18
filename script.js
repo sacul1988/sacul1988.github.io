@@ -10837,7 +10837,7 @@ function stundenplanCellKinderHtml() {
     }
 
     html += `<div class="sp-addkid">
-                <input type="text" id="sp-cell-newkid" class="form-control" placeholder="Name eingeben, Enter zum Hinzufügen..." onkeydown="if(event.key==='Enter'){event.preventDefault();stundenplanCellAddFreeKid();}">
+                <input type="text" id="sp-cell-newkid" class="form-control" placeholder="Name eingeben, Enter zum Hinzufügen..." autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();stundenplanCellAddFreeKid();}">
              </div>`;
     return html;
 }
