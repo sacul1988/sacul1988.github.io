@@ -1512,9 +1512,11 @@ function loadData() {
         }
     }
 
-    // Zustands-Wiederherstellung entfernt für bessere Synchronisations-Stabilität beim Start
-    // Wir starten bei jedem Neuladen immer auf der Startseite
-    showPage('home');
+    // Zustands-Wiederherstellung entfernt für bessere Synchronisations-Stabilität beim Start.
+    // Wir starten bei jedem Neuladen immer auf der Startseite – der initiale Render
+    // passiert aber erst in DOMContentLoaded, NACHDEM auch Termine und Planung geladen
+    // sind. Sonst rendert der Kalender zuerst ohne Termine, und diese erscheinen erst
+    // nach dem Cloud-Abgleich verzögert ("Termine werden neu geladen").
 }
 
 // Startseite: Klassen-Grid rendern
@@ -2449,6 +2451,10 @@ document.addEventListener('DOMContentLoaded', function() {
     loadData();
     loadTermine();
     loadPlanung();
+    // Startseite erst jetzt rendern – wenn Klassen, Termine UND Planung geladen sind.
+    // So zeigt der Kalender die Termine sofort aus dem localStorage, ohne auf den
+    // Cloud-Abgleich zu warten (kein verzögertes Nachladen beim Neuladen der Seite).
+    showPage('home');
 
     // Event-Listener für Zurück-Navigation (Browser-Zurück, Maus-Zurück, PWA)
     window.addEventListener('popstate', function(event) {
