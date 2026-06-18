@@ -13,7 +13,8 @@ service cloud.firestore {
     //   - classes: list (required) - Array of classes, students, grades
     //   - termine: list (required) - Array of calendar events
     //   - deletedTermineIds: list (required) - Array of deleted event IDs
-    //   - planung: map (required) - Seating plan settings mapped by class index
+    //   - planung: map | string (required) - Unterrichtsplanung pro Klassen-Index;
+    //       neu als JSON-String (atomarer Replace via merge:true), map = Altformat
     //   - planung_global_calendar_range: map (required) - Global calendar configuration
     //   - zeugnistexteArchiv: list (required) - Archived report texts
     //   - contacts: list (required) - Address book contacts
@@ -61,7 +62,10 @@ service cloud.firestore {
       data.classes is list && data.classes.size() <= 100 &&
       data.termine is list && data.termine.size() <= 1000 &&
       data.deletedTermineIds is list && data.deletedTermineIds.size() <= 1000 &&
-      data.planung is map &&
+      // planung wird neu als JSON-STRING geschrieben (merge:true ersetzt es dann
+      // atomar, damit gelöschte Einträge propagieren). Map weiterhin erlauben für
+      // noch nicht aktualisierte Geräte (Abwärtskompatibilität während der Umstellung).
+      (data.planung is map || data.planung is string) &&
       data.planung_global_calendar_range is map &&
       data.zeugnistexteArchiv is list && data.zeugnistexteArchiv.size() <= 2000 &&
       data.contacts is list && data.contacts.size() <= 500;
