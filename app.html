@@ -1037,7 +1037,7 @@
     <script type="module">
         import { initializeApp } from "firebase/app";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-        import { initializeFirestore, doc, setDoc, getDoc, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+        import { initializeFirestore, doc, setDoc, getDoc, updateDoc, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
         // ===== DEINE FIREBASE KONFIGURATION =====
         const firebaseConfig = {
@@ -1469,19 +1469,40 @@
                 }
             }
 
-            // Zeugnistext-Planung synchronisieren
-            if (shouldApplyExtra && cloudData.ztPlanung && typeof cloudData.ztPlanung === 'object') {
-                localStorage.setItem('ztPlanung', JSON.stringify(cloudData.ztPlanung));
-                if (typeof window.setZtPlanung === 'function') {
-                    window.setZtPlanung(cloudData.ztPlanung);
+            // Zeugnistext-Planung synchronisieren – auch wenn lokal NOCH LEER ist
+            // (erstes Erscheinen auf einem anderen Gerät, unabhängig von evtl.
+            // abweichenden Geräte-Uhren/Zeitstempeln).
+            if (cloudData.ztPlanung && typeof cloudData.ztPlanung === 'object') {
+                let localZtEmpty = true;
+                try {
+                    const lz = JSON.parse(localStorage.getItem('ztPlanung') || '{}');
+                    localZtEmpty = !(Array.isArray(lz.courses) && lz.courses.length > 0);
+                } catch (e) {}
+                const cloudZtHas = Array.isArray(cloudData.ztPlanung.courses) && cloudData.ztPlanung.courses.length > 0;
+                if (shouldApplyExtra || (localZtEmpty && cloudZtHas)) {
+                    localStorage.setItem('ztPlanung', JSON.stringify(cloudData.ztPlanung));
+                    if (typeof window.setZtPlanung === 'function') {
+                        window.setZtPlanung(cloudData.ztPlanung);
+                    }
                 }
             }
 
-            // Stundenplan synchronisieren
-            if (shouldApplyExtra && cloudData.stundenplan && typeof cloudData.stundenplan === 'object') {
-                localStorage.setItem('stundenplan', JSON.stringify(cloudData.stundenplan));
-                if (typeof window.setStundenplan === 'function') {
-                    window.setStundenplan(cloudData.stundenplan);
+            // Stundenplan synchronisieren – auch wenn lokal NOCH LEER ist
+            if (cloudData.stundenplan && typeof cloudData.stundenplan === 'object') {
+                let localSpEmpty = true;
+                try {
+                    const ls = JSON.parse(localStorage.getItem('stundenplan') || '{}');
+                    localSpEmpty = !((Array.isArray(ls.zeiten) && ls.zeiten.length > 0) ||
+                                     (ls.kacheln && Object.keys(ls.kacheln).length > 0));
+                } catch (e) {}
+                const sp = cloudData.stundenplan;
+                const cloudSpHas = (Array.isArray(sp.zeiten) && sp.zeiten.length > 0) ||
+                                   (sp.kacheln && Object.keys(sp.kacheln).length > 0);
+                if (shouldApplyExtra || (localSpEmpty && cloudSpHas)) {
+                    localStorage.setItem('stundenplan', JSON.stringify(cloudData.stundenplan));
+                    if (typeof window.setStundenplan === 'function') {
+                        window.setStundenplan(cloudData.stundenplan);
+                    }
                 }
             }
 
@@ -1593,6 +1614,20 @@
                 }
 
                 await setDoc(userDocRef, data, { merge: true });
+
+                // stundenplan & ztPlanung als GANZES ersetzen: merge:true führt
+                // verschachtelte Maps (z. B. stundenplan.kacheln) nur tief zusammen,
+                // sodass GELÖSCHTE Stunden/Kacheln/Kurse NICHT auf andere Geräte
+                // übertragen würden. updateDoc ersetzt diese Felder komplett.
+                try {
+                    await updateDoc(userDocRef, {
+                        stundenplan: data.stundenplan,
+                        ztPlanung: data.ztPlanung
+                    });
+                } catch (replaceErr) {
+                    console.warn('Replace-Write für stundenplan/ztPlanung fehlgeschlagen:', replaceErr);
+                }
+
                 localStorage.setItem('lastUpdate', timestamp);
 
                 // ===== SYNC-ZÄHLER =====

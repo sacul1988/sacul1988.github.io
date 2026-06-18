@@ -1556,13 +1556,13 @@ function renderClassesGrid() {
 
             classCard.innerHTML = `
                 <div class="class-card-header">
-                    <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span>${cls.name}</span>
+                    <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span>${escapeHtml(cls.name)}</span>
                     <span class="class-card-count">${studentCount} Schüler</span>
                 </div>
                 <div class="class-card-body">
                     <div class="module-buttons">
                         <button class="btn btn-green btn-block" onclick="showPage('class', ${index})">
-                            ${cls.name}
+                            ${escapeHtml(cls.name)}
                         </button>
                         <div class="class-card-actions">
                             <button class="btn btn-primary btn-icon-only" onclick="editClass(${index})">
@@ -2581,7 +2581,7 @@ function renderStudentsModule() {
         
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td class="${student.learningSupport ? 'learning-support' : ''} ${student.eseSupport ? 'ese-support' : ''}">${student.name}</td>
+            <td class="${student.learningSupport ? 'learning-support' : ''} ${student.eseSupport ? 'ese-support' : ''}">${escapeHtml(student.name)}</td>
             <td style="text-align: center;">
                 <input type="checkbox" ${student.eseSupport ? 'checked' : ''} onclick="toggleEseSupport(${index}, this)">
             </td>
@@ -3430,7 +3430,7 @@ function renderGradesModule() {
         let studentHeader = `
             <div class="student-header" onclick="toggleStudentDetails('noten', ${studentIndex})">
                 <div class="student-name ${student.learningSupport ? 'learning-support' : ''} ${student.eseSupport ? 'ese-support' : ''}">
-                    <i class="fas fa-user"></i> ${student.name}
+                    <i class="fas fa-user"></i> ${escapeHtml(student.name)}
                     <i id="notentoggleIcon-${studentIndex}" class="fas fa-chevron-down toggle-icon ${student.notenExpanded ? 'rotate' : ''}"></i>
                 </div>
                 <div class="student-header-actions" style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
@@ -5132,7 +5132,7 @@ function renderDesk(desk) {
             }
         }
         
-        deskContent = `<div class="desk-label ${student.learningSupport ? 'learning-support' : ''} ${student.eseSupport ? 'ese-support' : ''} ${highNegatives ? 'high-negatives-name' : ''}">${student.name}${participationHtml}</div>`;
+        deskContent = `<div class="desk-label ${student.learningSupport ? 'learning-support' : ''} ${student.eseSupport ? 'ese-support' : ''} ${highNegatives ? 'high-negatives-name' : ''}">${escapeHtml(student.name)}${participationHtml}</div>`;
     } else {
         // Leerer Tisch
         deskContent = `<div class="desk-label">Leer</div>`;
@@ -5400,7 +5400,7 @@ function showEvaluationPanel(desk) {
         content.innerHTML = `
             <div class="evaluation-item">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <h4 style="margin:0;">Schüler: ${student.name}</h4>
+                    <h4 style="margin:0;">Schüler: ${escapeHtml(student.name)}</h4>
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
                 <div class="homework-controls">
@@ -6193,7 +6193,7 @@ function exportGrades() {
     tableHtml += '<tbody>';
     students.forEach(student => {
         tableHtml += '<tr>';
-        tableHtml += `<td style="width: 200px; padding: ${padding}px;">${student.name}</td>`;
+        tableHtml += `<td style="width: 200px; padding: ${padding}px;">${escapeHtml(student.name)}</td>`;
         
         projectNames.forEach(projectName => {
             const project = student.projects ? student.projects.find(p => p.name && p.name.trim() === projectName) : null;
@@ -6367,7 +6367,7 @@ function renderZeugnisModule() {
 
         card.innerHTML = `
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
-                <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h3>
+                <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(student.name)}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
                     <button class="btn-back-to-top-circle${notesActive ? ' notes-btn-active' : ''}" onclick="event.stopPropagation(); openNotesModal(${index})" title="Notizen"><i class="fas fa-pen"></i></button>
                     <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);" title="Nach oben"><i class="fas fa-arrow-up"></i></button>
@@ -8155,7 +8155,15 @@ function localDateStr(d) {
 }
 
 function escapeHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    // Robust gegen null/undefined/Zahlen und maskiert auch ' (für HTML-Attribute),
+    // damit Nutzereingaben (Klassen-/Schülernamen, Notizen ...) gefahrlos via
+    // innerHTML eingefügt werden können.
+    return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 
@@ -10346,9 +10354,11 @@ function stundenplanPersist() {
             inklusionProKlasse: StundenplanState.inklusionProKlasse,
             halbjahr: StundenplanState.halbjahr
         }));
+        // Zeitstempel ZUERST erhöhen (vor dem evtl. werfenden syncPlanungCourses),
+        // damit andere Geräte die Änderung zuverlässig als "neuer" erkennen.
+        localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
         // Verknüpfte Planung-Kurse aktualisieren (schreibt localStorage ztPlanung, ohne eigenen Cloud-Push)
         stundenplanSyncPlanungCourses();
-        localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
     } catch (e) {
         console.warn('Fehler beim Speichern des Stundenplans:', e);
     }
