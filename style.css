@@ -5747,7 +5747,110 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .sp-tile-empty { color: var(--grey-color); font-size: 0.88rem; padding: 8px 0; }
 .sp-tile-empty { color: var(--grey-color); font-size: 0.88rem; }
 
+.dashboard-zt-card {
+    min-width: 0;
+    grid-column: span 2;
+}
+.dashboard-zt-list {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.dashboard-zt-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(62px, 0.5fr) minmax(86px, 0.75fr) 34px;
+    gap: 6px;
+    align-items: center;
+}
+.dashboard-zt-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 270px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+.dashboard-zt-row {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: #f8fafc;
+    padding: 6px;
+}
+.dashboard-zt-course {
+    border: 0;
+    background: transparent;
+    color: var(--dark-color);
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 800;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    padding: 4px 2px;
+}
+.dashboard-zt-course:hover {
+    color: var(--primary-color);
+}
+.dashboard-zt-choice {
+    border: 1.5px solid #dbe3ef;
+    background: #fff;
+    color: var(--grey-color);
+    border-radius: 8px;
+    padding: 5px 6px;
+    min-width: 0;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.dashboard-zt-choice:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: #eef2ff;
+}
+.dashboard-zt-choice.active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: #fff;
+}
+.dashboard-zt-choice.teacher.active {
+    border-color: var(--success-color);
+    background: var(--success-color);
+}
+.dashboard-zt-choice:disabled {
+    opacity: 0.45;
+    cursor: default;
+    background: #f1f5f9;
+}
+.dashboard-zt-reset {
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid #dbe3ef;
+    background: #fff;
+    color: var(--grey-color);
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+.dashboard-zt-reset:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: #eef2ff;
+}
+
 @media (max-width: 600px) {
+    .dashboard-zt-card {
+        grid-column: span 1;
+    }
     .sp-zeit-time { width: 92px; }
     .sp-grid { gap: 6px; }
 }

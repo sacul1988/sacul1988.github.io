@@ -1570,6 +1570,40 @@ function loadData() {
 }
 
 // Startseite: Klassen-Grid rendern
+function captureDashboardScrollRestore(tileScrollTop = null) {
+    window._dashboardScrollRestore = {
+        x: window.scrollX || window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0,
+        y: window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0,
+        tileScrollTop,
+        until: Date.now() + 2000
+    };
+}
+
+function applyDashboardScrollRestore() {
+    const state = window._dashboardScrollRestore;
+    if (!state) return;
+    if (Date.now() > state.until) {
+        window._dashboardScrollRestore = null;
+        return;
+    }
+    if (state.tileScrollTop !== null && state.tileScrollTop !== undefined) {
+        const tileScrollEl = document.querySelector('#dashboard-zt-list .dashboard-zt-scroll');
+        if (tileScrollEl) tileScrollEl.scrollTop = state.tileScrollTop;
+    }
+    document.documentElement.scrollTop = state.y;
+    document.body.scrollTop = state.y;
+    window.scrollTo(state.x, state.y);
+}
+
+function scheduleDashboardScrollRestore() {
+    applyDashboardScrollRestore();
+    requestAnimationFrame(applyDashboardScrollRestore);
+    setTimeout(applyDashboardScrollRestore, 50);
+    setTimeout(applyDashboardScrollRestore, 150);
+    setTimeout(applyDashboardScrollRestore, 350);
+    setTimeout(applyDashboardScrollRestore, 900);
+}
+
 function renderClassesGrid() {
     // Referenzen global verfügbar machen
     window.renderClassesGrid = renderClassesGrid;
@@ -1699,12 +1733,29 @@ function renderClassesGrid() {
     classesGrid.appendChild(stundenplanCard);
     if (typeof stundenplanRenderHomeTile === 'function') stundenplanRenderHomeTile();
 
+    // Zeugnistexte-Kachel: Zuständigkeiten aus der Planung direkt auf der Startseite klären
+    const ztPlanungCard = document.createElement('div');
+    ztPlanungCard.className = 'class-card dashboard-zt-card';
+    ztPlanungCard.dataset.tileKey = 'zeugnistexte';
+    ztPlanungCard.innerHTML = `
+        <div class="class-card-header">
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-list-check"></i> Zeugnistexte</span>
+            <span id="dashboard-zt-count" class="class-card-count">–</span>
+        </div>
+        <div class="class-card-body" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
+            <div id="dashboard-zt-list" class="dashboard-zt-list"></div>
+        </div>
+    `;
+    classesGrid.appendChild(ztPlanungCard);
+    if (typeof renderDashboardZtPlanungTile === 'function') renderDashboardZtPlanungTile();
+
     // Gespeicherte Reihenfolge anwenden, dann Masonry sofort vor dem ersten sichtbaren Paint berechnen.
     applyDashboardTileOrder();
     layoutDashboardMasonry();
     classesGrid.classList.remove('masonry-prep');
     initDashboardTileDnd();
     setupDashboardMasonry();
+    scheduleDashboardScrollRestore();
 }
 
 // ===================================================================
@@ -9759,6 +9810,7 @@ function ztPlanungPersist() {
         console.warn('Fehler beim Speichern von ztPlanung:', e);
     }
     ztPlanungUpdateBadge();
+    if (typeof renderDashboardZtPlanungTile === 'function') renderDashboardZtPlanungTile();
     if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.saveDataToCloud === 'function') {
         window.saveDataToCloud();
     }
@@ -9863,6 +9915,7 @@ window.setZtPlanung = function(obj) {
     ZtPlanungState.initialized = true;
     ztPlanungSyncClassTeacherCourse();
     ztPlanungUpdateBadge();
+    if (typeof renderDashboardZtPlanungTile === 'function') renderDashboardZtPlanungTile();
     const m = document.getElementById('zt-planung-modal');
     if (m && m.style.display !== 'none') ztPlanungRenderList();
 };
@@ -9892,6 +9945,15 @@ function ztPlanungSortedCourses() {
     });
 }
 
+function ztPlanungDashboardCourses() {
+    return [...ZtPlanungState.courses].sort((a, b) => {
+        const ka = ztPlanungSortKey(a), kb = ztPlanungSortKey(b);
+        if (ka.num !== kb.num) return ka.num - kb.num;
+        if (ka.letter !== kb.letter) return ka.letter.localeCompare(kb.letter);
+        return ka.rest.localeCompare(kb.rest, 'de');
+    });
+}
+
 function ztPlanungRenderList() {
     const modal = document.getElementById('zt-planung-modal');
     if (!modal) return;
@@ -9900,7 +9962,7 @@ function ztPlanungRenderList() {
     // ist das Modal kurz display:none (scrollTop = 0) -> dort übernimmt
     // ztPlanungCancelForm die Wiederherstellung aus ZtPlanungState.listScrollTop.
     const prevScroll = modal.scrollTop;
-    const courses = ztPlanungSortedCourses();
+    const courses = ztPlanungDashboardCourses();
     const { total, done } = ztPlanungCounts();
     const progressLabel = total ? `${done}/${total} erledigt` : '';
 
@@ -10100,6 +10162,68 @@ function ztPlanungChooseResponsible(courseId) {
             ztPlanungRenderList();
         }
     });
+}
+
+function ztPlanungSetResponsible(courseId, responsible) {
+    const c = ZtPlanungState.courses.find(x => x.id === courseId);
+    if (!c) return;
+    const tileScrollEl = document.querySelector('#dashboard-zt-list .dashboard-zt-scroll');
+    const tileScrollTop = tileScrollEl ? tileScrollEl.scrollTop : 0;
+    if (typeof captureDashboardScrollRestore === 'function') captureDashboardScrollRestore(tileScrollTop);
+
+    if (responsible === 'teacher') {
+        (c.students || []).forEach(s => { s.done = true; });
+        c.delegatedToTeacher = true;
+        c.textResponsible = 'teacher';
+    } else if (responsible === 'me') {
+        c.delegatedToTeacher = false;
+        c.textResponsible = 'me';
+    } else if (responsible === 'reset') {
+        (c.students || []).forEach(s => { s.done = false; });
+        c.delegatedToTeacher = false;
+        c.textResponsible = '';
+    } else {
+        return;
+    }
+
+    ztPlanungPersist();
+    const modal = document.getElementById('zt-planung-modal');
+    if (modal && modal.style.display !== 'none') ztPlanungRenderList();
+    if (typeof scheduleDashboardScrollRestore === 'function') scheduleDashboardScrollRestore();
+}
+
+function renderDashboardZtPlanungTile() {
+    const list = document.getElementById('dashboard-zt-list');
+    const count = document.getElementById('dashboard-zt-count');
+    if (!list) return;
+
+    ztPlanungInit();
+    ztPlanungSyncClassTeacherCourse();
+    const courses = ztPlanungSortedCourses();
+    if (count) count.textContent = courses.length ? String(courses.length) : '0';
+
+    if (!courses.length) {
+        list.innerHTML = '<div class="sp-tile-empty">Keine Zeugnistexte geplant.</div>';
+        return;
+    }
+
+    const rows = courses.map(course => {
+        const responsible = course.textResponsible || (course.delegatedToTeacher ? 'teacher' : '');
+        const fachlehrer = (course.fachlehrer || '').trim();
+        const teacherLabel = fachlehrer || 'Fachlehrer';
+        const teacherDisabled = fachlehrer ? '' : ' disabled';
+        const courseName = course.name || course.fach || 'Kurs';
+        return `
+            <div class="dashboard-zt-row">
+                <button type="button" class="dashboard-zt-course" onclick="ztPlanungOpen()" title="Planung öffnen">${ztEsc(courseName)}</button>
+                <button type="button" class="dashboard-zt-choice ${responsible === 'me' ? 'active' : ''}" onclick="ztPlanungSetResponsible('${spJsAttr(course.id)}','me')" title="Ich bin zuständig">Ich</button>
+                <button type="button" class="dashboard-zt-choice teacher ${responsible === 'teacher' ? 'active' : ''}" onclick="ztPlanungSetResponsible('${spJsAttr(course.id)}','teacher')" title="${ztEsc(teacherLabel)} ist zuständig"${teacherDisabled}>${ztEsc(teacherLabel)}</button>
+                <button type="button" class="dashboard-zt-reset" onclick="ztPlanungSetResponsible('${spJsAttr(course.id)}','reset')" title="Zurücksetzen"><i class="fas fa-rotate-left"></i></button>
+            </div>`;
+    }).join('');
+
+    list.innerHTML = `<div class="dashboard-zt-scroll">${rows}</div>`;
+    if (typeof scheduleDashboardScrollRestore === 'function') scheduleDashboardScrollRestore();
 }
 
 function ztPlanungDeleteStudent(courseId, studentId) {
@@ -10428,10 +10552,12 @@ window.ztPlanungFormRemoveStudent = ztPlanungFormRemoveStudent;
 window.ztPlanungFormToggleTyp = ztPlanungFormToggleTyp;
 window.ztPlanungToggleStudent = ztPlanungToggleStudent;
 window.ztPlanungChooseResponsible = ztPlanungChooseResponsible;
+window.ztPlanungSetResponsible = ztPlanungSetResponsible;
 window.ztPlanungDeleteStudent = ztPlanungDeleteStudent;
 window.ztPlanungDeleteCourse = ztPlanungDeleteCourse;
 window.ztPlanungClearAll = ztPlanungClearAll;
 window.ztPlanungWriteText = ztPlanungWriteText;
+window.renderDashboardZtPlanungTile = renderDashboardZtPlanungTile;
 
 // ===== DASHBOARD NOTES & CHECKLIST LOGIC =====
 function renderDashboardNotes() {
