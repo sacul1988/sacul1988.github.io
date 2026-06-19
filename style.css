@@ -1519,6 +1519,13 @@ html.login-active, body.login-active {
 .app-dialog-buttons .btn {
     min-width: 120px;
 }
+.zt-other-responsible-dialog .zt-other-responsible-input {
+    margin: 4px 0 14px;
+}
+.zt-other-responsible-dialog .zt-other-responsible-input.input-error {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
 .zt-responsible-dialog .app-dialog-buttons {
     flex-wrap: nowrap;
 }
@@ -1527,7 +1534,8 @@ html.login-active, body.login-active {
     flex: 1 1 0;
     white-space: nowrap;
 }
-.zt-responsible-dialog .app-dialog-buttons .zt-responsible-reset-btn {
+.zt-responsible-dialog .app-dialog-buttons .zt-responsible-reset-btn,
+.zt-responsible-dialog .app-dialog-buttons .zt-responsible-other-btn {
     flex: 0 0 46px;
     min-width: 46px;
     width: 46px;
@@ -1549,7 +1557,8 @@ html.login-active, body.login-active {
         padding-left: 10px;
         padding-right: 10px;
     }
-    .zt-responsible-dialog .app-dialog-buttons .zt-responsible-reset-btn {
+    .zt-responsible-dialog .app-dialog-buttons .zt-responsible-reset-btn,
+    .zt-responsible-dialog .app-dialog-buttons .zt-responsible-other-btn {
         width: 46px;
         padding-left: 0;
         padding-right: 0;
@@ -5758,7 +5767,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 }
 .dashboard-zt-row {
     display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(62px, 0.5fr) minmax(86px, 0.75fr) 34px;
+    grid-template-columns: minmax(0, 1.45fr) minmax(62px, 0.5fr) minmax(86px, 0.75fr) 34px 34px;
     gap: 6px;
     align-items: center;
 }
@@ -5828,7 +5837,8 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     cursor: default;
     background: #f1f5f9;
 }
-.dashboard-zt-reset {
+.dashboard-zt-reset,
+.dashboard-zt-other {
     width: 32px;
     height: 32px;
     border: 1.5px solid #dbe3ef;
@@ -5841,7 +5851,8 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     justify-content: center;
     transition: var(--transition);
 }
-.dashboard-zt-reset:hover {
+.dashboard-zt-reset:hover,
+.dashboard-zt-other:hover {
     border-color: var(--primary-color);
     color: var(--primary-color);
     background: #eef2ff;
