@@ -1738,7 +1738,7 @@ function renderClassesGrid() {
     ztPlanungCard.className = 'class-card dashboard-zt-card';
     ztPlanungCard.dataset.tileKey = 'zeugnistexte';
     ztPlanungCard.innerHTML = `
-        <div class="class-card-header">
+        <div class="class-card-header dashboard-zt-header" onclick="if(!event.target.closest('.tile-drag-grip')) ztPlanungOpen()">
             <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-list-check"></i> Zeugnistexte</span>
             <span id="dashboard-zt-count" class="class-card-count">–</span>
         </div>
@@ -9852,6 +9852,7 @@ function ztPlanungSyncClassTeacherCourse() {
             typ: 'sozialverhalten',
             fach: '',
             themen: '',
+            textResponsible: 'me',
             students: []
         };
         ZtPlanungState.courses.push(course);
@@ -9861,6 +9862,11 @@ function ztPlanungSyncClassTeacherCourse() {
     const desiredName = ztPlanungClassTeacherCourseName(cls);
     if (course.name !== desiredName) {
         course.name = desiredName;
+        changed = true;
+    }
+
+    if (!course.textResponsible && !course.delegatedToTeacher && !course.customResponsibleName) {
+        course.textResponsible = 'me';
         changed = true;
     }
 
@@ -9921,11 +9927,25 @@ window.setZtPlanung = function(obj) {
 };
 
 // ----- Listenansicht -----
-function ztPlanungOpen() {
+function ztPlanungOpen(focusCourseId = null) {
     ztPlanungInit();
     ztPlanungSyncClassTeacherCourse();
     ztPlanungRenderList();
     showModal('zt-planung-modal');
+    if (focusCourseId) {
+        requestAnimationFrame(() => ztPlanungFocusCourse(focusCourseId));
+        setTimeout(() => ztPlanungFocusCourse(focusCourseId), 120);
+    }
+}
+
+function ztPlanungFocusCourse(courseId) {
+    const modal = document.getElementById('zt-planung-modal');
+    if (!modal) return;
+    const card = Array.from(modal.querySelectorAll('.zt-plan-course')).find(el => el.dataset.courseId === courseId);
+    if (!card) return;
+    card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    card.classList.add('zt-plan-course-focus');
+    setTimeout(() => card.classList.remove('zt-plan-course-focus'), 1400);
 }
 
 function ztPlanungSortKey(course) {
@@ -9986,7 +10006,7 @@ function ztPlanungRenderList() {
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
         </div>
         <div class="zt-plan-add-row zt-plan-toolbar">
-            <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpenForm()"><i class="fas fa-plus"></i> Klasse manuell anlegen</button>
+            <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpenForm()"><i class="fas fa-plus"></i> Klasse anlegen</button>
             <button class="btn btn-secondary btn-icon" onclick="ztPlanungPrintResponsibleList()"><i class="fas fa-print"></i> Planung drucken</button>
         </div>
         ${body}`;
@@ -10064,6 +10084,9 @@ function ztPlanungResponsibleName(course) {
 function ztPlanungPromptOtherResponsible(course) {
     return new Promise(resolve => {
         const current = (course.customResponsibleName || '').trim();
+        const tileScrollEl = document.querySelector('#dashboard-zt-list .dashboard-zt-scroll');
+        const tileScrollTop = tileScrollEl ? tileScrollEl.scrollTop : null;
+        if (typeof captureDashboardScrollRestore === 'function') captureDashboardScrollRestore(tileScrollTop);
         const overlay = document.createElement('div');
         overlay.className = 'app-dialog-overlay';
 
@@ -10102,6 +10125,7 @@ function ztPlanungPromptOtherResponsible(course) {
             document.removeEventListener('keydown', keyHandler, true);
             overlay.classList.add('app-dialog-closing');
             setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 120);
+            if (typeof scheduleDashboardScrollRestore === 'function') scheduleDashboardScrollRestore();
             resolve(result);
         }
 
@@ -10187,9 +10211,13 @@ function ztPlanungCourseCardHtml(course) {
     const responsible = course.textResponsible || (course.delegatedToTeacher ? 'teacher' : '');
     const delegatedClass = (responsible === 'teacher' || responsible === 'other') ? ' delegated' : '';
     const teacherLabel = responsible === 'me'
-        ? `<span>Ich</span><span class="zt-plan-course-teacher-sep">|</span><span class="zt-plan-course-teacher-crossed">${ztEsc(responsibleName)}</span>`
-        : ztEsc(responsibleName);
-    const fachlehrerHtml = responsibleName ? `<button type="button" class="zt-plan-course-teacher${delegatedClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>` : '';
+        ? 'Zuständig'
+        : (responsible === 'teacher' || responsible === 'other')
+            ? `Nicht zuständig: ${ztEsc(responsibleName)}`
+            : ztEsc(responsibleName);
+    const fachlehrerHtml = (responsibleName || responsible === 'me')
+        ? `<button type="button" class="zt-plan-course-teacher${delegatedClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>`
+        : '';
     const titleOnclick = `onclick="ztPlanungOpenForm('${course.id}')" title="Kurs bearbeiten"`;
     const actions = isLinked ? '' : `
                 <div class="zt-plan-course-actions">
@@ -10198,7 +10226,7 @@ function ztPlanungCourseCardHtml(course) {
                 </div>`;
 
     return `
-        <div class="zt-plan-course ${isLinked ? 'linked' : ''}">
+        <div class="zt-plan-course ${isLinked ? 'linked' : ''}" data-course-id="${spJsAttr(course.id)}">
             <div class="zt-plan-course-head">
                 <div class="zt-plan-course-title" ${titleOnclick}>
                     <span class="zt-plan-course-name">${title} ${linkedBadge}</span>
@@ -10224,18 +10252,27 @@ function ztPlanungToggleStudent(courseId, studentId) {
 function ztPlanungChooseResponsible(courseId) {
     const c = ZtPlanungState.courses.find(x => x.id === courseId);
     if (!c) return;
-    const fachlehrer = (c.fachlehrer || '').trim() || 'der Fachlehrer';
+    const fachlehrer = (c.fachlehrer || '').trim();
+    const isClassTeacherCourse = c.source === 'klassenlehrer';
+    const buttons = {};
+    if (!isClassTeacherCourse) {
+        buttons.me = { text: 'Ich', value: 'me' };
+    }
+    if (!isClassTeacherCourse && fachlehrer) {
+        buttons.teacher = { text: fachlehrer, value: 'teacher' };
+    }
+    buttons.other = { text: 'andere Person', title: 'Andere Person eintragen', value: 'other', className: 'zt-responsible-other-btn text-btn' };
+    buttons.reset = { html: '<i class="fas fa-rotate-left"></i>', text: 'Zurücksetzen', title: 'Zurücksetzen', value: 'reset', className: 'zt-responsible-reset-btn' };
     swal({
         title: 'Wer ist zuständig?',
-        text: `Soll ${fachlehrer} die Zuständigkeit übernehmen oder bleibst du zuständig?`,
+        text: isClassTeacherCourse
+            ? 'Du bist standardmäßig zuständig. Optional kannst du eine andere Person eintragen.'
+            : fachlehrer
+            ? `Soll ${fachlehrer} die Zuständigkeit übernehmen oder bleibst du zuständig?`
+            : 'Möchtest du zuständig bleiben oder eine andere Person eintragen?',
         icon: 'question',
         dialogClass: 'zt-responsible-dialog',
-        buttons: {
-            me: { text: 'Ich', value: 'me' },
-            teacher: { text: fachlehrer, value: 'teacher' },
-            other: { html: '<i class="fas fa-plus"></i>', text: 'Andere Person', title: 'Andere Person eintragen', value: 'other', className: 'zt-responsible-other-btn' },
-            reset: { html: '<i class="fas fa-rotate-left"></i>', text: 'Zurücksetzen', title: 'Zurücksetzen', value: 'reset', className: 'zt-responsible-reset-btn' }
-        }
+        buttons
     }).then(async choice => {
         if (choice === 'teacher') {
             (c.students || []).forEach(s => { s.done = true; });
@@ -10325,7 +10362,7 @@ function renderDashboardZtPlanungTile() {
         const courseName = course.name || course.fach || 'Kurs';
         return `
             <div class="dashboard-zt-row">
-                <button type="button" class="dashboard-zt-course" onclick="ztPlanungOpen()" title="Planung öffnen">${ztEsc(courseName)}</button>
+                <button type="button" class="dashboard-zt-course" onclick="ztPlanungOpen('${spJsAttr(course.id)}')" title="In der Planung anzeigen">${ztEsc(courseName)}</button>
                 <button type="button" class="dashboard-zt-choice ${responsible === 'me' ? 'active' : ''}" onclick="ztPlanungSetResponsible('${spJsAttr(course.id)}','me')" title="Ich bin zuständig">Ich</button>
                 <button type="button" class="dashboard-zt-choice teacher ${responsible === 'teacher' || responsible === 'other' ? 'active' : ''}" onclick="ztPlanungSetResponsible('${spJsAttr(course.id)}','teacher')" title="${ztEsc(teacherLabel)} ist zuständig"${teacherDisabled}>${ztEsc(teacherLabel)}</button>
                 <button type="button" class="dashboard-zt-other" onclick="ztPlanungSetResponsible('${spJsAttr(course.id)}','other')" title="Andere Person eintragen"><i class="fas fa-plus"></i></button>

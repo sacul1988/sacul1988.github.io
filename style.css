@@ -1542,6 +1542,13 @@ html.login-active, body.login-active {
     padding-left: 0;
     padding-right: 0;
 }
+.zt-responsible-dialog .app-dialog-buttons .zt-responsible-other-btn.text-btn {
+    flex: 1 1 auto;
+    min-width: 132px;
+    width: auto;
+    padding-left: 12px;
+    padding-right: 12px;
+}
 @media (max-width: 600px) {
     .app-dialog-buttons {
         flex-direction: column-reverse;
@@ -1562,6 +1569,12 @@ html.login-active, body.login-active {
         width: 46px;
         padding-left: 0;
         padding-right: 0;
+    }
+    .zt-responsible-dialog .app-dialog-buttons .zt-responsible-other-btn.text-btn {
+        width: auto;
+        min-width: 116px;
+        padding-left: 10px;
+        padding-right: 10px;
     }
 }
 
@@ -3812,6 +3825,9 @@ html.modal-open, body.modal-open {
     background: #fff;
     overflow: hidden;
 }
+.zt-plan-course-focus {
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.22), var(--box-shadow-md);
+}
 .zt-plan-course-head {
     display: flex;
     align-items: center;
@@ -3842,7 +3858,7 @@ html.modal-open, body.modal-open {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 34%;
+    max-width: 46%;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -5759,6 +5775,9 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .dashboard-zt-card {
     min-width: 0;
     grid-column: span 2;
+}
+.dashboard-zt-header {
+    cursor: pointer;
 }
 .dashboard-zt-list {
     display: flex;
