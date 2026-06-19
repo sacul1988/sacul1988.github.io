@@ -32,6 +32,7 @@
         (function () {
             var lastShown = 0;
             var THROTTLE_MS = 8000;
+            var ERROR_LOG_KEY = 'globalErrorLog';
 
             function ignorable(msg) {
                 if (!msg) return true; // leere/cross-origin "Script error." ohne Infos
@@ -41,7 +42,41 @@
                 return false;
             }
 
-            function showErrorToast() {
+            function errorToText(entry) {
+                if (!entry) return 'Keine Fehlerdetails gespeichert.';
+                return [
+                    '[' + entry.time + '] ' + entry.type,
+                    entry.message || '(ohne Meldung)',
+                    entry.source ? ('Quelle: ' + entry.source) : '',
+                    entry.line ? ('Zeile: ' + entry.line + (entry.column ? ':' + entry.column : '')) : '',
+                    entry.stack ? ('\nStack:\n' + entry.stack) : ''
+                ].filter(Boolean).join('\n');
+            }
+
+            function storeError(entry) {
+                try {
+                    var list = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || '[]');
+                    if (!Array.isArray(list)) list = [];
+                    list.unshift(entry);
+                    localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(list.slice(0, 20)));
+                } catch (e) { /* Fehler-Logging darf nie selbst stören */ }
+            }
+
+            window.showLastGlobalError = function () {
+                try {
+                    var list = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || '[]');
+                    var text = errorToText(Array.isArray(list) ? list[0] : null);
+                    if (typeof swal === 'function') {
+                        swal('Letzter Fehler', text, 'warning');
+                    } else {
+                        alert(text);
+                    }
+                } catch (e) {
+                    alert('Fehlerdetails konnten nicht gelesen werden.');
+                }
+            };
+
+            function showErrorToast(entry) {
                 var now = Date.now();
                 if (now - lastShown < THROTTLE_MS) return; // nicht spammen
                 lastShown = now;
@@ -55,14 +90,16 @@
                             'z-index:99999;background:#1e293b;color:#fff;padding:11px 16px;border-radius:10px;' +
                             'box-shadow:0 6px 24px rgba(0,0,0,0.25);font-size:0.85rem;font-family:Inter,sans-serif;' +
                             'max-width:90vw;display:flex;align-items:center;gap:9px;opacity:0;transition:opacity .25s ease;' +
-                            'pointer-events:none;';
+                            'pointer-events:auto;';
                         t.innerHTML = '<i class="fas fa-triangle-exclamation" style="color:#fbbf24;"></i>' +
-                            '<span>Ein unerwarteter Fehler ist aufgetreten. Die Aktion wurde evtl. nicht abgeschlossen.</span>';
+                            '<span>Ein unerwarteter Fehler ist aufgetreten. Die Aktion wurde evtl. nicht abgeschlossen.</span>' +
+                            '<button type="button" onclick="showLastGlobalError()" style="border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:5px 9px;font:inherit;font-weight:700;cursor:pointer;">Details</button>';
                         document.body.appendChild(t);
                     }
+                    t.title = entry && entry.message ? entry.message : '';
                     requestAnimationFrame(function () { t.style.opacity = '1'; });
                     clearTimeout(t._hideTimer);
-                    t._hideTimer = setTimeout(function () { t.style.opacity = '0'; }, 5000);
+                    t._hideTimer = setTimeout(function () { t.style.opacity = '0'; }, 8000);
                 } catch (e) { /* Der Handler darf selbst niemals etwas auslösen */ }
             }
 
@@ -71,16 +108,36 @@
                 if (e && e.target && e.target !== window && e.target.tagName) return;
                 var msg = e && (e.message || (e.error && e.error.message));
                 if (ignorable(msg)) return;
+                var entry = {
+                    time: new Date().toISOString(),
+                    type: 'GlobalError',
+                    message: String(msg || ''),
+                    source: e && e.filename || '',
+                    line: e && e.lineno || '',
+                    column: e && e.colno || '',
+                    stack: e && e.error && e.error.stack ? String(e.error.stack) : ''
+                };
+                storeError(entry);
                 console.error('[GlobalError]', msg, (e && e.error) ? e.error : e);
-                showErrorToast();
+                showErrorToast(entry);
             });
 
             window.addEventListener('unhandledrejection', function (e) {
                 var reason = e && e.reason;
                 var msg = reason && (reason.message || reason);
                 if (ignorable(msg)) return;
+                var entry = {
+                    time: new Date().toISOString(),
+                    type: 'UnhandledRejection',
+                    message: String(msg || ''),
+                    source: '',
+                    line: '',
+                    column: '',
+                    stack: reason && reason.stack ? String(reason.stack) : ''
+                };
+                storeError(entry);
                 console.error('[UnhandledRejection]', reason);
-                showErrorToast();
+                showErrorToast(entry);
             });
         })();
     </script>
@@ -742,6 +799,12 @@
                         <option value="neben">Nebenfach</option>
                     </select>
                 </div>
+                <div class="form-group class-teacher-field">
+                    <label style="display: flex; align-items: center; gap: 10px; font-weight: 600;">
+                        <input type="checkbox" id="new-class-teacher" style="width: 18px; height: 18px;">
+                        Klassenlehrer
+                    </label>
+                </div>
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-primary" onclick="createClass()">Erstellen</button>
                 </div>
@@ -878,6 +941,12 @@
                         <option value="haupt">Hauptfach</option>
                         <option value="neben">Nebenfach</option>
                     </select>
+                </div>
+                <div class="form-group class-teacher-field">
+                    <label style="display: flex; align-items: center; gap: 10px; font-weight: 600;">
+                        <input type="checkbox" id="edit-class-teacher" style="width: 18px; height: 18px;">
+                        Klassenlehrer
+                    </label>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
                     <button class="btn btn-primary" onclick="saveEditedClass()">Speichern</button>
@@ -1875,12 +1944,14 @@
     <script src="grades.js"></script>
     <script src="script.js?v=2.9"></script>
     <script>
-        if ('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 for (let registration of registrations) {
                     registration.unregister();
                     console.log('Service Worker deinstalliert.');
                 }
+            }).catch(error => {
+                console.warn('Service Worker konnte nicht geprüft werden:', error);
             });
         }
     </script>

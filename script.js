@@ -1238,7 +1238,7 @@ function _appDialogButtons(opts) {
             const isLast = i === keys.length - 1;
             const value = (cfg.value !== undefined) ? cfg.value : (isCancel ? null : key);
             const type = (!isCancel && (isLast || keys.length === 1)) ? primaryType : 'secondary';
-            list.push({ text: cfg.text || key, value, type });
+            list.push({ text: cfg.text || key, html: cfg.html || '', className: cfg.className || '', title: cfg.title || '', value, type });
         });
         return list;
     }
@@ -1271,6 +1271,7 @@ function swal() {
 
         const dialog = document.createElement('div');
         dialog.className = 'app-dialog';
+        if (opts.dialogClass) dialog.classList.add(opts.dialogClass);
 
         const closeBtn = document.createElement('button');
         closeBtn.type = 'button';
@@ -1307,8 +1308,10 @@ function swal() {
             const button = document.createElement('button');
             button.type = 'button';
             const typeClass = desc.type === 'danger' ? 'btn-danger' : (desc.type === 'secondary' ? 'btn-secondary' : 'btn-primary');
-            button.className = `btn ${typeClass}`;
-            button.textContent = desc.text;
+            button.className = `btn ${typeClass}${desc.className ? ' ' + desc.className : ''}`;
+            if (desc.title) button.title = desc.title;
+            if (desc.html) button.innerHTML = desc.html;
+            else button.textContent = desc.text;
             button.onclick = () => _closeAppDialog(desc.value);
             btnRow.appendChild(button);
         });
@@ -1394,6 +1397,9 @@ function saveData(specificStudentIndex = null) {
         
         const dataToSave = JSON.stringify(classes);
         localStorage.setItem('classes', dataToSave);
+        if (typeof ztPlanungSyncClassTeacherCourse === 'function') {
+            ztPlanungSyncClassTeacherCourse();
+        }
 
         // Cloud-Sync (wenn eingeloggt)
         // VERHINDERUNG VON FRÜH-SPEICHERN: Nur synchronisieren wenn Initial-Sync fertig
@@ -1428,6 +1434,44 @@ function saveData(specificStudentIndex = null) {
     }
 }
 
+function normalizeClassTeacherFlags(preferredIndex = null) {
+    if (!Array.isArray(classes)) return;
+    let keeper = null;
+    if (preferredIndex !== null && classes[preferredIndex] && classes[preferredIndex].classTeacher) {
+        keeper = preferredIndex;
+    }
+    classes.forEach((cls, index) => {
+        if (!cls) return;
+        cls.classTeacher = !!cls.classTeacher;
+        if (cls.classTeacher && keeper === null) keeper = index;
+    });
+    classes.forEach((cls, index) => {
+        if (cls) cls.classTeacher = index === keeper;
+    });
+}
+
+function setSingleClassTeacher(classIndex, enabled) {
+    if (!Array.isArray(classes)) return;
+    classes.forEach((cls, index) => {
+        if (cls) cls.classTeacher = enabled && index === classIndex;
+    });
+}
+
+async function confirmClassTeacherSwitch(targetName, targetIndex = null) {
+    const currentIndex = Array.isArray(classes) ? classes.findIndex(cls => cls && cls.classTeacher) : -1;
+    if (currentIndex < 0 || currentIndex === targetIndex) return true;
+    if (typeof swal !== 'function') return true;
+
+    const currentName = classes[currentIndex]?.name || 'die bisherige Klasse';
+    return !!(await swal({
+        title: 'Klassenlehrer wechseln?',
+        text: `Bisher ist „${currentName}" als Klassenlehrer-Klasse markiert. Möchtest du stattdessen „${targetName}" verwenden?`,
+        icon: 'warning',
+        buttons: [false, 'Wechseln'],
+        dangerMode: true
+    }));
+}
+
 // Daten aus dem localStorage laden
 function loadData() {
     try {
@@ -1443,6 +1487,7 @@ function loadData() {
 
                 // Stelle sicher, dass alle erforderlichen Eigenschaften vorhanden sind
                 classes.forEach(cls => {
+                    cls.classTeacher = !!cls.classTeacher;
                     // Module-Daten initialisieren, falls nicht vorhanden
                     if (!cls.homework) cls.homework = {};
                     if (!cls.materials) cls.materials = {};
@@ -1487,6 +1532,7 @@ function loadData() {
                         cls.students = [];
                     }
                 });
+                normalizeClassTeacherFlags();
             } else {
                 console.warn('Geladene Klassendaten sind kein Array, verwende leere Daten');
                 classes = [];
@@ -1534,6 +1580,7 @@ function renderClassesGrid() {
     const classesGrid = safeGetElement('classes-grid');
     if (!classesGrid) return;
     
+    classesGrid.classList.add('masonry-prep');
     classesGrid.innerHTML = '';
     
     if (!classes || classes.length === 0) {
@@ -1567,8 +1614,8 @@ function renderClassesGrid() {
                 </div>
                 <div class="class-card-body">
                     <div class="module-buttons">
-                        <button class="btn btn-green btn-block" onclick="showPage('class', ${index})">
-                            ${escapeHtml(cls.name)}
+                        <button class="btn btn-green btn-block class-card-main-btn" onclick="showPage('class', ${index})">
+                            <span class="class-card-main-label">${escapeHtml(cls.name)}${cls.classTeacher ? '<span class="class-teacher-icon" title="Klassenlehrer"><i class="fas fa-chalkboard-user"></i></span>' : ''}</span>
                         </button>
                         <div class="class-card-actions">
                             <button class="btn btn-primary btn-icon-only" onclick="editClass(${index})">
@@ -1652,8 +1699,10 @@ function renderClassesGrid() {
     classesGrid.appendChild(stundenplanCard);
     if (typeof stundenplanRenderHomeTile === 'function') stundenplanRenderHomeTile();
 
-    // Gespeicherte Reihenfolge anwenden + Drag & Drop + Masonry-Layout aktivieren
+    // Gespeicherte Reihenfolge anwenden, dann Masonry sofort vor dem ersten sichtbaren Paint berechnen.
     applyDashboardTileOrder();
+    layoutDashboardMasonry();
+    classesGrid.classList.remove('masonry-prep');
     initDashboardTileDnd();
     setupDashboardMasonry();
 }
@@ -1707,6 +1756,7 @@ function tileRowSpan(grid, height) {
 }
 
 function layoutDashboardMasonry() {
+    _masonryRaf = null;
     if (_tileDrag) return;
     const grid = safeGetElement('classes-grid');
     if (!grid) return;
@@ -1744,24 +1794,24 @@ let _tileResizeObserver = null;
 let _masonryRaf = null;
 
 function setupDashboardMasonry() {
-    if (_masonryRaf) clearTimeout(_masonryRaf);
-    _masonryRaf = setTimeout(layoutDashboardMasonry, 60);
+    if (_masonryRaf) cancelAnimationFrame(_masonryRaf);
+    _masonryRaf = requestAnimationFrame(layoutDashboardMasonry);
     const grid = safeGetElement('classes-grid');
     if (!grid) return;
     if (typeof ResizeObserver === 'undefined') {
         if (!grid._masonryResizeBound) {
             grid._masonryResizeBound = true;
             window.addEventListener('resize', () => {
-                if (_masonryRaf) clearTimeout(_masonryRaf);
-                _masonryRaf = setTimeout(layoutDashboardMasonry, 60);
+                if (_masonryRaf) cancelAnimationFrame(_masonryRaf);
+                _masonryRaf = requestAnimationFrame(layoutDashboardMasonry);
             });
         }
         return;
     }
     if (!_tileResizeObserver) {
         _tileResizeObserver = new ResizeObserver(() => {
-            if (_masonryRaf) clearTimeout(_masonryRaf);
-            _masonryRaf = setTimeout(layoutDashboardMasonry, 60);
+            if (_masonryRaf) cancelAnimationFrame(_masonryRaf);
+            _masonryRaf = requestAnimationFrame(layoutDashboardMasonry);
         });
     }
     _tileResizeObserver.disconnect();
@@ -2155,7 +2205,7 @@ function addClassArtToggle(art) {
     if (n) n.classList.toggle('active', art === 'neben');
 }
 
-function createClass() {
+async function createClass() {
     const classNameInput = safeGetElement('new-class-name');
     if (!classNameInput) return;
 
@@ -2165,6 +2215,8 @@ function createClass() {
     const artEl = safeGetElement('new-class-art');
     const artVal = artEl ? artEl.value : '';
     const gewichtung = artVal === 'neben' ? 'nebenfach' : 'hauptfach';
+    const classTeacherEl = safeGetElement('new-class-teacher');
+    const isClassTeacher = !!(classTeacherEl && classTeacherEl.checked);
 
     if (!className) {
         if (typeof swal !== 'undefined') swal('Hinweis', 'Bitte einen Anzeigenamen eingeben.', 'info');
@@ -2190,6 +2242,9 @@ function createClass() {
         if (typeof swal !== 'undefined') swal('Fehler', 'Eine Klasse mit diesem Anzeigenamen existiert bereits', 'error');
         return;
     }
+    if (isClassTeacher && !(await confirmClassTeacherSwitch(className))) {
+        return;
+    }
 
     const newClass = {
         name: className,
@@ -2203,9 +2258,12 @@ function createClass() {
         alphabeticallySorted: false,
         homeworkSorted: false,
         studentsListSorted: false,
+        classTeacher: false,
         sitzplan: { desks: [], currentMode: 'evaluation' }
     };
 
+    if (isClassTeacher) setSingleClassTeacher(null, false);
+    newClass.classTeacher = isClassTeacher;
     classes.push(newClass);
     window.classes = classes;
     saveData();
@@ -2216,6 +2274,7 @@ function createClass() {
     const kEl = safeGetElement('new-class-klasse'); if (kEl) kEl.value = '';
     const fEl = safeGetElement('new-class-fach'); if (fEl) fEl.value = '';
     if (artEl) artEl.value = '';
+    if (classTeacherEl) classTeacherEl.checked = false;
 
     renderClassesGrid();
     if (typeof swal !== 'undefined') swal('Erfolg', `Klasse „${className}" wurde erstellt`, 'success');
@@ -2272,6 +2331,7 @@ function cloneClass() {
         alphabeticallySorted: originalClass.alphabeticallySorted || false,
         homeworkSorted: originalClass.homeworkSorted || false,
         studentsListSorted: originalClass.studentsListSorted || false,
+        classTeacher: false,
         sitzplan: originalClass.sitzplan ? JSON.parse(JSON.stringify(originalClass.sitzplan)) : { desks: [], currentMode: 'evaluation' }
     };
     
@@ -2320,17 +2380,24 @@ function editClass(classId) {
 
     const artSel = document.getElementById('edit-class-art');
     if (artSel) artSel.value = cls.gewichtung === 'nebenfach' ? 'neben' : 'haupt';
+    const classTeacherEl = document.getElementById('edit-class-teacher');
+    if (classTeacherEl) classTeacherEl.checked = !!cls.classTeacher;
 
     showModal('edit-class-modal');
 }
 
 // Klasse speichern nach Bearbeitung
-function saveEditedClass() {
+async function saveEditedClass() {
     const input = safeGetElement('edit-class-input');
     if (!input || classToEditId === null) return;
 
     const newName = input.value.trim();
     if (newName) {
+        const classTeacherEl = safeGetElement('edit-class-teacher');
+        if (classTeacherEl && classTeacherEl.checked && !(await confirmClassTeacherSwitch(newName, classToEditId))) {
+            return;
+        }
+
         classes[classToEditId].name = newName;
         const kEl = safeGetElement('edit-class-klasse');
         if (kEl) classes[classToEditId].klasse = kEl.value.trim();
@@ -2338,6 +2405,12 @@ function saveEditedClass() {
         if (fEl) classes[classToEditId].fach = fEl.value.trim();
         const editArtEl = safeGetElement('edit-class-art');
         classes[classToEditId].gewichtung = (editArtEl && editArtEl.value === 'neben') ? 'nebenfach' : 'hauptfach';
+        if (classTeacherEl && classTeacherEl.checked) {
+            setSingleClassTeacher(classToEditId, true);
+        } else {
+            classes[classToEditId].classTeacher = false;
+            normalizeClassTeacherFlags();
+        }
         saveData();
         renderClassesGrid();
         
@@ -9674,6 +9747,7 @@ function ztPlanungInit() {
         ZtPlanungState.courses = (parsed && Array.isArray(parsed.courses)) ? parsed.courses : [];
     } catch (e) { ZtPlanungState.courses = []; }
     ZtPlanungState.initialized = true;
+    ztPlanungSyncClassTeacherCourse();
     ztPlanungUpdateBadge();
 }
 
@@ -9688,6 +9762,83 @@ function ztPlanungPersist() {
     if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.saveDataToCloud === 'function') {
         window.saveDataToCloud();
     }
+}
+
+function ztPlanungStudentKey(name) {
+    return String(name || '').trim().toLowerCase();
+}
+
+function ztPlanungAutoStudentId(classIndex, studentName) {
+    return 'kl_' + classIndex + '_' + ztPlanungStudentKey(studentName).replace(/[^a-z0-9]+/g, '_');
+}
+
+function ztPlanungClassTeacherCourseName(cls) {
+    return [(cls.klasse || cls.name || '').trim(), 'Arbeits und Sozialverhalten'].filter(Boolean).join(' ');
+}
+
+function ztPlanungSyncClassTeacherCourse() {
+    if (typeof ztPlanungInit === 'function') ztPlanungInit();
+    if (typeof ZtPlanungState === 'undefined' || !Array.isArray(classes)) return false;
+
+    const classIndex = classes.findIndex(cls => cls && cls.classTeacher);
+    if (classIndex < 0) return false;
+
+    const cls = classes[classIndex];
+    const learningStudents = (cls.students || []).filter(student => student && student.learningSupport && (student.name || '').trim());
+    if (!learningStudents.length) return false;
+
+    const courseId = 'klassenlehrer:' + classIndex;
+    let course = ZtPlanungState.courses.find(c => c.id === courseId);
+    let changed = false;
+
+    if (!course) {
+        course = {
+            id: courseId,
+            source: 'klassenlehrer',
+            name: ztPlanungClassTeacherCourseName(cls),
+            halbjahr: 'ersten',
+            typ: 'sozialverhalten',
+            fach: '',
+            themen: '',
+            students: []
+        };
+        ZtPlanungState.courses.push(course);
+        changed = true;
+    }
+
+    const desiredName = ztPlanungClassTeacherCourseName(cls);
+    if (course.name !== desiredName) {
+        course.name = desiredName;
+        changed = true;
+    }
+
+    if (!Array.isArray(course.students)) course.students = [];
+    const existingNames = new Set(course.students.map(s => ztPlanungStudentKey(s.name)));
+    learningStudents.forEach(student => {
+        const key = ztPlanungStudentKey(student.name);
+        if (!key || existingNames.has(key)) return;
+        course.students.push({
+            id: ztPlanungAutoStudentId(classIndex, student.name),
+            name: student.name.trim(),
+            done: !!course.delegatedToTeacher
+        });
+        existingNames.add(key);
+        changed = true;
+    });
+
+    if (changed) {
+        try {
+            localStorage.setItem('ztPlanung', JSON.stringify({ courses: ZtPlanungState.courses }));
+            localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+        } catch (e) {
+            console.warn('Fehler beim automatischen Ergänzen der Klassenlehrer-Planung:', e);
+        }
+        ztPlanungUpdateBadge();
+        const pm = document.getElementById('zt-planung-modal');
+        if (pm && pm.style.display !== 'none') ztPlanungRenderList();
+    }
+
+    return changed;
 }
 
 function ztPlanungCounts() {
@@ -9710,6 +9861,7 @@ function ztPlanungUpdateBadge() {
 window.setZtPlanung = function(obj) {
     ZtPlanungState.courses = (obj && Array.isArray(obj.courses)) ? obj.courses : [];
     ZtPlanungState.initialized = true;
+    ztPlanungSyncClassTeacherCourse();
     ztPlanungUpdateBadge();
     const m = document.getElementById('zt-planung-modal');
     if (m && m.style.display !== 'none') ztPlanungRenderList();
@@ -9718,6 +9870,7 @@ window.setZtPlanung = function(obj) {
 // ----- Listenansicht -----
 function ztPlanungOpen() {
     ztPlanungInit();
+    ztPlanungSyncClassTeacherCourse();
     ztPlanungRenderList();
     showModal('zt-planung-modal');
 }
@@ -9729,6 +9882,16 @@ function ztPlanungSortKey(course) {
     return { num: 999, letter: '', rest: label };
 }
 
+function ztPlanungSortedCourses() {
+    return [...ZtPlanungState.courses].sort((a, b) => {
+        if (!!a.delegatedToTeacher !== !!b.delegatedToTeacher) return a.delegatedToTeacher ? 1 : -1;
+        const ka = ztPlanungSortKey(a), kb = ztPlanungSortKey(b);
+        if (ka.num !== kb.num) return ka.num - kb.num;
+        if (ka.letter !== kb.letter) return ka.letter.localeCompare(kb.letter);
+        return ka.rest.localeCompare(kb.rest, 'de');
+    });
+}
+
 function ztPlanungRenderList() {
     const modal = document.getElementById('zt-planung-modal');
     if (!modal) return;
@@ -9737,12 +9900,7 @@ function ztPlanungRenderList() {
     // ist das Modal kurz display:none (scrollTop = 0) -> dort übernimmt
     // ztPlanungCancelForm die Wiederherstellung aus ZtPlanungState.listScrollTop.
     const prevScroll = modal.scrollTop;
-    const courses = [...ZtPlanungState.courses].sort((a, b) => {
-        const ka = ztPlanungSortKey(a), kb = ztPlanungSortKey(b);
-        if (ka.num !== kb.num) return ka.num - kb.num;
-        if (ka.letter !== kb.letter) return ka.letter.localeCompare(kb.letter);
-        return ka.rest.localeCompare(kb.rest, 'de');
-    });
+    const courses = ztPlanungSortedCourses();
     const { total, done } = ztPlanungCounts();
     const progressLabel = total ? `${done}/${total} erledigt` : '';
 
@@ -9765,11 +9923,74 @@ function ztPlanungRenderList() {
             </span>
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
         </div>
-        <div class="zt-plan-add-row">
+        <div class="zt-plan-add-row zt-plan-toolbar">
             <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpenForm()"><i class="fas fa-plus"></i> Klasse manuell anlegen</button>
+            <button class="btn btn-secondary btn-icon" onclick="ztPlanungPrintResponsibleList()"><i class="fas fa-print"></i> Planung drucken</button>
         </div>
         ${body}`;
     modal.scrollTop = prevScroll;
+}
+
+function ztPlanungPrintResponsibleList() {
+    ztPlanungInit();
+    ztPlanungSyncClassTeacherCourse();
+    const courses = ztPlanungSortedCourses();
+    if (!courses.length) {
+        swal('Hinweis', 'Es gibt keine Planungskurse zum Drucken.', 'info');
+        return;
+    }
+
+    const rows = courses.map(course => {
+        const courseName = course.name || course.fach || 'Kurs';
+        const teacher = (course.fachlehrer || '').trim();
+        return `
+            <tr>
+                <td class="course">${ztEsc(courseName)}</td>
+                <td class="teacher">${ztEsc(teacher)}</td>
+                <td class="me"></td>
+            </tr>`;
+    }).join('');
+
+    const html = `<!doctype html>
+        <html lang="de">
+        <head>
+            <meta charset="utf-8">
+            <title>Planung Zuständigkeiten</title>
+            <style>
+                * { box-sizing: border-box; }
+                body { font-family: Arial, sans-serif; margin: 18mm; color: #111827; }
+                h1 { font-size: 18px; margin: 0 0 12px; }
+                table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                th, td { border: 1px solid #9ca3af; padding: 6px 8px; vertical-align: middle; }
+                th { background: #f3f4f6; text-align: left; font-weight: 700; }
+                th.teacher, td.teacher { width: 26%; }
+                th.me, td.me { width: 26%; }
+                td.course { width: 48%; font-weight: 700; }
+                td.teacher { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+                @page { size: A4 portrait; margin: 12mm; }
+            </style>
+        </head>
+        <body>
+            <h1>Planung Zuständigkeiten</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kurs</th>
+                        <th class="teacher">Fachlehrer</th>
+                        <th class="me">Ich</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <script>window.onload = function(){ window.print(); }</script>
+        </body>
+        </html>`;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) { swal('Hinweis', 'Bitte Popup-Blocker deaktivieren um zu drucken.', 'info'); return; }
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
 }
 
 function ztPlanungCourseCardHtml(course) {
@@ -9779,6 +10000,7 @@ function ztPlanungCourseCardHtml(course) {
     const typLabel = ztTypLabel(course.typ);
     const isSozial = course.typ === 'sozialverhalten';
     const halbjahrLabel = isSozial ? '' : (course.halbjahr === 'zweiten' ? '2. Halbjahr' : '1. Halbjahr');
+    const isLinked = course.source === 'stundenplan' || course.source === 'klassenlehrer';
 
     const title = course.name ? ztEsc(course.name) : (() => {
         const parts = [];
@@ -9794,13 +10016,25 @@ function ztPlanungCourseCardHtml(course) {
     const rows = sorted.map(s => `
         <li class="zt-plan-student ${s.done ? 'done' : ''}">
             <div class="zt-plan-check ${s.done ? 'checked' : ''}" onclick="ztPlanungToggleStudent('${course.id}','${s.id}')" title="Erledigt abhaken"><i class="fas fa-check"></i></div>
-            <span class="zt-plan-student-name" onclick="ztPlanungWriteText('${course.id}','${s.id}')" title="Text schreiben">${ztEsc(s.name)}</span>
+            <span class="zt-plan-student-name">${ztEsc(s.name)}</span>
             <button class="zt-plan-write" onclick="ztPlanungWriteText('${course.id}','${s.id}')" title="Text schreiben"><i class="fas fa-wand-magic-sparkles"></i></button>
-            <button class="zt-plan-del" onclick="ztPlanungDeleteStudent('${course.id}','${s.id}')" title="Schüler löschen"><i class="fas fa-trash"></i></button>
+            ${isLinked ? '' : `<button class="zt-plan-del" onclick="ztPlanungDeleteStudent('${course.id}','${s.id}')" title="Schüler löschen"><i class="fas fa-trash"></i></button>`}
         </li>`).join('');
 
-    const isLinked = course.source === 'stundenplan';
-    const linkedBadge = isLinked ? `<span class="zt-plan-linked-badge" title="Automatisch aus dem Stundenplan"><i class="fas fa-clock"></i> Stundenplan</span>` : '';
+    const linkedBadge = course.source === 'stundenplan'
+        ? `<span class="zt-plan-linked-badge" title="Automatisch aus dem Stundenplan"><i class="fas fa-clock"></i> Stundenplan</span>`
+        : course.source === 'klassenlehrer'
+            ? `<span class="zt-plan-linked-badge" title="Automatisch aus der Klassenlehrer-Klasse"><i class="fas fa-chalkboard-user"></i> Klassenlehrer</span>`
+            : '';
+    const fachlehrer = (course.fachlehrer || '').trim();
+    const responsible = course.textResponsible || (course.delegatedToTeacher ? 'teacher' : '');
+    const delegatedClass = responsible === 'teacher' ? ' delegated' : '';
+    const teacherLabel = responsible === 'me'
+        ? `<span>Ich</span><span class="zt-plan-course-teacher-sep">|</span><span class="zt-plan-course-teacher-crossed">${ztEsc(fachlehrer)}</span>`
+        : responsible === 'teacher'
+        ? ztEsc(fachlehrer)
+        : ztEsc(fachlehrer);
+    const fachlehrerHtml = fachlehrer ? `<button type="button" class="zt-plan-course-teacher${delegatedClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>` : '';
     const titleOnclick = `onclick="ztPlanungOpenForm('${course.id}')" title="Kurs bearbeiten"`;
     const actions = isLinked ? '' : `
                 <div class="zt-plan-course-actions">
@@ -9815,6 +10049,7 @@ function ztPlanungCourseCardHtml(course) {
                     <span class="zt-plan-course-name">${title} ${linkedBadge}</span>
                     <span class="zt-plan-course-progress">${done}/${total} erledigt</span>
                 </div>
+                ${fachlehrerHtml}
                 ${actions}
             </div>
             <ul class="zt-plan-students">${rows || '<li class="zt-plan-empty-students">Keine Schüler im Kurs</li>'}</ul>
@@ -9829,6 +10064,42 @@ function ztPlanungToggleStudent(courseId, studentId) {
     s.done = !s.done;
     ztPlanungPersist();
     ztPlanungRenderList();
+}
+
+function ztPlanungChooseResponsible(courseId) {
+    const c = ZtPlanungState.courses.find(x => x.id === courseId);
+    if (!c) return;
+    const fachlehrer = (c.fachlehrer || '').trim() || 'der Fachlehrer';
+    swal({
+        title: 'Wer ist zuständig?',
+        text: `Soll ${fachlehrer} die Zuständigkeit übernehmen oder bleibst du zuständig?`,
+        icon: 'question',
+        dialogClass: 'zt-responsible-dialog',
+        buttons: {
+            me: { text: 'Ich', value: 'me' },
+            teacher: { text: fachlehrer, value: 'teacher' },
+            reset: { html: '<i class="fas fa-rotate-left"></i>', text: 'Zurücksetzen', title: 'Zurücksetzen', value: 'reset', className: 'zt-responsible-reset-btn' }
+        }
+    }).then(choice => {
+        if (choice === 'teacher') {
+            (c.students || []).forEach(s => { s.done = true; });
+            c.delegatedToTeacher = true;
+            c.textResponsible = 'teacher';
+            ztPlanungPersist();
+            ztPlanungRenderList();
+        } else if (choice === 'me') {
+            c.delegatedToTeacher = false;
+            c.textResponsible = 'me';
+            ztPlanungPersist();
+            ztPlanungRenderList();
+        } else if (choice === 'reset') {
+            (c.students || []).forEach(s => { s.done = false; });
+            c.delegatedToTeacher = false;
+            c.textResponsible = '';
+            ztPlanungPersist();
+            ztPlanungRenderList();
+        }
+    });
 }
 
 function ztPlanungDeleteStudent(courseId, studentId) {
@@ -9933,7 +10204,7 @@ function ztPlanungRenderForm() {
     const isEdit = !!ZtPlanungState.formCourseId;
     const isSozial = d.typ === 'sozialverhalten';
     const editCourse = isEdit ? ZtPlanungState.courses.find(x => x.id === ZtPlanungState.formCourseId) : null;
-    const isLinked = !!(editCourse && editCourse.source === 'stundenplan');
+    const isLinked = !!(editCourse && (editCourse.source === 'stundenplan' || editCourse.source === 'klassenlehrer'));
 
     const linkedNote = '';
     const ro = isLinked ? 'readonly' : '';
@@ -10148,6 +10419,7 @@ function ztPlanungMarkRefDone() {
 }
 
 window.ztPlanungOpen = ztPlanungOpen;
+window.ztPlanungPrintResponsibleList = ztPlanungPrintResponsibleList;
 window.ztPlanungOpenForm = ztPlanungOpenForm;
 window.ztPlanungCancelForm = ztPlanungCancelForm;
 window.ztPlanungSaveCourse = ztPlanungSaveCourse;
@@ -10155,6 +10427,7 @@ window.ztPlanungFormAddStudent = ztPlanungFormAddStudent;
 window.ztPlanungFormRemoveStudent = ztPlanungFormRemoveStudent;
 window.ztPlanungFormToggleTyp = ztPlanungFormToggleTyp;
 window.ztPlanungToggleStudent = ztPlanungToggleStudent;
+window.ztPlanungChooseResponsible = ztPlanungChooseResponsible;
 window.ztPlanungDeleteStudent = ztPlanungDeleteStudent;
 window.ztPlanungDeleteCourse = ztPlanungDeleteCourse;
 window.ztPlanungClearAll = ztPlanungClearAll;
@@ -10462,19 +10735,19 @@ function stundenplanGetAppClass(name) {
     ) || null;
 }
 
-// Löst eine Kachel auf: gibt { fach, name, klasse, art } zurück (alle Formate)
+// Löst eine Kachel auf: gibt { fach, name, klasse, fachlehrer, art } zurück (alle Formate)
 function stundenplanResolveKachel(k) {
     if (!k) return null;
     // Neues direktes Format (name/fach/klasse/art direkt in der Kachel)
-    if (k.fach || k.name) return { fach: k.fach || '', name: k.name || k.klasse || '', klasse: k.klasse || '', art: k.art || 'neben' };
+    if (k.fach || k.name) return { fach: k.fach || '', name: k.name || k.klasse || '', klasse: k.klasse || '', fachlehrer: k.fachlehrer || '', art: k.art || 'neben' };
     // Altes kursId-Format (Rückwärtskompatibilität)
     if (k.kursId) {
         const kurs = StundenplanState.kurse.find(x => x.id === k.kursId);
         if (!kurs) return null;
-        return { fach: kurs.fach, name: kurs.name, klasse: kurs.klasse || kurs.name, art: kurs.art };
+        return { fach: kurs.fach, name: kurs.name, klasse: kurs.klasse || kurs.name, fachlehrer: k.fachlehrer || '', art: kurs.art };
     }
     // Altes direktes Format (nur klasse, kein name)
-    if (k.klasse) return { fach: k.fach || '', name: k.klasse, klasse: k.klasse, art: k.art || 'neben' };
+    if (k.klasse) return { fach: k.fach || '', name: k.klasse, klasse: k.klasse, fachlehrer: k.fachlehrer || '', art: k.art || 'neben' };
     return null;
 }
 
@@ -10785,10 +11058,11 @@ function stundenplanOpenCell(dayKey, zeitId) {
     const name = existing.name || (resolved && resolved.name) || '';
     const klasse = existing.klasse || (resolved && resolved.klasse) || '';
     const fach = existing.fach || (resolved && resolved.fach) || '';
+    const fachlehrer = existing.fachlehrer || '';
     const art = existing.art || (resolved && resolved.art) || 'neben';
     const kinderKey = klasse || name;
     const kinder = (kinderKey && StundenplanState.inklusionProKlasse[kinderKey]) ? [...StundenplanState.inklusionProKlasse[kinderKey]] : [];
-    StundenplanState.cellDraft = { dayKey, zeitId, key, name, klasse, fach, art, farbe: existing.farbe || '', kinder };
+    StundenplanState.cellDraft = { dayKey, zeitId, key, name, klasse, fach, fachlehrer, art, farbe: existing.farbe || '', kinder };
     stundenplanRenderCellModal();
     showModal('stundenplan-cell-modal');
 }
@@ -10807,46 +11081,22 @@ function stundenplanRenderCellModal() {
         `<button type="button" class="sp-swatch ${d.farbe === c ? 'active' : ''}" style="background:${c};" onclick="stundenplanCellSetColor('${c}')"></button>`
     ).join('');
 
-    // Bereits eingerichtete Kurse aus anderen Kacheln als Schnellauswahl anbieten –
-    // eindeutig je Kurs (Name|Klasse|Fach), damit auch mehrere Kurse derselben Klasse
-    // (z. B. "Mathe 5c" und "Sport 5c") und Kacheln OHNE separates Klasse-Feld erscheinen.
-    const usedClasses = [];
-    const seen = new Set();
-    Object.entries(StundenplanState.kacheln).forEach(([key, k]) => {
-        if (key === d.key) return;
-        const name = (k.name || '').trim();
-        const klasse = (k.klasse || '').trim();
-        const fach = (k.fach || '').trim();
-        if (!name && !klasse && !fach) return; // leere Kachel überspringen
-        const identity = `${name}|${klasse}|${fach}`.toLowerCase();
-        if (seen.has(identity)) return;
-        seen.add(identity);
-        usedClasses.push({ key, name, klasse, fach, label: name || klasse || fach });
-    });
-    usedClasses.sort((a, b) => {
-        const parse = s => { const m = (s || '').match(/^(\d+)(.*)$/); return m ? [parseInt(m[1]), m[2]] : [9999, s || '']; };
-        const [an, al] = parse(a.klasse || a.label);
-        const [bn, bl] = parse(b.klasse || b.label);
-        return an !== bn ? an - bn : (al || '').localeCompare(bl || '');
-    });
-    const quickSelect = usedClasses.length ? `
-        <div class="sp-field">
-            <span>Klasse übernehmen</span>
-            <div class="sp-quickselect">
-                ${usedClasses.map(c => `<button type="button" class="sp-quickselect-chip" onclick="stundenplanCellQuickSelect('${spJsAttr(c.key)}')">${ztEsc(c.label)}</button>`).join('')}
-            </div>
-        </div>` : '';
-
     modal.innerHTML = `
         <div class="zt-modal-head">
             <span style="font-size:1.2rem;font-weight:700;">Stunde bearbeiten: ${dayLabel}${stundeLabel}</span>
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
         </div>
         <div class="sp-cell-form">
-            ${quickSelect}
-            <div class="sp-field">
-                <span>Anzeigename</span>
-                <input id="sp-cell-name" class="form-control" placeholder="z. B. Mathe 8c" value="${ztEsc(d.name)}">
+            <div class="sp-cell-row2">
+                <div class="sp-field sp-name-field">
+                    <span>Anzeigename</span>
+                    <input id="sp-cell-name" class="form-control" placeholder="z. B. Mathe 8c" value="${ztEsc(d.name)}" onfocus="stundenplanCellNameFocused(this.value)" oninput="stundenplanCellNameChanged(this.value)" onblur="stundenplanCellNameBlurred()">
+                    <div id="sp-cell-name-suggestions" class="sp-name-suggestions"></div>
+                </div>
+                <div class="sp-field">
+                    <span>Fachlehrer</span>
+                    <input id="sp-cell-fachlehrer" class="form-control" placeholder="z. B. Frau Müller" value="${ztEsc(d.fachlehrer || '')}">
+                </div>
             </div>
             <div class="sp-cell-row2">
                 <div class="sp-field">
@@ -10937,20 +11187,127 @@ function stundenplanCellAppClassSelected(idxStr) {
     stundenplanRenderCellModal();
 }
 
+function stundenplanCellKursChanged(value) {
+    stundenplanCellAppClassSelected(value);
+}
+
+function stundenplanGetKnownKacheln() {
+    const d = StundenplanState.cellDraft;
+    const seen = new Set();
+    const known = [];
+    Object.entries(StundenplanState.kacheln).forEach(([key, k]) => {
+        if (d && key === d.key) return;
+        const resolved = stundenplanResolveKachel(k);
+        const name = (resolved?.name || '').trim();
+        const klasse = (resolved?.klasse || '').trim();
+        const fach = (resolved?.fach || '').trim();
+        if (!name && !klasse && !fach) return;
+        const label = name || klasse || fach;
+        const identity = `${label}|${klasse}|${fach}`.toLowerCase();
+        if (seen.has(identity)) return;
+        seen.add(identity);
+        known.push({ key, k, resolved, label, klasse, fach });
+    });
+    known.sort((a, b) => a.label.localeCompare(b.label, 'de'));
+    return known;
+}
+
+function stundenplanHideNameSuggestions() {
+    const host = document.getElementById('sp-cell-name-suggestions');
+    if (!host) return;
+    host.innerHTML = '';
+    host.style.display = 'none';
+}
+
+function stundenplanRenderNameSuggestions(value, showAll = false) {
+    const host = document.getElementById('sp-cell-name-suggestions');
+    if (!host) return;
+    const q = (value || '').trim().toLowerCase();
+    if (!q && !showAll) {
+        stundenplanHideNameSuggestions();
+        return;
+    }
+    const matches = stundenplanGetKnownKacheln()
+        .filter(item => !q || item.label.toLowerCase().includes(q));
+    if (!matches.length) {
+        stundenplanHideNameSuggestions();
+        return;
+    }
+    host.innerHTML = matches.map(item => `
+        <button type="button" class="sp-name-suggestion" onclick="stundenplanCellQuickSelect('${spJsAttr(item.key)}')">
+            <span>${ztEsc(item.label)}</span>
+            ${item.fach ? `<small>${ztEsc(item.fach)}</small>` : ''}
+        </button>
+    `).join('');
+    host.style.display = 'flex';
+}
+
+function stundenplanCellNameFocused(value) {
+    stundenplanRenderNameSuggestions(value, true);
+}
+
+function stundenplanCellNameBlurred() {
+    setTimeout(stundenplanHideNameSuggestions, 120);
+}
+
+function stundenplanFindMatchingKachelByName(name) {
+    const d = StundenplanState.cellDraft;
+    const wanted = (name || '').trim().toLowerCase();
+    if (!d || !wanted) return null;
+    let match = null;
+    Object.entries(StundenplanState.kacheln).some(([key, k]) => {
+        if (key === d.key) return false;
+        const resolved = stundenplanResolveKachel(k);
+        const candidate = (resolved?.name || resolved?.klasse || '').trim().toLowerCase();
+        if (candidate !== wanted) return false;
+        match = { key, k, resolved };
+        return true;
+    });
+    return match;
+}
+
+function stundenplanApplyKachelSuggestion(src) {
+    const d = StundenplanState.cellDraft;
+    if (!d || !src) return;
+    const resolved = stundenplanResolveKachel(src) || src;
+    d.name = resolved.name || d.name || '';
+    d.klasse = resolved.klasse || '';
+    d.fach = resolved.fach || '';
+    d.fachlehrer = resolved.fachlehrer || '';
+    d.art = resolved.art || 'neben';
+    if (!d.farbe && src.farbe) d.farbe = src.farbe;
+    const kinderKey = d.klasse || d.name;
+    d.kinder = (kinderKey && StundenplanState.inklusionProKlasse[kinderKey]) ? [...StundenplanState.inklusionProKlasse[kinderKey]] : [];
+}
+
+function stundenplanCellNameChanged(value) {
+    const d = StundenplanState.cellDraft;
+    if (!d) return;
+    d.name = value;
+    stundenplanRenderNameSuggestions(value, true);
+    const match = stundenplanFindMatchingKachelByName(value);
+    const matchKey = match ? match.key : '';
+    if (!match || d._lastNameSuggestionKey === matchKey) return;
+    d._lastNameSuggestionKey = matchKey;
+    stundenplanApplyKachelSuggestion(match.k);
+    const kEl = document.getElementById('sp-cell-klasse');
+    const fEl = document.getElementById('sp-cell-fach');
+    const flEl = document.getElementById('sp-cell-fachlehrer');
+    const aEl = document.getElementById('sp-cell-art');
+    if (kEl) kEl.value = d.klasse || '';
+    if (fEl) fEl.value = d.fach || '';
+    if (flEl) flEl.value = d.fachlehrer || '';
+    if (aEl) aEl.value = d.art || 'neben';
+    stundenplanRefreshKinderSection();
+}
+
 function stundenplanCellQuickSelect(key) {
     const d = StundenplanState.cellDraft;
     if (!d) return;
     // Quell-Kachel direkt per Key (eindeutig je Kurs)
     const src = StundenplanState.kacheln[key];
     if (!src) return;
-    d.name = src.name || '';
-    d.klasse = src.klasse || '';
-    d.fach = src.fach || '';
-    d.art = src.art || 'neben';
-    // Farbe nur übernehmen wenn noch keine gesetzt
-    if (!d.farbe && src.farbe) d.farbe = src.farbe;
-    const kinderKey = d.klasse || d.name;
-    d.kinder = (kinderKey && StundenplanState.inklusionProKlasse[kinderKey]) ? [...StundenplanState.inklusionProKlasse[kinderKey]] : [];
+    stundenplanApplyKachelSuggestion(src);
     stundenplanRenderCellModal();
 }
 
@@ -10988,10 +11345,12 @@ function stundenplanCellDraftFromDom() {
     const nEl = document.getElementById('sp-cell-name');
     const kEl = document.getElementById('sp-cell-klasse');
     const fEl = document.getElementById('sp-cell-fach');
+    const flEl = document.getElementById('sp-cell-fachlehrer');
     const aEl = document.getElementById('sp-cell-art');
     if (nEl) d.name = nEl.value;
     if (kEl) d.klasse = kEl.value;
     if (fEl) d.fach = fEl.value;
+    if (flEl) d.fachlehrer = flEl.value;
     if (aEl) d.art = aEl.value;
 }
 
@@ -11037,6 +11396,37 @@ function stundenplanCellRemoveKid(name) {
     stundenplanRefreshKinderSection();
 }
 
+function stundenplanNormCoursePart(value) {
+    return String(value || '').trim().toLowerCase();
+}
+
+function stundenplanIsSameCourse(target, candidate) {
+    if (!target || !candidate) return false;
+    const targetFach = stundenplanNormCoursePart(target.fach);
+    const candidateFach = stundenplanNormCoursePart(candidate.fach);
+    if (targetFach && candidateFach && targetFach !== candidateFach) return false;
+
+    const targetKlasse = stundenplanNormCoursePart(target.klasse);
+    const candidateKlasse = stundenplanNormCoursePart(candidate.klasse);
+    if (targetKlasse && candidateKlasse) return targetKlasse === candidateKlasse;
+
+    const targetName = stundenplanNormCoursePart(target.name);
+    const candidateName = stundenplanNormCoursePart(candidate.name);
+    if (targetName && candidateName) return targetName === candidateName;
+
+    return false;
+}
+
+function stundenplanApplyFachlehrerToMatchingKacheln(sourceKey, target, fachlehrer) {
+    if (!fachlehrer) return;
+    Object.entries(StundenplanState.kacheln).forEach(([key, k]) => {
+        if (key === sourceKey) return;
+        const resolved = stundenplanResolveKachel(k);
+        if (!stundenplanIsSameCourse(target, resolved)) return;
+        k.fachlehrer = fachlehrer;
+    });
+}
+
 function stundenplanSaveCell() {
     const d = StundenplanState.cellDraft;
     if (!d) return;
@@ -11044,13 +11434,16 @@ function stundenplanSaveCell() {
     const name = (d.name || '').trim();
     const fach = (d.fach || '').trim();
     const art = (d.art || '').trim();
+    const fachlehrer = (d.fachlehrer || '').trim();
     if (!name) { swal('Hinweis', 'Bitte einen Anzeigenamen eingeben.', 'info'); return; }
     if (!fach) { swal('Hinweis', 'Bitte ein Fach eingeben.', 'info'); return; }
     if (!art) { swal('Hinweis', 'Bitte Hauptfach oder Nebenfach wählen.', 'info'); return; }
     const klasse = (d.klasse || '').trim();
     const kinderKey = klasse || name;
 
-    StundenplanState.kacheln[d.key] = { name, klasse, fach, art: d.art || 'neben', farbe: d.farbe };
+    const savedKachel = { name, klasse, fach, fachlehrer, art: d.art || 'neben', farbe: d.farbe };
+    StundenplanState.kacheln[d.key] = savedKachel;
+    stundenplanApplyFachlehrerToMatchingKacheln(d.key, savedKachel, fachlehrer);
     if (kinderKey) {
         if (d.kinder && d.kinder.length) StundenplanState.inklusionProKlasse[kinderKey] = [...d.kinder];
         else delete StundenplanState.inklusionProKlasse[kinderKey];
@@ -11103,7 +11496,7 @@ function stundenplanSyncPlanungCourses() {
     if (typeof ZtPlanungState === 'undefined') return;
 
     // Gewünschte verknüpfte Kurse aus den Kacheln ableiten
-    const desired = {}; // id -> {klasse, fach, art}
+    const desired = {}; // id -> {klasse, fach, fachlehrer, art}
     Object.values(StundenplanState.kacheln).forEach(k => {
         const resolved = stundenplanResolveKachel(k);
         if (!resolved || !resolved.fach) return;
@@ -11111,7 +11504,8 @@ function stundenplanSyncPlanungCourses() {
         const kinder = StundenplanState.inklusionProKlasse[kinderKey] || [];
         if (!kinder.length) return;
         const id = 'sp:' + (kinderKey).toLowerCase().replace(/\s+/g, '_') + '__' + resolved.fach.toLowerCase().replace(/\s+/g, '_');
-        if (!desired[id]) desired[id] = { klasse: kinderKey, fach: resolved.fach, art: resolved.art };
+        if (!desired[id]) desired[id] = { klasse: kinderKey, fach: resolved.fach, fachlehrer: resolved.fachlehrer || '', art: resolved.art };
+        else if (!desired[id].fachlehrer && resolved.fachlehrer) desired[id].fachlehrer = resolved.fachlehrer;
     });
 
     const before = JSON.stringify(ZtPlanungState.courses);
@@ -11129,7 +11523,9 @@ function stundenplanSyncPlanungCourses() {
         const oldDone = {};
         if (old && Array.isArray(old.students)) old.students.forEach(s => { oldDone[s.name] = !!s.done; });
         const kinder = StundenplanState.inklusionProKlasse[info.klasse] || [];
-        const students = kinder.map(name => ({ id: stundenplanGenId(), name, done: !!oldDone[name] }));
+        const delegatedToTeacher = !!(old && old.delegatedToTeacher);
+        const textResponsible = old && old.textResponsible ? old.textResponsible : (delegatedToTeacher ? 'teacher' : '');
+        const students = kinder.map(name => ({ id: stundenplanGenId(), name, done: delegatedToTeacher || !!oldDone[name] }));
         return {
             id,
             source: 'stundenplan',
@@ -11137,6 +11533,9 @@ function stundenplanSyncPlanungCourses() {
             halbjahr: StundenplanState.halbjahr || 'ersten',
             typ: info.art === 'haupt' ? 'hauptfach' : 'nebenfach',
             fach: info.fach,
+            fachlehrer: info.fachlehrer || '',
+            delegatedToTeacher,
+            textResponsible,
             themen: (old && old.themen) || '',
             students
         };
@@ -11147,7 +11546,7 @@ function stundenplanSyncPlanungCourses() {
     const after = JSON.stringify(ZtPlanungState.courses);
     if (before !== after) {
         // Nur localStorage aktualisieren – Cloud-Push übernimmt der Aufrufer (stundenplanPersist)
-        try { localStorage.setItem('ztPlanung', JSON.stringify({ courses: ZtPlanungState.courses })); } catch (e) {}
+        try { localStorage.setItem('ztPlanung', JSON.stringify({ courses: ZtPlanungState.courses })); } catch (e) { console.warn('Fehler beim Speichern der Stundenplan-Planung:', e); }
         if (typeof ztPlanungUpdateBadge === 'function') ztPlanungUpdateBadge();
         // Falls das Planung-Modal gerade offen ist, neu zeichnen
         const pm = document.getElementById('zt-planung-modal');
@@ -11213,6 +11612,9 @@ window.stundenplanKursAdd = stundenplanKursAdd;
 window.stundenplanKursDelete = stundenplanKursDelete;
 window.stundenplanOpenCell = stundenplanOpenCell;
 window.stundenplanCellKursChanged = stundenplanCellKursChanged;
+window.stundenplanCellNameFocused = stundenplanCellNameFocused;
+window.stundenplanCellNameChanged = stundenplanCellNameChanged;
+window.stundenplanCellNameBlurred = stundenplanCellNameBlurred;
 window.stundenplanCellQuickSelect = stundenplanCellQuickSelect;
 window.stundenplanCellArtToggle = stundenplanCellArtToggle;
 window.stundenplanCellHalbjahrChanged = stundenplanCellHalbjahrChanged;
@@ -11223,6 +11625,5 @@ window.stundenplanCellRemoveKid = stundenplanCellRemoveKid;
 window.stundenplanSaveCell = stundenplanSaveCell;
 window.stundenplanClearCell = stundenplanClearCell;
 window.stundenplanResetConfirm = stundenplanResetConfirm;
-window.stundenplanResetExecute = stundenplanResetExecute;
 window.stundenplanRenderHomeTile = stundenplanRenderHomeTile;
 window.StundenplanState = StundenplanState;
