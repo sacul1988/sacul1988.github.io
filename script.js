@@ -1738,7 +1738,7 @@ function renderClassesGrid() {
     ztPlanungCard.className = 'class-card dashboard-zt-card';
     ztPlanungCard.dataset.tileKey = 'zeugnistexte';
     ztPlanungCard.innerHTML = `
-        <div class="class-card-header dashboard-zt-header" onclick="if(!event.target.closest('.tile-drag-grip')) ztPlanungOpen()">
+        <div class="class-card-header dashboard-zt-header" onclick="if(!event.target.closest('.tile-drag-grip')) ztPlanungOpenAtTop()">
             <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-list-check"></i> Zeugnistexte</span>
             <span id="dashboard-zt-count" class="class-card-count">–</span>
         </div>
@@ -9927,15 +9927,26 @@ window.setZtPlanung = function(obj) {
 };
 
 // ----- Listenansicht -----
-function ztPlanungOpen(focusCourseId = null) {
+function ztPlanungOpen(focusCourseId = null, options = {}) {
     ztPlanungInit();
     ztPlanungSyncClassTeacherCourse();
     ztPlanungRenderList();
     showModal('zt-planung-modal');
+    if (Number.isFinite(options.scrollTop)) {
+        const modal = document.getElementById('zt-planung-modal');
+        if (modal) {
+            modal.scrollTop = options.scrollTop;
+            requestAnimationFrame(() => { modal.scrollTop = options.scrollTop; });
+        }
+    }
     if (focusCourseId) {
         requestAnimationFrame(() => ztPlanungFocusCourse(focusCourseId));
         setTimeout(() => ztPlanungFocusCourse(focusCourseId), 120);
     }
+}
+
+function ztPlanungOpenAtTop() {
+    ztPlanungOpen(null, { scrollTop: 0 });
 }
 
 function ztPlanungFocusCourse(courseId) {
@@ -10691,6 +10702,7 @@ function ztPlanungMarkRefDone() {
 }
 
 window.ztPlanungOpen = ztPlanungOpen;
+window.ztPlanungOpenAtTop = ztPlanungOpenAtTop;
 window.ztPlanungPrintResponsibleList = ztPlanungPrintResponsibleList;
 window.ztPlanungOpenForm = ztPlanungOpenForm;
 window.ztPlanungCancelForm = ztPlanungCancelForm;
