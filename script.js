@@ -1059,7 +1059,7 @@ window.confirmLogout = confirmLogout;
 // Modal anzeigen/verstecken
 const APP_THEME_DEFAULT = '#f2f4fa';
 const APP_THEME_LOGIN = '#1e293b';
-const APP_THEME_MODAL = '#858b98';
+const APP_THEME_MODAL = '#f2f4fa';
 
 function setAppThemeColor(color) {
     const meta = document.querySelector('meta[name="theme-color"]');
@@ -1708,7 +1708,7 @@ function renderClassesGrid() {
     notesCard.dataset.tileKey = 'notes';
     notesCard.innerHTML = `
         <div class="class-card-header">
-            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Notizen &amp; Checkliste</span>
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Notizen</span>
             <span class="tile-head-tools"><button type="button" class="tile-header-action" onclick="openDashboardNoteInput()" title="Notiz hinzufügen"><i class="fas fa-plus"></i></button><button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button></span>
         </div>
         <div class="class-card-body" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
@@ -1842,7 +1842,7 @@ function dashboardTileDefinitions() {
         });
     });
     return defs.concat([
-        { key: 'notes', label: 'Notizen & Checkliste', group: 'Kacheln', icon: 'fa-list-check' },
+        { key: 'notes', label: 'Notizen', group: 'Kacheln', icon: 'fa-list-check' },
         { key: 'calendar', label: 'Kalender', group: 'Kacheln', icon: 'fa-calendar-alt' },
         { key: 'stundenplan', label: 'Stundenplan', group: 'Kacheln', icon: 'fa-clock' },
         { key: 'zeugnistexte', label: 'Zeugnistexte', group: 'Kacheln', icon: 'fa-list-check' }

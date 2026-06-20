@@ -18,7 +18,7 @@
     --transition: all 0.2s ease;
     --border-color: #e5e9f2;
     --bg-color: #f2f4fa;
-    --modal-backdrop-color: rgba(15, 23, 42, 0.48);
+    --modal-backdrop-color: var(--bg-color);
 }
 
 * {
@@ -1456,8 +1456,8 @@ html.login-active, body.login-active {
     inset: -100px;
     padding: 116px;
     background-color: var(--modal-backdrop-color);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     /* Über dem Sitzplan-Vollbild (z-index 9000), damit z. B. das Material-
        Zähler-Modal auch im Vollbild sichtbar über dem Sitzplan erscheint. */
     z-index: 9500;
@@ -1473,8 +1473,8 @@ html.login-active, body.login-active {
 
 #modal-container.show:not(.mobile-menu-active) {
     background-color: var(--modal-backdrop-color) !important;
-    backdrop-filter: blur(2px) !important;
-    -webkit-backdrop-filter: blur(2px) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 .modal {
@@ -1543,8 +1543,8 @@ html.login-active, body.login-active {
     position: fixed;
     inset: -100px;
     background-color: var(--modal-backdrop-color);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     /* Über ALLEM: Modals (#modal-container 9500), Login-Overlay (10000) und
        Flatpickr (999999). Bestätigungen/Hinweise müssen immer im Vordergrund
        liegen, sonst verschwinden sie hinter dem geöffneten Modal. */
@@ -3099,6 +3099,7 @@ div.notes-textarea:empty::before {
 html.modal-open, body.modal-open {
     overflow: hidden !important;
     overscroll-behavior: contain;
+    background-color: var(--modal-backdrop-color) !important;
 }
 
 .modal,
@@ -5356,22 +5357,23 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
         box-shadow: none !important;
     }
 
-    /* iOS Safari: Hinter die untere Browser-Leiste malt kein fixed-Overlay
+    /* iOS Safari: Hinter die Browser-Leisten malt kein fixed-Overlay
        zuverlässig. Deshalb wird bei offenem Modal der Seiteninhalt auf die
-       sichtbare 100dvh-Höhe gekappt; der helle Wurzel-Hintergrund bleibt als
-       einzige Fläche hinter den Safari-Leisten sichtbar. */
+       sichtbare 100dvh-Höhe gekappt; der Wurzel-Hintergrund bekommt denselben
+       hellen App-Vollton wie der Modal-Backdrop und die Theme-Color. */
     html.modal-open,
     body.modal-open {
         height: 100dvh !important;
         min-height: 100dvh !important;
         max-height: 100dvh !important;
         overflow: hidden !important;
-        background-color: var(--bg-color) !important;
+        background-color: var(--modal-backdrop-color) !important;
     }
     body.modal-open {
         overscroll-behavior: none !important;
     }
-    #modal-container {
+    #modal-container,
+    .app-dialog-overlay {
         inset: 0 !important;
         width: 100vw !important;
         height: 100dvh !important;
