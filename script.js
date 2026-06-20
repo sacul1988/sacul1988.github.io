@@ -1643,7 +1643,7 @@ function renderClassesGrid() {
 
             classCard.innerHTML = `
                 <div class="class-card-header">
-                    <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span>${escapeHtml(cls.name)}</span>
+                    <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>${escapeHtml(cls.name)}</span>
                     <span class="class-card-count">${studentCount} Schüler</span>
                 </div>
                 <div class="class-card-body">
@@ -1676,16 +1676,10 @@ function renderClassesGrid() {
     notesCard.dataset.tileKey = 'notes';
     notesCard.innerHTML = `
         <div class="class-card-header">
-            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-list-check"></i> Notizen &amp; Checkliste</span>
-            <button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button>
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Notizen &amp; Checkliste</span>
+            <span class="tile-head-tools"><button type="button" class="tile-header-action" onclick="openDashboardNoteInput()" title="Notiz hinzufügen"><i class="fas fa-plus"></i></button><button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button></span>
         </div>
         <div class="class-card-body" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
-            <div class="notes-input-group" style="margin-bottom: 15px;">
-                <input type="text" id="dashboard-note-input" class="form-control" placeholder="Neue Aufgabe hinzufügen..." onkeydown="if(event.key==='Enter') addDashboardNote()">
-                <button class="btn btn-primary btn-icon-only" onclick="addDashboardNote()" style="margin: 0; flex-shrink: 0;" title="Hinzufügen">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
             <ul id="dashboard-notes-list" class="dashboard-notes-list" style="flex-grow: 1;">
                 <!-- Hier werden die Notizen dynamisch eingefügt -->
             </ul>
@@ -1704,7 +1698,7 @@ function renderClassesGrid() {
     calendarCard.onclick = () => openToolWindow('kalender');
     calendarCard.innerHTML = `
         <div class="class-card-header">
-            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-calendar-alt"></i> Kalender</span>
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Kalender</span>
             <span id="dashboard-calendar-today-badge" class="class-card-count">-</span>
         </div>
         <div class="class-card-body" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
@@ -1724,7 +1718,7 @@ function renderClassesGrid() {
     stundenplanCard.onclick = () => openToolWindow('stundenplan');
     stundenplanCard.innerHTML = `
         <div class="class-card-header">
-            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-clock"></i> Stundenplan</span>
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Stundenplan</span>
             <span id="dashboard-sp-day" class="class-card-count">–</span>
         </div>
         <div class="class-card-body" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
@@ -1740,7 +1734,7 @@ function renderClassesGrid() {
     ztPlanungCard.dataset.tileKey = 'zeugnistexte';
     ztPlanungCard.innerHTML = `
         <div class="class-card-header dashboard-zt-header" onclick="if(!event.target.closest('.tile-drag-grip, .tile-width-grip')) ztPlanungOpenAtTop()">
-            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-list-check"></i> Zeugnistexte</span>
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Zeugnistexte</span>
             <span class="tile-head-tools"><span id="dashboard-zt-count" class="class-card-count">–</span><button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button></span>
         </div>
         <div class="class-card-body" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
@@ -1913,6 +1907,7 @@ function applyDashboardTileOrder() {
 
 let _tileDrag = null;
 let _tileWidthDrag = null;
+let _dashboardTileWidthPreview = null;
 const TILE_VGAP = 15; // gewünschter vertikaler Abstand zwischen Kacheln
 
 function tileRowSpan(grid, height) {
@@ -1950,10 +1945,14 @@ function dashboardCurrentTileSpan(card) {
     return match ? Math.max(1, parseInt(match[1], 10) || 1) : 1;
 }
 
+function dashboardEffectiveTileWidths() {
+    return Object.assign({}, getDashboardTileWidths(), _dashboardTileWidthPreview || {});
+}
+
 function applyDashboardTileSpans(grid) {
     const columns = dashboardColumnCount(grid);
     const baseSpan = dashboardBaseTileSpan(grid);
-    const widths = getDashboardTileWidths();
+    const widths = dashboardEffectiveTileWidths();
     let used = 0;
     Array.from(grid.children).forEach(item => {
         if (!(item.dataset && item.dataset.tileKey)) return;
@@ -2046,6 +2045,7 @@ function onTileWidthPointerDown(e) {
     const grid = safeGetElement('classes-grid');
     const card = grip.closest('.class-card');
     if (!grid || !card) return;
+    if (dashboardColumnCount(grid) <= dashboardBaseTileSpan(grid)) return;
     const key = card.dataset && card.dataset.tileKey;
     if (key !== 'notes' && key !== 'zeugnistexte') return;
 
@@ -2059,10 +2059,17 @@ function onTileWidthPointerDown(e) {
         startX: e.clientX,
         startSpan: dashboardCurrentTileSpan(card),
         columnWidth: dashboardColumnWidth(grid),
+        pendingSpan: dashboardCurrentTileSpan(card),
+        label: null,
         changed: false
     };
+    _dashboardTileWidthPreview = { [key]: _tileWidthDrag.startSpan };
     card.classList.add('tile-width-resizing');
     document.body.classList.add('tile-width-resizing-active');
+    _tileWidthDrag.label = document.createElement('div');
+    _tileWidthDrag.label.className = 'tile-width-preview-label';
+    document.body.appendChild(_tileWidthDrag.label);
+    updateTileWidthPreviewLabel(_tileWidthDrag, e.clientX, e.clientY);
     window.addEventListener('pointermove', onTileWidthPointerMove, { passive: false });
     window.addEventListener('pointerup', onTileWidthPointerUp);
     window.addEventListener('pointercancel', onTileWidthPointerUp);
@@ -2076,22 +2083,37 @@ function onTileWidthPointerMove(e) {
     const maxSpan = dashboardColumnCount(d.grid);
     const deltaColumns = Math.round((e.clientX - d.startX) / Math.max(1, d.columnWidth));
     const nextSpan = Math.max(minSpan, Math.min(maxSpan, d.startSpan + deltaColumns));
-    if (nextSpan === dashboardCurrentTileSpan(d.card)) return;
+    updateTileWidthPreviewLabel(d, e.clientX, e.clientY, nextSpan);
+    if (nextSpan === d.pendingSpan) return;
     d.changed = true;
-    dashboardSetTileWidth(d.key, nextSpan);
+    d.pendingSpan = nextSpan;
+    _dashboardTileWidthPreview = { [d.key]: nextSpan };
+    layoutDashboardMasonry();
 }
 
 function onTileWidthPointerUp() {
     const d = _tileWidthDrag;
     if (!d) return;
     _tileWidthDrag = null;
+    _dashboardTileWidthPreview = null;
     d.card.classList.remove('tile-width-resizing');
     document.body.classList.remove('tile-width-resizing-active');
+    if (d.label && d.label.parentNode) d.label.parentNode.removeChild(d.label);
     window.removeEventListener('pointermove', onTileWidthPointerMove);
     window.removeEventListener('pointerup', onTileWidthPointerUp);
     window.removeEventListener('pointercancel', onTileWidthPointerUp);
+    if (d.changed) dashboardSetTileWidth(d.key, d.pendingSpan);
+    else layoutDashboardMasonry();
     window._suppressTileClick = true;
     setTimeout(() => { window._suppressTileClick = false; }, 80);
+}
+
+function updateTileWidthPreviewLabel(d, x, y, span = d.pendingSpan) {
+    if (!d || !d.label) return;
+    const columns = dashboardColumnCount(d.grid);
+    d.label.textContent = `Breite ${span}/${columns}`;
+    d.label.style.left = Math.min(window.innerWidth - 120, x + 14) + 'px';
+    d.label.style.top = Math.max(10, y - 38) + 'px';
 }
 
 // FLIP: Geschwister-Kacheln sanft an ihre neuen Positionen gleiten lassen
@@ -2116,6 +2138,7 @@ function flipSiblings(grid, exclude, mutate) {
 
 function onTilePointerDown(e) {
     if (e.button != null && e.button !== 0) return;
+    if (_tileWidthDrag || (e.target.closest && e.target.closest('.tile-width-grip'))) return;
     const grip = e.target.closest && e.target.closest('.tile-drag-grip');
     if (!grip) return;
     const grid = safeGetElement('classes-grid');
@@ -2139,6 +2162,7 @@ function onTilePointerDown(e) {
     // Sichtbares, frei schwebendes gestricheltes Feld zeigt die Zielposition.
     const box = document.createElement('div');
     box.className = 'tile-drop-indicator';
+    box.innerHTML = '<span class="tile-drop-label">Hier ablegen</span>';
     box.style.transition = 'none';
     box.style.left = rect.left + 'px';
     box.style.top = rect.top + 'px';
@@ -10968,10 +10992,45 @@ function renderDashboardNotes() {
     });
 }
 
-function addDashboardNote() {
+function openDashboardNoteInput() {
+    if (_appDialogState) _closeAppDialog(null);
+    const overlay = document.createElement('div');
+    overlay.className = 'app-dialog-overlay';
+
+    const dialog = document.createElement('div');
+    dialog.className = 'app-dialog dashboard-note-dialog';
+    dialog.innerHTML = `
+        <button type="button" class="app-dialog-close" aria-label="Schließen">&times;</button>
+        <h2 class="app-dialog-title">Neue Notiz</h2>
+        <p class="app-dialog-text">Trage eine Aufgabe oder Erinnerung ein.</p>
+        <input type="text" id="dashboard-note-dialog-input" class="form-control" placeholder="Notiz eingeben">
+        <div class="app-dialog-buttons">
+            <button type="button" class="btn btn-primary">Speichern</button>
+        </div>`;
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    const input = dialog.querySelector('#dashboard-note-dialog-input');
+    const close = (save) => {
+        if (save) addDashboardNote(input ? input.value : '');
+        overlay.classList.add('app-dialog-closing');
+        setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 120);
+    };
+    dialog.querySelector('.app-dialog-close').onclick = () => close(false);
+    dialog.querySelector('.btn-primary').onclick = () => close(true);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false); });
+    if (input) {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); close(true); }
+            if (e.key === 'Escape') { e.preventDefault(); close(false); }
+        });
+        setTimeout(() => input.focus(), 30);
+    }
+}
+
+function addDashboardNote(noteText = '') {
     const input = safeGetElement('dashboard-note-input');
-    if (!input) return;
-    const text = input.value.trim();
+    const text = String(noteText || (input ? input.value : '')).trim();
     if (!text) return;
     
     const notes = AppState.dashboardNotes || [];
@@ -10985,7 +11044,7 @@ function addDashboardNote() {
     AppState.dashboardNotes = notes;
     localStorage.setItem('dashboardNotes', JSON.stringify(notes));
     
-    input.value = '';
+    if (input) input.value = '';
     renderDashboardNotes();
     saveData(); // Löst Cloud-Sync aus
 }
@@ -11120,6 +11179,7 @@ function renderDashboardCalendar() {
 
 // Global verfügbar machen
 window.renderDashboardNotes = renderDashboardNotes;
+window.openDashboardNoteInput = openDashboardNoteInput;
 window.addDashboardNote = addDashboardNote;
 window.toggleDashboardNote = toggleDashboardNote;
 window.updateDashboardNoteText = updateDashboardNoteText;

@@ -293,6 +293,15 @@ body {
 }
 .tile-drag-grip:hover { opacity: 1; }
 .tile-drag-grip:active { cursor: grabbing; }
+.tile-drag-dots {
+    display: inline-block;
+    width: 16px;
+    height: 18px;
+    color: currentColor;
+    background:
+        radial-gradient(circle at 2px 2px, currentColor 1.6px, transparent 1.8px) 0 0 / 6px 6px;
+    vertical-align: middle;
+}
 .tile-head-tools {
     display: inline-flex;
     align-items: center;
@@ -313,6 +322,28 @@ body {
     flex-shrink: 0;
     padding: 0;
     transition: background 0.15s ease, transform 0.12s ease;
+}
+.tile-header-action {
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    transition: background 0.15s ease, transform 0.12s ease;
+}
+.tile-header-action:hover {
+    background: rgba(255, 255, 255, 0.24);
+}
+.tile-header-action i {
+    font-size: 0.8rem;
+    margin: 0;
 }
 .tile-width-grip:hover,
 .tile-width-resizing .tile-width-grip {
@@ -349,7 +380,19 @@ body {
     border-radius: var(--border-radius-lg);
     background: rgba(99, 102, 241, 0.10);
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: left 0.14s ease, top 0.14s ease, width 0.14s ease, height 0.14s ease;
+}
+.tile-drop-label {
+    border-radius: 999px;
+    background: #fff;
+    color: var(--primary-color);
+    box-shadow: 0 6px 18px rgba(67, 97, 238, 0.16);
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 6px 11px;
 }
 body.tile-dragging-active {
     cursor: grabbing;
@@ -364,6 +407,19 @@ body.tile-width-resizing-active {
     cursor: ew-resize;
     user-select: none;
     -webkit-user-select: none;
+}
+.tile-width-preview-label {
+    position: fixed;
+    z-index: 1100;
+    pointer-events: none;
+    border-radius: 999px;
+    background: #1e293b;
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 6px 10px;
+    white-space: nowrap;
 }
 
 .class-card-body {
@@ -3561,6 +3617,10 @@ html.modal-open, body.modal-open {
         --dashboard-base-span: 12;
     }
 
+    .tile-width-grip {
+        display: none;
+    }
+
     .dashboard-notes-card {
         grid-column: auto;
     }
@@ -6019,6 +6079,9 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     align-items: center;
     gap: 10px;
     margin-top: 18px;
+}
+.dashboard-note-dialog .form-control {
+    margin: 4px 0 16px;
 }
 
 .dashboard-zt-card {

@@ -1578,7 +1578,7 @@
                                 const isDraggingSitzplan = window.isDraggingDesk === true;
 
                                 const isUserTypingInNotes = activeElement && 
-                                                             ((activeElement.tagName === 'INPUT' && activeElement.id === 'dashboard-note-input') || 
+                                                             ((activeElement.tagName === 'INPUT' && activeElement.id === 'dashboard-note-dialog-input') || 
                                                               (activeElement.tagName === 'SPAN' && activeElement.classList.contains('dashboard-note-text')));
 
                                 if (isUserTypingInZeugnis || isUserTypingInPlanung || isUserTypingInContacts || isUserTypingInNotes || isDraggingSitzplan) {
