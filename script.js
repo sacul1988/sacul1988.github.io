@@ -8637,10 +8637,14 @@ function renderPlanung() {
         }
     }
 
-    const listButtons = safeGetElement('planung-list-buttons');
-    if (listButtons) {
-        listButtons.style.display = viewMode === 'list' ? 'inline-flex' : 'none';
-    }
+    const listOnlyButtons = [
+        safeGetElement('planung-unterrichtstage-btn'),
+        safeGetElement('planung-termine-btn'),
+        safeGetElement('planung-delete-btn')
+    ];
+    listOnlyButtons.forEach(btn => {
+        if (btn) btn.style.display = viewMode === 'list' ? 'inline-flex' : 'none';
+    });
     
     
     if (viewMode === 'calendar') {
@@ -11680,22 +11684,22 @@ function stundenplanRenderCellModal() {
             <div class="sp-cell-row2">
                 <div class="sp-field sp-name-field">
                     <span>Anzeigename</span>
-                    <input id="sp-cell-name" class="form-control" placeholder="z. B. Mathe 8c" value="${ztEsc(d.name)}" onfocus="stundenplanCellNameFocused(this.value)" oninput="stundenplanCellNameChanged(this.value)" onblur="stundenplanCellNameBlurred()">
+                    <input id="sp-cell-name" class="form-control" value="${ztEsc(d.name)}" onfocus="stundenplanCellNameFocused(this.value)" oninput="stundenplanCellNameChanged(this.value)" onblur="stundenplanCellNameBlurred()">
                     <div id="sp-cell-name-suggestions" class="sp-name-suggestions"></div>
                 </div>
                 <div class="sp-field">
                     <span>Fachlehrer</span>
-                    <input id="sp-cell-fachlehrer" class="form-control" placeholder="z. B. Frau Müller" value="${ztEsc(d.fachlehrer || '')}">
+                    <input id="sp-cell-fachlehrer" class="form-control" value="${ztEsc(d.fachlehrer || '')}">
                 </div>
             </div>
             <div class="sp-cell-row2">
                 <div class="sp-field">
                     <span>Klasse</span>
-                    <input id="sp-cell-klasse" class="form-control" placeholder="z. B. 8c" value="${ztEsc(d.klasse)}">
+                    <input id="sp-cell-klasse" class="form-control" value="${ztEsc(d.klasse)}">
                 </div>
                 <div class="sp-field">
                     <span>Fach</span>
-                    <input id="sp-cell-fach" class="form-control" placeholder="z. B. Mathematik" value="${ztEsc(d.fach)}">
+                    <input id="sp-cell-fach" class="form-control" value="${ztEsc(d.fach)}">
                 </div>
             </div>
             <div class="sp-cell-row2">

@@ -264,7 +264,7 @@
             <div id="home-page" class="page">
                 <div class="card">
                     <div class="card-header">
-                        <h2>Klassen</h2>
+                        <h2></h2>
                         <div class="card-header-actions">
                             <div class="desktop-header-buttons">
                                 <button class="btn btn-primary btn-icon" onclick="showModal('add-class-modal')">
@@ -423,8 +423,11 @@
                                 <h2>Schriftlich</h2>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
-<button class="btn btn-primary btn-icon" onclick="showModal('noten-projekt-modal')">
-                                            <i class="fas fa-folder"></i> <span class="btn-text">Projekt</span>
+<button class="btn btn-primary btn-icon" onclick="showAddProjectToAllModal()">
+                                            <i class="fas fa-plus"></i> <span class="btn-text">Projekt hinzufügen</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" onclick="showDeleteProjectForAllModal()">
+                                            <i class="fas fa-trash"></i> <span class="btn-text">Projekt löschen</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" onclick="exportGrades()">
                                             <i class="fas fa-arrow-up"></i>
@@ -483,8 +486,14 @@
                                 <h2>Planung</h2>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
-                                        <button class="btn btn-secondary btn-icon" id="planung-list-buttons" style="display: none;" onclick="showModal('planung-optionen-modal')">
-                                            <i class="fas fa-sliders-h"></i> <span class="btn-text">Optionen</span>
+                                        <button class="btn btn-secondary btn-icon" id="planung-unterrichtstage-btn" style="display: none;" onclick="showModal('unterrichtstage-modal')">
+                                            <i class="fas fa-list-check"></i> <span class="btn-text">Unterrichtstage</span>
+                                        </button>
+                                        <button class="btn btn-secondary btn-icon" id="planung-termine-btn" style="display: none;" onclick="showTermineModal()">
+                                            <i class="fas fa-toggle-on"></i> <span class="btn-text">Termine</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" id="planung-delete-btn" style="display: none;" onclick="deletePlanungTable()">
+                                            <i class="fas fa-eraser"></i> <span class="btn-text">Planung löschen</span>
                                         </button>
                                         <button class="btn btn-secondary btn-icon" id="planung-zeitraum-btn" onclick="togglePlanungZeitraum()">
                                             <i class="fas fa-calendar-day"></i> <span class="btn-text">Zeitraum</span>
