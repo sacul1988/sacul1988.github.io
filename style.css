@@ -228,6 +228,10 @@ body {
     min-width: 0;
 }
 
+.dashboard-tile-hidden {
+    display: none !important;
+}
+
 .class-card {
     background-color: white;
     border-radius: var(--border-radius-lg);
@@ -3408,6 +3412,83 @@ html.modal-open, body.modal-open {
     align-items: center;
 }
 
+/* Header-Werkzeuge: auf Desktop/iPad wie die obere Symbolleiste darstellen */
+.card-header-actions .desktop-header-buttons .btn,
+.card-header-actions > .btn.btn-icon {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    padding: 0;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: #fff !important;
+    color: var(--primary-color) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    gap: 0;
+    flex: 0 0 auto;
+    position: relative;
+}
+.card-header-actions .desktop-header-buttons .btn .btn-text,
+.card-header-actions > .btn.btn-icon .btn-text {
+    display: none;
+}
+.card-header-actions .desktop-header-buttons .btn i,
+.card-header-actions .desktop-header-buttons .btn svg,
+.card-header-actions > .btn.btn-icon i,
+.card-header-actions > .btn.btn-icon svg {
+    margin: 0;
+    color: var(--primary-color) !important;
+    font-size: 1rem;
+}
+.card-header-actions .desktop-header-buttons .btn:hover,
+.card-header-actions > .btn.btn-icon:hover {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color);
+    color: #fff !important;
+    opacity: 1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transform: none;
+}
+.card-header-actions .desktop-header-buttons .btn:hover i,
+.card-header-actions .desktop-header-buttons .btn:hover svg,
+.card-header-actions > .btn.btn-icon:hover i,
+.card-header-actions > .btn.btn-icon:hover svg {
+    color: #fff !important;
+}
+.card-header-actions .desktop-header-buttons .btn:active,
+.card-header-actions > .btn.btn-icon:active {
+    transform: scale(0.95);
+}
+.card-header-actions .desktop-header-buttons .btn.btn-danger,
+.card-header-actions > .btn.btn-icon.btn-danger {
+    color: #e74c3c !important;
+}
+.card-header-actions .desktop-header-buttons .btn.btn-danger i,
+.card-header-actions .desktop-header-buttons .btn.btn-danger svg,
+.card-header-actions > .btn.btn-icon.btn-danger i,
+.card-header-actions > .btn.btn-icon.btn-danger svg {
+    color: #e74c3c !important;
+}
+.card-header-actions .desktop-header-buttons .btn.btn-danger:hover,
+.card-header-actions > .btn.btn-icon.btn-danger:hover {
+    background: #e74c3c !important;
+    border-color: #e74c3c;
+    color: #fff !important;
+}
+.card-header-actions .desktop-header-buttons .btn.btn-danger:hover i,
+.card-header-actions .desktop-header-buttons .btn.btn-danger:hover svg,
+.card-header-actions > .btn.btn-icon.btn-danger:hover i,
+.card-header-actions > .btn.btn-icon.btn-danger:hover svg {
+    color: #fff !important;
+}
+.card-header-actions .zt-archive-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    margin: 0;
+}
+
 /* --- iPhone / Mobilgeräte (Bottom Sheet) --- */
 @media (max-width: 600px) {
 
@@ -5771,6 +5852,125 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .sp-home-stunde-name { font-weight: 700; font-size: 0.95rem; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: right; }
 .sp-tile-empty { color: var(--grey-color); font-size: 0.88rem; padding: 8px 0; }
 .sp-tile-empty { color: var(--grey-color); font-size: 0.88rem; }
+.sp-weekend-state {
+    flex: 1;
+    min-height: 220px;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eef6ff 55%, #ecfdf5 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 24px 16px;
+    text-align: center;
+}
+.sp-weekend-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: #ffffff;
+    color: var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+}
+.sp-weekend-title {
+    color: #1e293b;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+.sp-weekend-text {
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+.sp-weekend-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+.sp-weekend-meta span {
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.76);
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 5px 9px;
+}
+.sp-weekend-meta i {
+    color: #16a34a;
+}
+
+.dashboard-tile-settings-modal {
+    max-width: 520px;
+}
+.dashboard-tile-settings-hint {
+    color: var(--grey-color);
+    font-size: 0.9rem;
+    margin: 0 0 16px;
+}
+.dashboard-tile-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: min(56vh, 520px);
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.dashboard-tile-settings-group {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin: 10px 0 2px;
+    text-transform: uppercase;
+}
+.dashboard-tile-settings-row {
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 11px 12px;
+    cursor: pointer;
+}
+.dashboard-tile-settings-name {
+    color: #1e293b;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    min-width: 0;
+}
+.dashboard-tile-settings-name i {
+    color: var(--primary-color);
+    width: 18px;
+    text-align: center;
+}
+.dashboard-tile-settings-row input {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    accent-color: var(--primary-color);
+}
+.dashboard-tile-settings-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+}
 
 .dashboard-zt-card {
     min-width: 0;

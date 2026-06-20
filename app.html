@@ -270,6 +270,9 @@
                                 <button class="btn btn-primary btn-icon" onclick="showModal('add-class-modal')">
                                     <i class="fas fa-plus"></i> <span class="btn-text">Klasse hinzufügen</span>
                                 </button>
+                                <button class="btn btn-secondary btn-icon" onclick="openDashboardTileSettings()" title="Kacheln ein- oder ausblenden">
+                                    <i class="fas fa-gear"></i> <span class="btn-text">Kacheln</span>
+                                </button>
                                 <button class="btn btn-primary btn-icon" onclick="exportAllData(event)" title="Alle Daten als Datei exportieren">
                                     <i class="fas fa-file-export"></i> <span class="btn-text">Exportieren</span>
                                 </button>
@@ -770,7 +773,21 @@
                     <h2 id="sync-status-modal-title">Synchronisierung</h2>
                     <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
                 </div>
-                <div id="sync-status-modal-body"></div>
+            <div id="sync-status-modal-body"></div>
+            </div>
+
+            <!-- Startseiten-Kacheln Modal -->
+            <div id="dashboard-tile-settings-modal" class="modal dashboard-tile-settings-modal" style="display: none;" role="dialog" aria-labelledby="dashboard-tile-settings-title">
+                <div class="wizard-header">
+                    <h2 id="dashboard-tile-settings-title">Kacheln anzeigen</h2>
+                    <button class="wizard-close-btn" onclick="hideModal()">&times;</button>
+                </div>
+                <p class="dashboard-tile-settings-hint">Diese Auswahl gilt nur auf diesem Gerät.</p>
+                <div id="dashboard-tile-settings-list" class="dashboard-tile-settings-list"></div>
+                <div class="dashboard-tile-settings-actions">
+                    <button class="btn btn-secondary btn-icon" onclick="dashboardTileSettingsShowAll()"><i class="fas fa-eye"></i> Alle anzeigen</button>
+                    <button class="btn btn-primary" onclick="hideModal()">Fertig</button>
+                </div>
             </div>
 
             <!-- Klasse hinzufügen Modal -->

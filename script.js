@@ -1751,6 +1751,7 @@ function renderClassesGrid() {
 
     // Gespeicherte Reihenfolge anwenden, dann Masonry sofort vor dem ersten sichtbaren Paint berechnen.
     applyDashboardTileOrder();
+    applyDashboardTileVisibility();
     layoutDashboardMasonry();
     classesGrid.classList.remove('masonry-prep');
     initDashboardTileDnd();
@@ -1762,6 +1763,94 @@ function renderClassesGrid() {
 // ===== Startseiten-Kacheln frei anordnen (Drag & Drop) =============
 // ===================================================================
 const DASHBOARD_TILE_ORDER_KEY = 'dashboardTileOrder';
+const DASHBOARD_TILE_VISIBILITY_KEY = 'dashboardTileVisibilityLocal';
+
+function getDashboardTileVisibility() {
+    try {
+        const obj = JSON.parse(localStorage.getItem(DASHBOARD_TILE_VISIBILITY_KEY) || '{}');
+        return obj && typeof obj === 'object' ? obj : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveDashboardTileVisibility(settings) {
+    localStorage.setItem(DASHBOARD_TILE_VISIBILITY_KEY, JSON.stringify(settings || {}));
+}
+
+function dashboardTileDefinitions() {
+    const defs = [];
+    (classes || []).forEach(cls => {
+        const name = cls && cls.name ? String(cls.name) : 'Klasse';
+        defs.push({
+            key: 'class:' + name,
+            label: name,
+            group: 'Klassen',
+            icon: 'fa-school'
+        });
+    });
+    return defs.concat([
+        { key: 'notes', label: 'Notizen & Checkliste', group: 'Kacheln', icon: 'fa-list-check' },
+        { key: 'calendar', label: 'Kalender', group: 'Kacheln', icon: 'fa-calendar-alt' },
+        { key: 'stundenplan', label: 'Stundenplan', group: 'Kacheln', icon: 'fa-clock' },
+        { key: 'zeugnistexte', label: 'Zeugnistexte', group: 'Kacheln', icon: 'fa-list-check' }
+    ]);
+}
+
+function applyDashboardTileVisibility() {
+    const grid = safeGetElement('classes-grid');
+    if (!grid) return;
+    const visibility = getDashboardTileVisibility();
+    Array.from(grid.children).forEach(card => {
+        const key = card.dataset && card.dataset.tileKey;
+        if (!key) return;
+        card.classList.toggle('dashboard-tile-hidden', visibility[key] === false);
+    });
+}
+
+function openDashboardTileSettings() {
+    renderDashboardTileSettings();
+    showModal('dashboard-tile-settings-modal');
+}
+
+function renderDashboardTileSettings() {
+    const list = safeGetElement('dashboard-tile-settings-list');
+    if (!list) return;
+    const visibility = getDashboardTileVisibility();
+    const defs = dashboardTileDefinitions();
+    let lastGroup = '';
+    list.innerHTML = defs.map(def => {
+        const checked = visibility[def.key] !== false;
+        const group = def.group !== lastGroup
+            ? `<div class="dashboard-tile-settings-group">${escapeHtml(def.group)}</div>`
+            : '';
+        lastGroup = def.group;
+        return `${group}
+            <label class="dashboard-tile-settings-row">
+                <span class="dashboard-tile-settings-name">
+                    <i class="fas ${escapeHtml(def.icon)}"></i>
+                    ${escapeHtml(def.label)}
+                </span>
+                <input type="checkbox" ${checked ? 'checked' : ''} onchange="dashboardTileSettingsToggle('${spJsAttr(def.key)}', this.checked)">
+            </label>`;
+    }).join('');
+}
+
+function dashboardTileSettingsToggle(key, visible) {
+    const settings = getDashboardTileVisibility();
+    if (visible) delete settings[key];
+    else settings[key] = false;
+    saveDashboardTileVisibility(settings);
+    applyDashboardTileVisibility();
+    layoutDashboardMasonry();
+}
+
+function dashboardTileSettingsShowAll() {
+    saveDashboardTileVisibility({});
+    renderDashboardTileSettings();
+    applyDashboardTileVisibility();
+    layoutDashboardMasonry();
+}
 
 function getDashboardTileOrder() {
     try {
@@ -11856,7 +11945,19 @@ function stundenplanRenderHomeTile() {
     const todayLabel = (STUNDENPLAN_DAYS.find(d => d.key === todayKey) || {}).label || '';
     if (dayBadge) dayBadge.textContent = todayLabel || 'Wochenende';
 
-    if (!todayKey) { list.innerHTML = '<li class="sp-tile-empty">Wochenende – kein Unterricht.</li>'; return; }
+    if (!todayKey) {
+        list.innerHTML = `
+            <div class="sp-weekend-state">
+                <div class="sp-weekend-icon"><i class="fas fa-smile"></i></div>
+                <div class="sp-weekend-title">Wochenende</div>
+                <div class="sp-weekend-text">Kein Unterricht geplant.</div>
+                <div class="sp-weekend-meta">
+                    <span><i class="fas fa-check-circle"></i> Unterrichtsfrei</span>
+                    <span><i class="fas fa-clock"></i> Stundenplan pausiert</span>
+                </div>
+            </div>`;
+        return;
+    }
 
     let stundeNr = 0;
     const items = [];
