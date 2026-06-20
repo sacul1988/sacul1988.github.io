@@ -3518,11 +3518,16 @@ html.modal-open, body.modal-open {
 /* Header-Werkzeuge: auf Desktop/iPad wie die obere Symbolleiste darstellen */
 .card-header-actions .desktop-header-buttons .btn,
 .card-header-actions > .btn.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 42px;
     min-width: 42px;
     height: 42px;
     min-height: 42px;
     padding: 0;
+    margin: 0;
+    line-height: 1;
     border-radius: 12px;
     border: 1px solid var(--border-color);
     background: #fff !important;
@@ -3540,15 +3545,21 @@ html.modal-open, body.modal-open {
 .card-header-actions .desktop-header-buttons .btn svg,
 .card-header-actions > .btn.btn-icon i,
 .card-header-actions > .btn.btn-icon svg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15em;
+    height: 1.15em;
+    line-height: 1;
     margin: 0;
     color: var(--primary-color) !important;
     font-size: 1rem;
 }
 .card-header-actions .desktop-header-buttons .btn:hover,
 .card-header-actions > .btn.btn-icon:hover {
-    background: var(--primary-color) !important;
-    border-color: var(--primary-color);
-    color: #fff !important;
+    background: #fff !important;
+    border-color: var(--border-color);
+    color: var(--primary-color) !important;
     opacity: 1;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     transform: none;
@@ -3557,7 +3568,7 @@ html.modal-open, body.modal-open {
 .card-header-actions .desktop-header-buttons .btn:hover svg,
 .card-header-actions > .btn.btn-icon:hover i,
 .card-header-actions > .btn.btn-icon:hover svg {
-    color: #fff !important;
+    color: var(--primary-color) !important;
 }
 .card-header-actions .desktop-header-buttons .btn:active,
 .card-header-actions > .btn.btn-icon:active {
@@ -3575,15 +3586,15 @@ html.modal-open, body.modal-open {
 }
 .card-header-actions .desktop-header-buttons .btn.btn-danger:hover,
 .card-header-actions > .btn.btn-icon.btn-danger:hover {
-    background: #e74c3c !important;
-    border-color: #e74c3c;
-    color: #fff !important;
+    background: #fff !important;
+    border-color: var(--border-color);
+    color: #e74c3c !important;
 }
 .card-header-actions .desktop-header-buttons .btn.btn-danger:hover i,
 .card-header-actions .desktop-header-buttons .btn.btn-danger:hover svg,
 .card-header-actions > .btn.btn-icon.btn-danger:hover i,
 .card-header-actions > .btn.btn-icon.btn-danger:hover svg {
-    color: #fff !important;
+    color: #e74c3c !important;
 }
 .card-header-actions .zt-archive-badge {
     position: absolute;
@@ -3998,13 +4009,25 @@ html.modal-open, body.modal-open {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.18);
+    width: 1.1em;
+    height: 1.1em;
+    line-height: 1;
+    border-radius: 0;
+    background: transparent;
     color: #fff;
     font-size: 0.82rem;
     flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.class-teacher-icon i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1em;
+    height: 1.1em;
+    line-height: 1;
+    margin: 0;
 }
 
 .zt-plan-list { display: flex; flex-direction: column; gap: 14px; }
