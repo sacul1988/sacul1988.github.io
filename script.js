@@ -1061,6 +1061,12 @@ function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
 
+    // Der alte Modal-Container liegt im Markup innerhalb der App-Fläche. Direkt
+    // unter body deckt sein Backdrop auch iOS-Safe-Areas und den Root-Hintergrund ab.
+    if (modalContainer.parentElement !== document.body) {
+        document.body.appendChild(modalContainer);
+    }
+
     // Scroll-Lock per position:fixed: friert den Hintergrund optisch GENAU an der
     // aktuellen Stelle ein -> kein Springen beim Öffnen/Schließen. Nur beim ersten
     // Öffnen anwenden (verschachtelte Modale nicht doppelt sperren).

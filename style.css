@@ -18,7 +18,7 @@
     --transition: all 0.2s ease;
     --border-color: #e5e9f2;
     --bg-color: #f2f4fa;
-    --modal-backdrop-color: rgba(15, 23, 42, 0.72);
+    --modal-backdrop-color: rgba(15, 23, 42, 0.48);
 }
 
 * {
@@ -1469,6 +1469,12 @@ html.login-active, body.login-active {
 
 #modal-container.show {
     display: flex;
+}
+
+#modal-container.show:not(.mobile-menu-active) {
+    background-color: var(--modal-backdrop-color) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
 }
 
 .modal {
@@ -5360,13 +5366,6 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
         bottom: auto !important;
         height: calc(100vh + 200px) !important;   /* iOS: 100vh = große Viewport-Höhe */
         height: calc(100lvh + 200px) !important;   /* moderne Browser: explizit große Viewport-Höhe */
-    }
-    /* Bei offenem Modal dunklen Wurzel-Hintergrund setzen, damit hinter der
-       Safari-Leiste kein heller App-Hintergrund erscheint. Die Scroll-Sperre läuft über einen
-       position:fixed-Lock (in showModal/hideModal) – kein height:100dvh mehr,
-       da dieses den Hintergrund beim Öffnen sichtbar nach oben springen ließ. */
-    html.modal-open, body.modal-open {
-        background-color: rgb(15, 23, 42) !important;
     }
 }
 
