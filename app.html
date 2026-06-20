@@ -1831,6 +1831,54 @@
                     }
                 }
 
+                // Notizen und Stundenplan sind ebenfalls anfällig für Lade-Races nach
+                // Hard-Refresh/App-Update: lokaler leerer Startzustand darf gefüllte
+                // Cloud-Felder nicht überschreiben. Bewusste Löschungen setzen
+                // Einmal-Flags in script.js und dürfen natürlich synchronisiert werden.
+                const allowEmptyNotesOnce = window._allowEmptyDashboardNotesSync === true;
+                const allowEmptyStundenplanOnce = window._allowEmptyStundenplanSync === true;
+                window._allowEmptyDashboardNotesSync = false;
+                window._allowEmptyStundenplanSync = false;
+
+                const isEmptyStundenplan = (value) => {
+                    const obj = parseCloudBlob(value) || {};
+                    return (!Array.isArray(obj.zeiten) || obj.zeiten.length === 0) &&
+                           (!Array.isArray(obj.kurse) || obj.kurse.length === 0) &&
+                           (!obj.kacheln || Object.keys(obj.kacheln).length === 0) &&
+                           (!obj.inklusionProKlasse || Object.keys(obj.inklusionProKlasse).length === 0);
+                };
+
+                try {
+                    const needsNotesGuard = Array.isArray(data.dashboardNotes) && data.dashboardNotes.length === 0 && !allowEmptyNotesOnce;
+                    const needsStundenplanGuard = isEmptyStundenplan(data.stundenplan) && !allowEmptyStundenplanOnce;
+                    if (needsNotesGuard || needsStundenplanGuard) {
+                        const existing = await getDoc(userDocRef);
+                        if (existing.exists()) {
+                            const existingData = existing.data();
+
+                            if (needsNotesGuard && Array.isArray(existingData.dashboardNotes) && existingData.dashboardNotes.length > 0) {
+                                console.warn(`Cloud-Sync Schutz: lokale Notizen leer, Cloud hat ${existingData.dashboardNotes.length} Notizen. Cloud-Stand bleibt erhalten.`);
+                                data.dashboardNotes = existingData.dashboardNotes;
+                                localStorage.setItem('dashboardNotes', JSON.stringify(existingData.dashboardNotes));
+                                if (typeof window.setDashboardNotes === 'function') window.setDashboardNotes(existingData.dashboardNotes);
+                                if (typeof window.renderDashboardNotes === 'function') window.renderDashboardNotes();
+                            }
+
+                            if (needsStundenplanGuard && existingData.stundenplan && !isEmptyStundenplan(existingData.stundenplan)) {
+                                console.warn('Cloud-Sync Schutz: lokaler Stundenplan leer, Cloud-Stundenplan ist gefüllt. Cloud-Stand bleibt erhalten.');
+                                data.stundenplan = typeof existingData.stundenplan === 'string'
+                                    ? existingData.stundenplan
+                                    : JSON.stringify(existingData.stundenplan);
+                                applyCloudBlob(existingData.stundenplan, 'stundenplan', window.setStundenplan);
+                            }
+                        }
+                    }
+                } catch (guardErr) {
+                    console.warn('Cloud-Sync Schutzprüfung für Notizen/Stundenplan fehlgeschlagen, riskante Leer-Felder werden nicht hochgeladen:', guardErr);
+                    if (Array.isArray(data.dashboardNotes) && data.dashboardNotes.length === 0 && !allowEmptyNotesOnce) delete data.dashboardNotes;
+                    if (isEmptyStundenplan(data.stundenplan) && !allowEmptyStundenplanOnce) delete data.stundenplan;
+                }
+
                 await setDoc(userDocRef, data, { merge: true });
                 localStorage.setItem('lastUpdate', timestamp);
 

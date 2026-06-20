@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Schulverwaltung – Klassen, Noten & Zeugnistexte mit KI</title>
-    <meta name="description" content="Schulverwaltung bündelt Klassen, Schülerlisten, Sitzpläne, Noten, Kalender, Adressbuch und KI-gestützte Zeugnistexte in einer schnellen, sicheren Web-App. Für Lehrkräfte an Förder- und Regelschulen.">
+    <title>Schulverwaltung – Klassen, Stundenplan, Noten & Zeugnistexte</title>
+    <meta name="description" content="Schulverwaltung bündelt Klassen, Schülerlisten, Sitzpläne, Stundenplan, Notizen, Kalender, Zuständigkeiten, Noten und KI-gestützte Zeugnistexte in einer schnellen Web-App für Lehrkräfte.">
     <meta name="theme-color" content="#1e293b">
 
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Schulverwaltung – Klassen, Noten & Zeugnistexte mit KI">
-    <meta property="og:description" content="Klassen, Noten, Sitzpläne, Kalender, Adressbuch und KI-Zeugnistexte – alles an einem Ort.">
+    <meta property="og:title" content="Schulverwaltung – Klassen, Stundenplan, Noten & Zeugnistexte">
+    <meta property="og:description" content="Startseiten-Dashboard, Stundenplan, Notizen, Zuständigkeiten, Noten und KI-Zeugnistexte – alles an einem Ort.">
     <meta property="og:image" content="assets/screenshots/c-ki-zeugnistext.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -106,6 +106,12 @@
         .sub h4 i { color: var(--primary); font-size: .95rem; }
         .sub p { color: var(--grey); font-size: .96rem; }
 
+        .feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 34px; }
+        .feature-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+        .feature-card i { color: var(--primary); font-size: 1.35rem; margin-bottom: 14px; }
+        .feature-card h4 { font-size: 1.05rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -.01em; }
+        .feature-card p { color: var(--grey); font-size: .95rem; line-height: 1.55; }
+
         /* KI band */
         .ki-band { background: linear-gradient(135deg, #1e293b 0%, #312e81 100%); color: #fff; margin-top: 60px; }
         .ki-band .part-label { background: rgba(247,37,133,.2); color: #fbcfe8; }
@@ -141,6 +147,7 @@
             .tour-row { grid-template-columns: 1fr; gap: 28px; }
             .tour-row.reverse .t-text { order: 0; }
             .benefits { grid-template-columns: repeat(2, 1fr); gap: 34px; }
+            .feature-grid { grid-template-columns: repeat(2, 1fr); }
             .nav-links .link { display: none; }
         }
         @media (max-width: 560px) {
@@ -148,6 +155,7 @@
             .hero { padding: 64px 0 110px; }
             .hero-shot { margin: 40px auto -120px; } .hero-offset { height: 120px; }
             .benefits { grid-template-columns: 1fr; }
+            .feature-grid { grid-template-columns: 1fr; }
             section.block, .part { padding: 56px 0 0; }
             .tour { padding: 32px 0; }
             .btn { width: 100%; } .hero-cta { flex-direction: column; }
@@ -161,6 +169,7 @@
             <nav class="nav-links">
                 <a href="#startseite" class="link">Startseite</a>
                 <a href="#klasse" class="link">In der Klasse</a>
+                <a href="#planung" class="link">Planung</a>
                 <a href="#ki" class="link">KI-Features</a>
                 <a href="app.html" class="btn btn-soft">Einloggen</a>
             </nav>
@@ -171,8 +180,8 @@
     <section class="hero" id="top">
         <div class="wrap">
             <span class="eyebrow"><i class="fas fa-graduation-cap"></i> Für Lehrkräfte an Förder- und Regelschulen</span>
-            <h1>Klassen, Noten und Zeugnisse –<br><span class="grad">alles an einem Ort.</span></h1>
-            <p class="lead">Schülerlisten, Sitzpläne, Notenverwaltung, Kalender, Adressbuch und KI-gestützte Zeugnistexte in einer schnellen, sicheren Web-App. Überall verfügbar, automatisch synchronisiert.</p>
+            <h1>Unterricht, Noten und Zeugnisse –<br><span class="grad">alles an einem Ort.</span></h1>
+            <p class="lead">Schülerlisten, Sitzpläne, Stundenplan, Notizen, Zuständigkeiten, Kalender, Adressbuch und KI-gestützte Zeugnistexte in einer schnellen Web-App. Für den Alltag in der Klasse gebaut.</p>
             <div class="hero-cta">
                 <a href="app.html" class="btn btn-primary btn-lg"><i class="fas fa-right-to-bracket"></i> Einloggen</a>
                 <a href="#startseite" class="btn btn-ghost btn-lg">Funktionen entdecken</a>
@@ -181,7 +190,7 @@
                 <span><i class="fas fa-lock"></i> DSGVO-konform</span>
                 <span><i class="fas fa-cloud"></i> Automatische Sync</span>
                 <span><i class="fas fa-wifi"></i> Offline nutzbar</span>
-                <span><i class="fas fa-mobile-screen"></i> Auf allen Geräten</span>
+                <span><i class="fas fa-sliders"></i> Lokal anpassbar</span>
             </div>
         </div>
         <div class="hero-shot wrap">
@@ -197,25 +206,36 @@
     <div class="part" id="startseite">
         <div class="wrap part-head">
             <span class="part-label">Teil 1 · Die Startseite</span>
-            <h2>Dein Überblick</h2>
-            <p>Von der Startseite aus erreichst du alle Klassen sowie die zentralen Werkzeuge: Kalender und Adressbuch.</p>
+            <h2>Dein tägliches Cockpit</h2>
+            <p>Die Startseite zeigt Klassen, Termine, den heutigen Stundenplan, Notizen und offene Zeugnistexte. Kacheln lassen sich verschieben, ausblenden und lokal pro Gerät anpassen.</p>
         </div>
     </div>
 
     <section class="tour">
         <div class="wrap tour-row">
             <div class="t-text">
-                <span class="tag"><i class="fas fa-users"></i> Klassen</span>
-                <h3>Klassen anlegen &amp; verwalten</h3>
-                <p>Lege beliebig viele Klassen an und sieh auf einen Blick die Schülerzahl. Jede Klasse lässt sich mit einem Klick bearbeiten, klonen oder löschen.</p>
+                <span class="tag"><i class="fas fa-table-cells-large"></i> Startseiten-Kacheln</span>
+                <h3>Alles Wichtige direkt sichtbar</h3>
+                <p>Die Startseite ist inzwischen mehr als eine Klassenliste: Kalender, Stundenplan, Notizen und Zeugnistexte liegen als Kacheln direkt neben deinen Klassen.</p>
                 <ul>
-                    <li><i class="fas fa-check"></i> Beliebig viele Klassen &amp; Fächer</li>
-                    <li><i class="fas fa-check"></i> Klonen für ähnliche Kurse</li>
-                    <li><i class="fas fa-check"></i> Import &amp; Export deiner Daten</li>
+                    <li><i class="fas fa-check"></i> Kacheln per Drag &amp; Drop sortieren</li>
+                    <li><i class="fas fa-check"></i> Notizen und Zeugnis-Zuständigkeiten direkt bearbeiten</li>
+                    <li><i class="fas fa-check"></i> Kacheln lokal pro Gerät ein- oder ausblenden</li>
                 </ul>
             </div>
             <div class="t-img">
-                <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-klassen-card.png" alt="Klassenkarte" loading="lazy"></div>
+                <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/01-klassen.png" alt="Startseite mit Klassenübersicht" loading="lazy"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tour" style="padding-top:18px;">
+        <div class="wrap">
+            <div class="feature-grid">
+                <div class="feature-card"><i class="fas fa-grip"></i><h4>Freie Kachelordnung</h4><p>Klassen und Dashboard-Kacheln lassen sich so anordnen, wie es auf deinem Gerät am besten passt.</p></div>
+                <div class="feature-card"><i class="fas fa-list-check"></i><h4>Notizen ohne Umweg</h4><p>Kurze Aufgaben und Checklisten bleiben direkt auf der Startseite sichtbar.</p></div>
+                <div class="feature-card"><i class="fas fa-clock"></i><h4>Heutiger Stundenplan</h4><p>Die aktuelle Tagesübersicht zeigt dir schnell, was heute ansteht.</p></div>
+                <div class="feature-card"><i class="fas fa-user-check"></i><h4>Zeugnistexte offen</h4><p>Die Kachel zeigt, bei welchen Kursen die Zuständigkeit noch geklärt werden muss.</p></div>
             </div>
         </div>
     </section>
@@ -224,8 +244,8 @@
         <div class="wrap tour-row reverse">
             <div class="t-text">
                 <span class="tag"><i class="fas fa-calendar-days"></i> Kalender</span>
-                <h3>Zentraler Kalender</h3>
-                <p>Termine wie Klassenarbeiten, Elternabende oder Ausflüge an einem Ort – über alle Klassen hinweg, mit Uhrzeiten und automatisch synchronisiert.</p>
+                <h3>Kalender und Tagesüberblick</h3>
+                <p>Termine wie Klassenarbeiten, Elternabende oder Ausflüge an einem Ort – plus Startseiten-Kachel für die nächsten wichtigen Termine.</p>
             </div>
             <div class="t-img">
                 <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-kalender.png" alt="Zentraler Kalender mit Terminen" loading="lazy"></div>
@@ -250,8 +270,8 @@
     <div class="part" id="klasse">
         <div class="wrap part-head">
             <span class="part-label">Teil 2 · In der Klasse</span>
-            <h2>Die fünf Tabs</h2>
-            <p>Jede Klasse bietet fünf Bereiche – von der Schülerliste über Sitzplan, Noten und Zeugnis bis zur Unterrichtsplanung.</p>
+            <h2>Die fünf Klassenbereiche</h2>
+            <p>Jede Klasse bietet Bereiche für Schülerliste, Sitzplan, Noten, Zeugnis und Planung – mit schnellen Werkzeugen für den Unterrichtsalltag.</p>
         </div>
     </div>
 
@@ -330,15 +350,31 @@
         </div>
     </section>
 
-    <section class="tour">
+    <section class="tour" id="planung">
         <div class="wrap tour-row">
             <div class="t-text">
-                <span class="tag"><i class="fas fa-clipboard-list"></i> Planung</span>
-                <h3>Unterricht planen</h3>
-                <p>Deine Unterrichtsstunden im gewählten Zeitraum als übersichtliche Tabelle. Termine erscheinen automatisch, der aktuelle Tag ist hervorgehoben.</p>
+                <span class="tag"><i class="fas fa-calendar-week"></i> Stundenplan &amp; Planung</span>
+                <h3>Stundenplan, Kurse und Fachlehrer verbunden</h3>
+                <p>Der Stundenplan merkt sich Kurse, Fachlehrer und Kindergruppen. Wenn du einen Kurs erneut einträgst, werden bekannte Daten vorgeschlagen und Fachlehrer automatisch übernommen.</p>
+                <ul>
+                    <li><i class="fas fa-check"></i> Kurse im Stundenplan wiederverwenden</li>
+                    <li><i class="fas fa-check"></i> Fachlehrer einmal eintragen und automatisch übernehmen</li>
+                    <li><i class="fas fa-check"></i> Planung als kompakte Liste drucken</li>
+                </ul>
             </div>
             <div class="t-img">
                 <div class="mock"><div class="mock-bar"><i></i><i></i><i></i></div><img src="assets/screenshots/c-planung.png" alt="Unterrichtsplanung als Tabelle" loading="lazy"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tour" style="padding-top:18px;">
+        <div class="wrap">
+            <div class="feature-grid">
+                <div class="feature-card"><i class="fas fa-chalkboard-user"></i><h4>Klassenlehrer-Klasse</h4><p>Eine Klasse kann als Klassenlehrer-Klasse markiert werden. Passende Arbeits- und Sozialverhalten-Kurse werden automatisch in der Planung ergänzt.</p></div>
+                <div class="feature-card"><i class="fas fa-user-tag"></i><h4>Zuständigkeiten</h4><p>Für jeden Zeugnistext kann festgelegt werden, ob du, der Fachlehrer oder eine andere Person zuständig ist.</p></div>
+                <div class="feature-card"><i class="fas fa-print"></i><h4>Planung drucken</h4><p>Eine kompakte Übersicht zeigt Kurs, Fachlehrer und freie Spalte für schnelle Absprachen in der Schule.</p></div>
+                <div class="feature-card"><i class="fas fa-house-laptop"></i><h4>Startseite gekoppelt</h4><p>Änderungen in der Zeugnistexte-Kachel und im Planung-Modal bleiben miteinander verbunden.</p></div>
             </div>
         </div>
     </section>
@@ -348,8 +384,8 @@
         <div class="part" id="ki">
             <div class="wrap part-head">
                 <span class="part-label"><i class="fas fa-wand-magic-sparkles"></i> Teil 3 · KI-Features</span>
-                <h2>Zwei KI-Helfer, die wirklich Zeit sparen</h2>
-                <p>Speziell für Förderschule und Inklusion entwickelt – damit aus Stichpunkten in Sekunden ein guter Text wird.</p>
+                <h2>KI-Helfer mit Planung im Rücken</h2>
+                <p>Zeugnistexte entstehen aus deinen Stichpunkten, Beobachtungen und geplanten Zuständigkeiten – besonders hilfreich für Förderschule und Inklusion.</p>
             </div>
         </div>
 
@@ -358,11 +394,11 @@
                 <div class="t-text">
                     <span class="tag ai"><i class="fas fa-wand-magic-sparkles"></i> KI-Zeugnistext (Inklusion)</span>
                     <h3>Zeugnistexte in Sekunden</h3>
-                    <p>Stichpunkte zu Themen und Beobachtungen rein – fertiger Zeugnistext raus, in korrekter Vergangenheitsform und wertschätzender Sprache.</p>
+                    <p>Stichpunkte zu Themen und Beobachtungen rein – fertiger Zeugnistext raus, in korrekter Vergangenheitsform und wertschätzender Sprache. Die Planung zeigt, welche Texte noch offen sind.</p>
                     <ul>
                         <li><i class="fas fa-check"></i> Haupt- &amp; Nebenfächer sowie Arbeits-/Sozialverhalten</li>
                         <li><i class="fas fa-check"></i> Kürzen, verlängern oder neu generieren</li>
-                        <li><i class="fas fa-check"></i> Mit eigener Anweisung anpassen &amp; Archiv</li>
+                        <li><i class="fas fa-check"></i> Zuständigkeiten direkt in Planung und Startseite klären</li>
                     </ul>
                 </div>
                 <div class="t-img">
@@ -395,12 +431,12 @@
         <div class="wrap">
             <div class="part-head" style="margin-bottom:54px;">
                 <span class="part-label">Sicher &amp; verlässlich</span>
-                <h2>Deine Daten sind geschützt</h2>
+                <h2>Für den Schulalltag gemacht</h2>
             </div>
             <div class="benefits">
                 <div class="benefit"><i class="fas fa-shield-halved"></i><h4>DSGVO-konform</h4><p>Strikte Zugriffsregeln – jede Lehrkraft sieht ausschließlich die eigenen Daten.</p></div>
                 <div class="benefit"><i class="fas fa-cloud-arrow-up"></i><h4>Automatische Sync</h4><p>Änderungen landen sofort sicher in der Cloud – ohne manuelles Speichern.</p></div>
-                <div class="benefit"><i class="fas fa-wifi"></i><h4>Offline nutzbar</h4><p>Als App installierbar und auch ohne Internet weiter einsatzbereit.</p></div>
+                <div class="benefit"><i class="fas fa-sliders"></i><h4>Lokal anpassbar</h4><p>Kachelreihenfolge, Breiten und Sichtbarkeit können pro Gerät unterschiedlich sein.</p></div>
                 <div class="benefit"><i class="fas fa-mobile-screen-button"></i><h4>Überall verfügbar</h4><p>Läuft im Browser auf Laptop, Tablet und Smartphone.</p></div>
             </div>
         </div>
@@ -411,7 +447,7 @@
         <div class="wrap">
             <div class="cta">
                 <h2>Bereit loszulegen?</h2>
-                <p>Melde dich an und verwalte deine Klassen, Noten und Zeugnisse entspannt an einem Ort.</p>
+                <p>Melde dich an und verwalte Klassen, Stundenplan, Notizen, Noten und Zeugnistexte entspannt an einem Ort.</p>
                 <a href="app.html" class="btn btn-primary btn-lg"><i class="fas fa-right-to-bracket"></i> Einloggen</a>
                 <p class="note"><i class="fas fa-circle-info"></i> Der Zugang ist derzeit auf eingeladene Lehrkräfte beschränkt.</p>
             </div>

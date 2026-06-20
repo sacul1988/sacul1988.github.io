@@ -1057,6 +1057,26 @@ window.confirmLogout = confirmLogout;
 
 
 // Modal anzeigen/verstecken
+const APP_THEME_DEFAULT = '#f2f4fa';
+const APP_THEME_LOGIN = '#1e293b';
+const APP_THEME_MODAL = '#858b98';
+
+function setAppThemeColor(color) {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', color);
+}
+
+function restoreAppThemeColor() {
+    const modalOpen = !!document.querySelector('#modal-container.show, .app-dialog-overlay:not(.app-dialog-closing)');
+    if (modalOpen) {
+        setAppThemeColor(APP_THEME_MODAL);
+    } else if (document.body.classList.contains('login-active') || document.documentElement.classList.contains('login-active')) {
+        setAppThemeColor(APP_THEME_LOGIN);
+    } else {
+        setAppThemeColor(APP_THEME_DEFAULT);
+    }
+}
+
 function showModal(modalId) {
     const modalContainer = safeGetElement('modal-container');
     if (!modalContainer) return;
@@ -1122,6 +1142,7 @@ function showModal(modalId) {
     modalContainer.style.display = 'flex';
     modalContainer.classList.add('show');
     modalContainer.setAttribute('aria-hidden', 'false');
+    setAppThemeColor(APP_THEME_MODAL);
 }
 
 function hideModal() {
@@ -1145,6 +1166,7 @@ function hideModal() {
     document.body.classList.remove('modal-open');
     document.documentElement.classList.remove('modal-open-scroll-lock');
     document.body.classList.remove('modal-open-scroll-lock');
+    restoreAppThemeColor();
 
     // position:fixed-Lock lösen und exakt zur vorherigen Scroll-Position springen
     // (synchron, daher kein sichtbares Springen) -> Ansicht bleibt z. B. beim
@@ -1258,7 +1280,10 @@ function _closeAppDialog(value) {
     _appDialogState = null;
     document.removeEventListener('keydown', keyHandler, true);
     overlay.classList.add('app-dialog-closing');
-    setTimeout(() => { if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 120);
+    setTimeout(() => {
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        restoreAppThemeColor();
+    }, 120);
     resolve(value);
 }
 
@@ -1274,6 +1299,7 @@ function swal() {
     return new Promise((resolve) => {
         const overlay = document.createElement('div');
         overlay.className = 'app-dialog-overlay';
+        setAppThemeColor(APP_THEME_MODAL);
 
         const dialog = document.createElement('div');
         dialog.className = 'app-dialog';
@@ -10333,6 +10359,7 @@ function ztPlanungPromptOtherResponsible(course) {
         if (typeof captureDashboardScrollRestore === 'function') captureDashboardScrollRestore(tileScrollTop);
         const overlay = document.createElement('div');
         overlay.className = 'app-dialog-overlay';
+        setAppThemeColor(APP_THEME_MODAL);
 
         const dialog = document.createElement('div');
         dialog.className = 'app-dialog zt-other-responsible-dialog';
@@ -10368,7 +10395,10 @@ function ztPlanungPromptOtherResponsible(course) {
         function cleanup(result) {
             document.removeEventListener('keydown', keyHandler, true);
             overlay.classList.add('app-dialog-closing');
-            setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 120);
+            setTimeout(() => {
+                if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                restoreAppThemeColor();
+            }, 120);
             if (typeof scheduleDashboardScrollRestore === 'function') scheduleDashboardScrollRestore();
             resolve(result);
         }
@@ -10961,9 +10991,9 @@ function renderDashboardNotes() {
     const notes = AppState.dashboardNotes || [];
     if (notes.length === 0) {
         list.innerHTML = `
-            <li class="empty-state" style="padding: 20px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                <i class="fas fa-clipboard-list" style="font-size: 2rem; color: var(--grey-color); margin-bottom: 8px;"></i>
-                <p style="font-size: 0.9rem; color: var(--grey-color); margin: 0;">Keine Aufgaben vorhanden</p>
+            <li class="empty-state dashboard-notes-empty">
+                <i class="fas fa-clipboard-list"></i>
+                <p>Keine Aufgaben vorhanden</p>
             </li>
         `;
         return;
@@ -11002,6 +11032,7 @@ function openDashboardNoteInput() {
     if (_appDialogState) _closeAppDialog(null);
     const overlay = document.createElement('div');
     overlay.className = 'app-dialog-overlay';
+    setAppThemeColor(APP_THEME_MODAL);
 
     const dialog = document.createElement('div');
     dialog.className = 'app-dialog dashboard-note-dialog';
@@ -11020,7 +11051,10 @@ function openDashboardNoteInput() {
     const close = (save) => {
         if (save) addDashboardNote(input ? input.value : '');
         overlay.classList.add('app-dialog-closing');
-        setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 120);
+        setTimeout(() => {
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            restoreAppThemeColor();
+        }, 120);
     };
     dialog.querySelector('.app-dialog-close').onclick = () => close(false);
     dialog.querySelector('.btn-primary').onclick = () => close(true);
@@ -11111,6 +11145,7 @@ function deleteDashboardNote(id) {
             let updatedNotes = AppState.dashboardNotes || [];
             updatedNotes = updatedNotes.filter(n => n.id !== id);
             AppState.dashboardNotes = updatedNotes;
+            if (updatedNotes.length === 0) window._allowEmptyDashboardNotesSync = true;
             localStorage.setItem('dashboardNotes', JSON.stringify(updatedNotes));
             renderDashboardNotes();
             saveData(); // Löst Cloud-Sync aus
@@ -12023,8 +12058,10 @@ function stundenplanResetConfirm(mode) {
         if (!confirmed) return;
         if (isAll) {
             StundenplanState.zeiten = [];
+            StundenplanState.kurse = [];
             StundenplanState.kacheln = {};
             StundenplanState.inklusionProKlasse = {};
+            window._allowEmptyStundenplanSync = true;
         } else {
             StundenplanState.kacheln = {};
             StundenplanState.inklusionProKlasse = {};

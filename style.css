@@ -5535,6 +5535,31 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     overflow-y: auto;
     padding-right: 2px;
 }
+.dashboard-notes-list:has(.dashboard-notes-empty) {
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+.dashboard-notes-empty {
+    width: 100%;
+    min-height: 100%;
+    padding: 0 18px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.dashboard-notes-empty i {
+    font-size: 2rem;
+    color: var(--grey-color);
+}
+.dashboard-notes-empty p {
+    font-size: 0.9rem;
+    color: var(--grey-color);
+    margin: 0;
+}
 .dashboard-note-item {
     display: flex;
     align-items: center;
