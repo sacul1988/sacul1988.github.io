@@ -1677,6 +1677,7 @@ function renderClassesGrid() {
     notesCard.innerHTML = `
         <div class="class-card-header">
             <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-list-check"></i> Notizen &amp; Checkliste</span>
+            <button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button>
         </div>
         <div class="class-card-body" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
             <div class="notes-input-group" style="margin-bottom: 15px;">
@@ -1738,9 +1739,9 @@ function renderClassesGrid() {
     ztPlanungCard.className = 'class-card dashboard-zt-card';
     ztPlanungCard.dataset.tileKey = 'zeugnistexte';
     ztPlanungCard.innerHTML = `
-        <div class="class-card-header dashboard-zt-header" onclick="if(!event.target.closest('.tile-drag-grip')) ztPlanungOpenAtTop()">
+        <div class="class-card-header dashboard-zt-header" onclick="if(!event.target.closest('.tile-drag-grip, .tile-width-grip')) ztPlanungOpenAtTop()">
             <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><i class="fas fa-grip-vertical"></i></span><i class="fas fa-list-check"></i> Zeugnistexte</span>
-            <span id="dashboard-zt-count" class="class-card-count">–</span>
+            <span class="tile-head-tools"><span id="dashboard-zt-count" class="class-card-count">–</span><button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button></span>
         </div>
         <div class="class-card-body" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
             <div id="dashboard-zt-list" class="dashboard-zt-list"></div>
@@ -1764,6 +1765,7 @@ function renderClassesGrid() {
 // ===================================================================
 const DASHBOARD_TILE_ORDER_KEY = 'dashboardTileOrder';
 const DASHBOARD_TILE_VISIBILITY_KEY = 'dashboardTileVisibilityLocal';
+const DASHBOARD_TILE_WIDTH_KEY = 'dashboardTileWidthLocalV2';
 
 function getDashboardTileVisibility() {
     try {
@@ -1776,6 +1778,30 @@ function getDashboardTileVisibility() {
 
 function saveDashboardTileVisibility(settings) {
     localStorage.setItem(DASHBOARD_TILE_VISIBILITY_KEY, JSON.stringify(settings || {}));
+}
+
+function getDashboardTileWidths() {
+    try {
+        const obj = JSON.parse(localStorage.getItem(DASHBOARD_TILE_WIDTH_KEY) || '{}');
+        return obj && typeof obj === 'object' ? obj : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveDashboardTileWidths(widths) {
+    localStorage.setItem(DASHBOARD_TILE_WIDTH_KEY, JSON.stringify(widths || {}));
+}
+
+function dashboardSetTileWidth(key, span) {
+    if (key !== 'notes' && key !== 'zeugnistexte') return;
+    const widths = getDashboardTileWidths();
+    const grid = safeGetElement('classes-grid');
+    const columns = grid ? dashboardColumnCount(grid) : 12;
+    const minSpan = grid ? dashboardBaseTileSpan(grid) : 3;
+    widths[key] = Math.max(minSpan, Math.min(columns, Number(span) || minSpan));
+    saveDashboardTileWidths(widths);
+    layoutDashboardMasonry();
 }
 
 function dashboardTileDefinitions() {
@@ -1886,13 +1912,66 @@ function applyDashboardTileOrder() {
 }
 
 let _tileDrag = null;
+let _tileWidthDrag = null;
 const TILE_VGAP = 15; // gewünschter vertikaler Abstand zwischen Kacheln
 
-// Masonry: jede Kachel belegt nur so viele feine Rasterzeilen, wie ihr Inhalt braucht,
-// damit darunterliegende Kacheln Lücken auffüllen.
 function tileRowSpan(grid, height) {
     const rowH = parseFloat(getComputedStyle(grid).gridAutoRows) || 1;
     return Math.max(1, Math.ceil((height + TILE_VGAP) / rowH));
+}
+
+function dashboardTileHeight(grid) {
+    const raw = getComputedStyle(grid).getPropertyValue('--dashboard-tile-height').trim();
+    const parsed = parseFloat(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 300;
+}
+
+function dashboardBaseTileSpan(grid) {
+    const raw = getComputedStyle(grid).getPropertyValue('--dashboard-base-span').trim();
+    const parsed = parseInt(raw, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 3;
+}
+
+function dashboardColumnCount(grid) {
+    const columns = getComputedStyle(grid).gridTemplateColumns;
+    if (!columns || columns === 'none') return 1;
+    return columns.split(/\s+/).filter(Boolean).length || 1;
+}
+
+function dashboardColumnWidth(grid) {
+    const columns = dashboardColumnCount(grid);
+    if (columns <= 1) return grid.getBoundingClientRect().width || 1;
+    const gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
+    return (grid.getBoundingClientRect().width - gap * (columns - 1)) / columns;
+}
+
+function dashboardCurrentTileSpan(card) {
+    const match = String(card.style.gridColumn || '').match(/span\s+(\d+)/);
+    return match ? Math.max(1, parseInt(match[1], 10) || 1) : 1;
+}
+
+function applyDashboardTileSpans(grid) {
+    const columns = dashboardColumnCount(grid);
+    const baseSpan = dashboardBaseTileSpan(grid);
+    const widths = getDashboardTileWidths();
+    let used = 0;
+    Array.from(grid.children).forEach(item => {
+        if (!(item.dataset && item.dataset.tileKey)) return;
+        if (item.classList && (item.classList.contains('tile-placeholder') || item.classList.contains('dashboard-tile-hidden'))) return;
+        const canBeWide = item.classList.contains('dashboard-notes-card') || item.classList.contains('dashboard-zt-card');
+        const key = item.dataset.tileKey;
+        let colSpan = Math.min(baseSpan, columns);
+        if (canBeWide && columns > baseSpan) {
+            if (widths[key]) {
+                colSpan = Math.max(baseSpan, Math.min(columns, Number(widths[key]) || baseSpan));
+            } else {
+                const remaining = columns - (used % columns);
+                colSpan = remaining >= baseSpan * 2 ? baseSpan * 2 : baseSpan;
+            }
+        }
+        item.style.gridColumn = `span ${colSpan}`;
+        used += colSpan;
+    });
 }
 
 function layoutDashboardMasonry() {
@@ -1901,33 +1980,15 @@ function layoutDashboardMasonry() {
     const grid = safeGetElement('classes-grid');
     if (!grid) return;
 
-    const calCard = grid.querySelector('[data-tile-key="calendar"]');
-    const spCard = grid.querySelector('[data-tile-key="stundenplan"]');
-    // min-height kurz entfernen, damit natürliche Inhaltshöhe gemessen wird.
-    // Alles im selben JS-Task → ResizeObserver sieht nur den Endzustand.
-    if (calCard) calCard.style.minHeight = '';
-    if (spCard) spCard.style.minHeight = '';
-
-    const naturalH = new Map();
+    applyDashboardTileSpans(grid);
+    const tileH = dashboardTileHeight(grid);
+    const span = tileRowSpan(grid, tileH);
     Array.from(grid.children).forEach(item => {
         if (item.classList && item.classList.contains('tile-placeholder')) return;
-        const h = item.getBoundingClientRect().height;
-        if (!h) return;
-        naturalH.set(item, h);
-        item.style.gridRowEnd = 'span ' + tileRowSpan(grid, h);
+        if (item.classList && item.classList.contains('dashboard-tile-hidden')) return;
+        item.style.minHeight = '';
+        item.style.gridRowEnd = 'span ' + span;
     });
-
-    // Kalender und Stundenplan auf gleiche Höhe bringen
-    if (calCard && spCard && naturalH.has(calCard) && naturalH.has(spCard)) {
-        const calH = naturalH.get(calCard);
-        const spH = naturalH.get(spCard);
-        const maxH = Math.max(calH, spH);
-        const maxSpan = tileRowSpan(grid, maxH);
-        calCard.style.gridRowEnd = 'span ' + maxSpan;
-        spCard.style.gridRowEnd = 'span ' + maxSpan;
-        if (calH < maxH) calCard.style.minHeight = maxH + 'px';
-        if (spH < maxH) spCard.style.minHeight = maxH + 'px';
-    }
 }
 
 let _tileResizeObserver = null;
@@ -1965,16 +2026,72 @@ function initDashboardTileDnd() {
     const grid = safeGetElement('classes-grid');
     if (!grid || grid._tileDndInit) return;
     grid._tileDndInit = true;
+    grid.addEventListener('pointerdown', onTileWidthPointerDown);
     grid.addEventListener('pointerdown', onTilePointerDown);
     // Klick nach einem Zug (oder direkt auf dem Griff) unterdrücken, damit z. B.
     // die Kalender-/Stundenplan-Kachel sich nicht versehentlich öffnet.
     grid.addEventListener('click', (e) => {
-        if (window._suppressTileClick || (e.target.closest && e.target.closest('.tile-drag-grip'))) {
+        if (window._suppressTileClick || (e.target.closest && e.target.closest('.tile-drag-grip, .tile-width-grip'))) {
             e.preventDefault();
             e.stopPropagation();
             window._suppressTileClick = false;
         }
     }, true);
+}
+
+function onTileWidthPointerDown(e) {
+    if (e.button != null && e.button !== 0) return;
+    const grip = e.target.closest && e.target.closest('.tile-width-grip');
+    if (!grip) return;
+    const grid = safeGetElement('classes-grid');
+    const card = grip.closest('.class-card');
+    if (!grid || !card) return;
+    const key = card.dataset && card.dataset.tileKey;
+    if (key !== 'notes' && key !== 'zeugnistexte') return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    _tileWidthDrag = {
+        grid,
+        card,
+        key,
+        startX: e.clientX,
+        startSpan: dashboardCurrentTileSpan(card),
+        columnWidth: dashboardColumnWidth(grid),
+        changed: false
+    };
+    card.classList.add('tile-width-resizing');
+    document.body.classList.add('tile-width-resizing-active');
+    window.addEventListener('pointermove', onTileWidthPointerMove, { passive: false });
+    window.addEventListener('pointerup', onTileWidthPointerUp);
+    window.addEventListener('pointercancel', onTileWidthPointerUp);
+}
+
+function onTileWidthPointerMove(e) {
+    const d = _tileWidthDrag;
+    if (!d) return;
+    e.preventDefault();
+    const minSpan = dashboardBaseTileSpan(d.grid);
+    const maxSpan = dashboardColumnCount(d.grid);
+    const deltaColumns = Math.round((e.clientX - d.startX) / Math.max(1, d.columnWidth));
+    const nextSpan = Math.max(minSpan, Math.min(maxSpan, d.startSpan + deltaColumns));
+    if (nextSpan === dashboardCurrentTileSpan(d.card)) return;
+    d.changed = true;
+    dashboardSetTileWidth(d.key, nextSpan);
+}
+
+function onTileWidthPointerUp() {
+    const d = _tileWidthDrag;
+    if (!d) return;
+    _tileWidthDrag = null;
+    d.card.classList.remove('tile-width-resizing');
+    document.body.classList.remove('tile-width-resizing-active');
+    window.removeEventListener('pointermove', onTileWidthPointerMove);
+    window.removeEventListener('pointerup', onTileWidthPointerUp);
+    window.removeEventListener('pointercancel', onTileWidthPointerUp);
+    window._suppressTileClick = true;
+    setTimeout(() => { window._suppressTileClick = false; }, 80);
 }
 
 // FLIP: Geschwister-Kacheln sanft an ihre neuen Positionen gleiten lassen
@@ -2016,10 +2133,7 @@ function onTilePointerDown(e) {
     ph.style.visibility = 'hidden';
     ph.style.height = rect.height + 'px'; // volle Kachelhöhe (sonst kollabiert er zur Linie)
     ph.style.gridRowEnd = card.style.gridRowEnd || ('span ' + tileRowSpan(grid, rect.height));
-    // Notizen belegt 2 Spalten (ab Tablet/Desktop) – Platzhalter genauso breit halten
-    if (card.classList.contains('dashboard-notes-card') && window.innerWidth >= 601) {
-        ph.style.gridColumn = 'span 2';
-    }
+    ph.style.gridColumn = card.style.gridColumn || getComputedStyle(card).gridColumn;
     grid.insertBefore(ph, card);
 
     // Sichtbares, frei schwebendes gestricheltes Feld zeigt die Zielposition.

@@ -198,8 +198,11 @@ body {
 
 /* Home page - Class grid */
 .classes-grid {
+    --dashboard-tile-height: 300px;
+    --dashboard-grid-cols: 12;
+    --dashboard-base-span: 3;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--dashboard-grid-cols), minmax(0, 1fr));
     column-gap: 15px;
     row-gap: 0;
     margin-top: 15px;
@@ -214,13 +217,13 @@ body {
 
 @media (max-width: 1200px) {
     .classes-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        --dashboard-base-span: 4;
     }
 }
 
 @media (max-width: 991px) {
     .classes-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        --dashboard-base-span: 6;
     }
 }
 
@@ -242,7 +245,7 @@ body {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    height: auto;
+    height: var(--dashboard-tile-height);
 }
 
 .class-card:hover {
@@ -290,6 +293,35 @@ body {
 }
 .tile-drag-grip:hover { opacity: 1; }
 .tile-drag-grip:active { cursor: grabbing; }
+.tile-head-tools {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.tile-width-grip {
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: ew-resize;
+    flex-shrink: 0;
+    padding: 0;
+    transition: background 0.15s ease, transform 0.12s ease;
+}
+.tile-width-grip:hover,
+.tile-width-resizing .tile-width-grip {
+    background: rgba(255, 255, 255, 0.24);
+}
+.tile-width-grip i {
+    font-size: 0.8rem;
+    margin: 0;
+}
 
 .class-card.tile-dragging {
     position: fixed;
@@ -328,12 +360,18 @@ body.tile-dragging-active .class-card:not(.tile-dragging):hover {
     transform: none;
     box-shadow: var(--box-shadow);
 }
+body.tile-width-resizing-active {
+    cursor: ew-resize;
+    user-select: none;
+    -webkit-user-select: none;
+}
 
 .class-card-body {
     padding: 12px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 .module-buttons {
@@ -341,6 +379,8 @@ body.tile-dragging-active .class-card:not(.tile-dragging):hover {
     flex-direction: column;
     width: 100%;
     margin-top: auto;
+    min-height: 0;
+    flex: 1;
 }
 
 /* Class card action buttons */
@@ -348,6 +388,7 @@ body.tile-dragging-active .class-card:not(.tile-dragging):hover {
     display: flex;
     width: 100%;
     margin-top: 8px;
+    flex-shrink: 0;
 }
 
 .class-card-actions button {
@@ -3517,7 +3558,7 @@ html.modal-open, body.modal-open {
 
     /* Startseite: Kacheln einzeln untereinander */
     .classes-grid {
-        grid-template-columns: 1fr;
+        --dashboard-base-span: 12;
     }
 
     .dashboard-notes-card {
@@ -3872,6 +3913,8 @@ html.modal-open, body.modal-open {
 
 .class-card-main-btn {
     position: relative;
+    flex: 1;
+    min-height: 0;
 }
 
 .class-card-main-label {
@@ -5430,6 +5473,9 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 2px;
 }
 .dashboard-note-item {
     display: flex;
@@ -5546,6 +5592,9 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 2px;
 }
 .dashboard-calendar-item {
     display: flex;
@@ -5854,7 +5903,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .sp-tile-empty { color: var(--grey-color); font-size: 0.88rem; }
 .sp-weekend-state {
     flex: 1;
-    min-height: 220px;
+    min-height: 0;
     border: 1px solid #dbeafe;
     border-radius: 12px;
     background: linear-gradient(135deg, #f8fafc 0%, #eef6ff 55%, #ecfdf5 100%);
@@ -5862,38 +5911,38 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 9px;
-    padding: 24px 16px;
+    gap: 7px;
+    padding: 14px 12px;
     text-align: center;
 }
 .sp-weekend-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 18px;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
     background: #ffffff;
     color: var(--primary-color);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.6rem;
-    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+    font-size: 1.25rem;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.10);
 }
 .sp-weekend-title {
     color: #1e293b;
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 800;
 }
 .sp-weekend-text {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 0.84rem;
     font-weight: 600;
 }
 .sp-weekend-meta {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
-    margin-top: 4px;
+    gap: 6px;
+    margin-top: 2px;
 }
 .sp-weekend-meta span {
     border: 1px solid #dbeafe;
@@ -5903,9 +5952,9 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.78rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    padding: 5px 9px;
+    padding: 4px 8px;
 }
 .sp-weekend-meta i {
     color: #16a34a;
@@ -5983,6 +6032,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    flex: 1;
 }
 .dashboard-zt-row {
     display: grid;
@@ -5994,7 +6044,8 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    max-height: 270px;
+    min-height: 0;
+    flex: 1;
     overflow-y: auto;
     padding-right: 2px;
 }
