@@ -9511,46 +9511,54 @@ const ZtState = {
     initialized: false,
     pendingMessages: null,
     pendingQuestions: null,
-    planungRef: null // {courseId, studentId}: gemerkt beim Sprung aus der Planung -> nach Generierung auto-abhaken
+    planungRef: null, // {courseId, studentId}: gemerkt beim Sprung aus der Planung -> nach Generierung auto-abhaken
+    inlineMode: 'planung'
 };
 
 function renderZeugnisTTexteModule() {
-    if (ZtState.initialized) return;
-    ZtState.initialized = true;
-    setZtTyp('nebenfach');
-    ztInitArchive();
-    ztPlanungInit();
-    ztPlanungRenderInline();
+    if (!ZtState.initialized) {
+        ZtState.initialized = true;
+        setZtTyp('nebenfach');
+        ztInitArchive();
+        ztPlanungInit();
 
-    document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && (activeModule === 'zeugnis-texte' || window._activeToolWindow === 'zeugnis-texte')) {
-            ztGenerate();
-        }
-    });
-}
-
-function ztEnsureTextModalContent() {
-    const modal = document.getElementById('zt-text-modal');
-    const stack = document.querySelector('.zt-stack');
-    if (!modal || !stack) return;
-    if (!modal.querySelector('.zt-text-modal-body')) {
-        modal.innerHTML = `
-            <div class="zt-modal-head">
-                <span style="font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:8px;">
-                    <i class="fas fa-file-pen"></i> Texte
-                </span>
-                <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="zt-text-modal-body"></div>`;
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && (activeModule === 'zeugnis-texte' || window._activeToolWindow === 'zeugnis-texte')) {
+                ztGenerate();
+            }
+        });
     }
-    const body = modal.querySelector('.zt-text-modal-body');
-    if (body && stack.parentElement !== body) body.appendChild(stack);
-    stack.style.display = '';
+    ztPlanungRenderInline();
+    ztApplyInlineMode();
 }
 
 function ztOpenTextModal() {
-    ztEnsureTextModalContent();
-    showModal('zt-text-modal');
+    ZtState.inlineMode = 'text';
+    ztApplyInlineMode();
+}
+
+function ztShowPlanningInline() {
+    ZtState.inlineMode = 'planung';
+    ztApplyInlineMode();
+}
+
+function ztToggleTextInline() {
+    ZtState.inlineMode = ZtState.inlineMode === 'text' ? 'planung' : 'text';
+    ztApplyInlineMode();
+}
+
+function ztApplyInlineMode() {
+    const planung = document.getElementById('zt-planung-inline');
+    const stack = document.querySelector('#zeugnis-texte-module .zt-stack');
+    const textBtn = document.getElementById('zt-open-text-inline-btn');
+    const planungBtn = document.getElementById('zt-open-planung-inline-btn');
+    if (!planung || !stack) return;
+
+    const textActive = ZtState.inlineMode === 'text';
+    planung.style.display = textActive ? 'none' : '';
+    stack.style.display = textActive ? 'flex' : 'none';
+    if (textBtn) textBtn.classList.toggle('is-active', textActive);
+    if (planungBtn) planungBtn.classList.toggle('is-active', !textActive);
 }
 
 function setZtTyp(typ) {
@@ -10053,6 +10061,8 @@ async function ztSubmitAnswers() {
 
 window.setZtTyp = setZtTyp;
 window.ztOpenTextModal = ztOpenTextModal;
+window.ztShowPlanningInline = ztShowPlanningInline;
+window.ztToggleTextInline = ztToggleTextInline;
 window.ztGenerate = ztGenerate;
 window.ztRegenerate = ztRegenerate;
 window.ztShortenText = ztShortenText;

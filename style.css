@@ -4026,6 +4026,20 @@ html.modal-open, body.modal-open {
     font-weight: 800;
 }
 
+#zt-open-text-inline-btn.is-active,
+#zt-open-planung-inline-btn.is-active {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+#zt-open-text-inline-btn.is-active i,
+#zt-open-text-inline-btn.is-active svg,
+#zt-open-planung-inline-btn.is-active i,
+#zt-open-planung-inline-btn.is-active svg {
+    color: #fff !important;
+}
+
 #zt-text-modal.zt-text-modal {
     max-width: 940px;
     height: min(760px, calc(100dvh - 64px));

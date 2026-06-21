@@ -240,7 +240,7 @@
                     <i class="fas fa-address-book"></i>
                 </button>
                 <button class="topbar-btn" type="button" data-tool="zeugnis-texte" title="Zeugnistexte" aria-label="Zeugnistexte" onclick="openToolWindow('zeugnis-texte')">
-                    <i class="fas fa-file-pen"></i>
+                    <i class="fas fa-list-check"></i>
                 </button>
                 <span class="topbar-sep" aria-hidden="true"></span>
                 <button class="topbar-btn sync-btn" type="button" id="sync-status-circle" data-state="synced" title="Synchronisierung" aria-label="Synchronisierung" onclick="openSyncModal()">
@@ -487,16 +487,16 @@
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
                                         <button class="btn btn-secondary btn-icon" id="planung-unterrichtstage-btn" style="display: none;" onclick="showModal('unterrichtstage-modal')">
-                                            <i class="fas fa-list-check"></i> <span class="btn-text">Unterrichtstage</span>
+                                            <i class="fas fa-chalkboard"></i> <span class="btn-text">Unterrichtstage</span>
+                                        </button>
+                                        <button class="btn btn-secondary btn-icon" id="planung-zeitraum-btn" onclick="togglePlanungZeitraum()">
+                                            <i class="fas fa-calendar-day"></i> <span class="btn-text">Zeitraum</span>
                                         </button>
                                         <button class="btn btn-secondary btn-icon" id="planung-termine-btn" style="display: none;" onclick="showTermineModal()">
                                             <i class="fas fa-toggle-on"></i> <span class="btn-text">Termine</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" id="planung-delete-btn" style="display: none;" onclick="deletePlanungTable()">
                                             <i class="fas fa-eraser"></i> <span class="btn-text">Planung löschen</span>
-                                        </button>
-                                        <button class="btn btn-secondary btn-icon" id="planung-zeitraum-btn" onclick="togglePlanungZeitraum()">
-                                            <i class="fas fa-calendar-day"></i> <span class="btn-text">Zeitraum</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" onclick="openPlanungExport()">
                                             <i class="fas fa-arrow-up"></i>
@@ -555,8 +555,11 @@
                                 <div id="zt-planung-header-summary" class="zt-planung-header-summary"></div>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
-                                        <button class="btn btn-secondary btn-icon" onclick="ztOpenTextModal()">
+                                        <button class="btn btn-secondary btn-icon" id="zt-open-text-inline-btn" onclick="ztToggleTextInline()">
                                             <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Texte</span>
+                                        </button>
+                                        <button class="btn btn-secondary btn-icon" id="zt-open-planung-inline-btn" onclick="ztShowPlanningInline()">
+                                            <i class="fas fa-list-check"></i> <span class="btn-text">Planung</span>
                                         </button>
                                         <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpenForm()">
                                             <i class="fas fa-plus"></i> <span class="btn-text">Klasse anlegen</span>
