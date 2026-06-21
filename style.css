@@ -4324,12 +4324,29 @@ html.modal-open, body.modal-open {
 @media (max-width: 600px) {
     .zt-plan-form-grid { flex-direction: column; gap: 0; }
     .zt-planung-inline {
-        padding: 14px;
+        padding: 0 0 14px;
     }
-    .zt-planung-header-summary {
-        width: 100%;
-        margin-left: 0;
-        order: 3;
+    #zeugnis-texte-module .card-header {
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 10px;
+    }
+    #zeugnis-texte-module .zt-planung-header-summary {
+        width: auto;
+        margin: 0 auto 0 0;
+        order: 1;
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+    #zeugnis-texte-module .card-header-actions {
+        order: 2;
+        margin-left: auto;
+        width: auto !important;
+        flex: 0 0 auto;
+    }
+    #zeugnis-texte-module .card-header-actions .desktop-header-buttons {
+        flex-wrap: nowrap;
+        gap: 6px;
     }
     .zt-plan-toolbar {
         flex-direction: column;
