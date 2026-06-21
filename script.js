@@ -276,6 +276,8 @@ function showPage(page, classId = null, shouldPushState = true) {
         saveFocusedZeugnisTextarea(previousClassId);
     }
 
+    if (shouldPushState) rememberCurrentHistoryScroll();
+
     // Alle Seiten ausblenden
     const pages = document.querySelectorAll('.page');
     if (pages) {

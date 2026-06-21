@@ -7,38 +7,40 @@ const { chromium } = require("playwright");
 
 const appUrl = "file://" + path.resolve(__dirname, "../../app.html");
 
+function seedDashboardData() {
+  localStorage.setItem("classes", JSON.stringify([
+    { name: "Mathe 5c", students: [{ name: "Birhat" }, { name: "Siraj" }] },
+    { name: "Musik 6b", students: [{ name: "Milan" }, { name: "Ihor" }] },
+    { name: "Kunst 5c", students: [{ name: "Lina" }, { name: "Noah" }] },
+    { name: "Deutsch 6c", students: [{ name: "Mira" }, { name: "Omar" }] },
+    { name: "Diff 10", students: [{ name: "Alex" }, { name: "Sam" }] },
+    { name: "Physik 8c", students: [{ name: "Ida" }, { name: "Ben" }] }
+  ]));
+  localStorage.setItem("ztPlanung", JSON.stringify({
+    courses: [
+      {
+        id: "course-1",
+        name: "5c Kunst",
+        halbjahr: "ersten",
+        typ: "nebenfach",
+        fach: "Kunst",
+        themen: "Farben und Formen",
+        fachlehrer: "Krato",
+        students: [
+          { id: "s1", name: "Birhat", done: false },
+          { id: "s2", name: "Ihor", done: true },
+          { id: "s3", name: "Siraj", done: false }
+        ]
+      }
+    ]
+  }));
+}
+
 async function openZeugnistexte(viewport = { width: 1048, height: 776 }) {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport });
 
-  await page.addInitScript(() => {
-    localStorage.setItem("classes", JSON.stringify([
-      { name: "Mathe 5c", students: [{ name: "Birhat" }, { name: "Siraj" }] },
-      { name: "Musik 6b", students: [{ name: "Milan" }, { name: "Ihor" }] },
-      { name: "Kunst 5c", students: [{ name: "Lina" }, { name: "Noah" }] },
-      { name: "Deutsch 6c", students: [{ name: "Mira" }, { name: "Omar" }] },
-      { name: "Diff 10", students: [{ name: "Alex" }, { name: "Sam" }] },
-      { name: "Physik 8c", students: [{ name: "Ida" }, { name: "Ben" }] }
-    ]));
-    localStorage.setItem("ztPlanung", JSON.stringify({
-      courses: [
-        {
-          id: "course-1",
-          name: "5c Kunst",
-          halbjahr: "ersten",
-          typ: "nebenfach",
-          fach: "Kunst",
-          themen: "Farben und Formen",
-          fachlehrer: "Krato",
-          students: [
-            { id: "s1", name: "Birhat", done: false },
-            { id: "s2", name: "Ihor", done: true },
-            { id: "s3", name: "Siraj", done: false }
-          ]
-        }
-      ]
-    }));
-  });
+  await page.addInitScript(seedDashboardData);
 
   await page.goto(appUrl);
   await page.waitForFunction(() => typeof window.openToolWindow === "function");
@@ -58,27 +60,7 @@ async function openDashboard(viewport = { width: 1048, height: 776 }) {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport });
 
-  await page.addInitScript(() => {
-    localStorage.setItem("classes", JSON.stringify([]));
-    localStorage.setItem("ztPlanung", JSON.stringify({
-      courses: [
-        {
-          id: "course-1",
-          name: "5c Kunst",
-          halbjahr: "ersten",
-          typ: "nebenfach",
-          fach: "Kunst",
-          themen: "Farben und Formen",
-          fachlehrer: "Krato",
-          students: [
-            { id: "s1", name: "Birhat", done: false },
-            { id: "s2", name: "Ihor", done: true },
-            { id: "s3", name: "Siraj", done: false }
-          ]
-        }
-      ]
-    }));
-  });
+  await page.addInitScript(seedDashboardData);
 
   await page.goto(appUrl);
   await page.waitForFunction(() => typeof window.showPage === "function");
@@ -150,14 +132,36 @@ test("Browser back from dashboard tool keeps previous scroll position", async ()
   try {
     await page.evaluate(() => window.scrollTo(0, 620));
     await page.waitForFunction(() => window.scrollY > 250);
-    const before = await page.evaluate(() => window.scrollY);
 
     await page.locator("#dashboard-zt-list .dashboard-zt-course").scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
     await page.click("#dashboard-zt-list .dashboard-zt-course");
     await assertVisible(page, "#tool-window-overlay.open #zeugnis-texte-module.active");
 
     await page.goBack();
     await page.waitForFunction(() => !document.getElementById("tool-window-overlay")?.classList.contains("open"));
+    await page.waitForFunction(
+      expected => Math.abs(window.scrollY - expected) < 24,
+      before
+    );
+  } finally {
+    await browser.close();
+  }
+});
+
+test("Browser back from class card keeps previous dashboard scroll position", async () => {
+  const { browser, page } = await openDashboard({ width: 729, height: 778 });
+  try {
+    await page.evaluate(() => window.scrollTo(0, 620));
+    await page.waitForFunction(() => window.scrollY > 250);
+    const before = await page.evaluate(() => window.scrollY);
+
+    await page.locator(".class-card-main-btn").last().scrollIntoViewIfNeeded();
+    await page.locator(".class-card-main-btn").last().click();
+    await assertVisible(page, "#class-page");
+
+    await page.goBack();
+    await page.waitForFunction(() => document.getElementById("home-page")?.style.display !== "none");
     await page.waitForFunction(
       expected => Math.abs(window.scrollY - expected) < 24,
       before
