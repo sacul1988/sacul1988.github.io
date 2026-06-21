@@ -239,8 +239,8 @@
                 <button class="topbar-btn" type="button" data-tool="kontakte" title="Adressbuch" aria-label="Adressbuch" onclick="openToolWindow('kontakte')">
                     <i class="fas fa-address-book"></i>
                 </button>
-                <button class="topbar-btn" type="button" data-tool="zeugnis-texte" title="Zeugnistextgenerator" aria-label="Zeugnistextgenerator" onclick="openToolWindow('zeugnis-texte')">
-                    <i class="fas fa-wand-magic-sparkles"></i>
+                <button class="topbar-btn" type="button" data-tool="zeugnis-texte" title="Zeugnistexte" aria-label="Zeugnistexte" onclick="openToolWindow('zeugnis-texte')">
+                    <i class="fas fa-file-pen"></i>
                 </button>
                 <span class="topbar-sep" aria-hidden="true"></span>
                 <button class="topbar-btn sync-btn" type="button" id="sync-status-circle" data-state="synced" title="Synchronisierung" aria-label="Synchronisierung" onclick="openSyncModal()">
@@ -551,20 +551,28 @@
                     <div id="zeugnis-texte-module" class="module" style="display: none;">
                         <div class="card">
                             <div class="card-header">
-                                <h2>Zeugnistextgenerator (Inklusion)</h2>
+                                <h2>Zeugnistexte (Inklusion)</h2>
+                                <div id="zt-planung-header-summary" class="zt-planung-header-summary"></div>
                                 <div class="card-header-actions">
-
-                                    <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpen()">
-                                        <i class="fas fa-list-check"></i> <span class="btn-text">Planung</span>
-                                        <span class="zt-archive-badge" id="zt-planung-badge" style="display:none;"></span>
-                                    </button>
-                                    <button class="btn btn-primary btn-icon" onclick="ztOpenArchiveModal()">
-                                        <i class="fas fa-box-archive"></i> <span class="btn-text">Archiv</span>
-                                        <span class="zt-archive-badge" id="zt-archive-badge" style="display:none;"></span>
-                                    </button>
+                                    <div class="desktop-header-buttons">
+                                        <button class="btn btn-secondary btn-icon" onclick="ztOpenTextModal()">
+                                            <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Texte</span>
+                                        </button>
+                                        <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpenForm()">
+                                            <i class="fas fa-plus"></i> <span class="btn-text">Klasse anlegen</span>
+                                        </button>
+                                        <button class="btn btn-secondary btn-icon" onclick="ztPlanungPrintResponsibleList()">
+                                            <i class="fas fa-print"></i> <span class="btn-text">Planung drucken</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-icon" onclick="ztOpenArchiveModal()">
+                                            <i class="fas fa-box-archive"></i> <span class="btn-text">Archiv</span>
+                                            <span class="zt-archive-badge" id="zt-archive-badge" style="display:none;"></span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="zt-stack">
+                            <div id="zt-planung-inline" class="zt-planung-inline"></div>
+                            <div class="zt-stack" style="display: none;">
                                 <!-- Eingaben-Panel -->
                                 <div class="zt-panel" id="zt-input-container">
                                     <div class="zt-panel-body">
@@ -719,6 +727,9 @@
 
             <!-- Zeugnistext Planung: Formular zum Anlegen/Bearbeiten (dynamisch befüllt) -->
             <div id="zt-planung-form-modal" class="modal zt-modal" style="display: none;"></div>
+
+            <!-- Zeugnistextgenerator: Eingabe und Ergebnis -->
+            <div id="zt-text-modal" class="modal zt-modal zt-text-modal" style="display: none;"></div>
 
             <!-- Stundenplan: Unterrichtszeiten festlegen (dynamisch befüllt) -->
             <div id="stundenplan-zeiten-modal" class="modal zt-modal" style="display: none;"></div>

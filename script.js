@@ -563,7 +563,7 @@ function openToolWindow(which, shouldPushState = true) {
 
     const titleEl = document.getElementById('tool-window-title');
     if (titleEl) {
-        const titles = { kalender: 'Kalender', stundenplan: 'Stundenplan', kontakte: 'Adressbuch', 'zeugnis-texte': 'Zeugnistextgenerator (Inklusion)' };
+        const titles = { kalender: 'Kalender', stundenplan: 'Stundenplan', kontakte: 'Adressbuch', 'zeugnis-texte': 'Zeugnistexte (Inklusion)' };
         titleEl.textContent = titles[which] || '';
     }
 
@@ -9520,12 +9520,37 @@ function renderZeugnisTTexteModule() {
     setZtTyp('nebenfach');
     ztInitArchive();
     ztPlanungInit();
+    ztPlanungRenderInline();
 
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && (activeModule === 'zeugnis-texte' || window._activeToolWindow === 'zeugnis-texte')) {
             ztGenerate();
         }
     });
+}
+
+function ztEnsureTextModalContent() {
+    const modal = document.getElementById('zt-text-modal');
+    const stack = document.querySelector('.zt-stack');
+    if (!modal || !stack) return;
+    if (!modal.querySelector('.zt-text-modal-body')) {
+        modal.innerHTML = `
+            <div class="zt-modal-head">
+                <span style="font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:8px;">
+                    <i class="fas fa-file-pen"></i> Texte
+                </span>
+                <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="zt-text-modal-body"></div>`;
+    }
+    const body = modal.querySelector('.zt-text-modal-body');
+    if (body && stack.parentElement !== body) body.appendChild(stack);
+    stack.style.display = '';
+}
+
+function ztOpenTextModal() {
+    ztEnsureTextModalContent();
+    showModal('zt-text-modal');
 }
 
 function setZtTyp(typ) {
@@ -10027,6 +10052,7 @@ async function ztSubmitAnswers() {
 }
 
 window.setZtTyp = setZtTyp;
+window.ztOpenTextModal = ztOpenTextModal;
 window.ztGenerate = ztGenerate;
 window.ztRegenerate = ztRegenerate;
 window.ztShortenText = ztShortenText;
@@ -10073,6 +10099,7 @@ function ztPlanungPersist() {
         console.warn('Fehler beim Speichern von ztPlanung:', e);
     }
     ztPlanungUpdateBadge();
+    ztPlanungRenderInline();
     if (typeof renderDashboardZtPlanungTile === 'function') renderDashboardZtPlanungTile();
     if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.saveDataToCloud === 'function') {
         window.saveDataToCloud();
@@ -10155,6 +10182,7 @@ function ztPlanungSyncClassTeacherCourse() {
             console.warn('Fehler beim automatischen Ergänzen der Klassenlehrer-Planung:', e);
         }
         ztPlanungUpdateBadge();
+        ztPlanungRenderInline();
         const pm = document.getElementById('zt-planung-modal');
         if (pm && pm.style.display !== 'none') ztPlanungRenderList();
     }
@@ -10184,6 +10212,7 @@ window.setZtPlanung = function(obj) {
     ZtPlanungState.initialized = true;
     ztPlanungSyncClassTeacherCourse();
     ztPlanungUpdateBadge();
+    ztPlanungRenderInline();
     if (typeof renderDashboardZtPlanungTile === 'function') renderDashboardZtPlanungTile();
     const m = document.getElementById('zt-planung-modal');
     if (m && m.style.display !== 'none') ztPlanungRenderList();
@@ -10285,6 +10314,34 @@ function ztPlanungRenderList() {
         </div>
         ${body}`;
     modal.scrollTop = prevScroll;
+}
+
+function ztPlanungRenderInline() {
+    const container = document.getElementById('zt-planung-inline');
+    if (!container) return;
+    ztPlanungInit();
+    ztPlanungSyncClassTeacherCourse();
+    const courses = ztPlanungSortedCourses();
+    const { total, done, open } = ztPlanungCounts();
+    const isEmpty = !courses.length;
+    const body = isEmpty
+        ? `<div class="zt-plan-empty">
+                <i class="fas fa-clipboard-list"></i>
+                <p>Noch keine Kurse geplant.</p>
+                <p>Kurse werden automatisch aus dem Stundenplan übernommen.</p>
+           </div>`
+        : '<div class="zt-plan-list">' + courses.map(c => ztPlanungCourseCardHtml(c)).join('') + '</div>';
+
+    ztPlanungRenderHeaderSummary(total, done, open);
+    container.classList.toggle('zt-planung-empty-state', isEmpty);
+    container.innerHTML = body;
+}
+
+function ztPlanungRenderHeaderSummary(total, done, open) {
+    const summary = document.getElementById('zt-planung-header-summary');
+    if (!summary) return;
+    const openLabel = total ? `${open} offen` : '0 offen';
+    summary.innerHTML = `<span class="zt-plan-inline-open">${openLabel}</span>`;
 }
 
 function ztPlanungPrintResponsibleList() {
@@ -10922,8 +10979,7 @@ function ztPlanungRestoreListScroll() {
 function ztPlanungCancelForm() {
     ZtPlanungState.formCourseId = null;
     ZtPlanungState.formDraft = null;
-    ztPlanungOpen();
-    ztPlanungRestoreListScroll();
+    hideModal();
 }
 
 // ----- Sprung in die Texterstellung -----
@@ -10952,6 +11008,8 @@ function ztPlanungWriteText(courseId, studentId) {
 
     // Für Auto-Erledigt nach erfolgreicher Generierung merken
     ZtState.planungRef = { courseId: courseId, studentId: studentId };
+    ztOpenTextModal();
+    if (beob) requestAnimationFrame(() => beob.focus());
 }
 
 function ztPlanungMarkRefDone() {
@@ -10970,6 +11028,7 @@ function ztPlanungMarkRefDone() {
 
 window.ztPlanungOpen = ztPlanungOpen;
 window.ztPlanungOpenAtTop = ztPlanungOpenAtTop;
+window.ztPlanungRenderInline = ztPlanungRenderInline;
 window.ztPlanungPrintResponsibleList = ztPlanungPrintResponsibleList;
 window.ztPlanungOpenForm = ztPlanungOpenForm;
 window.ztPlanungCancelForm = ztPlanungCancelForm;

@@ -3609,25 +3609,27 @@ html.modal-open, body.modal-open {
 }
 .card-header-actions .desktop-header-buttons .btn.btn-danger,
 .card-header-actions > .btn.btn-icon.btn-danger {
-    color: #e74c3c !important;
+    color: var(--primary-color) !important;
+    background: #fff !important;
+    border-color: var(--border-color) !important;
 }
 .card-header-actions .desktop-header-buttons .btn.btn-danger i,
 .card-header-actions .desktop-header-buttons .btn.btn-danger svg,
 .card-header-actions > .btn.btn-icon.btn-danger i,
 .card-header-actions > .btn.btn-icon.btn-danger svg {
-    color: #e74c3c !important;
+    color: var(--primary-color) !important;
 }
 .card-header-actions .desktop-header-buttons .btn.btn-danger:hover,
 .card-header-actions > .btn.btn-icon.btn-danger:hover {
-    background: #fff !important;
-    border-color: var(--border-color);
-    color: #e74c3c !important;
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
 }
 .card-header-actions .desktop-header-buttons .btn.btn-danger:hover i,
 .card-header-actions .desktop-header-buttons .btn.btn-danger:hover svg,
 .card-header-actions > .btn.btn-icon.btn-danger:hover i,
 .card-header-actions > .btn.btn-icon.btn-danger:hover svg {
-    color: #e74c3c !important;
+    color: #fff !important;
 }
 .card-header-actions .zt-archive-badge {
     position: absolute;
@@ -3985,6 +3987,112 @@ html.modal-open, body.modal-open {
 .zt-archive-del:hover { color: #e74c3c; border-color: #e74c3c; background: #fef2f2; }
 
 /* ===== Zeugnistext-Planung ===== */
+.zt-planung-inline {
+    padding: 0 0 18px;
+}
+
+.zt-planung-header-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-width: 0;
+    justify-content: flex-start;
+    text-align: left;
+    margin-right: auto;
+}
+
+#zeugnis-texte-module .card-header h2 {
+    flex: 0 0 auto;
+}
+
+#zeugnis-texte-module .card-header {
+    margin-bottom: 14px;
+}
+
+.zt-plan-inline-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--dark-color);
+}
+
+.zt-plan-inline-open {
+    flex-shrink: 0;
+    color: var(--primary-color);
+    background: #eef2ff;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+#zt-text-modal.zt-text-modal {
+    max-width: 940px;
+    height: min(760px, calc(100dvh - 64px));
+    max-height: calc(100dvh - 64px);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#zt-text-modal.zt-text-modal[style*="display: block"],
+#zt-text-modal.zt-text-modal[style*="display:block"] {
+    display: flex !important;
+}
+
+.zt-text-modal .zt-stack {
+    flex: 1;
+    min-height: 0;
+    gap: 14px;
+}
+
+.zt-text-modal .zt-text-modal-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.zt-text-modal .zt-panel {
+    background: transparent;
+    flex: 1;
+    min-height: 0;
+}
+
+.zt-text-modal #zt-input-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.zt-text-modal .zt-panel-body {
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+}
+
+.zt-text-modal #zt-input-container .zt-grid-desktop {
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+}
+
+.zt-text-modal #zt-input-container .zt-col-right,
+.zt-text-modal #zt-input-container .zt-textarea-group,
+.zt-text-modal #zt-input-container .zt-textarea-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.zt-text-modal #zt-input-container textarea.zt-textarea {
+    flex: 1;
+    height: 100%;
+    min-height: 220px;
+    resize: none;
+}
+
 /* Empty-State: Modal groß genug, Inhalt zentriert in sich selbst */
 #zt-planung-modal.zt-planung-empty-state {
     min-height: 340px;
@@ -4215,6 +4323,17 @@ html.modal-open, body.modal-open {
 }
 @media (max-width: 600px) {
     .zt-plan-form-grid { flex-direction: column; gap: 0; }
+    .zt-planung-inline {
+        padding: 14px;
+    }
+    .zt-planung-header-summary {
+        width: 100%;
+        margin-left: 0;
+        order: 3;
+    }
+    .zt-plan-toolbar {
+        flex-direction: column;
+    }
 }
 
 /* ===== Zeugnistext-Modals (Ergebnis + Archiv) ===== */
@@ -5098,7 +5217,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         display: flex;
         flex-direction: column;
         margin-bottom: 0;
-        padding: 12px !important;
+        padding: 20px !important;
     }
 
     @media (max-width: 576px) {
@@ -6325,6 +6444,49 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     border-color: var(--primary-color);
     color: var(--primary-color);
     background: #eef2ff;
+}
+
+/* Desktop: normal buttons fill blue on hover, matching the top toolbar. */
+@media (hover: hover) and (min-width: 601px) {
+    .btn:not(.btn-danger):not(.btn-warning):not(.btn-orange):not(.btn-purple):not(.btn-success):hover,
+    .topbar-btn:hover,
+    .card-header-actions .desktop-header-buttons .btn:hover,
+    .card-header-actions > .btn.btn-icon:hover,
+    .module-nav-item .btn:hover,
+    .class-card-actions .btn:not(.btn-danger):hover,
+    .tile-header-action:hover,
+    .zt-archive-btn:not(.zt-archive-del):hover,
+    .zt-plan-write:hover,
+    .dashboard-zt-choice:not(:disabled):hover,
+    .dashboard-zt-reset:hover,
+    .dashboard-zt-other:hover {
+        background: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        color: #fff !important;
+        opacity: 1 !important;
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.28) !important;
+    }
+
+    .btn:not(.btn-danger):not(.btn-warning):not(.btn-orange):not(.btn-purple):not(.btn-success):hover i,
+    .btn:not(.btn-danger):not(.btn-warning):not(.btn-orange):not(.btn-purple):not(.btn-success):hover svg,
+    .topbar-btn:hover i,
+    .topbar-btn:hover svg,
+    .card-header-actions .desktop-header-buttons .btn:hover i,
+    .card-header-actions .desktop-header-buttons .btn:hover svg,
+    .card-header-actions > .btn.btn-icon:hover i,
+    .card-header-actions > .btn.btn-icon:hover svg,
+    .module-nav-item .btn:hover i,
+    .module-nav-item .btn:hover svg,
+    .class-card-actions .btn:not(.btn-danger):hover i,
+    .class-card-actions .btn:not(.btn-danger):hover svg,
+    .tile-header-action:hover i,
+    .zt-archive-btn:not(.zt-archive-del):hover i,
+    .zt-plan-write:hover i,
+    .dashboard-zt-choice:not(:disabled):hover i,
+    .dashboard-zt-reset:hover i,
+    .dashboard-zt-other:hover i {
+        color: #fff !important;
+    }
 }
 
 @media (max-width: 600px) {
