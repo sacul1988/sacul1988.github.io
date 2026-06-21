@@ -179,7 +179,7 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
 
 // ===== Zeugnisnoten-Vorschlag: Note abwägen + Begründung schreiben =====
 const ZEUGNISNOTE_SYSTEM = `Du unterstützt eine Lehrkraft dabei, einer Schülerin oder einem Schüler eine Rückmeldung zur Endnote zu geben. Der Text wird DIREKT AN DIE SCHÜLERIN ODER DEN SCHÜLER gerichtet, also in der Anrede "Du".
-Der Rückmeldetext besteht aus drei Teilen, die später aneinandergehängt werden und zusammen wie EIN flüssiger Text wirken sollen: (1) dein Feld "noten_auflistung" zählt die einzelnen schriftlichen Noten auf, (2) direkt danach wird automatisch ein Satz mit der gerundeten Durchschnittsnote ergänzt (z. B. "Daraus ergibt sich die schriftliche Durchschnittsnote 2.") – diesen Satz schreibst du NICHT selbst und nimmst ihn auch nicht vorweg, (3) dein Feld "mitarbeit_text" zur sonstigen Mitarbeit inkl. Endnote.
+Der Rückmeldetext besteht aus drei Teilen, die später als einzelne Stichpunkte untereinander angezeigt werden: (1) dein Feld "noten_auflistung" zählt die einzelnen schriftlichen Noten auf, (2) direkt danach wird automatisch ein Stichpunkt mit der gerundeten Durchschnittsnote ergänzt (z. B. "Daraus ergibt sich die schriftliche Durchschnittsnote 2.") – diesen Stichpunkt schreibst du NICHT selbst und nimmst ihn auch nicht vorweg, (3) dein Feld "mitarbeit_text" zur sonstigen Mitarbeit inkl. Endnote.
 
 [WICHTIGE AUSGABE-REGEL (JSON)]
 Du musst als Antwort IMMER ein valides JSON-Objekt zurückgeben.
@@ -200,14 +200,18 @@ Regeln für "noten_auflistung":
 
 Ein bis zwei kurze Sätze in der Anrede "Du", die exakt die unten angegebenen einzelnen schriftlichen Noten (Name der Arbeit + Note) nennen, z. B. "Du hast im Musiktest die Note 2 und bei dem Lapbook über die Musikinstrumente die Note 3- geschrieben."
 Nutze die Namen und Noten EXAKT wie unten angegeben, erfinde oder verändere nichts. Wähle für jede Arbeit eine passende, natürlich klingende Formulierung/Präposition statt alle Arbeiten gleich anzuhängen (z. B. "im Test", "in der Klassenarbeit", "bei dem Projekt/Lapbook über ..."), je nachdem, was zur Art der Arbeit passt. Einfache, klare Sprache.
-Schließe NICHT mit der Durchschnittsnote ab – der Satz dazu wird automatisch ergänzt.
+Schließe NICHT mit der Durchschnittsnote ab – der Stichpunkt dazu wird automatisch ergänzt.
 Wenn unten keine schriftlichen Noten angegeben sind, gib einen leeren String "" zurück.
 
 Regeln für "mitarbeit_text":
 
-Beginnt sinngemäß mit einem Übergang zur sonstigen Mitarbeit, z. B. "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen: Du ..." – die genaue Formulierung darf variieren, der Sinn (Überleitung zur sonstigen/mündlichen Mitarbeit, Anrede "Du") soll aber erhalten bleiben.
-Insgesamt 3 bis 5 Sätze in der direkten Anrede "Du", die sich konkret auf die unten genannten Beobachtungen zur mündlichen Mitarbeit beziehen. Formuliere in ganzen, runden Sätzen, nicht als Stichpunktliste, ohne Zeilenumbrüche.
-Endet mit einem Satz, der erklärt, wie sich aus dem schriftlichen Durchschnitt und der sonstigen Mitarbeit zusammen die Endnote ergibt, z. B. "Insgesamt ergibt das für dich die Note X."
+Gib KEINEN Fließtext zurück, sondern 3 bis 5 einzelne Stichpunkte, jeweils in einer eigenen Zeile und jeweils beginnend mit "• ".
+Der erste Stichpunkt beginnt sinngemäß mit einem Übergang zur sonstigen Mitarbeit, z. B. "• In der sonstigen Mitarbeit ist mir Folgendes aufgefallen: Du ..." – die genaue Formulierung darf variieren, der Sinn (Überleitung zur sonstigen/mündlichen Mitarbeit, Anrede "Du") soll aber erhalten bleiben.
+Jeder Stichpunkt steht in der direkten Anrede "Du" und bezieht sich konkret auf die unten genannten Beobachtungen zur mündlichen Mitarbeit. Formuliere kurze, klare Stichpunkte statt eines zusammenhängenden Fließtexts.
+Schreibe in einfacher, schülernaher Sprache. Vermeide verschachtelte Satzstrukturen, lange Relativsätze und mehrere Kommas in einem Stichpunkt. Lieber zwei kurze Aussagen als ein langer Satz.
+Hänge keine wertenden Satzreste an, z. B. NICHT: "..., das ist positiv." Schreibe stattdessen direkt und natürlich, z. B. "• Du arbeitest zuverlässig und ruhig im Unterricht mit." oder "• Das hilft dir im Unterricht."
+Vermeide Konstruktionen wie "was in einem Hauptfach, in dem ..., ins Gewicht fällt". Formuliere einfacher, z. B. "• Du meldest dich noch zu selten. Da die mündliche Mitarbeit im Hauptfach genauso wichtig ist wie die schriftliche Leistung, wirkt sich das auf deine Note aus."
+Der letzte Stichpunkt erklärt, wie sich aus dem schriftlichen Durchschnitt und der sonstigen Mitarbeit zusammen die Endnote ergibt, z. B. "• Insgesamt ergibt das für dich die Note X."
 Formuliere wertschätzend und konstruktiv, auch wenn die Rückmeldung nicht durchgehend positiv ist.
 Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.
 Wenn die Beobachtungen sehr knapp oder widersprüchlich sind (und du dich entscheidest, keine Rückfragen zu stellen), weise das kurz und sachlich an passender Stelle darauf hin.
@@ -247,6 +251,21 @@ Die im Schlusssatz von "mitarbeit_text" genannte Note muss exakt dem Wert von "e
 
 function formatAverageSentence(durchschnitt, durchschnittNote) {
   return durchschnitt ? `Daraus ergibt sich die schriftliche Durchschnittsnote ${durchschnittNote}.` : "";
+}
+
+function normalizeBulletLines(text) {
+  if (!text || !String(text).trim()) return [];
+  return String(text)
+    .split(/\r?\n+/)
+    .map(line => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim())
+    .filter(Boolean)
+    .map(line => `• ${line}`);
+}
+
+function formatZeugnisnoteBullets(parts) {
+  return parts
+    .flatMap(part => normalizeBulletLines(part))
+    .join("\n");
 }
 
 // Robotische, aber garantiert korrekte Notiz-Auflistung – nur als Fallback, falls die KI
@@ -364,8 +383,7 @@ exports.generateZeugnisnote = onCall(
         }
         const averageSentence = formatAverageSentence(durchschnitt, durchschnittNote);
 
-        const intro = [notenAuflistung, averageSentence].filter(Boolean).join(" ");
-        begruendung = [intro, mitarbeitText].filter(Boolean).join(" ");
+        begruendung = formatZeugnisnoteBullets([notenAuflistung, averageSentence, mitarbeitText]);
       }
     } catch (e) {
       console.error("JSON parsing failed, falling back to raw text:", e);
