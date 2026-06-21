@@ -8,7 +8,15 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "functions/**"
+      "functions/**",
+      "package.json",
+      "package-lock.json",
+      "check.js",
+      "**/*.test.js",
+      "eslint.config.mjs",
+      "firestore.rules",
+      "tests/**",
+      "assets/screenshots/**"
     ]
   },
   "functions": [

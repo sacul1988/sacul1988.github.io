@@ -6801,6 +6801,25 @@ let _znPendingMessages = null;
 let _znPendingIndex = null;
 let _znPendingRichtung = null;
 
+function formatKiGenerationError(error, fallback = 'Fehler beim Generieren.') {
+    const message = String(error?.message || '').trim();
+    const code = String(error?.code || '').toLowerCase();
+
+    if (/zu lang|zu umfangreich|too long|too many/i.test(message) || code.includes('invalid-argument') || code.includes('invalid_argument')) {
+        return 'Die Eingaben sind zu lang oder zu umfangreich. Bitte kürze den Text und versuche es erneut.';
+    }
+    if (/zu viele ki-anfragen|tageslimit|resource-exhausted|resource_exhausted/i.test(message) || code.includes('resource-exhausted') || code.includes('resource_exhausted')) {
+        return message || 'Zu viele KI-Anfragen in kurzer Zeit. Bitte warte einen Moment und versuche es erneut.';
+    }
+    if (/nicht angemeldet|unauthenticated/i.test(message) || code.includes('unauthenticated')) {
+        return 'Du bist nicht mehr angemeldet. Bitte melde dich erneut an.';
+    }
+    if (/network|failed to fetch|internet|fetch/i.test(message)) {
+        return 'Die KI konnte gerade nicht erreicht werden. Bitte prüfe deine Internetverbindung und versuche es erneut.';
+    }
+    return message || fallback;
+}
+
 function getZeugnisnoteContext(student) {
     const schriftlicheNoten = (student.projects || [])
         .filter(p => p.grade && p.grade !== '-')
@@ -7053,7 +7072,7 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
           }
       } catch (err) {
           console.error('Zeugnisnote-Fehler:', err);
-          swal('Fehler', err.message || 'Fehler beim Generieren.', 'error');
+          swal('Fehler', formatKiGenerationError(err), 'error');
       } finally {
           _zeugnisnoteBusy = false;
           const c = document.getElementById(`zn-inline-${index}`);
@@ -9672,7 +9691,7 @@ async function ztGenerate() {
         }
     } catch(e) {
         ztCloseResult();
-        swal('Fehler', 'Fehler beim Generieren. Bitte erneut versuchen.', 'error');
+        swal('Fehler', formatKiGenerationError(e, 'Fehler beim Generieren. Bitte erneut versuchen.'), 'error');
     }
 }
 
@@ -9690,7 +9709,7 @@ async function ztRegenerate() {
         ztRenderResult();
     } catch(e) {
         ztRenderResult();
-        swal('Fehler', 'Fehler beim Generieren.', 'error');
+        swal('Fehler', formatKiGenerationError(e, 'Fehler beim Generieren.'), 'error');
     }
 }
 
@@ -9706,7 +9725,7 @@ async function ztShortenText() {
         ztRenderResult();
     } catch(e) {
         ztRenderResult();
-        swal('Fehler', 'Fehler beim Kürzen.', 'error');
+        swal('Fehler', formatKiGenerationError(e, 'Fehler beim Kürzen.'), 'error');
     }
 }
 
@@ -9722,7 +9741,7 @@ async function ztLengthenText() {
         ztRenderResult();
     } catch(e) {
         ztRenderResult();
-        swal('Fehler', 'Fehler beim Verlängern.', 'error');
+        swal('Fehler', formatKiGenerationError(e, 'Fehler beim Verlängern.'), 'error');
     }
 }
 
@@ -9742,7 +9761,7 @@ async function ztRefineText() {
         ztRenderResult();
     } catch(e) {
         ztRenderResult();
-        swal('Fehler', 'Fehler beim Verfeinern. Bitte erneut versuchen.', 'error');
+        swal('Fehler', formatKiGenerationError(e, 'Fehler beim Verfeinern. Bitte erneut versuchen.'), 'error');
     }
 }
 
@@ -10055,7 +10074,7 @@ async function ztSubmitAnswers() {
         }
     } catch(e) {
         ztCloseResult();
-        swal('Fehler', 'Fehler beim Generieren. Bitte erneut versuchen.', 'error');
+        swal('Fehler', formatKiGenerationError(e, 'Fehler beim Generieren. Bitte erneut versuchen.'), 'error');
     }
 }
 

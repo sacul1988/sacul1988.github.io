@@ -1,11 +1,22 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
+const {
+  validateZeugnistextPayload,
+  validateZeugnisnotePayload
+} = require("./payloadValidation");
 
 admin.initializeApp();
 const db = admin.firestore();
 
 const anthropicApiKey = defineSecret("ANTHROPIC_API_KEY");
+
+function toInvalidArgument(error) {
+  if (error && error.code === "invalid-argument") {
+    return new HttpsError("invalid-argument", error.message);
+  }
+  return error;
+}
 
 // ===== Rate-Limit pro Nutzer (Kostenschutz für die KI-Aufrufe) =====
 // Gemeinsames Limit über beide KI-Funktionen. Gleitende Fenster (Minute + Tag).
@@ -114,10 +125,13 @@ exports.generateZeugnistext = onCall(
     }
     await checkRateLimit(request.auth.uid);
 
-    const { typ, messages } = request.data;
-    if (!typ || !Array.isArray(messages)) {
-      throw new HttpsError("invalid-argument", "Fehlende oder ungültige Parameter.");
+    let payload;
+    try {
+      payload = validateZeugnistextPayload(request.data);
+    } catch (e) {
+      throw toInvalidArgument(e);
     }
+    const { typ, messages } = payload;
 
     const basePrompt = PROMPTS[typ] || PROMPTS.nebenfach;
     const systemPrompt = basePrompt + `\n\n[WICHTIGE AUSGABE-REGEL (JSON)]
@@ -305,7 +319,13 @@ exports.generateZeugnisnote = onCall(
     }
     await checkRateLimit(request.auth.uid);
 
-    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, messages } = request.data || {};
+    let payload;
+    try {
+      payload = validateZeugnisnotePayload(request.data);
+    } catch (e) {
+      throw toInvalidArgument(e);
+    }
+    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, messages } = payload;
     const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
 
     let userMsg = "";

@@ -4,8 +4,10 @@
   "version": "1.0.0",
   "description": "Schulverwaltung – Dev-Tooling (Lint & Pre-Deploy-Checks)",
   "scripts": {
-    "lint": "eslint grades.js script.js check.js functions/index.js",
+    "lint": "eslint grades.js script.js check.js *.test.js functions/*.js tests/**/*.js",
     "test": "node --test",
+    "test:ui": "node --test tests/ui/zeugnistexte.playwright.js",
+    "verify": "npm run check && npm run lint && npm test",
     "check": "node check.js"
   },
   "devDependencies": {

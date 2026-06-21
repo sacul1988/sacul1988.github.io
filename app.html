@@ -719,9 +719,6 @@
 
         <!-- Modals -->
         <div id="modal-container" style="display: none;" onclick="closeModalOnOutsideClick(event)" role="dialog" aria-modal="true" aria-hidden="true">
-            <!-- Zeugnistext Ergebnis Modal (dynamisch befüllt) -->
-            <div id="zt-result-modal" class="modal zt-modal" style="display: none;"></div>
-
             <!-- Zeugnistext Archiv Modal (dynamisch befüllt) -->
             <div id="zt-archive-modal" class="modal zt-modal" style="display: none;"></div>
 
@@ -730,9 +727,6 @@
 
             <!-- Zeugnistext Planung: Formular zum Anlegen/Bearbeiten (dynamisch befüllt) -->
             <div id="zt-planung-form-modal" class="modal zt-modal" style="display: none;"></div>
-
-            <!-- Zeugnistextgenerator: Eingabe und Ergebnis -->
-            <div id="zt-text-modal" class="modal zt-modal zt-text-modal" style="display: none;"></div>
 
             <!-- Stundenplan: Unterrichtszeiten festlegen (dynamisch befüllt) -->
             <div id="stundenplan-zeiten-modal" class="modal zt-modal" style="display: none;"></div>
@@ -1272,6 +1266,30 @@
         window.firebaseDb = db;
         window.firebaseAuth = auth;
 
+        function createCallableError(error, fallbackMessage) {
+            const status = String(error?.status || error?.code || '').toLowerCase();
+            const rawMessage = error?.message || fallbackMessage || 'Fehler beim Generieren.';
+            let message = rawMessage;
+
+            if (status.includes('resource_exhausted') || status.includes('resource-exhausted')) {
+                message = 'Zu viele KI-Anfragen in kurzer Zeit. Bitte warte einen Moment und versuche es erneut.';
+            } else if (status.includes('unauthenticated')) {
+                message = 'Du bist nicht mehr angemeldet. Bitte melde dich erneut an.';
+            } else if (
+                status.includes('invalid_argument') ||
+                status.includes('invalid-argument') ||
+                /zu lang|zu viele|too long|too many/i.test(rawMessage)
+            ) {
+                message = /zu lang|zu viele/i.test(rawMessage)
+                    ? 'Die Eingaben sind zu lang oder zu umfangreich. Bitte kürze den Text und versuche es erneut.'
+                    : rawMessage;
+            }
+
+            const err = new Error(message);
+            err.code = status;
+            return err;
+        }
+
         // Firebase Functions: Zeugnistext-Generator (direct fetch to ensure auth token is sent)
         window.callGenerateZeugnistext = async (typ, messages) => {
             const user = auth.currentUser;
@@ -1289,7 +1307,7 @@
                 }
             );
             const json = await response.json();
-            if (json.error) throw new Error(json.error.message || 'Fehler beim Generieren.');
+            if (json.error) throw createCallableError(json.error, 'Fehler beim Generieren.');
             return json.result;
         };
 
@@ -1310,7 +1328,7 @@
                 }
             );
             const json = await response.json();
-            if (json.error) throw new Error(json.error.message || 'Fehler beim Generieren.');
+            if (json.error) throw createCallableError(json.error, 'Fehler beim Generieren.');
             return json.result;
         };
 

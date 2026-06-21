@@ -56,7 +56,7 @@ export default [
 
   // Node-/CommonJS-Code (grades.js ist dual-mode: Browser-global + module.exports)
   {
-    files: ['functions/**/*.js', 'check.js', 'grades.js'],
+    files: ['functions/**/*.js', 'check.js', 'grades.js', '*.test.js', 'tests/**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'commonjs',

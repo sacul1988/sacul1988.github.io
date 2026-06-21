@@ -33,6 +33,16 @@ function collectJsFiles() {
       if (e.isFile() && e.name.endsWith('.js')) out.push(path.join(fnDir, e.name));
     }
   }
+  const testsDir = path.join(ROOT, 'tests');
+  function collectFromDir(dir) {
+    if (!fs.existsSync(dir)) return;
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) collectFromDir(full);
+      else if (e.isFile() && e.name.endsWith('.js')) out.push(full);
+    }
+  }
+  collectFromDir(testsDir);
   return out;
 }
 
@@ -106,4 +116,3 @@ for (const h of htmlSources) {
 console.log('');
 if (problems) { console.error(`FEHLGESCHLAGEN: ${problems} Problem(e) gefunden.`); process.exit(1); }
 console.log('Alles in Ordnung ✓');
-
