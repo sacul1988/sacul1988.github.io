@@ -10267,17 +10267,45 @@ function ztPlanungOpen(focusCourseId = null, options = {}) {
 }
 
 function ztPlanungOpenAtTop() {
-    ztPlanungOpen(null, { scrollTop: 0 });
+    ztPlanungOpenInline(null, { scrollTop: 0 });
 }
 
-function ztPlanungFocusCourse(courseId) {
-    const modal = document.getElementById('zt-planung-modal');
-    if (!modal) return;
-    const card = Array.from(modal.querySelectorAll('.zt-plan-course')).find(el => el.dataset.courseId === courseId);
+function ztPlanungFocusCourseIn(container, courseId) {
+    if (!container) return;
+    const card = Array.from(container.querySelectorAll('.zt-plan-course')).find(el => el.dataset.courseId === courseId);
     if (!card) return;
     card.scrollIntoView({ block: 'center', behavior: 'smooth' });
     card.classList.add('zt-plan-course-focus');
     setTimeout(() => card.classList.remove('zt-plan-course-focus'), 1400);
+}
+
+function ztPlanungFocusCourse(courseId) {
+    ztPlanungFocusCourseIn(document.getElementById('zt-planung-modal'), courseId);
+}
+
+function ztPlanungFocusInlineCourse(courseId) {
+    ztPlanungFocusCourseIn(document.getElementById('zt-planung-inline'), courseId);
+}
+
+function ztPlanungOpenInline(focusCourseId = null, options = {}) {
+    ztPlanungInit();
+    ztPlanungSyncClassTeacherCourse();
+    openToolWindow('zeugnis-texte');
+    ZtState.inlineMode = 'planung';
+    ztPlanungRenderInline();
+    ztApplyInlineMode();
+
+    const scrollToTarget = () => {
+        if (Number.isFinite(options.scrollTop)) {
+            const body = document.getElementById('tool-window-body');
+            if (body) body.scrollTop = options.scrollTop;
+            window.scrollTo({ top: options.scrollTop, behavior: 'auto' });
+        }
+        if (focusCourseId) ztPlanungFocusInlineCourse(focusCourseId);
+    };
+
+    requestAnimationFrame(scrollToTarget);
+    setTimeout(scrollToTarget, 160);
 }
 
 function ztPlanungSortKey(course) {
@@ -10726,7 +10754,7 @@ function renderDashboardZtPlanungTile() {
         const courseName = course.name || course.fach || 'Kurs';
         return `
             <div class="dashboard-zt-row">
-                <button type="button" class="dashboard-zt-course" onclick="ztPlanungOpen('${spJsAttr(course.id)}')" title="In der Planung anzeigen">${ztEsc(courseName)}</button>
+                <button type="button" class="dashboard-zt-course" onclick="ztPlanungOpenInline('${spJsAttr(course.id)}')" title="In Zeugnistexte anzeigen">${ztEsc(courseName)}</button>
                 <button type="button" class="dashboard-zt-choice ${responsible === 'me' ? 'active' : ''}" onclick="ztPlanungSetResponsible('${spJsAttr(course.id)}','me')" title="Ich bin zuständig">Ich</button>
                 <button type="button" class="dashboard-zt-choice teacher ${responsible === 'teacher' || responsible === 'other' ? 'active' : ''}" onclick="ztPlanungSetResponsible('${spJsAttr(course.id)}','teacher')" title="${ztEsc(teacherLabel)} ist zuständig"${teacherDisabled}>${ztEsc(teacherLabel)}</button>
                 <button type="button" class="dashboard-zt-other" onclick="ztPlanungSetResponsible('${spJsAttr(course.id)}','other')" title="Andere Person eintragen"><i class="fas fa-plus"></i></button>
@@ -11057,6 +11085,7 @@ function ztPlanungMarkRefDone() {
 
 window.ztPlanungOpen = ztPlanungOpen;
 window.ztPlanungOpenAtTop = ztPlanungOpenAtTop;
+window.ztPlanungOpenInline = ztPlanungOpenInline;
 window.ztPlanungRenderInline = ztPlanungRenderInline;
 window.ztPlanungPrintResponsibleList = ztPlanungPrintResponsibleList;
 window.ztPlanungOpenForm = ztPlanungOpenForm;

@@ -47,6 +47,46 @@ async function openZeugnistexte(viewport = { width: 1048, height: 776 }) {
   return { browser, page };
 }
 
+async function openDashboard(viewport = { width: 1048, height: 776 }) {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({ viewport });
+
+  await page.addInitScript(() => {
+    localStorage.setItem("classes", JSON.stringify([]));
+    localStorage.setItem("ztPlanung", JSON.stringify({
+      courses: [
+        {
+          id: "course-1",
+          name: "5c Kunst",
+          halbjahr: "ersten",
+          typ: "nebenfach",
+          fach: "Kunst",
+          themen: "Farben und Formen",
+          fachlehrer: "Krato",
+          students: [
+            { id: "s1", name: "Birhat", done: false },
+            { id: "s2", name: "Ihor", done: true },
+            { id: "s3", name: "Siraj", done: false }
+          ]
+        }
+      ]
+    }));
+  });
+
+  await page.goto(appUrl);
+  await page.waitForFunction(() => typeof window.showPage === "function");
+  await page.evaluate(() => {
+    const login = document.getElementById("login-container");
+    if (login) login.style.display = "none";
+    document.documentElement.classList.remove("login-active");
+    document.body.classList.remove("login-active");
+    window.showPage("home", null, false);
+  });
+  await page.waitForSelector("#dashboard-zt-list .dashboard-zt-course", { state: "visible" });
+
+  return { browser, page };
+}
+
 test("Zeugnistexte switches between planning and text view", async () => {
   const { browser, page } = await openZeugnistexte();
   try {
@@ -79,6 +119,20 @@ test("Zeugnistexte controls stay usable on mobile width", async () => {
 
     await page.click("#zt-open-planung-inline-btn");
     await assertVisible(page, "#zt-planung-inline");
+  } finally {
+    await browser.close();
+  }
+});
+
+test("Dashboard zeugnistexte course opens inline planning instead of modal", async () => {
+  const { browser, page } = await openDashboard();
+  try {
+    await page.click("#dashboard-zt-list .dashboard-zt-course");
+
+    await assertVisible(page, "#tool-window-overlay.open #zeugnis-texte-module.active");
+    await assertVisible(page, "#zt-planung-inline");
+    await assertHidden(page, "#zt-planung-modal");
+    await page.waitForSelector('#zt-planung-inline .zt-plan-course[data-course-id="course-1"]');
   } finally {
     await browser.close();
   }
