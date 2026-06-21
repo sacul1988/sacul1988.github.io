@@ -339,6 +339,44 @@ function showPage(page, classId = null, shouldPushState = true) {
     }
 }
 
+function getCurrentPageScrollState() {
+    const ztTileScrollEl = document.querySelector('#dashboard-zt-list .dashboard-zt-scroll');
+    return {
+        scrollX: window.scrollX || window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0,
+        scrollY: window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0,
+        dashboardZtScrollTop: ztTileScrollEl ? ztTileScrollEl.scrollTop : null
+    };
+}
+
+function rememberCurrentHistoryScroll() {
+    if (!history.state) return;
+    history.replaceState({ ...history.state, ...getCurrentPageScrollState() }, '');
+}
+
+function restoreHistoryScroll(state) {
+    if (!state || (!Number.isFinite(state.scrollY) && !Number.isFinite(state.dashboardZtScrollTop))) return;
+
+    const restore = () => {
+        if (Number.isFinite(state.dashboardZtScrollTop)) {
+            const ztTileScrollEl = document.querySelector('#dashboard-zt-list .dashboard-zt-scroll');
+            if (ztTileScrollEl) ztTileScrollEl.scrollTop = state.dashboardZtScrollTop;
+        }
+
+        if (Number.isFinite(state.scrollY)) {
+            const x = Number.isFinite(state.scrollX) ? state.scrollX : 0;
+            document.documentElement.scrollTop = state.scrollY;
+            document.body.scrollTop = state.scrollY;
+            window.scrollTo(x, state.scrollY);
+        }
+    };
+
+    restore();
+    requestAnimationFrame(restore);
+    setTimeout(restore, 60);
+    setTimeout(restore, 180);
+    setTimeout(restore, 360);
+}
+
 // Modul wechseln
 function showModule(module, shouldPushState = true) {
     // Sitzplan-Vollbild beim Tab-Wechsel sicher verlassen
@@ -538,6 +576,7 @@ function openToolWindow(which, shouldPushState = true) {
     initToolWindows();
     const overlay = document.getElementById('tool-window-overlay');
     if (!overlay) return;
+    if (shouldPushState) rememberCurrentHistoryScroll();
 
     overlay.querySelectorAll('.tool-window-panel').forEach(p => p.classList.remove('active'));
 
@@ -593,7 +632,8 @@ function openToolWindow(which, shouldPushState = true) {
     if (wbody) wbody.scrollTop = 0;
 }
 
-function closeToolWindow() {
+function closeToolWindow(options = {}) {
+    const resetScroll = options.resetScroll !== false;
     const overlay = document.getElementById('tool-window-overlay');
     if (!overlay) return;
 
@@ -611,7 +651,7 @@ function closeToolWindow() {
 
     // Beim Dokument-Scroll-Fenster den Seiten-Scroll zurücksetzen, damit die
     // wieder eingeblendete Ausgangsseite oben beginnt.
-    if (wasDocScroll) window.scrollTo(0, 0);
+    if (wasDocScroll && resetScroll) window.scrollTo(0, 0);
 
     // modal-open nur entfernen, wenn kein normales Modal mehr offen ist
     const modalContainer = document.getElementById('modal-container');
@@ -628,7 +668,7 @@ function closeToolWindowOnBackdrop(event) {
 }
 
 function closeToolWindowBack() {
-    closeToolWindow();
+    closeToolWindow({ resetScroll: true });
     showPage('home');
 }
 
@@ -2866,19 +2906,20 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 // Kein Tool-Window im neuen Zustand -> falls eins offen ist, schließen
                 if (isToolWindowOpen) {
-                    closeToolWindow();
+                    closeToolWindow({ resetScroll: false });
                 }
                 if (state.page) {
                     showPage(state.page, state.classId, false);
                     if (state.page === 'class' && state.module) {
                         showModule(state.module, false);
                     }
+                    restoreHistoryScroll(state);
                 }
             }
         } else {
             // Fallback auf Startseite
             if (isToolWindowOpen) {
-                closeToolWindow();
+                closeToolWindow({ resetScroll: false });
             }
             showPage('home', null, false);
         }
