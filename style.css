@@ -213,6 +213,7 @@ body {
     grid-auto-rows: 2px;
     grid-auto-flow: row dense;
     align-items: start;
+    position: relative; /* Bezug für das Hilfsraster beim freien Verschieben */
 }
 
 .classes-grid.masonry-prep {
@@ -394,6 +395,15 @@ body {
     justify-content: center;
     transition: left 0.14s ease, top 0.14s ease, width 0.14s ease, height 0.14s ease;
 }
+/* Tausch-Modus: Kachel wird auf eine andere gezogen -> beide tauschen Platz. */
+.tile-drop-indicator.swap {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.14);
+}
+.tile-drop-indicator.swap .tile-drop-label {
+    color: #059669;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.18);
+}
 .tile-drop-label {
     border-radius: 999px;
     background: #fff;
@@ -403,6 +413,30 @@ body {
     font-weight: 800;
     padding: 6px 11px;
 }
+/* Sichtbares Hilfsraster: beim Verschieben/Vergrößern wird der freie Hintergrund
+   in kleine Kästchen eingeteilt, auf denen die Kachel (auch mit Lücke) landet. */
+.tile-grid-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+.tile-grid-cell {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px dashed rgba(99, 102, 241, 0.28);
+    border-radius: 6px;
+    background: rgba(99, 102, 241, 0.035);
+}
+/* Während des Ziehens stehen die echten Kacheln über dem Hilfsraster –
+   die Kästchen scheinen so nur in den freien Flächen durch. */
+.classes-grid.tile-grid-active > .class-card:not(.tile-dragging) {
+    position: relative;
+    z-index: 1;
+}
+
 body.tile-dragging-active {
     cursor: grabbing;
     user-select: none;

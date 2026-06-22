@@ -2027,28 +2027,104 @@ function dashboardEffectiveTileWidths() {
     return Object.assign({}, getDashboardTileWidths(), _dashboardTileWidthPreview || {});
 }
 
-function applyDashboardTileSpans(grid) {
-    const columns = dashboardColumnCount(grid);
-    const baseSpan = dashboardBaseTileSpan(grid);
-    const widths = dashboardEffectiveTileWidths();
-    let used = 0;
-    Array.from(grid.children).forEach(item => {
-        if (!(item.dataset && item.dataset.tileKey)) return;
-        if (item.classList && (item.classList.contains('tile-placeholder') || item.classList.contains('dashboard-tile-hidden'))) return;
-        const canBeWide = item.classList.contains('dashboard-notes-card') || item.classList.contains('dashboard-zt-card');
-        const key = item.dataset.tileKey;
-        let colSpan = Math.min(baseSpan, columns);
-        if (canBeWide && columns > baseSpan) {
-            if (widths[key]) {
-                colSpan = Math.max(baseSpan, Math.min(columns, Number(widths[key]) || baseSpan));
-            } else {
-                const remaining = columns - (used % columns);
-                colSpan = remaining >= baseSpan * 2 ? baseSpan * 2 : baseSpan;
+// Wie viele Spalten breit eine Kachel ist (Klassen = Basisbreite, Notizen/Zeugnis-
+// texte dürfen breiter sein – gespeichert oder als Standard doppelt breit).
+function computeTileColSpan(item, columns, baseSpan, widths) {
+    const key = item.dataset.tileKey;
+    const canBeWide = item.classList.contains('dashboard-notes-card') || item.classList.contains('dashboard-zt-card');
+    let colSpan = Math.min(baseSpan, columns);
+    if (canBeWide && columns > baseSpan) {
+        if (widths[key]) {
+            colSpan = Math.max(baseSpan, Math.min(columns, Number(widths[key]) || baseSpan));
+        } else {
+            colSpan = columns >= baseSpan * 2 ? baseSpan * 2 : baseSpan;
+        }
+    }
+    return colSpan;
+}
+
+// Höhe einer Klassen-Kachel in Raster-Reihen = 1 "Slot". Eine volle Dashboard-
+// Kachel ist genau 2 Slots hoch. So rastet alles auf demselben Slot-Gitter ein.
+function dashboardSlotRows(grid) {
+    return tileRowSpan(grid, dashboardClassTileHeight(grid));
+}
+
+function tileSlotSpan(item) {
+    return isClassTile(item) ? 1 : 2;
+}
+
+// Freies Platzieren ist nur sinnvoll, wenn mehr Spalten als eine Kachelbreite da
+// sind. Auf schmalen Bildschirmen (Handy: Basisbreite = Spaltenzahl) fällt das
+// Layout auf einfaches Untereinander-Stapeln zurück.
+function dashboardIsFreeMode(grid) {
+    return dashboardColumnCount(grid) > dashboardBaseTileSpan(grid);
+}
+
+function visibleDashboardTiles(grid) {
+    return Array.from(grid.children).filter(item =>
+        item.dataset && item.dataset.tileKey
+        && !item.classList.contains('tile-placeholder')
+        && !item.classList.contains('dashboard-tile-hidden'));
+}
+
+const DASHBOARD_TILE_POS_KEY = 'dashboardTilePosLocalV1';
+
+function getDashboardTilePositions() {
+    try {
+        const obj = JSON.parse(localStorage.getItem(DASHBOARD_TILE_POS_KEY) || '{}');
+        return (obj && typeof obj === 'object') ? obj : {};
+    } catch (e) { return {}; }
+}
+
+function saveDashboardTilePositions(pos) {
+    localStorage.setItem(DASHBOARD_TILE_POS_KEY, JSON.stringify(pos || {}));
+}
+
+function dashboardSetTilePosition(key, col, slot) {
+    if (!key) return;
+    const pos = getDashboardTilePositions();
+    pos[key] = { col: Math.max(1, Math.round(col)), slot: Math.max(0, Math.round(slot)) };
+    saveDashboardTilePositions(pos);
+    // Reihenfolge fürs Handy (Stapel-Fallback) aus den Positionen ableiten.
+    syncDashboardOrderFromPositions();
+}
+
+// Aus den freien Positionen eine lineare Reihenfolge (oben→unten, links→rechts)
+// ableiten und speichern – damit die schmale Handy-Ansicht der Anordnung folgt.
+function syncDashboardOrderFromPositions() {
+    const grid = safeGetElement('classes-grid');
+    if (!grid) return;
+    const pos = getDashboardTilePositions();
+    const tiles = visibleDashboardTiles(grid).slice();
+    tiles.sort((a, b) => {
+        const pa = pos[a.dataset.tileKey] || { slot: 9999, col: 9999 };
+        const pb = pos[b.dataset.tileKey] || { slot: 9999, col: 9999 };
+        return (pa.slot - pb.slot) || (pa.col - pb.col);
+    });
+    localStorage.setItem(DASHBOARD_TILE_ORDER_KEY, JSON.stringify(tiles.map(t => t.dataset.tileKey)));
+}
+
+// Belegungsraster: occ[slot][col-1] = true, wächst nach unten bei Bedarf.
+function makeTileOccupancy(columns) {
+    const occ = [];
+    const ensure = (s) => { while (occ.length <= s) occ.push(new Array(columns).fill(false)); };
+    return {
+        rows: () => occ.length,
+        fits(col, slot, cspan, sspan) {
+            if (col < 1 || col + cspan - 1 > columns || slot < 0) return false;
+            for (let s = slot; s < slot + sspan; s++) {
+                ensure(s);
+                for (let c = col; c < col + cspan; c++) if (occ[s][c - 1]) return false;
+            }
+            return true;
+        },
+        mark(col, slot, cspan, sspan) {
+            for (let s = slot; s < slot + sspan; s++) {
+                ensure(s);
+                for (let c = col; c < col + cspan; c++) occ[s][c - 1] = true;
             }
         }
-        item.style.gridColumn = `span ${colSpan}`;
-        used += colSpan;
-    });
+    };
 }
 
 function layoutDashboardMasonry() {
@@ -2057,14 +2133,68 @@ function layoutDashboardMasonry() {
     const grid = safeGetElement('classes-grid');
     if (!grid) return;
 
-    applyDashboardTileSpans(grid);
-    const span = tileRowSpan(grid, dashboardTileHeight(grid));
-    const classSpan = tileRowSpan(grid, dashboardClassTileHeight(grid));
-    Array.from(grid.children).forEach(item => {
-        if (item.classList && item.classList.contains('tile-placeholder')) return;
-        if (item.classList && item.classList.contains('dashboard-tile-hidden')) return;
+    const columns = dashboardColumnCount(grid);
+    const baseSpan = dashboardBaseTileSpan(grid);
+    const tiles = visibleDashboardTiles(grid);
+
+    if (!dashboardIsFreeMode(grid)) {
+        // Schmaler Bildschirm: klassisches Untereinander-Stapeln (Reihenfolge zählt).
+        grid.style.gridAutoFlow = '';
+        const fullSpan = tileRowSpan(grid, dashboardTileHeight(grid));
+        const classSpan = tileRowSpan(grid, dashboardClassTileHeight(grid));
+        tiles.forEach(item => {
+            item.style.minHeight = '';
+            item.style.gridColumn = 'span ' + Math.min(baseSpan, columns);
+            item.style.gridRow = '';
+            item.style.gridRowEnd = 'span ' + (isClassTile(item) ? classSpan : fullSpan);
+        });
+        return;
+    }
+
+    // Freies Raster: jede Kachel bekommt eine explizite Spalten-/Slot-Position.
+    grid.style.gridAutoFlow = 'row'; // kein dichtes Auffüllen -> Lücken bleiben erhalten
+    const slotRows = dashboardSlotRows(grid);
+    const widths = dashboardEffectiveTileWidths();
+    const positions = getDashboardTilePositions();
+    const occ = makeTileOccupancy(columns);
+
+    const place = (item, col, slot) => {
         item.style.minHeight = '';
-        item.style.gridRowEnd = 'span ' + (isClassTile(item) ? classSpan : span);
+        item.style.gridColumn = col + ' / span ' + item._cspan;
+        item.style.gridRow = (slot * slotRows + 1) + ' / span ' + (item._sspan * slotRows);
+        occ.mark(col, slot, item._cspan, item._sspan);
+    };
+
+    // Spannen vorberechnen.
+    tiles.forEach(item => {
+        item._cspan = computeTileColSpan(item, columns, baseSpan, widths);
+        item._sspan = tileSlotSpan(item);
+    });
+
+    // 1. Durchgang: gespeicherte Positionen anwenden (an die Spaltenzahl geklemmt).
+    // Bewusst ohne Kollisionsprüfung, damit eine bewegte Kachel beim Verbreitern
+    // nicht plötzlich wegspringt – sie bleibt an ihrem Platz stehen.
+    const deferred = [];
+    tiles.forEach(item => {
+        const p = positions[item.dataset.tileKey];
+        if (p && Number.isFinite(p.col) && Number.isFinite(p.slot)) {
+            const col = Math.max(1, Math.min(columns - item._cspan + 1, p.col));
+            const slot = Math.max(0, p.slot);
+            place(item, col, slot);
+            return;
+        }
+        deferred.push(item);
+    });
+
+    // 2. Durchgang: ohne (gültige) Position automatisch links-oben einfügen.
+    deferred.forEach(item => {
+        for (let slot = 0; slot < 1000; slot++) {
+            let placed = false;
+            for (let col = 1; col + item._cspan - 1 <= columns; col++) {
+                if (occ.fits(col, slot, item._cspan, item._sspan)) { place(item, col, slot); placed = true; break; }
+            }
+            if (placed) break;
+        }
     });
 }
 
@@ -2194,24 +2324,103 @@ function updateTileWidthPreviewLabel(d, x, y, span = d.pendingSpan) {
     d.label.style.top = Math.max(10, y - 38) + 'px';
 }
 
-// FLIP: Geschwister-Kacheln sanft an ihre neuen Positionen gleiten lassen
-function flipSiblings(grid, exclude, mutate) {
-    const sibs = Array.from(grid.children).filter(c => c !== exclude && c.dataset && c.dataset.tileKey);
-    const first = new Map();
-    sibs.forEach(c => first.set(c, c.getBoundingClientRect()));
-    mutate();
-    sibs.forEach(c => {
-        const f = first.get(c);
-        const last = c.getBoundingClientRect();
-        const dx = f.left - last.left, dy = f.top - last.top;
-        if (!dx && !dy) return;
-        c.style.transition = 'none';
-        c.style.transform = `translate(${dx}px, ${dy}px)`;
-        requestAnimationFrame(() => {
-            c.style.transition = 'transform 0.18s ease';
-            c.style.transform = '';
-        });
+// Raster-Maße (in Pixeln) für das freie Platzieren auf der Startseite.
+function dashboardGridMetrics(grid) {
+    const autoRowPx = parseFloat(getComputedStyle(grid).gridAutoRows) || 2;
+    const slotRows = dashboardSlotRows(grid);
+    const colGap = parseFloat(getComputedStyle(grid).columnGap) || 0;
+    const colW = dashboardColumnWidth(grid);
+    return {
+        autoRowPx,
+        slotRows,
+        slotH: slotRows * autoRowPx,        // Höhe eines Slots inkl. Abstand
+        colGap,
+        colW,
+        colStride: colW + colGap,           // Spaltenbreite inkl. Abstand
+        columns: dashboardColumnCount(grid)
+    };
+}
+
+// Viewport-Rechteck einer Rasterposition (col 1-basiert, slot 0-basiert).
+function dashboardCellRect(grid, m, col, slot, cspan, sspan) {
+    const gr = grid.getBoundingClientRect();
+    return {
+        left: gr.left + (col - 1) * m.colStride,
+        top: gr.top + slot * m.slotH,
+        width: cspan * m.colW + (cspan - 1) * m.colGap,
+        height: sspan * m.slotH - TILE_VGAP
+    };
+}
+
+// Footprint einer bereits platzierten Kachel aus ihren Grid-Styles ableiten.
+function dashboardTileFootprint(item, slotRows) {
+    const colM = String(item.style.gridColumn || '').match(/(\d+)\s*\/\s*span\s+(\d+)/);
+    const rowM = String(item.style.gridRow || '').match(/(\d+)\s*\/\s*span\s+(\d+)/);
+    if (!colM || !rowM) return null;
+    return {
+        col: parseInt(colM[1], 10),
+        cspan: parseInt(colM[2], 10),
+        slot: Math.round((parseInt(rowM[1], 10) - 1) / slotRows),
+        sspan: Math.max(1, Math.round(parseInt(rowM[2], 10) / slotRows))
+    };
+}
+
+// Belegung aus dem aktuellen DOM lesen (die gezogene Kachel ausgenommen).
+function dashboardOccupancyFromDom(grid, exclude, columns, slotRows) {
+    const occ = makeTileOccupancy(columns);
+    visibleDashboardTiles(grid).forEach(item => {
+        if (item === exclude) return;
+        const fp = dashboardTileFootprint(item, slotRows);
+        if (fp) occ.mark(fp.col, fp.slot, fp.cspan, fp.sspan);
     });
+    return occ;
+}
+
+// Wunschzelle aus der Fingerposition; ist sie belegt, die nächste freie suchen.
+function dashboardResolveDropCell(d) {
+    const { grid, m, cspan, sspan } = d;
+    const gr = grid.getBoundingClientRect();
+    const cardLeft = d.px - d.offsetX;
+    const cardTop = d.py - d.offsetY;
+    let col = Math.round((cardLeft - gr.left) / m.colStride) + 1;
+    let slot = Math.round((cardTop - gr.top) / m.slotH);
+    col = Math.max(1, Math.min(m.columns - cspan + 1, col));
+    slot = Math.max(0, slot);
+
+    const occ = dashboardOccupancyFromDom(grid, d.card, m.columns, m.slotRows);
+    if (occ.fits(col, slot, cspan, sspan)) return { col, slot, free: true };
+
+    // Ringförmig nach außen die nächste freie Position suchen.
+    for (let r = 1; r <= 40; r++) {
+        for (let ds = -r; ds <= r; ds++) {
+            for (let dc = -r; dc <= r; dc++) {
+                if (Math.max(Math.abs(ds), Math.abs(dc)) !== r) continue;
+                const c = Math.max(1, Math.min(m.columns - cspan + 1, col + dc));
+                const s = Math.max(0, slot + ds);
+                if (occ.fits(c, s, cspan, sspan)) return { col: c, slot: s, free: true };
+            }
+        }
+    }
+    return { col, slot, free: false };
+}
+
+// Sichtbares Hilfsraster: kleine Kästchen im freien Hintergrund einblenden.
+function buildDashboardCellOverlay(grid, m, totalSlots) {
+    const overlay = document.createElement('div');
+    overlay.className = 'tile-grid-overlay';
+    overlay.style.height = (totalSlots * m.slotH) + 'px';
+    for (let s = 0; s < totalSlots; s++) {
+        for (let c = 0; c < m.columns; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'tile-grid-cell';
+            cell.style.left = (c * m.colStride) + 'px';
+            cell.style.top = (s * m.slotH) + 'px';
+            cell.style.width = m.colW + 'px';
+            cell.style.height = (m.slotH - TILE_VGAP) + 'px';
+            overlay.appendChild(cell);
+        }
+    }
+    return overlay;
 }
 
 function onTilePointerDown(e) {
@@ -2225,17 +2434,22 @@ function onTilePointerDown(e) {
     e.preventDefault();
     e.stopPropagation();
 
-    const rect = card.getBoundingClientRect();
+    // Auf schmalen Bildschirmen (Stapel-Layout) bleibt das einfache Umsortieren.
+    if (!dashboardIsFreeMode(grid)) { startTileReorderDrag(e, grid, card); return; }
 
-    // Unsichtbarer Platzhalter hält den Original-Rasterplatz, damit die anderen
-    // Kacheln beim Anheben NICHT nachrutschen – sie bleiben fest stehen.
-    const ph = document.createElement('div');
-    ph.className = 'tile-placeholder';
-    ph.style.visibility = 'hidden';
-    ph.style.height = rect.height + 'px'; // volle Kachelhöhe (sonst kollabiert er zur Linie)
-    ph.style.gridRowEnd = card.style.gridRowEnd || ('span ' + tileRowSpan(grid, rect.height));
-    ph.style.gridColumn = card.style.gridColumn || getComputedStyle(card).gridColumn;
-    grid.insertBefore(ph, card);
+    const rect = card.getBoundingClientRect();
+    const m = dashboardGridMetrics(grid);
+    const cspan = computeTileColSpan(card, m.columns, dashboardBaseTileSpan(grid), dashboardEffectiveTileWidths());
+    const sspan = tileSlotSpan(card);
+    // Ausgangszelle merken (für die Tausch-Mechanik beim Ablegen auf eine Kachel).
+    const originFp = dashboardTileFootprint(card, m.slotRows);
+
+    // Hilfsraster einblenden und genug Platz zum Ablegen nach unten schaffen.
+    const totalSlots = Math.max(Math.ceil(grid.scrollHeight / m.slotH) + 2, 4);
+    grid.style.minHeight = (totalSlots * m.slotH) + 'px';
+    const overlay = buildDashboardCellOverlay(grid, m, totalSlots);
+    grid.appendChild(overlay);
+    grid.classList.add('tile-grid-active');
 
     // Sichtbares, frei schwebendes gestricheltes Feld zeigt die Zielposition.
     const box = document.createElement('div');
@@ -2258,15 +2472,18 @@ function onTilePointerDown(e) {
     document.body.classList.add('tile-dragging-active');
 
     _tileDrag = {
-        grid, card, ph, box,
+        grid, card, box, overlay, m, cspan, sspan,
+        originCol: originFp ? originFp.col : null,
+        originSlot: originFp ? originFp.slot : null,
         offsetX: e.clientX - rect.left,
         offsetY: e.clientY - rect.top,
         lastX: e.clientX,
         lastY: e.clientY,
         px: e.clientX,
         py: e.clientY,
-        refNode: card.nextSibling, // aktuelle Einfügeposition (vor diesem Knoten)
+        target: null,
         dragged: false,
+        scanRaf: null,
         scrollRaf: null
     };
     window.addEventListener('pointermove', onTilePointerMove, { passive: false });
@@ -2309,7 +2526,7 @@ function onTilePointerMove(e) {
         d.dragged = true;
     }
 
-    // Indikator-Update gedrosselt per rAF (das Durchmessen erzwingt Layout)
+    // Indikator-Update gedrosselt per rAF
     d.px = e.clientX;
     d.py = e.clientY;
     if (d.scanRaf) return;
@@ -2319,117 +2536,84 @@ function onTilePointerMove(e) {
     });
 }
 
-// Anteil der Kachelbreite, ab dem in Bewegungsrichtung umgeschaltet wird
-// (0.3 = ~30 %, statt erst bei der Mitte). Mitwandernde Grenze = stabil.
-const TILE_FLIP_FRACTION = 0.3;
+// Kachel direkt unter dem Finger (für die Tausch-Mechanik). Die gezogene Karte
+// ist pointer-events:none, daher trifft elementFromPoint die Kachel darunter.
+function dashboardTileUnderPointer(d) {
+    const el = document.elementFromPoint(d.px, d.py);
+    const t = el && el.closest ? el.closest('.class-card') : null;
+    if (!t || t === d.card || t.parentElement !== d.grid) return null;
+    if (t.classList.contains('dashboard-tile-hidden')) return null;
+    return t;
+}
 
-// Aktualisiert das gestrichelte Ziel-Feld.
-//  • Direkt über einer Kachel rastet es früh in Bewegungsrichtung ein: ~20 % der
-//    Kachelbreite reichen (nach rechts ziehen -> dahinter, nach links -> davor),
-//    statt bis zur Mitte ziehen zu müssen. Die mit der Zugrichtung wandernde
-//    Grenze verhindert Zittern. So sind auch beide Seiten breiter Kacheln
-//    (Notizen) erreichbar.
-//  • Über leerem Raum wird der nächstgelegene echte Landeplatz unter allen
-//    Positionen gesucht (auch Lücken zwischen den Kacheln).
+function setDropBox(d, left, top, width, height, swap) {
+    d.box.classList.toggle('swap', !!swap);
+    const label = d.box.querySelector('.tile-drop-label');
+    if (label) label.textContent = swap ? 'Tauschen' : 'Hier ablegen';
+    d.box.style.left = left + 'px';
+    d.box.style.top = top + 'px';
+    d.box.style.width = width + 'px';
+    d.box.style.height = height + 'px';
+}
+
+// Über einer Kachel -> Tauschen; über freier Fläche -> frei ablegen (mit Lücke).
 function updateDropIndicator(d) {
     if (!_tileDrag) return;
-    const { grid, card, ph, px, py } = d;
-
-    // waagerechte Bewegungsrichtung verfolgen (kleine Totzone gegen Zittern)
-    if (d.prevX == null) d.prevX = px;
-    if (px - d.prevX > 4) { d.dirRight = true; d.prevX = px; }
-    else if (px - d.prevX < -4) { d.dirRight = false; d.prevX = px; }
-
-    const under = document.elementFromPoint(px, py);
-    let target = under && under.closest ? under.closest('.class-card') : null;
-    if (target === card || (target && target.parentElement !== grid)) target = null;
-
-    if (target) {
-        const r = target.getBoundingClientRect();
-        const afterRef = nextTileAfter(d, target);
-        const f = r.width * TILE_FLIP_FRACTION;
-        const after = (d.dirRight === false)
-            ? px > r.right - f    // nach links: bereits ab 20 % von rechts „davor"
-            : px > r.left + f;    // nach rechts: bereits ab 20 % von links „dahinter"
-        const ref = after ? afterRef : target;
-        applyDropIndicator(d, ref, measureSlotRect(d, ref));
+    const swapTile = dashboardTileUnderPointer(d);
+    if (swapTile) {
+        d.target = { mode: 'swap', tile: swapTile };
+        const r = swapTile.getBoundingClientRect();
+        setDropBox(d, r.left, r.top, r.width, r.height, true);
         return;
     }
-
-    // Leerer Raum: nächstgelegenen Landeplatz unter allen Positionen suchen
-    const tiles = Array.from(grid.children).filter(c =>
-        c !== card && c !== ph && c.dataset && c.dataset.tileKey);
-    const savedNext = ph.nextSibling;
-    let bestRef = null, bestRect = null, bestDist = Infinity;
-    let curRect = null, curDist = Infinity; // Distanz der aktuell gewählten Position
-    [...tiles, null].forEach(cand => {
-        grid.insertBefore(ph, cand);           // an Kandidatposition
-        const rr = ph.getBoundingClientRect(); // erzwingt Layout (kein Paint)
-        const ccx = rr.left + rr.width / 2;
-        const ccy = rr.top + rr.height / 2;
-        const dist = Math.hypot(ccx - px, ccy - py);
-        if (dist < bestDist) { bestDist = dist; bestRef = cand; bestRect = rr; }
-        if (cand === d.refNode) { curDist = dist; curRect = rr; }
-    });
-    grid.insertBefore(ph, savedNext);          // ph zurück an Original
-
-    // Stabileres Einrasten (Hysterese): nur wechseln, wenn spürbar näher.
-    const STICKY = 28; // px
-    if (curRect && (curDist - bestDist) < STICKY) { bestRef = d.refNode; bestRect = curRect; }
-    applyDropIndicator(d, bestRef, bestRect);
-}
-
-// Nächste echte Kachel nach einem Knoten (überspringt gezogene Karte, Platzhalter,
-// Nicht-Kacheln). Gibt null zurück = ans Ende einsetzen.
-function nextTileAfter(d, node) {
-    let n = node.nextSibling;
-    while (n && (n === d.card || n === d.ph || !(n.dataset && n.dataset.tileKey))) n = n.nextSibling;
-    return n;
-}
-
-// Misst, wo die Karte bei gegebener Einfügeposition landet: Halte-Platzhalter
-// kurz dorthin, messen, zurück – synchron, also ohne sichtbares Umsortieren.
-function measureSlotRect(d, refNode) {
-    const { grid, ph } = d;
-    const savedNext = ph.nextSibling;
-    grid.insertBefore(ph, refNode);
-    const r = ph.getBoundingClientRect();
-    grid.insertBefore(ph, savedNext);
-    return r;
-}
-
-function applyDropIndicator(d, ref, rect) {
-    if (!rect) return;
-    d.refNode = ref;
-    d.box.style.left = rect.left + 'px';
-    d.box.style.top = rect.top + 'px';
-    d.box.style.width = rect.width + 'px';
-    d.box.style.height = rect.height + 'px';
+    const cell = dashboardResolveDropCell(d);
+    d.target = { mode: 'free', col: cell.col, slot: cell.slot };
+    const r = dashboardCellRect(d.grid, d.m, cell.col, cell.slot, d.cspan, d.sspan);
+    setDropBox(d, r.left, r.top, r.width, r.height, false);
 }
 
 function onTilePointerUp() {
     if (!_tileDrag) return;
     const d = _tileDrag;
     _tileDrag = null;
-    const { grid, card, ph, box, dragged } = d;
+    const { grid, card, box, overlay, dragged } = d;
     if (d.scanRaf) cancelAnimationFrame(d.scanRaf);
     if (d.scrollRaf) cancelAnimationFrame(d.scrollRaf);
     window.removeEventListener('pointermove', onTilePointerMove);
     window.removeEventListener('pointerup', onTilePointerUp);
     window.removeEventListener('pointercancel', onTilePointerUp);
 
-    const refNode = (d.refNode && d.refNode.parentElement === grid && d.refNode !== card) ? d.refNode : null;
+    // Ziel bestimmen: Tausch mit einer Kachel oder freies Ablegen auf einer Zelle.
+    let tgt = d.target;
+    if (!tgt) { const c = dashboardResolveDropCell(d); tgt = { mode: 'free', col: c.col, slot: c.slot }; }
 
-    // Die EINZIGE Kachel-Bewegung beim Loslassen: alle Kacheln einmal sanft in die
-    // Endanordnung bringen (Halte-Platzhalter an die Zielposition setzen).
-    flipSiblings(grid, card, () => grid.insertBefore(ph, refNode));
+    let landCol, landSlot;
+    if (tgt.mode === 'swap' && tgt.tile && tgt.tile.parentElement === grid) {
+        const tfp = dashboardTileFootprint(tgt.tile, d.m.slotRows);
+        if (tfp && d.originCol != null) {
+            landCol = tfp.col; landSlot = tfp.slot;
+            if (dragged) {
+                // Die getauschte Kachel wandert auf die Ausgangszelle der gezogenen.
+                dashboardSetTilePosition(tgt.tile.dataset.tileKey, d.originCol, d.originSlot);
+                dashboardSetTilePosition(card.dataset.tileKey, tfp.col, tfp.slot);
+            }
+        } else {
+            // Footprint unbekannt -> wie freies Ablegen behandeln.
+            const c = dashboardResolveDropCell(d);
+            landCol = c.col; landSlot = c.slot;
+            if (dragged) dashboardSetTilePosition(card.dataset.tileKey, landCol, landSlot);
+        }
+    } else {
+        landCol = tgt.col; landSlot = tgt.slot;
+        if (dragged) dashboardSetTilePosition(card.dataset.tileKey, landCol, landSlot);
+    }
 
-    // Karte zum nun gehaltenen Zielplatz gleiten lassen
-    const slot = ph.getBoundingClientRect();
+    // Karte sanft auf die Zielzelle gleiten lassen.
+    const r = dashboardCellRect(grid, d.m, landCol, landSlot, d.cspan, d.sspan);
     card.style.transition = 'left 0.18s ease, top 0.18s ease, transform 0.18s ease';
     requestAnimationFrame(() => {
-        card.style.left = slot.left + 'px';
-        card.style.top = slot.top + 'px';
+        card.style.left = r.left + 'px';
+        card.style.top = r.top + 'px';
         card.style.transform = 'scale(1)';
     });
 
@@ -2439,19 +2623,99 @@ function onTilePointerUp() {
         card.removeEventListener('transitionend', finish);
         card.classList.remove('tile-dragging');
         ['width', 'height', 'left', 'top', 'transform', 'transition'].forEach(p => card.style.removeProperty(p));
-        if (ph.parentElement) grid.insertBefore(card, ph);
-        if (ph.parentElement) ph.remove();
+        grid.classList.remove('tile-grid-active');
+        grid.style.minHeight = '';
+        if (overlay && overlay.parentElement) overlay.remove();
         if (box.parentElement) box.remove();
         document.body.classList.remove('tile-dragging-active');
+        // Beim Neu-Anordnen die anderen Kacheln sanft an ihren Platz gleiten lassen
+        // (z. B. die getauschte Kachel auf die freigewordene Zelle).
+        const sibs = visibleDashboardTiles(grid).filter(c => c !== card);
+        const before = new Map(sibs.map(c => [c, c.getBoundingClientRect()]));
         layoutDashboardMasonry();
+        sibs.forEach(c => {
+            const f = before.get(c);
+            const l = c.getBoundingClientRect();
+            const dx = f.left - l.left, dy = f.top - l.top;
+            if (!dx && !dy) return;
+            c.style.transition = 'none';
+            c.style.transform = `translate(${dx}px, ${dy}px)`;
+            requestAnimationFrame(() => {
+                c.style.transition = 'transform 0.18s ease';
+                c.style.transform = '';
+            });
+        });
         if (dragged) {
-            saveDashboardTileOrder();
             window._suppressTileClick = true;
             setTimeout(() => { window._suppressTileClick = false; }, 60);
         }
     };
     card.addEventListener('transitionend', finish);
     setTimeout(finish, 280); // Fallback, falls keine Transition feuert
+}
+
+// Schmaler Bildschirm: simples Umsortieren (Kacheln stehen voll breit untereinander).
+function startTileReorderDrag(e, grid, card) {
+    const rect = card.getBoundingClientRect();
+    const box = document.createElement('div');
+    box.className = 'tile-drop-indicator';
+    box.innerHTML = '<span class="tile-drop-label">Hier ablegen</span>';
+    box.style.left = rect.left + 'px';
+    box.style.top = rect.top + 'px';
+    box.style.width = rect.width + 'px';
+    box.style.height = rect.height + 'px';
+    document.body.appendChild(box);
+
+    card.classList.add('tile-dragging');
+    card.style.width = rect.width + 'px';
+    card.style.height = rect.height + 'px';
+    card.style.left = rect.left + 'px';
+    card.style.top = rect.top + 'px';
+    document.body.classList.add('tile-dragging-active');
+
+    const state = {
+        grid, card, box,
+        offsetX: e.clientX - rect.left,
+        offsetY: e.clientY - rect.top,
+        refNode: card.nextSibling,
+        dragged: false
+    };
+
+    const move = (ev) => {
+        ev.preventDefault();
+        card.style.left = (ev.clientX - state.offsetX) + 'px';
+        card.style.top = (ev.clientY - state.offsetY) + 'px';
+        state.dragged = true;
+        const under = document.elementFromPoint(ev.clientX, ev.clientY);
+        let target = under && under.closest ? under.closest('.class-card') : null;
+        if (!target || target === card || target.parentElement !== grid) return;
+        const r = target.getBoundingClientRect();
+        const after = ev.clientY > r.top + r.height / 2;
+        state.refNode = after ? target.nextSibling : target;
+        box.style.left = (after ? r.left : r.left) + 'px';
+        box.style.top = (after ? r.bottom - box.offsetHeight : r.top) + 'px';
+        box.style.width = r.width + 'px';
+    };
+    const up = () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        const ref = (state.refNode && state.refNode.parentElement === grid && state.refNode !== card) ? state.refNode : null;
+        if (state.dragged) grid.insertBefore(card, ref);
+        card.classList.remove('tile-dragging');
+        ['width', 'height', 'left', 'top', 'transform', 'transition'].forEach(p => card.style.removeProperty(p));
+        if (box.parentElement) box.remove();
+        document.body.classList.remove('tile-dragging-active');
+        layoutDashboardMasonry();
+        if (state.dragged) {
+            saveDashboardTileOrder();
+            window._suppressTileClick = true;
+            setTimeout(() => { window._suppressTileClick = false; }, 60);
+        }
+    };
+    window.addEventListener('pointermove', move, { passive: false });
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
 }
 
 // Drag & Drop Funktionen für Schüler-Sortierung
