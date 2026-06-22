@@ -2270,15 +2270,19 @@ function layoutDashboardMasonry() {
     });
 
     // 1. Durchgang: gespeicherte Positionen anwenden (an die Spaltenzahl geklemmt).
-    // Bewusst ohne Kollisionsprüfung, damit eine bewegte Kachel beim Verbreitern
-    // nicht plötzlich wegspringt – sie bleibt an ihrem Platz stehen.
+    // Mit Kollisionsprüfung – wenn der Span gewechselt hat und Positionen kollidieren,
+    // wird die Kachel im zweiten Durchgang automatisch neu platziert.
     const deferred = [];
     tiles.forEach(item => {
         const p = positions[item.dataset.tileKey];
         if (p && Number.isFinite(p.col) && Number.isFinite(p.slot)) {
             const col = Math.max(1, Math.min(columns - item._cspan + 1, p.col));
             const slot = Math.max(0, p.slot);
-            place(item, col, slot);
+            if (occ.fits(col, slot, item._cspan, item._sspan)) {
+                place(item, col, slot);
+            } else {
+                deferred.push(item);
+            }
             return;
         }
         deferred.push(item);
