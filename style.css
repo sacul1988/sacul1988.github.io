@@ -6423,6 +6423,8 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     white-space: nowrap;
     cursor: pointer;
     padding: 4px 2px;
+    width: 100%;
+    display: block;
     transform: translateZ(0); /* WebKit repaint fix */
 }
 .dashboard-zt-course:hover {
