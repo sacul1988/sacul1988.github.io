@@ -199,7 +199,8 @@ body {
 
 /* Home page - Class grid */
 .classes-grid {
-    --dashboard-tile-height: 300px;
+    --dashboard-tile-height: 340px;
+    --dashboard-class-tile-height: 170px;
     --dashboard-grid-cols: 12;
     --dashboard-base-span: 3;
     display: grid;
@@ -247,6 +248,11 @@ body {
     display: flex;
     flex-direction: column;
     height: var(--dashboard-tile-height);
+}
+
+/* Klassen-Kacheln nur halb so hoch wie die Dashboard-Kacheln */
+.class-card[data-tile-key^="class:"] {
+    height: var(--dashboard-class-tile-height);
 }
 
 .class-card:hover {
@@ -1657,6 +1663,24 @@ html.login-active, body.login-active {
 }
 .app-dialog-buttons .btn {
     min-width: 120px;
+}
+/* Klassen-Kachel: Aktions-Symbole ohne Rahmen/Hintergrund – nur das weiße Icon */
+.class-card[data-tile-key^="class:"] .tile-header-action {
+    width: auto;
+    height: auto;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    opacity: 0.85;
+    transition: opacity 0.15s ease, color 0.15s ease;
+}
+.class-card[data-tile-key^="class:"] .tile-header-action:hover {
+    background: transparent;
+    opacity: 1;
+}
+/* Löschen-Symbol: rötlicher Hover als Warnhinweis */
+.class-card-action-delete:hover {
+    color: #fecaca;
 }
 .zt-other-responsible-dialog .zt-other-responsible-input {
     margin: 4px 0 14px;
@@ -4076,7 +4100,9 @@ html.modal-open, body.modal-open {
     flex: 1 1 0;
 }
 
-.class-card-main-btn {
+/* min-height muss .btn-green.btn-block (120px) überstimmen, damit der
+   Button in der halbhohen Kachel schrumpft und unten weißer Rand bleibt */
+.class-card .class-card-main-btn {
     position: relative;
     flex: 1;
     min-height: 0;
@@ -5747,8 +5773,8 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .dashboard-note-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
+    gap: 10px;
+    padding: 7px 10px;
     background: #f8fafc;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -5758,7 +5784,6 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .dashboard-note-item:hover {
     background: #f1f5f9;
     border-color: #cbd5e1;
-    transform: translateY(-1px);
 }
 .dashboard-note-checkbox {
     width: 22px;
@@ -5796,26 +5821,18 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     flex: 1;
     font-size: 0.9rem;
     color: var(--dark-color);
-    outline: none;
     padding: 3px 6px;
-    border-radius: 6px;
-    transition: var(--transition);
     word-break: break-word;
-    cursor: text;
-}
-.dashboard-note-text[contenteditable="true"]:focus {
-    background: white;
-    box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.15);
 }
 .dashboard-note-text.completed {
     text-decoration: line-through;
     color: var(--grey-color);
     opacity: 0.6;
 }
+.dashboard-note-edit,
 .dashboard-note-delete {
     background: transparent;
     border: none;
-    color: var(--danger-color);
     cursor: pointer;
     padding: 6px;
     border-radius: 6px;
@@ -5826,6 +5843,17 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     justify-content: center;
     font-size: 0.9rem;
     flex-shrink: 0;
+}
+.dashboard-note-edit {
+    color: var(--grey-color);
+}
+.dashboard-note-edit:hover {
+    background: #e0e7ff;
+    opacity: 1;
+    color: var(--primary-color);
+}
+.dashboard-note-delete {
+    color: var(--danger-color);
 }
 .dashboard-note-delete:hover {
     background: #fee2e2;
@@ -5858,16 +5886,18 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     min-height: 0;
     overflow-y: auto;
     padding-right: 2px;
 }
 .dashboard-calendar-item {
+    flex: 1;
+    min-height: 36px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
+    padding: 6px 14px;
     background: #f8fafc;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);

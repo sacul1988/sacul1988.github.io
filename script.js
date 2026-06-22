@@ -1718,24 +1718,17 @@ function renderClassesGrid() {
             classCard.innerHTML = `
                 <div class="class-card-header">
                     <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>${escapeHtml(cls.name)}</span>
-                    <span class="class-card-count">${studentCount} Schüler</span>
+                    <span class="tile-head-tools">
+                        <button type="button" class="tile-header-action" title="Bearbeiten" onclick="event.stopPropagation(); editClass(${index})"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="tile-header-action" title="Duplizieren" onclick="event.stopPropagation(); showCloneModal(${index})"><i class="fas fa-copy"></i></button>
+                        <button type="button" class="tile-header-action class-card-action-delete" title="Löschen" onclick="event.stopPropagation(); deleteClass(${index})"><i class="fas fa-trash"></i></button>
+                    </span>
                 </div>
                 <div class="class-card-body">
                     <div class="module-buttons">
                         <button class="btn btn-green btn-block class-card-main-btn" onclick="showPage('class', ${index})">
-                            <span class="class-card-main-label">${escapeHtml(cls.name)}${cls.classTeacher ? '<span class="class-teacher-icon" title="Klassenlehrer"><i class="fas fa-chalkboard-user"></i></span>' : ''}</span>
+                            <span class="class-card-main-label">${escapeHtml(cls.name)} (${studentCount})${cls.classTeacher ? '<span class="class-teacher-icon" title="Klassenlehrer"><i class="fas fa-chalkboard-user"></i></span>' : ''}</span>
                         </button>
-                        <div class="class-card-actions">
-                            <button class="btn btn-primary btn-icon-only" onclick="editClass(${index})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-secondary btn-icon-only" onclick="showCloneModal(${index})">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                            <button class="btn btn-secondary btn-icon-only" onclick="deleteClass(${index})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
                     </div>
                 </div>
             `;
@@ -1995,6 +1988,17 @@ function dashboardTileHeight(grid) {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 300;
 }
 
+function dashboardClassTileHeight(grid) {
+    const raw = getComputedStyle(grid).getPropertyValue('--dashboard-class-tile-height').trim();
+    const parsed = parseFloat(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : dashboardTileHeight(grid) / 2;
+}
+
+function isClassTile(item) {
+    return !!(item && item.dataset && typeof item.dataset.tileKey === 'string'
+        && item.dataset.tileKey.indexOf('class:') === 0);
+}
+
 function dashboardBaseTileSpan(grid) {
     const raw = getComputedStyle(grid).getPropertyValue('--dashboard-base-span').trim();
     const parsed = parseInt(raw, 10);
@@ -2054,13 +2058,13 @@ function layoutDashboardMasonry() {
     if (!grid) return;
 
     applyDashboardTileSpans(grid);
-    const tileH = dashboardTileHeight(grid);
-    const span = tileRowSpan(grid, tileH);
+    const span = tileRowSpan(grid, dashboardTileHeight(grid));
+    const classSpan = tileRowSpan(grid, dashboardClassTileHeight(grid));
     Array.from(grid.children).forEach(item => {
         if (item.classList && item.classList.contains('tile-placeholder')) return;
         if (item.classList && item.classList.contains('dashboard-tile-hidden')) return;
         item.style.minHeight = '';
-        item.style.gridRowEnd = 'span ' + span;
+        item.style.gridRowEnd = 'span ' + (isClassTile(item) ? classSpan : span);
     });
 }
 
@@ -11180,9 +11184,10 @@ function renderDashboardNotes() {
             <div class="${checkboxClass}" onclick="toggleDashboardNote(${note.id})" title="Abhaken">
                 <i class="fas fa-check"></i>
             </div>
-            <span class="${textClass}" contenteditable="true" 
-                  onblur="updateDashboardNoteText(${note.id}, this.innerText)" 
-                  onkeydown="handleDashboardNoteKeydown(event, ${note.id}, this)">${escapeHtml(note.text)}</span>
+            <span class="${textClass}">${escapeHtml(note.text)}</span>
+            <button class="dashboard-note-edit" onclick="editDashboardNote(${note.id})" title="Bearbeiten">
+                <i class="fas fa-edit"></i>
+            </button>
             <button class="dashboard-note-delete" onclick="deleteDashboardNote(${note.id})" title="Löschen">
                 <i class="fas fa-trash"></i>
             </button>
@@ -11285,10 +11290,52 @@ function updateDashboardNoteText(id, newText) {
     }
 }
 
-function handleDashboardNoteKeydown(event, id, element) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        element.blur(); // Löst updateDashboardNoteText aus
+function editDashboardNote(id) {
+    const notes = AppState.dashboardNotes || [];
+    const note = notes.find(n => n.id === id);
+    if (!note) return;
+    if (_appDialogState) _closeAppDialog(null);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'app-dialog-overlay';
+    setAppThemeColor(APP_THEME_MODAL);
+
+    const dialog = document.createElement('div');
+    dialog.className = 'app-dialog dashboard-note-dialog';
+    dialog.innerHTML = `
+        <button type="button" class="app-dialog-close" aria-label="Schließen">&times;</button>
+        <h2 class="app-dialog-title">Notiz bearbeiten</h2>
+        <p class="app-dialog-text">Passe die Aufgabe oder Erinnerung an.</p>
+        <input type="text" id="dashboard-note-dialog-input" class="form-control" placeholder="Notiz eingeben">
+        <div class="app-dialog-buttons">
+            <button type="button" class="btn btn-primary">Speichern</button>
+        </div>`;
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    const input = dialog.querySelector('#dashboard-note-dialog-input');
+    if (input) input.value = note.text;
+    const close = (save) => {
+        const val = input ? input.value.trim() : '';
+        overlay.classList.add('app-dialog-closing');
+        setTimeout(() => {
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            restoreAppThemeColor();
+            if (save && val) {
+                updateDashboardNoteText(id, val);
+                renderDashboardNotes();
+            }
+        }, 120);
+    };
+    dialog.querySelector('.app-dialog-close').onclick = () => close(false);
+    dialog.querySelector('.btn-primary').onclick = () => close(true);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false); });
+    if (input) {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); close(true); }
+            if (e.key === 'Escape') { e.preventDefault(); close(false); }
+        });
+        setTimeout(() => { input.focus(); input.select(); }, 30);
     }
 }
 
@@ -11388,7 +11435,7 @@ window.openDashboardNoteInput = openDashboardNoteInput;
 window.addDashboardNote = addDashboardNote;
 window.toggleDashboardNote = toggleDashboardNote;
 window.updateDashboardNoteText = updateDashboardNoteText;
-window.handleDashboardNoteKeydown = handleDashboardNoteKeydown;
+window.editDashboardNote = editDashboardNote;
 window.deleteDashboardNote = deleteDashboardNote;
 window.renderDashboardCalendar = renderDashboardCalendar;
 
