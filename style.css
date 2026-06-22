@@ -251,11 +251,18 @@ body {
     display: flex;
     flex-direction: column;
     height: var(--dashboard-tile-height);
+    /* Positioniert, damit die Stapel-Reihenfolge (z-index) beim freien
+       Anordnen greift. Große Kacheln liegen auf Ebene 1. */
+    position: relative;
+    z-index: 1;
 }
 
 /* Klassen-Kacheln nur halb so hoch wie die Dashboard-Kacheln */
 .class-card[data-tile-key^="class:"] {
     height: var(--dashboard-class-tile-height);
+    /* Kleine Klassen-Kacheln liegen IMMER über den großen Kacheln, damit sie
+       beim Überlappen niemals dahinter verschwinden. */
+    z-index: 2;
 }
 
 .class-card:hover {
@@ -430,12 +437,8 @@ body {
     border-radius: 6px;
     background: rgba(99, 102, 241, 0.035);
 }
-/* Während des Ziehens stehen die echten Kacheln über dem Hilfsraster –
-   die Kästchen scheinen so nur in den freien Flächen durch. */
-.classes-grid.tile-grid-active > .class-card:not(.tile-dragging) {
-    position: relative;
-    z-index: 1;
-}
+/* Die echten Kacheln (z-index 1/2) liegen ohnehin über dem Hilfsraster
+   (z-index 0); die Kästchen scheinen so nur in den freien Flächen durch. */
 
 body.tile-dragging-active {
     cursor: grabbing;
