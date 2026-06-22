@@ -219,6 +219,10 @@ body {
 .classes-grid.masonry-prep {
     visibility: hidden;
 }
+.classes-grid.masonry-prep,
+.classes-grid.masonry-prep * {
+    transition: none !important;
+}
 
 @media (max-width: 1200px) {
     .classes-grid {
@@ -6387,7 +6391,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 }
 .dashboard-zt-row {
     display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(62px, 0.5fr) minmax(86px, 0.75fr) 34px 34px;
+    grid-template-columns: minmax(50px, 1.45fr) minmax(62px, 0.5fr) minmax(86px, 0.75fr) 34px 34px;
     gap: 6px;
     align-items: center;
 }
