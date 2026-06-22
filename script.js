@@ -1675,10 +1675,22 @@ function loadData() {
 
 // Startseite: Klassen-Grid rendern
 function captureDashboardScrollRestore(tileScrollTop = null) {
+    const scrollMap = {};
+    const ztScroll = document.querySelector('#dashboard-zt-list .dashboard-zt-scroll');
+    if (ztScroll) scrollMap['#dashboard-zt-list .dashboard-zt-scroll'] = ztScroll.scrollTop;
+    else if (tileScrollTop !== null) scrollMap['#dashboard-zt-list .dashboard-zt-scroll'] = tileScrollTop;
+
+    const notesScroll = document.querySelector('#dashboard-notes-list');
+    if (notesScroll) scrollMap['#dashboard-notes-list'] = notesScroll.scrollTop;
+
+    const calScroll = document.querySelector('#dashboard-calendar-list');
+    if (calScroll) scrollMap['#dashboard-calendar-list'] = calScroll.scrollTop;
+
     window._dashboardScrollRestore = {
         x: window.scrollX || window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0,
         y: window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0,
-        tileScrollTop,
+        tileScrollTop: tileScrollTop !== null ? tileScrollTop : (ztScroll ? ztScroll.scrollTop : null),
+        scrollMap,
         until: Date.now() + 2000
     };
 }
@@ -1693,7 +1705,12 @@ function applyDashboardScrollRestore() {
         window._dashboardScrollRestore = null;
         return;
     }
-    if (state.tileScrollTop !== null && state.tileScrollTop !== undefined) {
+    if (state.scrollMap) {
+        for (const [selector, scrollTop] of Object.entries(state.scrollMap)) {
+            const el = document.querySelector(selector);
+            if (el) el.scrollTop = scrollTop;
+        }
+    } else if (state.tileScrollTop !== null && state.tileScrollTop !== undefined) {
         const tileScrollEl = document.querySelector('#dashboard-zt-list .dashboard-zt-scroll');
         if (tileScrollEl) tileScrollEl.scrollTop = state.tileScrollTop;
     }
@@ -1745,6 +1762,15 @@ function renderClassesGrid() {
 
     const classesGrid = safeGetElement('classes-grid');
     if (!classesGrid) return;
+    
+    // Scrollpositionen und Höhe sichern, um Zucken/Springen zu verhindern
+    if (typeof captureDashboardScrollRestore === 'function') {
+        captureDashboardScrollRestore();
+    }
+    const currentHeight = classesGrid.offsetHeight;
+    if (currentHeight > 0) {
+        classesGrid.style.minHeight = currentHeight + 'px';
+    }
     
     classesGrid.classList.add('masonry-prep');
     classesGrid.innerHTML = '';
@@ -1874,6 +1900,10 @@ function renderClassesGrid() {
     applyDashboardTileVisibility();
     layoutDashboardMasonry();
     classesGrid.classList.remove('masonry-prep');
+    
+    // Nach dem Berechnen des Masonry-Layouts die temporäre Mindesthöhe wieder entfernen
+    classesGrid.style.minHeight = '';
+    
     initDashboardTileDnd();
     setupDashboardMasonry();
     scheduleDashboardScrollRestore();

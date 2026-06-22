@@ -1642,15 +1642,17 @@
                                 // Prüfen, auf welcher Seite wir sind (script.js Variable nutzen)
                                 const currentAppPage = typeof currentPage !== 'undefined' ? currentPage : 'home';
 
-                                // 4. Hauptübersicht/Home-Seite aktualisieren
-                                if (typeof window.renderClassesGrid === 'function') {
-                                    window.renderClassesGrid();
-                                }
-                                if (typeof window.renderDashboardNotes === 'function') {
-                                    window.renderDashboardNotes();
-                                }
-                                if (typeof window.renderDashboardCalendar === 'function') {
-                                    window.renderDashboardCalendar();
+                                // 4. Hauptübersicht/Home-Seite aktualisieren (nur wenn wir uns tatsächlich auf der Startseite befinden)
+                                if (currentAppPage === 'home') {
+                                    if (typeof window.renderClassesGrid === 'function') {
+                                        window.renderClassesGrid();
+                                    }
+                                    if (typeof window.renderDashboardNotes === 'function') {
+                                        window.renderDashboardNotes();
+                                    }
+                                    if (typeof window.renderDashboardCalendar === 'function') {
+                                        window.renderDashboardCalendar();
+                                    }
                                 }
                                 
                                 // 5. Falls wir uns in einer Klasse befinden, das aktuelle Modul neu rendern
