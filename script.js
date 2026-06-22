@@ -359,6 +359,8 @@ function restoreHistoryScroll(state) {
     if (!state || (!Number.isFinite(state.scrollY) && !Number.isFinite(state.dashboardZtScrollTop))) return;
 
     const restore = () => {
+        // Nicht in ein offenes Tool-Fenster hineinscrollen (verstellt dessen Scroll).
+        if (window._activeToolWindow) return;
         if (Number.isFinite(state.dashboardZtScrollTop)) {
             const ztTileScrollEl = document.querySelector('#dashboard-zt-list .dashboard-zt-scroll');
             if (ztTileScrollEl) ztTileScrollEl.scrollTop = state.dashboardZtScrollTop;
@@ -377,6 +379,21 @@ function restoreHistoryScroll(state) {
     setTimeout(restore, 60);
     setTimeout(restore, 180);
     setTimeout(restore, 360);
+}
+
+// Vor einer Startseiten-Rückkehr (Browser-Zurück) die robuste Scroll-Wiederher-
+// stellung „vorladen": renderClassesGrid ruft danach scheduleDashboardScrollRestore
+// auf, das die Position über ~900 ms immer wieder setzt – auch während sich das
+// Kachel-Layout (Masonry) erst einpendelt. Das verhindert das kleine Springen,
+// besonders beim Schließen eines Tool-Fensters (Dokument-Scroll).
+function seedDashboardScrollRestore(state) {
+    if (!state || state.page !== 'home') return;
+    window._dashboardScrollRestore = {
+        x: Number.isFinite(state.scrollX) ? state.scrollX : 0,
+        y: Number.isFinite(state.scrollY) ? state.scrollY : 0,
+        tileScrollTop: Number.isFinite(state.dashboardZtScrollTop) ? state.dashboardZtScrollTop : null,
+        until: Date.now() + 2000
+    };
 }
 
 // Modul wechseln
@@ -610,6 +627,11 @@ function openToolWindow(which, shouldPushState = true) {
 
     overlay.classList.add('open');
 
+    // Eine evtl. noch nachlaufende Startseiten-Scroll-Wiederherstellung abbrechen.
+    // Sonst scrollt einer ihrer Timer (bis ~900 ms) das gerade geöffnete
+    // Dokument-Scroll-Tool-Fenster nach unten und schiebt die Startleiste raus.
+    window._dashboardScrollRestore = null;
+
     if (shouldPushState) {
         history.pushState({ page: currentPage, classId: activeClassId, module: activeModule, toolWindow: which }, '');
     }
@@ -670,8 +692,16 @@ function closeToolWindowOnBackdrop(event) {
 }
 
 function closeToolWindowBack() {
-    closeToolWindow({ resetScroll: true });
-    showPage('home');
+    // Wie der Browser-Zurück: denselben popstate-Pfad nehmen. Das schließt das
+    // Overlay und stellt die Scroll-Position der darunterliegenden Seite
+    // (Startseite oder Klasse) wieder her – statt hart nach oben zu springen.
+    if (history.state && history.state.toolWindow) {
+        history.back();
+    } else {
+        // Fallback: kein passender Verlaufseintrag -> regulär schließen.
+        closeToolWindow({ resetScroll: true });
+        showPage('home');
+    }
 }
 
 // ===== Such-Modal =====
@@ -1656,6 +1686,9 @@ function captureDashboardScrollRestore(tileScrollTop = null) {
 function applyDashboardScrollRestore() {
     const state = window._dashboardScrollRestore;
     if (!state) return;
+    // Niemals den Seiten-Scroll setzen, während ein Tool-Fenster offen ist –
+    // sonst würde dessen (Dokument-)Scroll verstellt und die Startleiste rausgeschoben.
+    if (window._activeToolWindow) return;
     if (Date.now() > state.until) {
         window._dashboardScrollRestore = null;
         return;
@@ -1669,7 +1702,32 @@ function applyDashboardScrollRestore() {
     window.scrollTo(state.x, state.y);
 }
 
+// Sobald der Nutzer selbst scrollt (Rad/Touch/Tasten), die nachlaufende
+// Wiederherstellung sofort abbrechen – sonst zieht sie kurz zurück = Stottern.
+// (Auf 'scroll' lauschen wir bewusst NICHT, das löst ja unser eigenes scrollTo aus.)
+function armDashboardScrollRestoreCancel() {
+    if (window._dashboardScrollCancelArmed) return;
+    window._dashboardScrollCancelArmed = true;
+    let timer = null;
+    const disarm = () => {
+        window._dashboardScrollCancelArmed = false;
+        window.removeEventListener('wheel', cancel);
+        window.removeEventListener('touchmove', cancel);
+        window.removeEventListener('keydown', onKey);
+        if (timer) clearTimeout(timer);
+    };
+    const cancel = () => { window._dashboardScrollRestore = null; disarm(); };
+    const onKey = (e) => {
+        if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Spacebar'].includes(e.key)) cancel();
+    };
+    window.addEventListener('wheel', cancel, { passive: true });
+    window.addEventListener('touchmove', cancel, { passive: true });
+    window.addEventListener('keydown', onKey);
+    timer = setTimeout(disarm, 1000);
+}
+
 function scheduleDashboardScrollRestore() {
+    armDashboardScrollRestoreCancel();
     applyDashboardScrollRestore();
     requestAnimationFrame(applyDashboardScrollRestore);
     setTimeout(applyDashboardScrollRestore, 50);
@@ -3140,6 +3198,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialisierungsfunktion rufen
     initFlatpickr();
 
+    // Scroll-Wiederherstellung selbst übernehmen: Sonst stellt der Browser bei
+    // Zurück seine eigene (am gemeinsamen Dokument-Scroll gemerkte) Position wieder
+    // her und kollidiert mit unserer -> sichtbares Springen, v. a. beim Schließen
+    // eines Doc-Scroll-Tool-Fensters über die Startseite.
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+
     // Ersten Zustand im Verlauf festlegen (Startseite)
     if (!history.state) {
         history.replaceState({ page: 'home', classId: null, module: null, toolWindow: null }, '');
@@ -3179,11 +3245,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     closeToolWindow({ resetScroll: false });
                 }
                 if (state.page) {
+                    // Robuste Scroll-Wiederherstellung vorladen, BEVOR die Startseite
+                    // neu rendert (sonst greift sie beim Masonry-Einpendeln zu spät).
+                    seedDashboardScrollRestore(state);
                     showPage(state.page, state.classId, false);
                     if (state.page === 'class' && state.module) {
                         showModule(state.module, false);
                     }
-                    restoreHistoryScroll(state);
+                    // Bei 'home' übernimmt bereits die vorgeladene, robuste
+                    // Wiederherstellung (scheduleDashboardScrollRestore in
+                    // renderClassesGrid). Doppeltes Setzen würde nur stottern.
+                    if (state.page !== 'home') restoreHistoryScroll(state);
                 }
             }
         } else {
@@ -3220,7 +3292,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (homeLink) {
         homeLink.addEventListener('click', (e) => {
             e.preventDefault();
-            showPage('home');
+            // Wie der Browser-Zurück: bewahrt die Scroll-Position der Startseite.
+            if (history.state && history.state.page && history.state.page !== 'home') {
+                history.back();
+            } else {
+                showPage('home');
+            }
         });
     }
 
