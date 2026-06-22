@@ -20,14 +20,21 @@ setTimeout(() => {
 
 window.AppState = AppState; // Für index.html (Firebase-Sync) zugänglich machen
 
-// ===== GLOBALE VARIABLEN (deprecated, use AppState) =====
-// Für Abwärtskompatibilität, aber bevorzuge AppState
-let classes = AppState.classes;
-window.classes = classes; // Explizit global für index.html verfügbar machen
-let contacts = AppState.contacts;
-window.contacts = contacts;
-let dashboardNotes = AppState.dashboardNotes;
-window.dashboardNotes = dashboardNotes;
+// ===== GLOBALE VARIABLEN =====
+// Einzige Quelle der Wahrheit: AppState. Die Namen `classes`, `contacts` und
+// `dashboardNotes` (inkl. window.classes etc.) sind nur noch Aliasse, die per
+// Getter/Setter direkt auf AppState zeigen. Dadurch können die drei Kopien
+// nicht mehr auseinanderlaufen – egal welche Schreibweise im Code steht.
+// (Klassisches, nicht-striktes Skript: nackte Bezeichner wie `classes` greifen
+//  automatisch auf window.classes – und damit auf AppState – zu.)
+['classes', 'contacts', 'dashboardNotes'].forEach((key) => {
+    Object.defineProperty(window, key, {
+        get() { return AppState[key]; },
+        set(value) { AppState[key] = value; },
+        configurable: true,
+        enumerable: true,
+    });
+});
 let activeClassId = AppState.activeClassId;
 let activeModule = AppState.activeModule;
 let currentPage = AppState.currentPage;
@@ -35,9 +42,7 @@ let currentPage = AppState.currentPage;
 // Funktion zum globalen Aktualisieren der Notizen (wird von Firestore aufgerufen)
 window.setDashboardNotes = function(newNotes) {
     if (Array.isArray(newNotes)) {
-        dashboardNotes = newNotes;
         AppState.dashboardNotes = newNotes;
-        window.dashboardNotes = newNotes;
     }
 };
 
@@ -47,9 +52,7 @@ let currentEvaluationStudentIndex = AppState.currentEvaluationStudentIndex;
 // Funktion zum globalen Aktualisieren der Klassen-Daten (wird von Firestore aufgerufen)
 window.setClasses = function(newClasses) {
     if (Array.isArray(newClasses)) {
-        classes = newClasses;
         AppState.classes = newClasses;
-        window.classes = newClasses;
     }
 };
 
