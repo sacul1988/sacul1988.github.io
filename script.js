@@ -1762,7 +1762,17 @@ function renderClassesGrid() {
 
     const classesGrid = safeGetElement('classes-grid');
     if (!classesGrid) return;
-    
+
+    // Schnellpfad: Kein visuelles Neu-Rendern wenn die auf der Startseite
+    // sichtbaren Klassen-Daten identisch sind (verhindert Flash bei Sync).
+    const _fp = JSON.stringify((classes || []).map(c =>
+        [c.name, (c.students || []).length, !!c.classTeacher]
+    ));
+    if (classesGrid._classFp === _fp && classesGrid.children.length > 0) {
+        return;
+    }
+    classesGrid._classFp = _fp;
+
     // Scrollpositionen und Höhe sichern, um Zucken/Springen zu verhindern
     if (typeof captureDashboardScrollRestore === 'function') {
         captureDashboardScrollRestore();
@@ -1771,7 +1781,7 @@ function renderClassesGrid() {
     if (currentHeight > 0) {
         classesGrid.style.minHeight = currentHeight + 'px';
     }
-    
+
     classesGrid.classList.add('masonry-prep');
     classesGrid.innerHTML = '';
     
