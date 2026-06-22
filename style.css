@@ -6412,7 +6412,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 }
 .dashboard-zt-course {
     border: 0;
-    background: transparent;
+    background: transparent !important;
     color: var(--dark-color);
     font: inherit;
     font-size: 0.86rem;
@@ -6423,6 +6423,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     white-space: nowrap;
     cursor: pointer;
     padding: 4px 2px;
+    transform: translateZ(0); /* WebKit repaint fix */
 }
 .dashboard-zt-course:hover {
     color: var(--primary-color);
