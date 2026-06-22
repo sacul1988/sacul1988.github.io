@@ -3332,12 +3332,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (homeLink) {
         homeLink.addEventListener('click', (e) => {
             e.preventDefault();
-            // Wie der Browser-Zurück: bewahrt die Scroll-Position der Startseite.
-            if (history.state && history.state.page && history.state.page !== 'home') {
-                history.back();
-            } else {
-                showPage('home');
+            if (window._activeToolWindow) {
+                closeToolWindow({ resetScroll: false });
             }
+            showPage('home');
         });
     }
 
