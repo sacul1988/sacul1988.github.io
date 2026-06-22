@@ -322,6 +322,7 @@ function showPage(page, classId = null, shouldPushState = true) {
     if (page === 'home') {
         renderClassesGrid();
         renderDashboardNotes();
+        renderDashboardCalendar();
     } else if (page === 'class') {
         renderModuleContent();
     }
@@ -1771,7 +1772,6 @@ function renderClassesGrid() {
     if (classesGrid._classFp === _fp && classesGrid.children.length > 0) {
         return;
     }
-    classesGrid._classFp = _fp;
 
     // Scrollpositionen und Höhe sichern, um Zucken/Springen zu verhindern
     if (typeof captureDashboardScrollRestore === 'function') {
@@ -1917,6 +1917,7 @@ function renderClassesGrid() {
     initDashboardTileDnd();
     setupDashboardMasonry();
     scheduleDashboardScrollRestore();
+    classesGrid._classFp = _fp;
 }
 
 // ===================================================================
@@ -2270,10 +2271,19 @@ function layoutDashboardMasonry() {
     });
 
     // 1. Durchgang: gespeicherte Positionen anwenden (an die Spaltenzahl geklemmt).
-    // Mit Kollisionsprüfung – wenn der Span gewechselt hat und Positionen kollidieren,
-    // wird die Kachel im zweiten Durchgang automatisch neu platziert.
+    // Sortierung nach (slot, col) stellt sicher, dass frühere Positionen zuerst
+    // bedient werden und keine spätere Kachel eine frühere verdrängt.
+    // Mit Kollisionsprüfung – kollidierende Kacheln landen im zweiten Durchgang.
+    const tilesForFirstPass = tiles.slice().sort((a, b) => {
+        const pa = positions[a.dataset.tileKey];
+        const pb = positions[b.dataset.tileKey];
+        if (!pa && !pb) return 0;
+        if (!pa) return 1;
+        if (!pb) return -1;
+        return pa.slot !== pb.slot ? pa.slot - pb.slot : pa.col - pb.col;
+    });
     const deferred = [];
-    tiles.forEach(item => {
+    tilesForFirstPass.forEach(item => {
         const p = positions[item.dataset.tileKey];
         if (p && Number.isFinite(p.col) && Number.isFinite(p.slot)) {
             const col = Math.max(1, Math.min(columns - item._cspan + 1, p.col));
