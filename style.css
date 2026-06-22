@@ -224,7 +224,13 @@ body {
     transition: none !important;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1200px) {
+    .classes-grid {
+        --dashboard-base-span: 4;
+    }
+}
+
+@media (max-width: 991px) {
     .classes-grid {
         --dashboard-base-span: 6;
     }
