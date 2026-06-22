@@ -2288,9 +2288,17 @@ function layoutDashboardMasonry() {
         deferred.push(item);
     });
 
-    // 2. Durchgang: ohne (gültige) Position automatisch links-oben einfügen.
+    // 2. Durchgang: kollidierende Kacheln in ihrer ursprünglichen Reihenfolge
+    // platzieren und dabei am gespeicherten Slot starten, um visuelle Ordnung zu wahren.
+    deferred.sort((a, b) => {
+        const pa = positions[a.dataset.tileKey] || { slot: 9999, col: 9999 };
+        const pb = positions[b.dataset.tileKey] || { slot: 9999, col: 9999 };
+        return pa.slot !== pb.slot ? pa.slot - pb.slot : pa.col - pb.col;
+    });
     deferred.forEach(item => {
-        for (let slot = 0; slot < 1000; slot++) {
+        const p = positions[item.dataset.tileKey];
+        const startSlot = p ? Math.max(0, p.slot) : 0;
+        for (let slot = startSlot; slot < startSlot + 1000; slot++) {
             let placed = false;
             for (let col = 1; col + item._cspan - 1 <= columns; col++) {
                 if (occ.fits(col, slot, item._cspan, item._sspan)) { place(item, col, slot); placed = true; break; }
