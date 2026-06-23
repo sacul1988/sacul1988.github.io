@@ -9992,12 +9992,22 @@ function renderZeugnisTTexteModule() {
         ztInitArchive();
         ztPlanungInit();
 
+        // Eingaben bei jeder Änderung automatisch sichern
+        ZT_DRAFT_FIELDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', ztSaveInputDraft);
+                el.addEventListener('change', ztSaveInputDraft);
+            }
+        });
+
         document.addEventListener('keydown', function(e) {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && (activeModule === 'zeugnis-texte' || window._activeToolWindow === 'zeugnis-texte')) {
                 ztGenerate();
             }
         });
     }
+    ztRestoreInputDraft();
     ztPlanungRenderInline();
     ztApplyInlineMode();
 }
@@ -10039,6 +10049,32 @@ function setZtTyp(typ) {
     const isSozial = typ === 'sozialverhalten';
     document.querySelectorAll('.zt-halbjahr-field, .zt-fach-field, .zt-themen-field').forEach(el => {
         el.style.display = isSozial ? 'none' : '';
+    });
+}
+
+// Eingaben des Generator-Formulars lokal sichern, damit der Inhalt (besonders
+// "Beobachtungen & Gedanken") beim kurzen Schließen des Fensters nicht verloren geht.
+const ZT_DRAFT_FIELDS = ['zt-halbjahr', 'zt-typ', 'zt-fach', 'zt-name', 'zt-themen', 'zt-beobachtungen'];
+
+function ztSaveInputDraft() {
+    try {
+        const draft = {};
+        ZT_DRAFT_FIELDS.forEach(id => { draft[id] = document.getElementById(id)?.value || ''; });
+        localStorage.setItem('ztInputDraft', JSON.stringify(draft));
+    } catch (e) { /* ignore */ }
+}
+
+function ztRestoreInputDraft() {
+    let draft;
+    try { draft = JSON.parse(localStorage.getItem('ztInputDraft') || 'null'); } catch (e) { draft = null; }
+    if (!draft) return;
+    // Auswahlfelder (Halbjahr/Art) direkt setzen; Textfelder nur, wenn sie leer
+    // sind – so wird aktuelles Tippen nie überschrieben.
+    if (draft['zt-typ']) { const t = document.getElementById('zt-typ'); if (t) { t.value = draft['zt-typ']; setZtTyp(draft['zt-typ']); } }
+    if (draft['zt-halbjahr']) { const h = document.getElementById('zt-halbjahr'); if (h) h.value = draft['zt-halbjahr']; }
+    ['zt-fach', 'zt-name', 'zt-themen', 'zt-beobachtungen'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && (el.value == null || el.value === '') && typeof draft[id] === 'string') el.value = draft[id];
     });
 }
 
@@ -10100,11 +10136,12 @@ function ztNextStudent() {
     
     if (nameEl) nameEl.value = '';
     if (beobEl) beobEl.value = '';
-    
+
     ZtState.currentId = null;
     ZtState.currentText = '';
     ZtState.currentLabel = '';
-    
+    ztSaveInputDraft();
+
     ztCloseResult();
 }
 
@@ -10276,11 +10313,8 @@ function ztRenderResult() {
                         <button class="btn btn-secondary btn-icon" onclick="ztShowBeobachtungen()"><i class="fas fa-clipboard"></i> <span class="btn-text">Beobachtungen</span></button>
                     </div>
                     <div class="zt-refine">
-                        <textarea id="zt-refine-input" class="form-control zt-refine-input" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();ztRefineText();}"></textarea>
+                        <textarea id="zt-refine-input" class="form-control zt-refine-input" style="min-height: 220px;" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();ztRefineText();}"></textarea>
                         <button class="btn btn-primary btn-icon zt-refine-btn" onclick="ztRefineText()"><i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Anwenden</span></button>
-                    </div>
-                    <div class="zt-next-student-container">
-                        <button class="btn btn-success btn-icon zt-next-student-btn" onclick="ztNextStudent()"><i class="fas fa-user-plus"></i> <span class="btn-text">Nächster Schüler</span></button>
                     </div>
                 </div>
             </div>
@@ -11571,6 +11605,7 @@ function ztPlanungWriteText(courseId, studentId) {
 
     // Für Auto-Erledigt nach erfolgreicher Generierung merken
     ZtState.planungRef = { courseId: courseId, studentId: studentId };
+    ztSaveInputDraft();
     ztOpenTextModal();
     if (beob) requestAnimationFrame(() => beob.focus());
 }
