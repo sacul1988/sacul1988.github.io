@@ -18,6 +18,34 @@ function toInvalidArgument(error) {
   return error;
 }
 
+// Anthropic-Messages-Aufruf mit automatischer Wiederholung bei vorübergehenden
+// Serverfehlern (429/500/502/503/529). Gibt die erfolgreiche Response zurück
+// oder wirft nach mehreren Versuchen einen Fehler.
+async function anthropicMessagesRequest(payload) {
+  const RETRYABLE = new Set([429, 500, 502, 503, 529]);
+  const MAX_ATTEMPTS = 3;
+  let status = 0;
+  let errBody = "";
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify(payload)
+    });
+    if (response.ok) return response;
+    status = response.status;
+    try { errBody = await response.text(); } catch (e) { /* ignore */ }
+    if (!RETRYABLE.has(status) || attempt === MAX_ATTEMPTS - 1) break;
+    await new Promise(r => setTimeout(r, 700 * (attempt + 1)));
+  }
+  console.error("Anthropic API-Fehler", status, errBody);
+  throw new HttpsError("internal", "Anthropic API-Fehler: " + status);
+}
+
 // ===== Rate-Limit pro Nutzer (Kostenschutz für die KI-Aufrufe) =====
 // Gemeinsames Limit über beide KI-Funktionen. Gleitende Fenster (Minute + Tag).
 const RATE_LIMIT_PER_MINUTE = 30;
@@ -201,26 +229,14 @@ Antworte in genau diesem JSON-Format:
 
 Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohne Einleitung, Erklärung oder sonstigen Text davor/danach).`;
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 5000,
-        thinking: { type: "adaptive" },
-        output_config: { effort: "low" },
-        system: systemPrompt,
-        messages
-      })
+    const response = await anthropicMessagesRequest({
+      model: "claude-sonnet-4-6",
+      max_tokens: 5000,
+      thinking: { type: "adaptive" },
+      output_config: { effort: "low" },
+      system: systemPrompt,
+      messages
     });
-
-    if (!response.ok) {
-      throw new HttpsError("internal", "Anthropic API-Fehler: " + response.status);
-    }
 
     const data = await response.json();
     const rawText = data.content?.map(b => b.text || "").join("").trim() || "";
@@ -413,26 +429,14 @@ exports.generateZeugnisnote = onCall(
       ? messages
       : [{ role: "user", content: userMsg }];
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 4000,
-        thinking: { type: "adaptive" },
-        output_config: { effort: "medium" },
-        system: ZEUGNISNOTE_SYSTEM,
-        messages: messagesToSend
-      })
+    const response = await anthropicMessagesRequest({
+      model: "claude-sonnet-4-6",
+      max_tokens: 4000,
+      thinking: { type: "adaptive" },
+      output_config: { effort: "medium" },
+      system: ZEUGNISNOTE_SYSTEM,
+      messages: messagesToSend
     });
-
-    if (!response.ok) {
-      throw new HttpsError("internal", "Anthropic API-Fehler: " + response.status);
-    }
 
     const data = await response.json();
     const raw = data.content?.map(b => b.text || "").join("").trim() || "";
