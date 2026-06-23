@@ -152,7 +152,7 @@ Form:
 };
 
 exports.generateZeugnistext = onCall(
-  { secrets: [anthropicApiKey], invoker: "public", cors: true },
+  { secrets: [anthropicApiKey], invoker: "public", cors: true, timeoutSeconds: 120 },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
@@ -194,6 +194,7 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
         model: "claude-sonnet-4-6",
         max_tokens: 5000,
         thinking: { type: "adaptive" },
+        output_config: { effort: "low" },
         system: systemPrompt,
         messages
       })
@@ -347,7 +348,7 @@ function listingHasAllGrades(text, schriftlicheNoten) {
 }
 
 exports.generateZeugnisnote = onCall(
-  { secrets: [anthropicApiKey], invoker: "public", cors: true },
+  { secrets: [anthropicApiKey], invoker: "public", cors: true, timeoutSeconds: 120 },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Nicht angemeldet.");
@@ -405,6 +406,7 @@ exports.generateZeugnisnote = onCall(
         model: "claude-sonnet-4-6",
         max_tokens: 4000,
         thinking: { type: "adaptive" },
+        output_config: { effort: "medium" },
         system: ZEUGNISNOTE_SYSTEM,
         messages: messagesToSend
       })
