@@ -11777,7 +11777,7 @@ function ztPlanungCourseCardHtml(course) {
         <li class="zt-plan-student ${s.done ? 'done' : ''}">
             <div class="zt-plan-check ${s.done ? 'checked' : ''}" onclick="ztPlanungToggleStudent('${course.id}','${s.id}')" title="Erledigt abhaken"><i class="fas fa-check"></i></div>
             <span class="zt-plan-student-name">${ztEsc(s.name)}</span>
-            <button class="zt-plan-write" onclick="ztPlanungWriteText('${course.id}','${s.id}')" title="Text schreiben"><i class="fas fa-wand-magic-sparkles"></i></button>
+            <button class="btn btn-sm btn-primary btn-circle-sm" onclick="ztPlanungWriteText('${course.id}','${s.id}')" title="Text schreiben"><i class="fas fa-wand-magic-sparkles"></i></button>
             ${isLinked ? '' : `<button class="zt-plan-del" onclick="ztPlanungDeleteStudent('${course.id}','${s.id}')" title="Schüler löschen"><i class="fas fa-trash"></i></button>`}
         </li>`).join('');
 
