@@ -105,7 +105,8 @@ Umgang mit den Eingaben:
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
-- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage zum Lernstand oder Lernfortschritt ab.
+- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton.
+- Bevorzuge aktive Satzkonstruktionen und variiere die Satzanfänge. Schließe den Text mit einem konkreten, inhaltlich bezogenen Satz ab.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
@@ -133,7 +134,8 @@ Umgang mit den Eingaben:
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
 - Beschreibe konkret, was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, und gehe auf Materialien, Beteiligung und Lernfortschritt ein.
-- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage zum Lernstand oder Lernfortschritt ab.
+- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton.
+- Bevorzuge aktive Satzkonstruktionen und variiere die Satzanfänge. Schließe den Text mit einem konkreten, inhaltlich bezogenen Satz ab.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
@@ -159,7 +161,8 @@ Umgang mit den Eingaben:
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
-- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage ab.
+- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton.
+- Bevorzuge aktive Satzkonstruktionen und variiere die Satzanfänge. Schließe den Text mit einem konkreten, inhaltlich bezogenen Satz ab.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "zuverlässig") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
