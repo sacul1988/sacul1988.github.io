@@ -230,7 +230,7 @@ body {
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 599px) {
     .classes-grid {
         --dashboard-base-span: 6;
     }
@@ -1755,7 +1755,7 @@ html.login-active, body.login-active {
     padding-left: 12px;
     padding-right: 12px;
 }
-@media (max-width: 600px) {
+@media (max-width: 599px) {
     .app-dialog-buttons {
         flex-direction: column-reverse;
     }
@@ -1826,7 +1826,7 @@ html.login-active, body.login-active {
     flex-direction: column;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 600px) {
     #sitzplan-module .main-content {
         flex-direction: row;
     }
@@ -2147,13 +2147,13 @@ html.login-active, body.login-active {
     border-radius: 4px;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 599px) {
     #sitzplan-module .workspace {
         width: 100%;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 599px) {
     #sitzplan-module .sitzplan-container {
         padding: 10px;
     }
@@ -2228,7 +2228,7 @@ html.login-active, body.login-active {
 }
 
 /* Responsive Anpassungen für kleine Bildschirme */
-@media (max-width: 600px) {
+@media (max-width: 599px) {
     .btn-text {
         display: none !important;
     }
@@ -3393,7 +3393,7 @@ html.modal-open, body.modal-open {
 /* ==========================================
    RESPONSIVE DESIGN FOR SMARTPHONES (iPhone)
    ========================================== */
-@media (max-width: 576px) {
+@media (max-width: 599px) {
     /* 1. Containers & Layout spacing */
     .container {
         padding: calc(8px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom)) 8px;
@@ -3706,7 +3706,7 @@ html.modal-open, body.modal-open {
 }
 
 /* --- iPhone / Mobilgeräte (Bottom Sheet) --- */
-@media (max-width: 600px) {
+@media (max-width: 599px) {
 
     /* Kopfzeile: kompakter, damit alle Werkzeuge in eine Zeile passen */
     .app-topbar { gap: 6px; }
@@ -4366,7 +4366,7 @@ html.modal-open, body.modal-open {
     display: flex; justify-content: flex-end; gap: 10px;
     margin-top: 18px;
 }
-@media (max-width: 600px) {
+@media (max-width: 599px) {
     .zt-plan-form-grid { flex-direction: column; gap: 0; }
     .zt-planung-inline {
         padding: 0 0 14px;
@@ -4596,7 +4596,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     content: 'Startseite';
 }
 
-@media (max-width: 600px) {
+@media (max-width: 599px) {
     .topbar-title {
         font-size: 1.2rem;
     }
@@ -4721,7 +4721,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 }
 /* Auf schmalen Geräten denselben Außenabstand wie .container (8px) verwenden,
    damit der Start-Button im Tool-Fenster exakt über dem der Startseite liegt */
-@media (max-width: 576px) {
+@media (max-width: 599px) {
     .tool-window {
         padding-left: 8px;
         padding-right: 8px;
@@ -5012,14 +5012,14 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 }
 .zn-loading i { font-size: 2rem; color: var(--primary-color); }
 
-@media (max-width: 600px) {
+@media (max-width: 599px) {
     .zn-actions { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .zn-action-btn { padding: 12px 6px; font-size: 0.85rem; gap: 5px; }
     .zn-grade-circle { width: 38px; height: 38px; font-size: 1rem; border-width: 2.5px; }
 }
 
 /* Mobile Optimierungen für das Zeugnistextgenerator-Ergebnis (Inklusion) */
-@media (max-width: 767px) {
+@media (max-width: 599px) {
     /* Verhindert das Scrollen des gesamten Fensters, wenn das Ergebnis zu sehen ist */
     .tool-window-overlay.open:not(.doc-scroll):has(#zeugnis-texte-module.active):has(#zt-result-container:not([style*="display: none"])) .tool-window {
         overflow-y: hidden;
@@ -5292,7 +5292,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         padding: 20px !important;
     }
 
-    @media (max-width: 576px) {
+    @media (max-width: 599px) {
         .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) .tool-window-body {
             padding-bottom: 8px !important;
         }
@@ -5303,14 +5303,14 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 }
 
 /* ===== Zeugnistextgenerator Desktop doc-scroll: Card bis Bildschirmrand dehnen ===== */
-@media (min-width: 992px) {
+@media (min-width: 600px) {
     .tool-window-overlay.doc-scroll:has(#zeugnis-texte-module.active) #zeugnis-texte-module .card {
         min-height: calc(100dvh - 60px);
     }
 }
 
 /* ===== Zeugnis-Modul Desktop-Optimierung: Schülerkarten zweispaltig ===== */
-@media (min-width: 992px) {
+@media (min-width: 600px) {
     #zeugnis-container {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -5323,7 +5323,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 }
 
 /* ===== Zeugnistextgenerator Desktop-Optimierung ===== */
-@media (min-width: 768px) {
+@media (min-width: 600px) {
     /* Dehne das Tool-Fenster und die Card für zeugnis-texte-module bis zum unteren Bildschirmrand aus */
     .tool-window-overlay.open:not(.doc-scroll) .tool-window {
         height: 100vh;
@@ -5542,7 +5542,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
    Bewusst am Dateiende, damit diese Regeln in Spezifitäts-/
    Quellreihenfolge-Konflikten gewinnen.
    ================================================================ */
-@media (max-width: 600px) {
+@media (max-width: 599px) {
     /* Keine Übergangs-Easings -> Zustandswechsel erfolgen sofort, ohne Animation */
     *, *::before, *::after {
         transition: none !important;
@@ -5667,7 +5667,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
    Ansicht (<=600px, iPhone Hochformat) bleiben die zwei Datumsfelder, der
    Kalender öffnet erst beim Antippen. Gleiche Grenze wie die übrige App.
    ================================================================ */
-@media (min-width: 601px) {
+@media (min-width: 600px) {
     #planung-zeitraum-modal {
         max-width: 700px !important;
         width: auto !important;
@@ -5687,7 +5687,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 /* Mobile (<=600px): Datums-Popup sofort in der Bildschirmmitte öffnen (kein
    Springen vom Feld zur Mitte). Gilt nur für aufklappende Popups, nicht für
    die eingebetteten .inline-Kalender (die gibt es mobil ohnehin nicht). */
-@media (max-width: 600px) {
+@media (max-width: 599px) {
     .flatpickr-calendar:not(.inline) {
         position: fixed !important;
         top: 50% !important;
@@ -5793,7 +5793,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 }
 /* span 2 nur ab Tablet/Desktop – auf Mobile (<=600px) bleibt das Grid einspaltig,
    sonst würde ein span-2-Element eine zweite implizite Spalte erzwingen. */
-@media (min-width: 601px) {
+@media (min-width: 600px) {
     .dashboard-notes-card {
         grid-column: span 2;
     }
@@ -6568,7 +6568,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 599px) {
     .dashboard-zt-card {
         grid-column: span 1;
     }
