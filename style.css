@@ -3991,6 +3991,17 @@ html.modal-open, body.modal-open {
 
 .zt-archive-list { display: flex; flex-direction: column; }
 
+.zt-archive-group-head {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--primary-color);
+    padding: 12px 18px 6px;
+    border-bottom: 2px solid var(--border-color);
+}
+.zt-archive-group-head:not(:first-child) {
+    margin-top: 8px;
+}
+
 .zt-archive-item {
     display: flex;
     align-items: center;

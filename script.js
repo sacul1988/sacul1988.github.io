@@ -10348,12 +10348,19 @@ function ztPersistArchive() {
 // Neue Generierung -> sofort einen Archiv-Eintrag anlegen
 function ztCreateArchiveEntry() {
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
+    // Klassenbezug aus der Planung übernehmen (für die Gruppierung im Archiv)
+    let klasse = '';
+    if (ZtState.planungRef && ZtState.planungRef.courseId && typeof ZtPlanungState !== 'undefined') {
+        const refCourse = (ZtPlanungState.courses || []).find(c => c.id === ZtState.planungRef.courseId);
+        if (refCourse) klasse = ztArchiveExtractKlasse(refCourse.name || refCourse.fach || '');
+    }
     const entry = {
         id: 'zt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
         label: ZtState.currentLabel || 'Zeugnistext',
         typ: ZtState.currentTyp,
         text: ZtState.currentText,
         beobachtungen: beob,
+        klasse: klasse,
         date: new Date().toISOString()
     };
     ZtState.archive.unshift(entry);
@@ -10381,6 +10388,61 @@ function ztOpenArchiveModal() {
     showModal('zt-archive-modal');
 }
 
+// Klasse (z. B. "5c") aus einem Kurs-/Fachnamen ableiten – analog zur Planung.
+function ztArchiveExtractKlasse(str) {
+    const m = (str || '').match(/(\d+)\s*([a-zA-Z])/);
+    return m ? (m[1] + m[2].toLowerCase()) : '';
+}
+
+// HTML eines einzelnen Archiv-Eintrags.
+function ztArchiveItemHtml(item) {
+    const d = item.date ? new Date(item.date) : null;
+    const dateStr = d ? d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+    const full = item.text || '';
+    const preview = full.length > 90 ? full.slice(0, 90) + '…' : full;
+    const typLabel = ztTypLabel(item.typ);
+    return `
+        <div class="zt-archive-item">
+            <div class="zt-archive-main" onclick="ztOpenArchive('${item.id}')">
+                <div class="zt-archive-row1">
+                    <span class="zt-archive-name">${ztEsc(item.label)}</span>
+                    ${typLabel ? `<span class="zt-archive-typ">${typLabel}</span>` : ''}
+                    <span class="zt-archive-date">${dateStr}</span>
+                </div>
+                <div class="zt-archive-preview">${ztEsc(preview)}</div>
+            </div>
+            <div class="zt-archive-actions">
+                <button class="btn btn-sm btn-primary btn-circle-sm" title="Öffnen" onclick="ztOpenArchive('${item.id}')"><i class="fas fa-up-right-from-square"></i></button>
+                <button class="btn btn-sm btn-danger btn-circle-sm" title="Löschen" onclick="ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`;
+}
+
+// Archiv-Einträge nach Klasse gruppiert und sortiert (wie die Planungsliste).
+function ztArchiveGroupedHtml(items) {
+    const groups = new Map();
+    items.forEach(item => {
+        const k = item.klasse || '';
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k).push(item);
+    });
+    const keyInfo = (k) => {
+        const m = k.match(/(\d+)\s*([a-zA-Z])/);
+        return m ? { num: parseInt(m[1], 10), letter: m[2].toLowerCase() } : { num: 9999, letter: '' };
+    };
+    const keys = [...groups.keys()].sort((a, b) => {
+        if (!a) return 1;   // "Ohne Klasse" ans Ende
+        if (!b) return -1;
+        const ka = keyInfo(a), kb = keyInfo(b);
+        if (ka.num !== kb.num) return ka.num - kb.num;
+        return ka.letter.localeCompare(kb.letter);
+    });
+    return '<div class="zt-archive-list">' + keys.map(k => {
+        const head = `<div class="zt-archive-group-head">${k ? ztEsc(k) : 'Ohne Klasse'}</div>`;
+        return head + groups.get(k).map(ztArchiveItemHtml).join('');
+    }).join('') + '</div>';
+}
+
 function ztRenderArchiveModal() {
     const modal = document.getElementById('zt-archive-modal');
     if (!modal) return;
@@ -10392,28 +10454,7 @@ function ztRenderArchiveModal() {
                 <p>Noch keine Texte im Archiv</p>
                 <p>Generierte Zeugnistexte werden hier automatisch gespeichert.</p>
            </div>`
-        : '<div class="zt-archive-list">' + items.map(item => {
-            const d = item.date ? new Date(item.date) : null;
-            const dateStr = d ? d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
-            const full = item.text || '';
-            const preview = full.length > 90 ? full.slice(0, 90) + '…' : full;
-            const typLabel = ztTypLabel(item.typ);
-            return `
-                <div class="zt-archive-item">
-                    <div class="zt-archive-main" onclick="ztOpenArchive('${item.id}')">
-                        <div class="zt-archive-row1">
-                            <span class="zt-archive-name">${ztEsc(item.label)}</span>
-                            ${typLabel ? `<span class="zt-archive-typ">${typLabel}</span>` : ''}
-                            <span class="zt-archive-date">${dateStr}</span>
-                        </div>
-                        <div class="zt-archive-preview">${ztEsc(preview)}</div>
-                    </div>
-                    <div class="zt-archive-actions">
-                        <button class="btn btn-sm btn-primary btn-circle-sm" title="Öffnen" onclick="ztOpenArchive('${item.id}')"><i class="fas fa-up-right-from-square"></i></button>
-                        <button class="btn btn-sm btn-danger btn-circle-sm" title="Löschen" onclick="ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>`;
-        }).join('') + '</div>';
+        : ztArchiveGroupedHtml(items);
     modal.innerHTML = `
         <div class="zt-modal-head">
             <span style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
