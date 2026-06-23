@@ -10415,6 +10415,7 @@ const ZtState = {
     pendingMessages: null,
     pendingQuestions: null,
     planungRef: null, // {courseId, studentId}: gemerkt beim Sprung aus der Planung -> nach Generierung auto-abhaken
+    editingEntryId: null, // gesetzt von "Neu generieren": die nächste Generierung aktualisiert diesen Eintrag statt einen neuen anzulegen
     inlineMode: 'planung'
 };
 
@@ -10620,6 +10621,7 @@ function ztNextStudent() {
     ZtState.currentId = null;
     ZtState.currentText = '';
     ZtState.currentLabel = '';
+    ZtState.editingEntryId = null;
     ztSaveInputDraft();
 
     ztCloseResult();
@@ -10642,7 +10644,10 @@ async function ztGenerate() {
 
     const userMsg = ztBuildUserMsg();
     ZtState.currentLabel = ZtState.currentTyp === 'sozialverhalten' ? name : `${name} · ${fach}`;
-    ZtState.currentId = null;
+    // "Neu generieren" setzt editingEntryId -> denselben Eintrag aktualisieren.
+    // Sonst (frische Generierung) einen neuen Eintrag anlegen.
+    ZtState.currentId = ZtState.editingEntryId || null;
+    ZtState.editingEntryId = null;
 
     // Eingaben (besonders Beobachtungen) vor dem langen Request sichern, damit sie
     // bei einem Abbruch / "Load failed" garantiert erhalten bleiben.
@@ -10658,7 +10663,7 @@ async function ztGenerate() {
             showClarifyingQuestionsModal(apiResult.questions, initialMessages);
         } else {
             ZtState.currentText = ztNormalizeText(apiResult.text);
-            ztCreateArchiveEntry();
+            ztFinalizeGeneratedText();
             ztRenderResult();
         }
     } catch(e) {
@@ -10792,7 +10797,7 @@ function ztRenderResult() {
                 </div>
                 <div class="zt-result-right">
                     <div class="zt-result-actions">
-                        <button class="btn btn-primary btn-icon" onclick="ztShowBeobachtungen()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
+                        <button class="btn btn-primary btn-icon" onclick="ztBackToInputForm()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
                         <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
                     </div>
                 </div>
@@ -10806,6 +10811,49 @@ function ztCopyText(btn) {
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-check"></i> <span class="btn-text">Kopiert!</span>';
     setTimeout(() => { btn.innerHTML = orig; }, 2000);
+}
+
+// Füllt die Eingabemaske aus einem Archiv-Eintrag. Bei älteren Einträgen ohne
+// separate Felder wird Name/Fach aus dem Label ("Name · Fach") abgeleitet.
+function ztFillFormFromEntry(entry) {
+    if (!entry) return;
+    if (entry.typ) setZtTyp(entry.typ);
+    // Name/Fach: bevorzugt gespeicherte Felder, sonst aus dem Label parsen
+    let name = typeof entry.name === 'string' ? entry.name : '';
+    let fach = typeof entry.fach === 'string' ? entry.fach : '';
+    if ((!name || (!fach && entry.typ !== 'sozialverhalten')) && entry.label) {
+        const parts = String(entry.label).split(' · ');
+        if (!name) name = parts[0] || '';
+        if (!fach && parts.length > 1) fach = parts[1] || '';
+    }
+    const set = (id, val) => { const el = document.getElementById(id); if (el && typeof val === 'string') el.value = val; };
+    if (typeof entry.halbjahr === 'string' && entry.halbjahr) set('zt-halbjahr', entry.halbjahr);
+    set('zt-fach', fach);
+    set('zt-name', name);
+    set('zt-themen', typeof entry.themen === 'string' ? entry.themen : '');
+    set('zt-beobachtungen', typeof entry.beobachtungen === 'string' ? entry.beobachtungen : '');
+}
+
+// "Neu generieren" aus der Ergebnisansicht: zurück zur Eingabemaske mit allen
+// bereits gemachten Eingaben. Die nächste Generierung aktualisiert denselben
+// Archiv-Eintrag (statt einen zweiten anzulegen).
+function ztBackToInputForm() {
+    ztFlushSave();
+    let entry = null;
+    if (ZtState.currentId) entry = ZtState.archive.find(a => a.id === ZtState.currentId);
+    if (entry) {
+        ztFillFormFromEntry(entry);
+        ZtState.editingEntryId = entry.id;
+        // courseId/-Name dieses Eintrags fürs Auto-Abhaken nicht erneut auslösen
+        ZtState.planungRef = null;
+    } else {
+        // Frisch generierter Text ohne Eintrag: Felder sind bereits ausgefüllt.
+        ZtState.editingEntryId = ZtState.currentId || null;
+    }
+    ztSaveInputDraft();
+    ztCloseResult();
+    const beobEl = document.getElementById('zt-beobachtungen');
+    if (beobEl) { try { beobEl.focus({ preventScroll: true }); } catch (e) {} }
 }
 
 // Zeigt die zum Text gespeicherten Beobachtungen & Gedanken an (aus dem Archiv-
@@ -10929,6 +10977,9 @@ function ztPersistArchive() {
 function ztCreateArchiveEntry() {
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
     const themen = (document.getElementById('zt-themen')?.value || '').trim();
+    const halbjahr = (document.getElementById('zt-halbjahr')?.value || '').trim();
+    const fach = (document.getElementById('zt-fach')?.value || '').trim();
+    const name = (document.getElementById('zt-name')?.value || '').trim();
     // Kursbezug aus der Planung übernehmen, damit der Text im Archiv unter
     // demselben Kurs gruppiert wird wie in der Planungsliste.
     let courseId = '';
@@ -10945,6 +10996,9 @@ function ztCreateArchiveEntry() {
         text: ZtState.currentText,
         beobachtungen: beob,
         themen: themen,
+        halbjahr: halbjahr,
+        fach: fach,
+        name: name,
         courseId: courseId,
         courseName: courseName,
         date: new Date().toISOString()
@@ -10957,7 +11011,11 @@ function ztCreateArchiveEntry() {
     ztPlanungMarkRefDone();
 }
 
-// Bearbeitung (Kürzen/Verlängern/Anweisung/Neu) -> bestehenden Eintrag aktualisieren
+// Bearbeitung (Kürzen/Verlängern/Anweisung/Neu) -> bestehenden Eintrag aktualisieren.
+// Aktualisiert NUR Text/Label/Typ – die Eingabefelder werden hier bewusst NICHT
+// gelesen (beim direkten Bearbeiten eines geöffneten Archiv-Eintrags enthalten die
+// Felder nicht zwingend dessen Werte). Die Eingaben werden gezielt in ztGenerate
+// (Regenerieren-Pfad) mitgeschrieben.
 function ztUpdateCurrentEntry() {
     if (!ZtState.currentId) { ztCreateArchiveEntry(); return; }
     const entry = ZtState.archive.find(a => a.id === ZtState.currentId);
@@ -10967,6 +11025,41 @@ function ztUpdateCurrentEntry() {
     entry.typ = ZtState.currentTyp;
     entry.date = new Date().toISOString();
     ztPersistArchive();
+}
+
+// Schreibt die aktuellen Eingabefelder in einen Archiv-Eintrag (nur im
+// Regenerieren-Pfad, wo die Felder garantiert zum Eintrag passen).
+function ztUpdateEntryInputs(entry) {
+    if (!entry) return;
+    const beobEl = document.getElementById('zt-beobachtungen');
+    const themenEl = document.getElementById('zt-themen');
+    const halbjahrEl = document.getElementById('zt-halbjahr');
+    const fachEl = document.getElementById('zt-fach');
+    const nameEl = document.getElementById('zt-name');
+    if (beobEl) entry.beobachtungen = beobEl.value.trim();
+    if (themenEl) entry.themen = themenEl.value.trim();
+    if (halbjahrEl) entry.halbjahr = halbjahrEl.value.trim();
+    if (fachEl) entry.fach = fachEl.value.trim();
+    if (nameEl) entry.name = nameEl.value.trim();
+}
+
+// Nach erfolgreicher Generierung: bestehenden Eintrag aktualisieren (Regenerieren)
+// oder einen neuen anlegen (frische Generierung).
+function ztFinalizeGeneratedText() {
+    if (ZtState.currentId) {
+        const entry = ZtState.archive.find(a => a.id === ZtState.currentId);
+        if (entry) {
+            entry.text = ZtState.currentText;
+            entry.label = ZtState.currentLabel;
+            entry.typ = ZtState.currentTyp;
+            entry.date = new Date().toISOString();
+            ztUpdateEntryInputs(entry);
+            ztPersistArchive();
+            ztPlanungMarkRefDone();
+            return;
+        }
+    }
+    ztCreateArchiveEntry();
 }
 
 // Rückwärtskompatibel: Archiv wird jetzt inline statt im Modal geöffnet.
@@ -11068,6 +11161,7 @@ function ztOpenArchive(id) {
     ZtState.currentText = item.text;
     ZtState.currentLabel = item.label;
     ZtState.currentId = item.id;
+    ZtState.editingEntryId = null;
     if (item.typ) setZtTyp(item.typ);
     hideModal();
     // In die Text-/Generator-Ansicht wechseln – sonst bleibt die zt-stack (mit dem
@@ -11160,7 +11254,7 @@ async function ztSubmitAnswers() {
             showClarifyingQuestionsModal(apiResult.questions, ZtState.pendingMessages);
         } else {
             ZtState.currentText = ztNormalizeText(apiResult.text);
-            ztCreateArchiveEntry();
+            ztFinalizeGeneratedText();
             ztRenderResult();
         }
     } catch(e) {
@@ -11176,6 +11270,7 @@ window.ztShowArchiveInline = ztShowArchiveInline;
 window.ztToggleTextInline = ztToggleTextInline;
 window.ztGenerate = ztGenerate;
 window.ztRegenerate = ztRegenerate;
+window.ztBackToInputForm = ztBackToInputForm;
 window.ztShortenText = ztShortenText;
 window.ztLengthenText = ztLengthenText;
 window.ztRefineText = ztRefineText;
@@ -12158,6 +12253,7 @@ function ztPlanungWriteText(courseId, studentId) {
 
     // Für Auto-Erledigt nach erfolgreicher Generierung merken
     ZtState.planungRef = { courseId: courseId, studentId: studentId };
+    ZtState.editingEntryId = null;
     ztSaveInputDraft();
     ztOpenTextModal();
     if (beob) requestAnimationFrame(() => beob.focus());
