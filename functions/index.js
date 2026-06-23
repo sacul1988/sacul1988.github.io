@@ -80,7 +80,7 @@ Umgang mit den Eingaben:
 - Orientiere dich an dieser groben Reihenfolge (nur eine Tendenz, nicht starr einzuhalten): (1) behandelte Themen des Halbjahres, (2) Unterrichtssituation (innerhalb des Unterrichts, gegebenenfalls außerhalb in Kleingruppen, Differenzierung), (3) was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, (4) weitere Beobachtungen wie Motivation, Materialien, mündliche Beteiligung und Störungen.
 
 Stil und Ton:
-- Schreibe ausschließlich in der Vergangenheitsform.
+- Schreibe ausschließlich in der einfachen Vergangenheit (Präteritum). Vermeide das Plusquamperfekt mit "hatte" (z. B. NICHT "hatte ... verstanden", NICHT "hatte ... bearbeitet"). Formuliere stattdessen im Präteritum, z. B. "verstand", "bearbeitete" oder "konnte ... verstehen".
 - Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton. Vermeide leere oder floskelhafte Schlusssätze, etwa pauschale Aussagen über den "Lernweg", den "Beginn des Lernens" oder Ähnliches. Beende den Text mit einer konkreten, auf die genannten Beobachtungen bezogenen Aussage statt mit einer allgemeinen Einordnung.
 - Übernimm Häufigkeit, Intensität und Schwere der Beobachtungen genau so, wie sie angegeben sind. Schwäche negative Angaben nicht ab – schreibe nicht "gelegentlich", wenn "regelmäßig" oder "gezielt" gemeint ist. Der wertschätzende Ton betrifft nur die Wortwahl, nicht das Abmildern der Tatsachen.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht" – ohne die Tatsache abzuschwächen.
@@ -114,7 +114,7 @@ Umgang mit den Eingaben:
 - Orientiere dich an dieser groben Reihenfolge (nur eine Tendenz, nicht starr einzuhalten): (1) behandelte Themen des Halbjahres, (2) Unterrichtssituation (innerhalb des Unterrichts, gegebenenfalls außerhalb in Kleingruppen, Differenzierung), (3) was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, (4) weitere Beobachtungen wie Motivation, Materialien, mündliche Beteiligung und Störungen.
 
 Stil und Ton:
-- Schreibe ausschließlich in der Vergangenheitsform.
+- Schreibe ausschließlich in der einfachen Vergangenheit (Präteritum). Vermeide das Plusquamperfekt mit "hatte" (z. B. NICHT "hatte ... verstanden", NICHT "hatte ... bearbeitet"). Formuliere stattdessen im Präteritum, z. B. "verstand", "bearbeitete" oder "konnte ... verstehen".
 - Beschreibe konkret, was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, und gehe auf Materialien, Beteiligung und Lernfortschritt ein.
 - Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton. Vermeide leere oder floskelhafte Schlusssätze, etwa pauschale Aussagen über den "Lernweg", den "Beginn des Lernens" oder Ähnliches. Beende den Text mit einer konkreten, auf die genannten Beobachtungen bezogenen Aussage statt mit einer allgemeinen Einordnung.
 - Übernimm Häufigkeit, Intensität und Schwere der Beobachtungen genau so, wie sie angegeben sind. Schwäche negative Angaben nicht ab – schreibe nicht "gelegentlich", wenn "regelmäßig" oder "gezielt" gemeint ist. Der wertschätzende Ton betrifft nur die Wortwahl, nicht das Abmildern der Tatsachen.
@@ -153,7 +153,7 @@ Struktur:
 - Beschreibe beim Sozialverhalten: Integration, Konflikte, Regelverhalten, Ausdrucksfähigkeit.
 
 Stil und Ton:
-- Schreibe ausschließlich in der Vergangenheitsform.
+- Schreibe ausschließlich in der einfachen Vergangenheit (Präteritum). Vermeide das Plusquamperfekt mit "hatte" (z. B. NICHT "hatte ... verstanden", NICHT "hatte ... bearbeitet"). Formuliere stattdessen im Präteritum, z. B. "verstand", "bearbeitete" oder "konnte ... verstehen".
 - Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton. Vermeide leere oder floskelhafte Schlusssätze, etwa pauschale Aussagen über den "Lernweg", den "Beginn des Lernens" oder Ähnliches. Beende den Text mit einer konkreten, auf die genannten Beobachtungen bezogenen Aussage statt mit einer allgemeinen Einordnung.
 - Übernimm Häufigkeit, Intensität und Schwere der Beobachtungen genau so, wie sie angegeben sind. Schwäche negative Angaben nicht ab – schreibe nicht "gelegentlich", wenn "regelmäßig" oder "gezielt" gemeint ist. Der wertschätzende Ton betrifft nur die Wortwahl, nicht das Abmildern der Tatsachen.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht" – ohne die Tatsache abzuschwächen.
