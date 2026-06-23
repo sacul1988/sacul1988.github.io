@@ -200,7 +200,7 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
         model: "claude-sonnet-4-6",
         max_tokens: 5000,
         thinking: { type: "adaptive" },
-        output_config: { effort: "medium" },
+        output_config: { effort: "low" },
         system: systemPrompt,
         messages
       })
