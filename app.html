@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=3.14">
+    <link rel="stylesheet" href="style.css?v=3.15">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -555,17 +555,17 @@
                                 <div id="zt-planung-header-summary" class="zt-planung-header-summary"></div>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
-                                        <button class="btn btn-secondary btn-icon" id="zt-open-text-inline-btn" onclick="ztToggleTextInline()">
-                                            <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Texte</span>
-                                        </button>
-                                        <button class="btn btn-secondary btn-icon" id="zt-open-planung-inline-btn" onclick="ztShowPlanningInline()">
-                                            <i class="fas fa-list-check"></i> <span class="btn-text">Planung</span>
-                                        </button>
                                         <button class="btn btn-secondary btn-icon" onclick="ztPlanungOpenForm()">
                                             <i class="fas fa-plus"></i> <span class="btn-text">Klasse anlegen</span>
                                         </button>
                                         <button class="btn btn-secondary btn-icon" onclick="ztPlanungPrintResponsibleList()">
                                             <i class="fas fa-print"></i> <span class="btn-text">Planung drucken</span>
+                                        </button>
+                                        <button class="btn btn-secondary btn-icon" id="zt-open-text-inline-btn" onclick="ztToggleTextInline()">
+                                            <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Texte</span>
+                                        </button>
+                                        <button class="btn btn-secondary btn-icon" id="zt-open-planung-inline-btn" onclick="ztShowPlanningInline()">
+                                            <i class="fas fa-list-check"></i> <span class="btn-text">Planung</span>
                                         </button>
                                         <button class="btn btn-secondary btn-icon" id="zt-open-archive-inline-btn" onclick="ztShowArchiveInline()">
                                             <i class="fas fa-box-archive"></i> <span class="btn-text">Archiv</span>
@@ -2059,7 +2059,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=3.14"></script>
+    <script src="script.js?v=3.15"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
