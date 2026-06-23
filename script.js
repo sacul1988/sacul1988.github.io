@@ -10433,6 +10433,10 @@ function ztOpenArchive(id) {
     ZtState.currentId = item.id;
     if (item.typ) setZtTyp(item.typ);
     hideModal();
+    // In die Text-/Generator-Ansicht wechseln – sonst bleibt die zt-stack (mit dem
+    // Ergebnis-Panel) ausgeblendet und man sieht weiterhin die Klassen-Liste.
+    ZtState.inlineMode = 'text';
+    ztApplyInlineMode();
     ztRenderResult();
 }
 
