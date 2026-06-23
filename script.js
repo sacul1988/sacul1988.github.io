@@ -10028,6 +10028,11 @@ function ztShowPlanningInline() {
     ztApplyInlineMode();
 }
 
+function ztShowArchiveInline() {
+    ZtState.inlineMode = 'archive';
+    ztApplyInlineMode();
+}
+
 function ztToggleTextInline() {
     ZtState.inlineMode = ZtState.inlineMode === 'text' ? 'planung' : 'text';
     ztApplyInlineMode();
@@ -10035,16 +10040,33 @@ function ztToggleTextInline() {
 
 function ztApplyInlineMode() {
     const planung = document.getElementById('zt-planung-inline');
+    const archive = document.getElementById('zt-archive-inline');
     const stack = document.querySelector('#zeugnis-texte-module .zt-stack');
     const textBtn = document.getElementById('zt-open-text-inline-btn');
     const planungBtn = document.getElementById('zt-open-planung-inline-btn');
+    const archiveBtn = document.getElementById('zt-open-archive-inline-btn');
     if (!planung || !stack) return;
 
-    const textActive = ZtState.inlineMode === 'text';
-    planung.style.display = textActive ? 'none' : '';
+    const mode = ZtState.inlineMode;
+    const textActive = mode === 'text';
+    const archiveActive = mode === 'archive';
+    const planungActive = !textActive && !archiveActive;
+
+    planung.style.display = planungActive ? '' : 'none';
     stack.style.display = textActive ? 'flex' : 'none';
+    if (archive) archive.style.display = archiveActive ? '' : 'none';
+
     if (textBtn) textBtn.classList.toggle('is-active', textActive);
-    if (planungBtn) planungBtn.classList.toggle('is-active', !textActive);
+    if (planungBtn) planungBtn.classList.toggle('is-active', planungActive);
+    if (archiveBtn) archiveBtn.classList.toggle('is-active', archiveActive);
+
+    if (archiveActive) {
+        ztRenderArchiveInline();
+    } else if (planungActive) {
+        // Planungs-Zusammenfassung im Header wiederherstellen
+        const counts = ztPlanungCounts();
+        ztPlanungRenderHeaderSummary(counts.total, counts.done, counts.open);
+    }
 }
 
 function setZtTyp(typ) {
@@ -10510,9 +10532,9 @@ function ztUpdateCurrentEntry() {
     ztPersistArchive();
 }
 
+// Rückwärtskompatibel: Archiv wird jetzt inline statt im Modal geöffnet.
 function ztOpenArchiveModal() {
-    ztRenderArchiveModal();
-    showModal('zt-archive-modal');
+    ztShowArchiveInline();
 }
 
 // HTML eines einzelnen Archiv-Eintrags – visuell wie eine Planungslisten-Zeile.
@@ -10577,27 +10599,28 @@ function ztArchiveGroupedHtml(items) {
     }).join('') + '</div>';
 }
 
-function ztRenderArchiveModal() {
-    const modal = document.getElementById('zt-archive-modal');
-    if (!modal) return;
+// Archiv als Inline-Ansicht (füllt – wie die Planungsliste – den Bereich unten
+// und scrollt natürlich mit der Seite, kein Modal).
+function ztRenderArchiveInline() {
+    const container = document.getElementById('zt-archive-inline');
+    if (!container) return;
     const items = ZtState.archive;
-    const countLabel = items.length ? items.length + (items.length === 1 ? ' Eintrag' : ' Einträge') : '';
-    const body = !items.length
-        ? `<div class="zt-archive-empty">
+    const isEmpty = !items.length;
+    const body = isEmpty
+        ? `<div class="zt-plan-empty">
                 <i class="fas fa-box-open"></i>
-                <p>Noch keine Texte im Archiv</p>
+                <p>Noch keine Texte im Archiv.</p>
                 <p>Generierte Zeugnistexte werden hier automatisch gespeichert.</p>
            </div>`
         : ztArchiveGroupedHtml(items);
-    modal.innerHTML = `
-        <div class="zt-modal-head">
-            <span style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                Archiv
-                ${countLabel ? `<span class="zt-archive-count" style="font-size: 0.82rem; font-weight: 400; color: var(--grey-color); background: var(--light-color); padding: 2px 8px; border-radius: 12px; margin-left: 6px;">${countLabel}</span>` : ''}
-            </span>
-            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
-        </div>
-        ${body}`;
+    container.classList.toggle('zt-planung-empty-state', isEmpty);
+    container.innerHTML = body;
+    // Header-Zusammenfassung auf Archiv-Anzahl setzen
+    const summary = document.getElementById('zt-planung-header-summary');
+    if (summary && ZtState.inlineMode === 'archive') {
+        const n = items.length;
+        summary.innerHTML = `<span class="zt-plan-inline-open">${n} ${n === 1 ? 'Eintrag' : 'Einträge'}</span>`;
+    }
 }
 
 function ztOpenArchive(id) {
@@ -10629,7 +10652,7 @@ function ztDeleteArchive(id) {
         ZtState.archive = ZtState.archive.filter(a => a.id !== id);
         if (ZtState.currentId === id) ZtState.currentId = null;
         ztPersistArchive();
-        ztRenderArchiveModal();
+        ztRenderArchiveInline();
     });
 }
 
@@ -10638,8 +10661,7 @@ function ztDeleteArchive(id) {
 window.setZeugnistexteArchiv = function(arr) {
     ZtState.archive = Array.isArray(arr) ? arr : [];
     ztUpdateArchiveBadge();
-    const am = document.getElementById('zt-archive-modal');
-    if (am && am.style.display !== 'none') ztRenderArchiveModal();
+    if (ZtState.inlineMode === 'archive') ztRenderArchiveInline();
 };
 
 function showClarifyingQuestionsModal(questions, originalMessages) {
@@ -10711,6 +10733,7 @@ async function ztSubmitAnswers() {
 window.setZtTyp = setZtTyp;
 window.ztOpenTextModal = ztOpenTextModal;
 window.ztShowPlanningInline = ztShowPlanningInline;
+window.ztShowArchiveInline = ztShowArchiveInline;
 window.ztToggleTextInline = ztToggleTextInline;
 window.ztGenerate = ztGenerate;
 window.ztRegenerate = ztRegenerate;

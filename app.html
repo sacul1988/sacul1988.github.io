@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=3.13">
+    <link rel="stylesheet" href="style.css?v=3.14">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -567,7 +567,7 @@
                                         <button class="btn btn-secondary btn-icon" onclick="ztPlanungPrintResponsibleList()">
                                             <i class="fas fa-print"></i> <span class="btn-text">Planung drucken</span>
                                         </button>
-                                        <button class="btn btn-primary btn-icon" onclick="ztOpenArchiveModal()">
+                                        <button class="btn btn-secondary btn-icon" id="zt-open-archive-inline-btn" onclick="ztShowArchiveInline()">
                                             <i class="fas fa-box-archive"></i> <span class="btn-text">Archiv</span>
                                             <span class="zt-archive-badge" id="zt-archive-badge" style="display:none;"></span>
                                         </button>
@@ -575,6 +575,7 @@
                                 </div>
                             </div>
                             <div id="zt-planung-inline" class="zt-planung-inline"></div>
+                            <div id="zt-archive-inline" class="zt-planung-inline" style="display: none;"></div>
                             <div class="zt-stack" style="display: none;">
                                 <!-- Eingaben-Panel -->
                                 <div class="zt-panel" id="zt-input-container">
@@ -719,8 +720,6 @@
 
         <!-- Modals -->
         <div id="modal-container" style="display: none;" onclick="closeModalOnOutsideClick(event)" role="dialog" aria-modal="true" aria-hidden="true">
-            <!-- Zeugnistext Archiv Modal (dynamisch befüllt) -->
-            <div id="zt-archive-modal" class="modal zt-modal" style="display: none;"></div>
             <!-- Zeugnistext Beobachtungen Modal (bearbeitbar, dynamisch befüllt) -->
             <div id="zt-beob-modal" class="modal zt-modal" style="display: none;"></div>
 
@@ -2060,7 +2059,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=3.13"></script>
+    <script src="script.js?v=3.14"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {

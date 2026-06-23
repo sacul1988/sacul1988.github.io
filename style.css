@@ -4120,7 +4120,8 @@ html.modal-open, body.modal-open {
 }
 
 #zt-open-text-inline-btn.is-active,
-#zt-open-planung-inline-btn.is-active {
+#zt-open-planung-inline-btn.is-active,
+#zt-open-archive-inline-btn.is-active {
     background: var(--primary-color) !important;
     border-color: var(--primary-color) !important;
     color: #fff !important;
@@ -4129,7 +4130,9 @@ html.modal-open, body.modal-open {
 #zt-open-text-inline-btn.is-active i,
 #zt-open-text-inline-btn.is-active svg,
 #zt-open-planung-inline-btn.is-active i,
-#zt-open-planung-inline-btn.is-active svg {
+#zt-open-planung-inline-btn.is-active svg,
+#zt-open-archive-inline-btn.is-active i,
+#zt-open-archive-inline-btn.is-active svg {
     color: #fff !important;
 }
 
