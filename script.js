@@ -665,6 +665,11 @@ function closeToolWindow(options = {}) {
     const overlay = document.getElementById('tool-window-overlay');
     if (!overlay) return;
 
+    // Generator-Entwurf beim Schließen in die Cloud sichern (no-op, wenn unverändert)
+    if (window._activeToolWindow === 'zeugnis-texte' && typeof ztSyncDraftToCloud === 'function') {
+        ztSyncDraftToCloud();
+    }
+
     // Offene Zeugnis-/Kalender-Daten sichern (analog zum Modulwechsel)
     if (typeof window.saveDataToCloud === 'function' && window.firebaseAuth && window.firebaseAuth.currentUser) {
         window.saveDataToCloud();
@@ -9998,6 +10003,7 @@ function renderZeugnisTTexteModule() {
             if (el) {
                 el.addEventListener('input', ztSaveInputDraft);
                 el.addEventListener('change', ztSaveInputDraft);
+                el.addEventListener('blur', ztSyncDraftToCloud);
             }
         });
 
@@ -10076,6 +10082,21 @@ function ztRestoreInputDraft() {
         const el = document.getElementById(id);
         if (el && (el.value == null || el.value === '') && typeof draft[id] === 'string') el.value = draft[id];
     });
+}
+window.ztRestoreInputDraft = ztRestoreInputDraft;
+
+// Cloud-Sync des Entwurfs – nur bei tatsächlicher Änderung, ausgelöst beim
+// Verlassen eines Feldes oder beim Schließen des Fensters (nicht pro Tastendruck).
+let _ztDraftLastSynced = null;
+function ztSyncDraftToCloud() {
+    ztSaveInputDraft();
+    const cur = localStorage.getItem('ztInputDraft') || '';
+    if (cur === _ztDraftLastSynced) return;
+    _ztDraftLastSynced = cur;
+    try { localStorage.setItem('extraDataLastUpdate', new Date().toISOString()); } catch (e) { /* ignore */ }
+    if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.saveDataToCloud === 'function') {
+        window.saveDataToCloud();
+    }
 }
 
 async function ztCallAPI(messages) {
