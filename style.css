@@ -5098,8 +5098,24 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 
     #zt-result-container .zt-result-actions .btn {
         flex: unset;
-        padding: 10px 16px;
+        padding: 6px 8px;
+        background: none;
+        border: none;
+        box-shadow: none;
+        color: var(--primary-color);
+        font-size: 22px;
         justify-content: center;
+    }
+
+    #zt-result-container .zt-result-actions .btn:hover,
+    #zt-result-container .zt-result-actions .btn:active {
+        background: none;
+        box-shadow: none;
+        opacity: 0.7;
+    }
+
+    #zt-result-container .zt-result-actions .btn .btn-text {
+        display: none;
     }
 
     /* Eigene Anweisung (Wand-Button unter dem Eingabefeld, vollflächig) */
