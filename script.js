@@ -3281,6 +3281,22 @@ document.addEventListener('DOMContentLoaded', function() {
         history.replaceState({ page: 'home', classId: null, module: null, toolWindow: null }, '');
     }
 
+    // Crash-Recovery: Falls die Archiv-Ansicht (Zeitreise) zuvor unsauber verlassen
+    // wurde (z. B. Reload während der Ansicht), liegen evtl. noch die alten Archiv-
+    // Daten im localStorage. Dann die gesicherten Live-Daten zurückspielen und die
+    // Sperre lösen, damit nie versehentlich Archiv-Daten hochgeladen werden.
+    try {
+        if (localStorage.getItem('__archiveViewActive') === '1') {
+            const backupRaw = localStorage.getItem(ARCHIVE_LIVE_BACKUP_KEY);
+            if (backupRaw) {
+                try { ztApplySnapshotToApp(JSON.parse(backupRaw)); } catch (e) {}
+            }
+            localStorage.removeItem(ARCHIVE_LIVE_BACKUP_KEY);
+            localStorage.removeItem('__archiveViewActive');
+            window.__archiveViewMode = false;
+        }
+    } catch (e) { /* Recovery best effort */ }
+
     loadData();
     loadTermine();
     loadPlanung();
@@ -5237,6 +5253,40 @@ function addProjectGradesPreviewStyles() {
 
 // ===== IMPORT/EXPORT-FUNKTIONEN =====
 
+// Baut ein vollständiges Snapshot-Objekt aller App-Daten (gleiche Struktur wie
+// der Datei-Export). Einzige Quelle der Wahrheit für Export, Halbjahr-Archiv und
+// die lokale Live-Sicherung beim Betreten der Archiv-Ansicht.
+function buildCurrentSnapshot() {
+    const planungObj = {};
+    if (Array.isArray(classes)) {
+        classes.forEach((_, i) => {
+            try {
+                const p = localStorage.getItem(`planung_${i}`);
+                if (p) planungObj[String(i)] = JSON.parse(p);
+            } catch (e) { /* ungültiges JSON ignorieren */ }
+        });
+    }
+    return {
+        version: "1.1",
+        timestamp: new Date().toISOString(),
+        classes: classes,
+        contacts: contacts,
+        dashboardNotes: AppState.dashboardNotes || [],
+        termine: (window.AppState && window.AppState.termine) ? window.AppState.termine : [],
+        deletedTermineIds: JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'),
+        planung: planungObj,
+        planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
+        zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
+        ztPlanung: JSON.parse(localStorage.getItem('ztPlanung') || '{"courses":[]}'),
+        stundenplan: JSON.parse(localStorage.getItem('stundenplan') || '{"zeiten":[],"kacheln":{},"inklusionProKlasse":{}}'),
+        zeugnisViewMode: localStorage.getItem('zeugnisViewMode') || 'individual',
+        extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || new Date().toISOString(),
+        // Zusätzliche Felder für exakte Wiederherstellung (nicht im alten Export):
+        lastUpdate: localStorage.getItem('lastUpdate') || '',
+        ztInputDraft: localStorage.getItem('ztInputDraft') || ''
+    };
+}
+
 // Alle Daten exportieren - Mit Event-Parameter für stopPropagation
 function exportAllData(event) {
     // Verhindern, dass das Event den toggleBackupPanel auslöst
@@ -5245,40 +5295,12 @@ function exportAllData(event) {
     }
 
     try {
-        // Alle Planungsdaten sammeln
-        const planungObj = {};
-        if (Array.isArray(classes)) {
-            classes.forEach((_, i) => {
-                try {
-                    const p = localStorage.getItem(`planung_${i}`);
-                    if (p) planungObj[String(i)] = JSON.parse(p);
-                } catch (e) {
-                    // Ignorieren falls JSON ungültig ist
-                }
-            });
-        }
-
         // Alle Daten in einem Objekt zusammenfassen
-        const exportData = {
-            version: "1.1",
-            timestamp: new Date().toISOString(),
-            classes: classes,
-            contacts: contacts,
-            dashboardNotes: AppState.dashboardNotes || [],
-            termine: (window.AppState && window.AppState.termine) ? window.AppState.termine : [],
-            deletedTermineIds: JSON.parse(localStorage.getItem('deletedTermineIds') || '[]'),
-            planung: planungObj,
-            planung_global_calendar_range: JSON.parse(localStorage.getItem('planung_global_calendar_range') || '{}'),
-            zeugnistexteArchiv: JSON.parse(localStorage.getItem('zeugnistexteArchiv') || '[]'),
-            ztPlanung: JSON.parse(localStorage.getItem('ztPlanung') || '{"courses":[]}'),
-            stundenplan: JSON.parse(localStorage.getItem('stundenplan') || '{"zeiten":[],"kacheln":{},"inklusionProKlasse":{}}'),
-            zeugnisViewMode: localStorage.getItem('zeugnisViewMode') || 'individual',
-            extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || new Date().toISOString()
-        };
-        
+        const exportData = buildCurrentSnapshot();
+
         // Als JSON konvertieren
         const jsonData = JSON.stringify(exportData, null, 2);
-        
+
         // Als Datei herunterladen
         const now = new Date();
         const day = String(now.getDate()).padStart(2, '0');
@@ -5460,6 +5482,412 @@ function importBackupFile(event) {
     };
     
     reader.readAsText(file);
+}
+
+// ===== HALBJAHR-ARCHIV =====
+// Am Ende eines Halbjahres kann der komplette Datenstand als EIN Snapshot in die
+// Cloud archiviert und anschließend zurückgesetzt werden (Adressbuch, Kalender,
+// Unterrichtszeiten und die Namen übernommener Klassen bleiben erhalten). Das
+// Archiv lässt sich später read-only "ansehen" (Zeitreise-Modus) und löschen.
+// Kein Wiederherstellen.
+
+const ARCHIVE_LIVE_BACKUP_KEY = '__liveBackupBeforeArchive';
+
+// Snapshot (Export-Struktur) in die App laden – OHNE Cloud-Sync auszulösen.
+// Genutzt für die Archiv-Ansicht (Zeitreise) und das Zurückspielen der Live-Sicherung.
+function ztApplySnapshotToApp(data) {
+    if (!data || typeof data !== 'object') return;
+
+    if (Array.isArray(data.classes)) {
+        classes = data.classes;
+        AppState.classes = data.classes;
+        window.classes = data.classes;
+        localStorage.setItem('classes', JSON.stringify(data.classes));
+    }
+    if (Array.isArray(data.contacts)) {
+        contacts = data.contacts;
+        AppState.contacts = data.contacts;
+        window.contacts = data.contacts;
+        localStorage.setItem('contacts', JSON.stringify(data.contacts));
+    }
+    if (Array.isArray(data.dashboardNotes)) {
+        localStorage.setItem('dashboardNotes', JSON.stringify(data.dashboardNotes));
+        if (typeof window.setDashboardNotes === 'function') window.setDashboardNotes(data.dashboardNotes);
+        else { AppState.dashboardNotes = data.dashboardNotes; window.dashboardNotes = data.dashboardNotes; }
+    }
+    if (Array.isArray(data.termine)) {
+        if (window.AppState) window.AppState.termine = data.termine;
+        localStorage.setItem('termine', JSON.stringify(data.termine));
+    }
+    if (Array.isArray(data.deletedTermineIds)) {
+        localStorage.setItem('deletedTermineIds', JSON.stringify(data.deletedTermineIds));
+    }
+    // Planung (pro Klasse): alte planung_*-Keys entfernen, neue setzen
+    {
+        const planungKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && /^planung_\d+$/.test(key)) planungKeys.push(key);
+        }
+        planungKeys.forEach(k => localStorage.removeItem(k));
+        if (data.planung && typeof data.planung === 'object') {
+            Object.keys(data.planung).forEach(id => {
+                try { localStorage.setItem('planung_' + id, JSON.stringify(data.planung[id])); } catch (e) {}
+            });
+        }
+    }
+    if (data.planung_global_calendar_range && typeof data.planung_global_calendar_range === 'object') {
+        localStorage.setItem('planung_global_calendar_range', JSON.stringify(data.planung_global_calendar_range));
+    }
+    if (Array.isArray(data.zeugnistexteArchiv)) {
+        localStorage.setItem('zeugnistexteArchiv', JSON.stringify(data.zeugnistexteArchiv));
+        if (typeof window.setZeugnistexteArchiv === 'function') window.setZeugnistexteArchiv(data.zeugnistexteArchiv);
+    }
+    if (data.ztPlanung && typeof data.ztPlanung === 'object') {
+        localStorage.setItem('ztPlanung', JSON.stringify(data.ztPlanung));
+        if (typeof window.setZtPlanung === 'function') window.setZtPlanung(data.ztPlanung);
+    }
+    if (data.stundenplan && typeof data.stundenplan === 'object') {
+        localStorage.setItem('stundenplan', JSON.stringify(data.stundenplan));
+        if (typeof window.setStundenplan === 'function') window.setStundenplan(data.stundenplan);
+    }
+    if (data.zeugnisViewMode) {
+        if (window.AppState) window.AppState.zeugnisViewMode = data.zeugnisViewMode;
+        localStorage.setItem('zeugnisViewMode', data.zeugnisViewMode);
+    }
+    if (typeof data.ztInputDraft === 'string') {
+        localStorage.setItem('ztInputDraft', data.ztInputDraft);
+    }
+    if (data.extraDataLastUpdate) localStorage.setItem('extraDataLastUpdate', data.extraDataLastUpdate);
+    if (typeof data.lastUpdate === 'string' && data.lastUpdate) localStorage.setItem('lastUpdate', data.lastUpdate);
+}
+
+// Re-render aller Hauptansichten nach einem Datenwechsel (Snapshot laden/verlassen).
+function ztRerenderAfterDataSwap() {
+    try { if (typeof showPage === 'function') showPage('home'); } catch (e) {}
+    try { if (typeof renderClassesGrid === 'function') renderClassesGrid(); } catch (e) {}
+    try { if (typeof renderDashboardNotes === 'function') renderDashboardNotes(); } catch (e) {}
+    try { if (typeof renderDashboardCalendar === 'function') renderDashboardCalendar(); } catch (e) {}
+}
+
+// Schätzt einen sinnvollen Default-Namen aus dem aktuellen Datum.
+function guessHalbjahrName() {
+    const d = new Date();
+    const m = d.getMonth(); // 0 = Januar
+    const y = d.getFullYear();
+    let half, startYear;
+    if (m >= 7) { half = 1; startYear = y; }            // Aug–Dez
+    else if (m === 0) { half = 1; startYear = y - 1; }    // Januar
+    else { half = 2; startYear = y - 1; }                 // Feb–Jul
+    const yy = String(startYear).slice(-2);
+    const yy2 = String(startYear + 1).slice(-2);
+    return `${half}. Halbjahr ${yy}/${yy2}`;
+}
+
+// Banner ein-/ausblenden
+function showArchiveViewBanner(name) {
+    const b = document.getElementById('archive-view-banner');
+    const label = document.getElementById('archive-view-banner-label');
+    if (label) label.textContent = 'Archiv-Ansicht: ' + (name || 'Halbjahr') + ' · nur Lesen';
+    if (b) b.style.display = 'flex';
+    document.body.classList.add('archive-view-active');
+}
+function hideArchiveViewBanner() {
+    const b = document.getElementById('archive-view-banner');
+    if (b) b.style.display = 'none';
+    document.body.classList.remove('archive-view-active');
+}
+
+// --- Modal-Rendering ---
+function openHalbjahrArchive() {
+    // Während der Archiv-Ansicht: Button führt zurück zu den aktuellen Daten.
+    if (window.__archiveViewMode) { exitHalbjahrArchiveView(); return; }
+    ztRenderHalbjahrArchiveModal({ loading: true });
+    showModal('halbjahr-archive-modal');
+    (async () => {
+        let entry = null;
+        try {
+            if (typeof window.loadHalbjahrArchiveFromCloud === 'function') {
+                entry = await window.loadHalbjahrArchiveFromCloud();
+            }
+        } catch (e) { entry = null; }
+        ztRenderHalbjahrArchiveModal({ entry });
+    })();
+}
+
+function ztRenderHalbjahrArchiveModal(state) {
+    const modal = document.getElementById('halbjahr-archive-modal');
+    if (!modal) return;
+    const head = `
+        <div class="zt-modal-head">
+            <span style="font-size:1.25rem;font-weight:700;">Halbjahr-Archiv</span>
+            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>`;
+
+    if (state && state.loading) {
+        modal.innerHTML = head + `<div style="padding:24px 4px;text-align:center;color:var(--grey-color);"><i class="fas fa-spinner fa-spin"></i> Lade Archiv …</div>`;
+        return;
+    }
+
+    const entry = state && state.entry;
+    if (entry && entry.data) {
+        let dateStr = '';
+        if (entry.date) { try { dateStr = new Date(entry.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) {} }
+        let sizeKb = 0;
+        try { sizeKb = Math.round(JSON.stringify(entry.data).length / 1024); } catch (e) {}
+        const nClasses = Array.isArray(entry.data.classes) ? entry.data.classes.length : 0;
+        modal.innerHTML = head + `
+            <div style="padding:4px 4px 0;">
+                <div class="hja-entry">
+                    <div class="hja-entry-main">
+                        <div class="hja-entry-name">${escapeHtml(entry.name || 'Archiviertes Halbjahr')}</div>
+                        <div class="hja-entry-meta">${dateStr ? 'archiviert am ' + dateStr + ' · ' : ''}${nClasses} ${nClasses === 1 ? 'Klasse' : 'Klassen'} · ~${sizeKb} KB</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:16px;">
+                    <button class="btn btn-primary btn-icon" style="flex:1;" onclick="enterHalbjahrArchiveView()"><i class="fas fa-eye"></i> Ansehen</button>
+                    <button class="btn btn-danger btn-icon" style="flex:1;" onclick="ztDeleteHalbjahrArchive()"><i class="fas fa-trash"></i> Löschen</button>
+                </div>
+                <p style="color:var(--grey-color);font-size:13px;margin:16px 0 4px;">Es kann nur ein Halbjahr archiviert sein. Zum Archivieren eines neuen Halbjahres bitte zuerst dieses löschen.</p>
+            </div>`;
+        return;
+    }
+
+    // Kein Archiv vorhanden
+    modal.innerHTML = head + `
+        <div style="padding:4px 4px 0;">
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;font-size:13px;color:#1e40af;margin-bottom:16px;">
+                Hier kannst du am Ende eines Halbjahres den kompletten Stand sichern und für das neue Halbjahr aufräumen. Das Archiv bleibt zum Ansehen erhalten, bis du es löschst.
+            </div>
+            <button class="btn btn-primary btn-icon btn-block" onclick="ztShowHalbjahrArchiveCreate()"><i class="fas fa-box-archive"></i> Aktuelles Halbjahr archivieren</button>
+        </div>`;
+}
+
+function ztShowHalbjahrArchiveCreate() {
+    const modal = document.getElementById('halbjahr-archive-modal');
+    if (!modal) return;
+    const guess = guessHalbjahrName();
+    const classList = Array.isArray(classes) ? classes : [];
+    const rows = classList.length
+        ? classList.map((c, i) =>
+            `<label class="hja-class-row"><input type="checkbox" class="hja-keep-class" value="${i}" checked> <span>${escapeHtml(c.name || ('Klasse ' + (i + 1)))}</span></label>`
+          ).join('')
+        : '<p style="color:var(--grey-color);margin:0;">Keine Klassen vorhanden.</p>';
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            <span style="font-size:1.25rem;font-weight:700;">Halbjahr archivieren</span>
+            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        <div style="padding:4px 4px 0;">
+            <label style="font-weight:600;display:block;margin-bottom:4px;">Name fürs Archiv</label>
+            <input id="hja-name" class="form-control" value="${escapeHtml(guess)}" style="margin-bottom:18px;">
+            <label style="font-weight:600;display:block;margin-bottom:6px;">Welche Klassen ins neue Halbjahr übernehmen?</label>
+            <p style="color:var(--grey-color);font-size:13px;margin:0 0 8px;">Angekreuzte Klassen bleiben – aber nur mit den Schülernamen. Noten, Hausaufgaben und Zeugnis-Daten werden geleert. Nicht angekreuzte Klassen werden entfernt.</p>
+            <div class="hja-class-list">${rows}</div>
+            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 12px;margin:14px 0;font-size:13px;color:#9a3412;line-height:1.5;">
+                <strong>Was passiert:</strong> Der komplette aktuelle Stand wird als Archiv gesichert. Danach werden Noten, Zeugnistexte, Zeugnis-Planung, Unterrichtsplanung, Startseiten-Notizen und die einzelnen Stundenplan-Stunden geleert.<br>
+                <strong>Erhalten bleiben:</strong> Adressbuch, Kalender/Termine, Unterrichtszeiten und die Namen der übernommenen Klassen.
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-secondary btn-icon" style="flex:1;" onclick="openHalbjahrArchive()"><i class="fas fa-arrow-left"></i> Zurück</button>
+                <button class="btn btn-primary btn-icon" style="flex:2;" onclick="ztConfirmHalbjahrArchive()"><i class="fas fa-box-archive"></i> Archivieren &amp; zurücksetzen</button>
+            </div>
+        </div>`;
+}
+
+async function ztConfirmHalbjahrArchive() {
+    const nameEl = document.getElementById('hja-name');
+    const name = (nameEl ? nameEl.value : '').trim() || guessHalbjahrName();
+    const keepIndices = Array.from(document.querySelectorAll('.hja-keep-class:checked')).map(el => Number(el.value));
+
+    const willDo = await swal({
+        title: 'Halbjahr archivieren?',
+        text: `„${name}" wird gesichert und der aktuelle Stand anschließend zurückgesetzt. Adressbuch, Kalender und Unterrichtszeiten bleiben erhalten.`,
+        icon: 'warning',
+        buttons: ['Abbrechen', 'Archivieren & zurücksetzen'],
+        dangerMode: true
+    });
+    if (!willDo) return;
+
+    // 1) Snapshot bauen und in die Cloud schreiben – ZUERST sichern, dann erst leeren.
+    let snapshot;
+    try { snapshot = buildCurrentSnapshot(); } catch (e) {
+        swal('Fehler', 'Der aktuelle Stand konnte nicht gelesen werden. Es wurde nichts verändert.', 'error');
+        return;
+    }
+    try {
+        if (typeof window.saveHalbjahrArchiveToCloud !== 'function') throw new Error('Cloud nicht verfügbar');
+        await window.saveHalbjahrArchiveToCloud(name, snapshot);
+    } catch (e) {
+        console.error('Archiv-Upload fehlgeschlagen:', e);
+        swal('Fehler', 'Das Archiv konnte nicht in der Cloud gespeichert werden. Es wurde nichts zurückgesetzt.', 'error');
+        return;
+    }
+
+    // 2) Live-Daten zurücksetzen
+    try {
+        resetForNewHalfYear(keepIndices);
+    } catch (e) {
+        console.error('Reset fehlgeschlagen:', e);
+        swal('Fehler', 'Beim Zurücksetzen ist ein Fehler aufgetreten. Das Archiv wurde aber gespeichert.', 'error');
+        return;
+    }
+
+    // 3) Den geleerten Stand in die Cloud schreiben. Leer-Schutz-Flags setzen,
+    //    damit das beabsichtigte Leeren propagiert.
+    window._allowEmptyClassesSync = true;
+    window._allowEmptyDashboardNotesSync = true;
+    window._allowEmptyStundenplanSync = true;
+    try {
+        if (typeof window.saveDataToCloud === 'function') await window.saveDataToCloud();
+    } catch (e) { console.warn('Upload des zurückgesetzten Standes fehlgeschlagen:', e); }
+
+    hideModal();
+    ztRerenderAfterDataSwap();
+    swal('Fertig', `„${name}" wurde archiviert. Der aktuelle Stand ist für das neue Halbjahr zurückgesetzt.`, 'success');
+}
+
+// Setzt den Live-Stand fürs neue Halbjahr zurück. Behält: Adressbuch, Termine,
+// Unterrichtszeiten und die Namen der übernommenen Klassen.
+function resetForNewHalfYear(keepIndices) {
+    const keep = new Set((keepIndices || []).map(Number));
+    const oldClasses = Array.isArray(classes) ? classes : [];
+    const newClasses = [];
+    oldClasses.forEach((c, i) => {
+        if (!keep.has(i)) return; // nicht übernommene Klassen entfernen
+        const students = Array.isArray(c.students) ? c.students.map(s => ({
+            name: s.name,
+            projects: [],
+            homework: 0,
+            materials: 0,
+            isExpanded: false,
+            hwHistory: []
+        })) : [];
+        newClasses.push({
+            name: c.name,
+            klasse: c.klasse,
+            fach: c.fach,
+            subject: c.subject || '',
+            gewichtung: c.gewichtung,
+            classTeacher: !!c.classTeacher,
+            alphabeticallySorted: false,
+            homeworkSorted: false,
+            studentsListSorted: false,
+            homework: {},
+            materials: {},
+            students: students,
+            sitzplan: { desks: [], currentMode: 'evaluation' }
+        });
+    });
+    classes = newClasses;
+    AppState.classes = newClasses;
+    window.classes = newClasses;
+    localStorage.setItem('classes', JSON.stringify(newClasses));
+
+    // Startseiten-Notizen leeren
+    AppState.dashboardNotes = [];
+    window.dashboardNotes = [];
+    localStorage.setItem('dashboardNotes', JSON.stringify([]));
+    if (typeof window.setDashboardNotes === 'function') window.setDashboardNotes([]);
+
+    // Unterrichtsplanung (pro Klasse) entfernen
+    const pk = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && /^planung_\d+$/.test(k)) pk.push(k);
+    }
+    pk.forEach(k => localStorage.removeItem(k));
+    localStorage.setItem('planung_global_calendar_range', JSON.stringify({}));
+
+    // Zeugnistext-Archiv leeren
+    localStorage.setItem('zeugnistexteArchiv', JSON.stringify([]));
+    if (typeof window.setZeugnistexteArchiv === 'function') window.setZeugnistexteArchiv([]);
+
+    // Zeugnis-Planung leeren
+    const emptyZt = { courses: [] };
+    localStorage.setItem('ztPlanung', JSON.stringify(emptyZt));
+    if (typeof window.setZtPlanung === 'function') window.setZtPlanung(emptyZt);
+
+    // Stundenplan: Unterrichtszeiten behalten, einzelne Stunden + Inklusionszuordnung leeren
+    let sp = {};
+    try { sp = JSON.parse(localStorage.getItem('stundenplan') || '{}') || {}; } catch (e) { sp = {}; }
+    const newSp = { zeiten: Array.isArray(sp.zeiten) ? sp.zeiten : [], kacheln: {}, inklusionProKlasse: {} };
+    localStorage.setItem('stundenplan', JSON.stringify(newSp));
+    if (typeof window.setStundenplan === 'function') window.setStundenplan(newSp);
+
+    // Generator-Entwurf leeren
+    localStorage.removeItem('ztInputDraft');
+
+    // Zeitstempel hochsetzen, damit der Reset als neuester Stand gilt (auch für Archiv-Propagierung)
+    const now = new Date().toISOString();
+    localStorage.setItem('extraDataLastUpdate', now);
+    localStorage.setItem('lastUpdate', now);
+}
+
+// --- Archiv-Ansicht (Zeitreise, read-only) ---
+async function enterHalbjahrArchiveView() {
+    let entry = null;
+    try {
+        if (typeof window.loadHalbjahrArchiveFromCloud === 'function') entry = await window.loadHalbjahrArchiveFromCloud();
+    } catch (e) { entry = null; }
+    if (!entry || !entry.data) { swal('Kein Archiv', 'Es ist kein archiviertes Halbjahr vorhanden.', 'info'); return; }
+
+    // 1) Aktuelle Live-Daten lokal sichern (für die Rückkehr – auch offline)
+    try {
+        localStorage.setItem(ARCHIVE_LIVE_BACKUP_KEY, JSON.stringify(buildCurrentSnapshot()));
+    } catch (e) {
+        swal('Fehler', 'Die aktuellen Daten konnten nicht gesichert werden. Ansicht abgebrochen.', 'error');
+        return;
+    }
+    // 2) Cloud-Sync hart pausieren (kein Hochladen, kein Live-Listener)
+    if (typeof window.pauseCloudSync === 'function') window.pauseCloudSync();
+    else window.__archiveViewMode = true;
+    // 3) Archiv-Daten laden und anzeigen
+    ztApplySnapshotToApp(entry.data);
+    showArchiveViewBanner(entry.name || 'Halbjahr');
+    hideModal();
+    ztRerenderAfterDataSwap();
+}
+
+function exitHalbjahrArchiveView() {
+    let backup = null;
+    try { backup = JSON.parse(localStorage.getItem(ARCHIVE_LIVE_BACKUP_KEY) || 'null'); } catch (e) { backup = null; }
+
+    if (backup) {
+        ztApplySnapshotToApp(backup);
+    }
+    localStorage.removeItem(ARCHIVE_LIVE_BACKUP_KEY);
+    hideArchiveViewBanner();
+
+    // Sync wieder einschalten (Listener neu aufsetzen)
+    if (typeof window.resumeCloudSync === 'function') window.resumeCloudSync();
+    else window.__archiveViewMode = false;
+
+    // Falls keine lokale Sicherung vorhanden war: aktuellen Stand frisch aus der Cloud holen.
+    if (!backup && typeof window.forceRefreshFromCloud === 'function') {
+        window.forceRefreshFromCloud().then(() => ztRerenderAfterDataSwap());
+    } else {
+        ztRerenderAfterDataSwap();
+    }
+}
+
+async function ztDeleteHalbjahrArchive() {
+    const willDelete = await swal({
+        title: 'Archiv löschen?',
+        text: 'Das archivierte Halbjahr wird dauerhaft gelöscht. Das kann nicht rückgängig gemacht werden.',
+        icon: 'warning',
+        buttons: ['Abbrechen', 'Endgültig löschen'],
+        dangerMode: true
+    });
+    if (!willDelete) return;
+    try {
+        if (typeof window.deleteHalbjahrArchiveFromCloud === 'function') await window.deleteHalbjahrArchiveFromCloud();
+    } catch (e) {
+        console.error('Archiv löschen fehlgeschlagen:', e);
+        swal('Fehler', 'Das Archiv konnte nicht gelöscht werden.', 'error');
+        return;
+    }
+    ztRenderHalbjahrArchiveModal({ entry: null });
 }
 
 // ===== SITZPLAN MODUL =====
@@ -10092,17 +10520,19 @@ function ztSaveInputDraft() {
     } catch (e) { /* ignore */ }
 }
 
-function ztRestoreInputDraft() {
+function ztRestoreInputDraft(force) {
     let draft;
     try { draft = JSON.parse(localStorage.getItem('ztInputDraft') || 'null'); } catch (e) { draft = null; }
     if (!draft) return;
-    // Auswahlfelder (Halbjahr/Art) direkt setzen; Textfelder nur, wenn sie leer
-    // sind – so wird aktuelles Tippen nie überschrieben.
+    // Auswahlfelder (Halbjahr/Art) direkt setzen; Textfelder normalerweise nur, wenn
+    // sie leer sind – so wird aktuelles Tippen nie überschrieben. Mit force=true
+    // werden auch die Textfelder gefüllt (z. B. nach einem Generierungs-Abbruch).
     if (draft['zt-typ']) { const t = document.getElementById('zt-typ'); if (t) { t.value = draft['zt-typ']; setZtTyp(draft['zt-typ']); } }
     if (draft['zt-halbjahr']) { const h = document.getElementById('zt-halbjahr'); if (h) h.value = draft['zt-halbjahr']; }
     ['zt-fach', 'zt-name', 'zt-themen', 'zt-beobachtungen'].forEach(id => {
         const el = document.getElementById(id);
-        if (el && (el.value == null || el.value === '') && typeof draft[id] === 'string') el.value = draft[id];
+        if (!el || typeof draft[id] !== 'string') return;
+        if (force || el.value == null || el.value === '') el.value = draft[id];
     });
 }
 window.ztRestoreInputDraft = ztRestoreInputDraft;
@@ -10214,12 +10644,16 @@ async function ztGenerate() {
     ZtState.currentLabel = ZtState.currentTyp === 'sozialverhalten' ? name : `${name} · ${fach}`;
     ZtState.currentId = null;
 
+    // Eingaben (besonders Beobachtungen) vor dem langen Request sichern, damit sie
+    // bei einem Abbruch / "Load failed" garantiert erhalten bleiben.
+    ztSaveInputDraft();
+
     ztSetLoading();
 
     try {
         const initialMessages = [{ role: 'user', content: userMsg }];
         const apiResult = await ztCallAPI(initialMessages);
-        
+
         if (apiResult.questions && apiResult.questions.length > 0) {
             showClarifyingQuestionsModal(apiResult.questions, initialMessages);
         } else {
@@ -10228,7 +10662,10 @@ async function ztGenerate() {
             ztRenderResult();
         }
     } catch(e) {
+        // Generierung abgebrochen: Eingabeformular wieder anzeigen UND die
+        // gesicherten Eingaben aktiv zurückholen, damit nichts neu getippt werden muss.
         ztCloseResult();
+        ztRestoreInputDraft(true);
         swal('Fehler', formatKiGenerationError(e, 'Fehler beim Generieren. Bitte erneut versuchen.'), 'error');
     }
 }
@@ -10549,8 +10986,10 @@ function ztArchiveItemHtml(item) {
                 ${typLabel ? `<span class="zt-archive-typ">${typLabel}</span>` : ''}
             </div>
             <span class="zt-archive-date">${dateStr}</span>
-            <button class="zt-plan-write" title="Öffnen" onclick="event.stopPropagation();ztOpenArchive('${item.id}')"><i class="fas fa-up-right-from-square"></i></button>
-            <button class="zt-plan-del" title="Löschen" onclick="event.stopPropagation();ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
+            <div class="zt-archive-actions">
+                <button class="btn btn-sm btn-primary btn-circle-sm" title="Öffnen / Bearbeiten" onclick="event.stopPropagation();ztOpenArchive('${item.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-danger btn-circle-sm" title="Löschen" onclick="event.stopPropagation();ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
+            </div>
         </li>`;
 }
 

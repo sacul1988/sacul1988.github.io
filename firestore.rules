@@ -79,5 +79,18 @@ service cloud.firestore {
       allow update: if isOwner(userId) && isValidUserData(request.resource.data);
       allow delete: if isOwner(userId);
     }
+
+    // Halbjahr-Archiv: genau ein vollständiger Snapshot pro Nutzer (uid = Doc-ID),
+    // getrennt vom Live-Dokument. Der Snapshot liegt als JSON-String in `dataJson`.
+    match /halbjahrArchive/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create, update: if isOwner(userId)
+        && request.resource.data.dataJson is string
+        && request.resource.data.dataJson.size() <= 1000000
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 200;
+      allow delete: if isOwner(userId);
+    }
   }
 }

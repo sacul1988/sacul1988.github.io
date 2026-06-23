@@ -6575,3 +6575,72 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     .sp-zeit-time { width: 92px; }
     .sp-grid { gap: 6px; }
 }
+
+/* ===== HALBJAHR-ARCHIV ===== */
+/* Banner für den Archiv-Ansichtsmodus (Zeitreise, read-only) */
+#archive-view-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 11000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    background: #b45309;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+.archive-view-banner-text { display: inline-flex; align-items: center; gap: 8px; }
+.archive-view-banner-btn {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.archive-view-banner-btn:hover { background: rgba(255, 255, 255, 0.28); }
+/* Inhalt nach unten schieben, solange das Banner sichtbar ist */
+body.archive-view-active { padding-top: 48px; }
+
+/* Klassen-Checkliste im Archivieren-Dialog */
+.hja-class-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+.hja-class-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--dark-color);
+}
+.hja-class-row input { width: 18px; height: 18px; cursor: pointer; }
+
+/* Archiv-Eintrag (Statusansicht) */
+.hja-entry {
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: #fff;
+}
+.hja-entry-name { font-weight: 700; color: var(--dark-color); font-size: 1.05rem; }
+.hja-entry-meta { font-size: 13px; color: var(--grey-color); margin-top: 4px; }

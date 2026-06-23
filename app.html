@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=3.15">
+    <link rel="stylesheet" href="style.css?v=3.17">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -190,6 +190,12 @@
             if (themeColorMeta) themeColorMeta.setAttribute('content', '#f2f4fa');
         }
     </script>
+    <!-- Banner für den Archiv-Ansichtsmodus (Zeitreise). Standardmäßig versteckt. -->
+    <div id="archive-view-banner" style="display: none;">
+        <span class="archive-view-banner-text"><i class="fas fa-box-archive"></i> <span id="archive-view-banner-label">Archiv-Ansicht</span></span>
+        <button type="button" class="archive-view-banner-btn" onclick="exitHalbjahrArchiveView()"><i class="fas fa-arrow-left"></i> Zurück zu aktuellen Daten</button>
+    </div>
+
     <!-- Login Modal -->
     <div id="login-container" class="login-overlay" style="display: none;">
         <div class="login-card">
@@ -274,10 +280,13 @@
                                     <i class="fas fa-layer-group"></i> <span class="btn-text">Kacheln</span>
                                 </button>
                                 <button class="btn btn-primary btn-icon" onclick="exportAllData(event)" title="Alle Daten als Datei exportieren">
-                                    <i class="fas fa-arrow-up"></i> <span class="btn-text">Exportieren</span>
+                                    <i class="fas fa-arrow-down"></i> <span class="btn-text">Exportieren</span>
                                 </button>
                                 <button class="btn btn-secondary btn-icon" onclick="handleImportButtonClick(event)" title="Daten aus Datei importieren">
-                                    <i class="fas fa-arrow-down"></i> <span class="btn-text">Importieren</span>
+                                    <i class="fas fa-arrow-up"></i> <span class="btn-text">Importieren</span>
+                                </button>
+                                <button class="btn btn-secondary btn-icon" onclick="openHalbjahrArchive()" title="Halbjahr archivieren oder altes Archiv ansehen">
+                                    <i class="fas fa-box-archive"></i> <span class="btn-text">Halbjahr-Archiv</span>
                                 </button>
                             </div>
 
@@ -335,7 +344,7 @@
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
                                         <button class="btn btn-secondary btn-icon" onclick="showExportStudentsModal()">
-                                            <i class="fas fa-arrow-up"></i>
+                                            <i class="fas fa-arrow-down"></i>
                                             <span class="btn-text">Exportieren</span>
                                         </button>
                                     </div>
@@ -380,7 +389,7 @@
                                     <div class="card-header-actions">
                                         <div class="desktop-header-buttons">
                                             <button class="btn btn-secondary btn-icon" onclick="exportSitzplanAsJPEG()" title="Sitzplan exportieren">
-                                                <i class="fas fa-arrow-up"></i>
+                                                <i class="fas fa-arrow-down"></i>
                                                 <span class="btn-text">Exportieren</span>
                                             </button>
                                         </div>
@@ -430,7 +439,7 @@
                                             <i class="fas fa-trash"></i> <span class="btn-text">Projekt löschen</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" onclick="exportGrades()">
-                                            <i class="fas fa-arrow-up"></i>
+                                            <i class="fas fa-arrow-down"></i>
                                             <span class="btn-text">Exportieren</span>
                                         </button>
                                         <button class="btn btn-info btn-icon search-icon-btn" title="Suchen" aria-label="Suchen" onclick="openSearchModal('noten')">
@@ -499,7 +508,7 @@
                                             <i class="fas fa-eraser"></i> <span class="btn-text">Planung löschen</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" onclick="openPlanungExport()">
-                                            <i class="fas fa-arrow-up"></i>
+                                            <i class="fas fa-arrow-down"></i>
                                             <span class="btn-text">Exportieren</span>
                                         </button>
                                     </div>
@@ -526,7 +535,7 @@
                                             <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Durchlauf</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" onclick="exportAllStudentCards()">
-                                            <i class="fas fa-arrow-up"></i>
+                                            <i class="fas fa-arrow-down"></i>
                                             <span class="btn-text">Exportieren</span>
                                         </button>
                                         <button class="btn btn-info btn-icon search-icon-btn" title="Suchen" aria-label="Suchen" onclick="openSearchModal('zeugnis')">
@@ -695,10 +704,10 @@
                                             <i class="fas fa-calendar-day"></i> <span class="btn-text">Zeitraum</span>
                                         </button>
                                         <button class="btn btn-secondary btn-icon" onclick="triggerIcsImport()">
-                                            <i class="fas fa-arrow-down"></i> <span class="btn-text">Importieren</span>
+                                            <i class="fas fa-arrow-up"></i> <span class="btn-text">Importieren</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" onclick="openPlanungExport()">
-                                            <i class="fas fa-arrow-up"></i> <span class="btn-text">Exportieren</span>
+                                            <i class="fas fa-arrow-down"></i> <span class="btn-text">Exportieren</span>
                                         </button>
                                     </div>
 
@@ -722,6 +731,9 @@
         <div id="modal-container" style="display: none;" onclick="closeModalOnOutsideClick(event)" role="dialog" aria-modal="true" aria-hidden="true">
             <!-- Zeugnistext Beobachtungen Modal (bearbeitbar, dynamisch befüllt) -->
             <div id="zt-beob-modal" class="modal zt-modal" style="display: none;"></div>
+
+            <!-- Halbjahr-Archiv Modal (Status / Ansehen / Löschen / Erstellen, dynamisch befüllt) -->
+            <div id="halbjahr-archive-modal" class="modal zt-modal" style="display: none;"></div>
 
             <!-- Zeugnistext Planung: Listenansicht (dynamisch befüllt) -->
             <div id="zt-planung-modal" class="modal zt-modal" style="display: none;"></div>
@@ -917,7 +929,7 @@
                     </select>
                 </div>
                 <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="exportStudentsList()"><i class="fas fa-arrow-up"></i> Exportieren</button>
+                    <button class="btn btn-primary" onclick="exportStudentsList()"><i class="fas fa-arrow-down"></i> Exportieren</button>
                 </div>
             </div>
             
@@ -1240,7 +1252,7 @@
     <script type="module">
         import { initializeApp } from "firebase/app";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-        import { initializeFirestore, doc, setDoc, getDoc, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+        import { initializeFirestore, doc, setDoc, getDoc, deleteDoc, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
         // ===== DEINE FIREBASE KONFIGURATION =====
         const firebaseConfig = {
@@ -1807,6 +1819,13 @@
         }
 
         window.saveDataToCloud = async (specificStudentIndex = null) => {
+            // SCHUTZ: Im Archiv-Ansichtsmodus (Zeitreise) NIEMALS hochladen –
+            // sonst würden die alten Daten die aktuellen in der Cloud überschreiben.
+            // Das geteilte localStorage-Flag schützt auch vor anderen offenen Tabs.
+            if (window.__archiveViewMode || localStorage.getItem('__archiveViewActive') === '1') {
+                console.warn('saveDataToCloud im Archiv-Ansichtsmodus blockiert.');
+                return;
+            }
             const user = auth.currentUser;
             if (!user) return;
             const statusText = document.querySelector('#cloud-status-bar span');
@@ -1983,6 +2002,9 @@
 
         // Neu: Erzwungener Abgleich mit der Cloud (für Tab-Wechsel)
         window.forceRefreshFromCloud = async () => {
+            // SCHUTZ: Im Archiv-Ansichtsmodus keine Live-Daten nachladen –
+            // sonst würde die Zeitreise-Ansicht überschrieben.
+            if (window.__archiveViewMode) return;
             const user = auth.currentUser;
             if (!user) return;
             
@@ -2041,6 +2063,72 @@
             window.saveDataToCloud();
         };
 
+        // ===== HALBJAHR-ARCHIV: Cloud-Anbindung =====
+        // Der Snapshot liegt in einem EIGENEN Dokument (halbjahrArchive/{uid}),
+        // getrennt vom Live-Dokument. So kann er die aktuellen Daten nie gefährden und
+        // hat sein eigenes 1-MB-Limit. Genau ein Eintrag pro Nutzer.
+        function halbjahrArchiveDocRef() {
+            const user = auth.currentUser;
+            if (!user) return null;
+            // Eigene Top-Level-Collection, ein Dokument pro Nutzer (uid = Doc-ID).
+            return doc(db, "halbjahrArchive", user.uid);
+        }
+
+        window.saveHalbjahrArchiveToCloud = async (name, snapshotObj) => {
+            const ref = halbjahrArchiveDocRef();
+            if (!ref) throw new Error('Nicht angemeldet.');
+            await setDoc(ref, {
+                name: name || 'Archiviertes Halbjahr',
+                date: new Date().toISOString(),
+                dataJson: JSON.stringify(snapshotObj)
+            });
+            return true;
+        };
+
+        window.loadHalbjahrArchiveFromCloud = async () => {
+            const ref = halbjahrArchiveDocRef();
+            if (!ref) return null;
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return null;
+            const d = snap.data();
+            let data = null;
+            try { data = d.dataJson ? JSON.parse(d.dataJson) : null; } catch (e) { data = null; }
+            return { name: d.name || '', date: d.date || '', data };
+        };
+
+        window.deleteHalbjahrArchiveFromCloud = async () => {
+            const ref = halbjahrArchiveDocRef();
+            if (!ref) throw new Error('Nicht angemeldet.');
+            await deleteDoc(ref);
+            return true;
+        };
+
+        // Cloud-Sync pausieren (Archiv-Ansicht betreten): Hochladen sperren,
+        // Live-Listener abmelden, ausstehende Debounce-Syncs abbrechen.
+        window.pauseCloudSync = () => {
+            window.__archiveViewMode = true;
+            // Geteiltes Flag: blockiert Uploads auch in anderen offenen Tabs
+            // (localStorage ist tab-übergreifend).
+            try { localStorage.setItem('__archiveViewActive', '1'); } catch (e) {}
+            if (window.unsubscribeRealtime) {
+                try { window.unsubscribeRealtime(); } catch (e) {}
+                window.unsubscribeRealtime = null;
+            }
+            if (window._cloudSyncDebounceTimer) {
+                clearTimeout(window._cloudSyncDebounceTimer);
+                window._cloudSyncDebounceTimer = null;
+            }
+        };
+
+        // Cloud-Sync fortsetzen (Archiv-Ansicht verlassen): Flag lösen,
+        // Live-Listener neu aufsetzen.
+        window.resumeCloudSync = () => {
+            window.__archiveViewMode = false;
+            try { localStorage.removeItem('__archiveViewActive'); } catch (e) {}
+            const user = auth.currentUser;
+            if (user) setupRealtimeSync(user.uid);
+        };
+
         // Beim Verlassen/Wechseln der Seite einen noch ausstehenden (verzögerten) Cloud-Sync
         // sofort abschließen, damit z. B. neue Notizen zuverlässig auf allen Geräten ankommen.
         const flushOnLeave = () => {
@@ -2059,7 +2147,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=3.15"></script>
+    <script src="script.js?v=3.17"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
