@@ -230,7 +230,7 @@ body {
     }
 }
 
-@media (max-width: 599px) {
+@media (max-width: 991px) {
     .classes-grid {
         --dashboard-base-span: 6;
     }
