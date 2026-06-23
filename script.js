@@ -10327,11 +10327,10 @@ function ztRenderResult() {
                 </div>
                 <div class="zt-result-right">
                     <div class="zt-result-actions">
-                        <button class="btn btn-primary btn-icon" onclick="ztRegenerate()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
+                        <button class="btn btn-primary btn-icon" onclick="ztShowBeobachtungen()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
                         <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
                         <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
                         <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
-                        <button class="btn btn-secondary btn-icon" onclick="ztShowBeobachtungen()"><i class="fas fa-clipboard"></i> <span class="btn-text">Beobachtungen</span></button>
                     </div>
                     <div class="zt-refine">
                         <textarea id="zt-refine-input" class="form-control zt-refine-input" style="min-height: 220px;" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();ztRefineText();}"></textarea>
