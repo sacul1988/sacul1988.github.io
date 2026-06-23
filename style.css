@@ -3989,7 +3989,7 @@ html.modal-open, body.modal-open {
     letter-spacing: 0;
 }
 
-.zt-archive-list { display: flex; flex-direction: column; }
+.zt-archive-list { display: flex; flex-direction: column; gap: 12px; }
 
 .zt-archive-group-head {
     font-weight: 700;
@@ -4499,9 +4499,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 .zt-modal .zt-archive-list {
     max-height: 60vh;
     overflow-y: auto;
-    margin: 0 -4px;
 }
-.zt-modal .zt-archive-item { padding: 12px 4px; }
 
 .zt-archive-empty {
     display: flex;

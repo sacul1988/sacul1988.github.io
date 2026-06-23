@@ -10515,28 +10515,21 @@ function ztOpenArchiveModal() {
     showModal('zt-archive-modal');
 }
 
-// HTML eines einzelnen Archiv-Eintrags.
+// HTML eines einzelnen Archiv-Eintrags – visuell wie eine Planungslisten-Zeile.
 function ztArchiveItemHtml(item) {
     const d = item.date ? new Date(item.date) : null;
     const dateStr = d ? d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
-    const full = item.text || '';
-    const preview = full.length > 90 ? full.slice(0, 90) + '…' : full;
     const typLabel = ztTypLabel(item.typ);
     return `
-        <div class="zt-archive-item">
-            <div class="zt-archive-main" onclick="ztOpenArchive('${item.id}')">
-                <div class="zt-archive-row1">
-                    <span class="zt-archive-name">${ztEsc(item.label)}</span>
-                    ${typLabel ? `<span class="zt-archive-typ">${typLabel}</span>` : ''}
-                    <span class="zt-archive-date">${dateStr}</span>
-                </div>
-                <div class="zt-archive-preview">${ztEsc(preview)}</div>
+        <li class="zt-plan-student zt-archive-item" style="cursor:pointer;" onclick="ztOpenArchive('${item.id}')">
+            <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span class="zt-plan-student-name">${ztEsc(item.label)}</span>
+                ${typLabel ? `<span class="zt-archive-typ">${typLabel}</span>` : ''}
             </div>
-            <div class="zt-archive-actions">
-                <button class="btn btn-sm btn-primary btn-circle-sm" title="Öffnen" onclick="ztOpenArchive('${item.id}')"><i class="fas fa-up-right-from-square"></i></button>
-                <button class="btn btn-sm btn-danger btn-circle-sm" title="Löschen" onclick="ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
-            </div>
-        </div>`;
+            <span class="zt-archive-date" style="white-space:nowrap;">${dateStr}</span>
+            <button class="zt-plan-write" title="Öffnen" onclick="event.stopPropagation();ztOpenArchive('${item.id}')"><i class="fas fa-up-right-from-square"></i></button>
+            <button class="zt-plan-del" title="Löschen" onclick="event.stopPropagation();ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
+        </li>`;
 }
 
 // Archiv-Einträge nach Kurs gruppiert und sortiert – wie die Planungsliste.
@@ -10571,8 +10564,16 @@ function ztArchiveGroupedHtml(items) {
     return '<div class="zt-archive-list">' + keys.map(k => {
         const g = groups.get(k);
         const headLabel = k ? (g.name || 'Kurs') : 'Ohne Kurs';
-        const head = `<div class="zt-archive-group-head">${ztEsc(headLabel)}</div>`;
-        return head + g.items.map(ztArchiveItemHtml).join('');
+        const count = g.items.length;
+        return `<div class="zt-plan-course">
+            <div class="zt-plan-course-head">
+                <div class="zt-plan-course-title">
+                    <span class="zt-plan-course-name">${ztEsc(headLabel)}</span>
+                    <span class="zt-plan-course-progress">${count} ${count === 1 ? 'Eintrag' : 'Einträge'}</span>
+                </div>
+            </div>
+            <ul class="zt-plan-students">${g.items.map(ztArchiveItemHtml).join('')}</ul>
+        </div>`;
     }).join('') + '</div>';
 }
 
