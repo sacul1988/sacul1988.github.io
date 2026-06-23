@@ -82,6 +82,8 @@ Umgang mit den Eingaben:
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
 - Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton. Vermeide leere oder floskelhafte Schlusssätze, etwa pauschale Aussagen über den "Lernweg", den "Beginn des Lernens" oder Ähnliches. Beende den Text mit einer konkreten, auf die genannten Beobachtungen bezogenen Aussage statt mit einer allgemeinen Einordnung.
+- Übernimm Häufigkeit, Intensität und Schwere der Beobachtungen genau so, wie sie angegeben sind. Schwäche negative Angaben nicht ab – schreibe nicht "gelegentlich", wenn "regelmäßig" oder "gezielt" gemeint ist. Der wertschätzende Ton betrifft nur die Wortwahl, nicht das Abmildern der Tatsachen.
+- Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht" – ohne die Tatsache abzuschwächen.
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 - Beginne mit einer Einleitung zu den behandelten Themen des Halbjahres.
@@ -113,6 +115,8 @@ Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
 - Beschreibe konkret, was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, und gehe auf Materialien, Beteiligung und Lernfortschritt ein.
 - Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton. Vermeide leere oder floskelhafte Schlusssätze, etwa pauschale Aussagen über den "Lernweg", den "Beginn des Lernens" oder Ähnliches. Beende den Text mit einer konkreten, auf die genannten Beobachtungen bezogenen Aussage statt mit einer allgemeinen Einordnung.
+- Übernimm Häufigkeit, Intensität und Schwere der Beobachtungen genau so, wie sie angegeben sind. Schwäche negative Angaben nicht ab – schreibe nicht "gelegentlich", wenn "regelmäßig" oder "gezielt" gemeint ist. Der wertschätzende Ton betrifft nur die Wortwahl, nicht das Abmildern der Tatsachen.
+- Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht" – ohne die Tatsache abzuschwächen.
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 
@@ -147,6 +151,8 @@ Struktur:
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
 - Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton. Vermeide leere oder floskelhafte Schlusssätze, etwa pauschale Aussagen über den "Lernweg", den "Beginn des Lernens" oder Ähnliches. Beende den Text mit einer konkreten, auf die genannten Beobachtungen bezogenen Aussage statt mit einer allgemeinen Einordnung.
+- Übernimm Häufigkeit, Intensität und Schwere der Beobachtungen genau so, wie sie angegeben sind. Schwäche negative Angaben nicht ab – schreibe nicht "gelegentlich", wenn "regelmäßig" oder "gezielt" gemeint ist. Der wertschätzende Ton betrifft nur die Wortwahl, nicht das Abmildern der Tatsachen.
+- Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht" – ohne die Tatsache abzuschwächen.
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "zuverlässig") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 
