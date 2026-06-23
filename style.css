@@ -3950,7 +3950,7 @@ html.modal-open, body.modal-open {
     letter-spacing: 0;
 }
 
-.zt-copy-btn { padding: 6px 12px; font-size: 12px; }
+.zt-copy-btn { padding: 6px 12px; }
 
 .zt-result-text {
     padding: 22px 24px;
@@ -5088,22 +5088,18 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         flex-shrink: 0;
     }
 
-    /* Aktionen (Neu, Kürzen, Verlängern, Kopieren) in eine Reihe mit reinen Icons */
+    /* Aktionen (Neu generieren, Kopieren) rechtsbündig unter dem Textfeld */
     #zt-result-container .zt-result-actions {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        display: flex;
+        justify-content: flex-end;
         gap: 8px;
         margin-top: 8px;
     }
 
     #zt-result-container .zt-result-actions .btn {
-        flex: 1;
-        padding: 10px 0;
+        flex: unset;
+        padding: 10px 16px;
         justify-content: center;
-    }
-
-    #zt-result-container .zt-result-actions .btn .btn-text {
-        display: none;
     }
 
     /* Eigene Anweisung (Wand-Button unter dem Eingabefeld, vollflächig) */

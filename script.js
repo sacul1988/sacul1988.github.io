@@ -10326,7 +10326,6 @@ function ztRenderResult() {
         <div class="zt-panel-body">
             <div class="zt-modal-head">
                 <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ztEsc(ZtState.currentLabel)}</span>
-                <button class="zt-modal-close" onclick="ztBackToPlanung()" title="Schließen"><i class="fas fa-times"></i></button>
             </div>
             <div class="zt-result-grid-desktop">
                 <div class="zt-result-left">
