@@ -10371,7 +10371,6 @@ function ztShowBeobachtungen() {
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
         </div>
         <div style="padding:4px 4px 0;">
-            <p style="margin:0 0 10px; color: var(--grey-color); font-size:0.9rem;">Du kannst die Beobachtungen ergänzen oder ändern. Über „Neu generieren" wird der Text mit den aktualisierten Beobachtungen erstellt – die Themen bleiben gleich.</p>
             <textarea id="zt-beob-edit" class="form-control" style="width:100%; min-height:280px; resize:vertical;">${ztEsc(beob)}</textarea>
             <div style="margin-top:14px;">
                 <button class="btn btn-primary btn-icon btn-block" onclick="ztRegenerateFromBeob()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
