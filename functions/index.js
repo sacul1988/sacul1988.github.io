@@ -104,6 +104,7 @@ Satzbau (besonders wichtig):
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
+- Leite nach der Aufzählung der Themen mit einem Übergangssatz zur Beschreibung der Leistung über – zum Beispiel mit "Dabei zeigte sich, dass ...", "Insgesamt zeigte sich ..." oder ähnlichen Formulierungen.
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
@@ -133,6 +134,7 @@ Satzbau (besonders wichtig):
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
+- Leite nach der Aufzählung der Themen mit einem Übergangssatz zur Beschreibung der Leistung über – zum Beispiel mit "Dabei zeigte sich, dass ...", "Insgesamt zeigte sich ..." oder ähnlichen Formulierungen.
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
