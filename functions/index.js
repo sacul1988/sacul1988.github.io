@@ -104,16 +104,12 @@ Satzbau (besonders wichtig):
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
-- Du darfst knapp oder allgemein gehaltene Beobachtungen sinnvoll konkretisieren und ausführen, solange die Konkretisierung plausibel und inhaltlich naheliegend aus der Angabe folgt. Erfinde dabei keine eigenständigen Sachverhalte, die in den Beobachtungen nicht angelegt sind und nicht zu ihnen passen.
 - Orientiere dich an dieser groben Reihenfolge (nur eine Tendenz, nicht starr einzuhalten): (1) behandelte Themen des Halbjahres, (2) Unterrichtssituation (innerhalb des Unterrichts, gegebenenfalls außerhalb in Kleingruppen, Differenzierung), (3) was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, (4) weitere Beobachtungen wie Motivation, Materialien, mündliche Beteiligung und Störungen.
 
 Stil und Ton:
-- Schreibe ausschließlich in der einfachen Vergangenheit (Präteritum). Vermeide das Plusquamperfekt mit "hatte" (z. B. NICHT "hatte ... verstanden", NICHT "hatte ... bearbeitet"). Formuliere stattdessen im Präteritum, z. B. "verstand", "bearbeitete" oder "konnte ... verstehen".
-- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton. Vermeide leere oder floskelhafte Schlusssätze, etwa pauschale Aussagen über den "Lernweg", den "Beginn des Lernens" oder Ähnliches. Beende den Text mit einer konkreten, auf die genannten Beobachtungen bezogenen Aussage statt mit einer allgemeinen Einordnung.
-- Übernimm Häufigkeit, Intensität und Schwere der Beobachtungen genau so, wie sie angegeben sind. Schwäche negative Angaben nicht ab – schreibe nicht "gelegentlich", wenn "regelmäßig" oder "gezielt" gemeint ist. Der wertschätzende Ton betrifft nur die Wortwahl, nicht das Abmildern der Tatsachen.
-- Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht" – ohne die Tatsache abzuschwächen.
-- Schreibe in einem natürlichen, leicht abgefederten Zeugnisstil und webe regelmäßig typische verbindende und einordnende Wendungen ein, damit der Text fließt und nicht zu knapp oder abgehackt wirkt. Dazu gehören einordnende Wörter (z. B. "insgesamt", "eher", "überwiegend", "weitgehend", "zeitweise", "auch", "ebenfalls", "in diesem Halbjahr") ebenso wie satzverbindende Übergänge zwischen aufeinanderfolgenden Sätzen (z. B. "Ebenfalls …", "Zudem …", "Darüber hinaus …", "Hinzu kam, dass …"). Diese Beispiele sind nicht abschließend – variiere natürlich und setze die Wendungen lieber etwas großzügiger als zu sparsam ein.
-- Solche Wendungen dürfen eine angegebene Häufigkeit oder Schwere nicht ersetzen oder verharmlosen (kein "gelegentlich" statt "regelmäßig", kein "teilweise" statt "massiv"). Eine angegebene Schwere darfst du aber in eine natürliche Formulierung einbetten, solange das Ausmaß klar erhalten bleibt (z. B. "überwiegend massiv störend", "insgesamt eher sehr gering").
+- Schreibe ausschließlich in der Vergangenheitsform.
+- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage zum Lernstand oder Lernfortschritt ab.
+- Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 - Beginne mit einer Einleitung zu den behandelten Themen des Halbjahres.
@@ -138,17 +134,13 @@ Satzbau (besonders wichtig):
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
-- Du darfst knapp oder allgemein gehaltene Beobachtungen sinnvoll konkretisieren und ausführen, solange die Konkretisierung plausibel und inhaltlich naheliegend aus der Angabe folgt. Erfinde dabei keine eigenständigen Sachverhalte, die in den Beobachtungen nicht angelegt sind und nicht zu ihnen passen.
 - Orientiere dich an dieser groben Reihenfolge (nur eine Tendenz, nicht starr einzuhalten): (1) behandelte Themen des Halbjahres, (2) Unterrichtssituation (innerhalb des Unterrichts, gegebenenfalls außerhalb in Kleingruppen, Differenzierung), (3) was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, (4) weitere Beobachtungen wie Motivation, Materialien, mündliche Beteiligung und Störungen.
 
 Stil und Ton:
-- Schreibe ausschließlich in der einfachen Vergangenheit (Präteritum). Vermeide das Plusquamperfekt mit "hatte" (z. B. NICHT "hatte ... verstanden", NICHT "hatte ... bearbeitet"). Formuliere stattdessen im Präteritum, z. B. "verstand", "bearbeitete" oder "konnte ... verstehen".
+- Schreibe ausschließlich in der Vergangenheitsform.
 - Beschreibe konkret, was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, und gehe auf Materialien, Beteiligung und Lernfortschritt ein.
-- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton. Vermeide leere oder floskelhafte Schlusssätze, etwa pauschale Aussagen über den "Lernweg", den "Beginn des Lernens" oder Ähnliches. Beende den Text mit einer konkreten, auf die genannten Beobachtungen bezogenen Aussage statt mit einer allgemeinen Einordnung.
-- Übernimm Häufigkeit, Intensität und Schwere der Beobachtungen genau so, wie sie angegeben sind. Schwäche negative Angaben nicht ab – schreibe nicht "gelegentlich", wenn "regelmäßig" oder "gezielt" gemeint ist. Der wertschätzende Ton betrifft nur die Wortwahl, nicht das Abmildern der Tatsachen.
-- Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht" – ohne die Tatsache abzuschwächen.
-- Schreibe in einem natürlichen, leicht abgefederten Zeugnisstil und webe regelmäßig typische verbindende und einordnende Wendungen ein, damit der Text fließt und nicht zu knapp oder abgehackt wirkt. Dazu gehören einordnende Wörter (z. B. "insgesamt", "eher", "überwiegend", "weitgehend", "zeitweise", "auch", "ebenfalls", "in diesem Halbjahr") ebenso wie satzverbindende Übergänge zwischen aufeinanderfolgenden Sätzen (z. B. "Ebenfalls …", "Zudem …", "Darüber hinaus …", "Hinzu kam, dass …"). Diese Beispiele sind nicht abschließend – variiere natürlich und setze die Wendungen lieber etwas großzügiger als zu sparsam ein.
-- Solche Wendungen dürfen eine angegebene Häufigkeit oder Schwere nicht ersetzen oder verharmlosen (kein "gelegentlich" statt "regelmäßig", kein "teilweise" statt "massiv"). Eine angegebene Schwere darfst du aber in eine natürliche Formulierung einbetten, solange das Ausmaß klar erhalten bleibt (z. B. "überwiegend massiv störend", "insgesamt eher sehr gering").
+- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage zum Lernstand oder Lernfortschritt ab.
+- Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 
@@ -172,7 +164,6 @@ Satzbau (besonders wichtig):
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
-- Du darfst knapp oder allgemein gehaltene Beobachtungen sinnvoll konkretisieren und ausführen, solange die Konkretisierung plausibel und inhaltlich naheliegend aus der Angabe folgt. Erfinde dabei keine eigenständigen Sachverhalte, die in den Beobachtungen nicht angelegt sind und nicht zu ihnen passen.
 
 Struktur:
 - Gliedere den Text klar in Arbeitsverhalten und Sozialverhalten (diese Reihenfolge ist eine Tendenz, nicht starr einzuhalten).
@@ -181,12 +172,9 @@ Struktur:
 - Beschreibe beim Sozialverhalten: Integration, Konflikte, Regelverhalten, Ausdrucksfähigkeit.
 
 Stil und Ton:
-- Schreibe ausschließlich in der einfachen Vergangenheit (Präteritum). Vermeide das Plusquamperfekt mit "hatte" (z. B. NICHT "hatte ... verstanden", NICHT "hatte ... bearbeitet"). Formuliere stattdessen im Präteritum, z. B. "verstand", "bearbeitete" oder "konnte ... verstehen".
-- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton. Vermeide leere oder floskelhafte Schlusssätze, etwa pauschale Aussagen über den "Lernweg", den "Beginn des Lernens" oder Ähnliches. Beende den Text mit einer konkreten, auf die genannten Beobachtungen bezogenen Aussage statt mit einer allgemeinen Einordnung.
-- Übernimm Häufigkeit, Intensität und Schwere der Beobachtungen genau so, wie sie angegeben sind. Schwäche negative Angaben nicht ab – schreibe nicht "gelegentlich", wenn "regelmäßig" oder "gezielt" gemeint ist. Der wertschätzende Ton betrifft nur die Wortwahl, nicht das Abmildern der Tatsachen.
-- Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht" – ohne die Tatsache abzuschwächen.
-- Schreibe in einem natürlichen, leicht abgefederten Zeugnisstil und webe regelmäßig typische verbindende und einordnende Wendungen ein, damit der Text fließt und nicht zu knapp oder abgehackt wirkt. Dazu gehören einordnende Wörter (z. B. "insgesamt", "eher", "überwiegend", "weitgehend", "zeitweise", "auch", "ebenfalls", "in diesem Halbjahr") ebenso wie satzverbindende Übergänge zwischen aufeinanderfolgenden Sätzen (z. B. "Ebenfalls …", "Zudem …", "Darüber hinaus …", "Hinzu kam, dass …"). Diese Beispiele sind nicht abschließend – variiere natürlich und setze die Wendungen lieber etwas großzügiger als zu sparsam ein.
-- Solche Wendungen dürfen eine angegebene Häufigkeit oder Schwere nicht ersetzen oder verharmlosen (kein "gelegentlich" statt "regelmäßig", kein "teilweise" statt "massiv"). Eine angegebene Schwere darfst du aber in eine natürliche Formulierung einbetten, solange das Ausmaß klar erhalten bleibt (z. B. "überwiegend massiv störend", "insgesamt eher sehr gering").
+- Schreibe ausschließlich in der Vergangenheitsform.
+- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage ab.
+- Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "zuverlässig") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 
@@ -231,9 +219,7 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
 
     const response = await anthropicMessagesRequest({
       model: "claude-sonnet-4-6",
-      max_tokens: 5000,
-      thinking: { type: "adaptive" },
-      output_config: { effort: "low" },
+      max_tokens: 2000,
       system: systemPrompt,
       messages
     });
@@ -431,9 +417,7 @@ exports.generateZeugnisnote = onCall(
 
     const response = await anthropicMessagesRequest({
       model: "claude-sonnet-4-6",
-      max_tokens: 4000,
-      thinking: { type: "adaptive" },
-      output_config: { effort: "medium" },
+      max_tokens: 1500,
       system: ZEUGNISNOTE_SYSTEM,
       messages: messagesToSend
     });
