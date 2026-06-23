@@ -3861,7 +3861,6 @@ html.modal-open, body.modal-open {
 }
 
 .zt-schreibhilfe {
-    grid-column: 1 / -1;
     background: var(--light-color, #f8f9fa);
     border: 1px solid var(--border-color, #dee2e6);
     border-radius: 8px;
