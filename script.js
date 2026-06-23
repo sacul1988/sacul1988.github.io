@@ -10521,12 +10521,12 @@ function ztArchiveItemHtml(item) {
     const dateStr = d ? d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
     const typLabel = ztTypLabel(item.typ);
     return `
-        <li class="zt-plan-student zt-archive-item" style="cursor:pointer;" onclick="ztOpenArchive('${item.id}')">
-            <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <li class="zt-plan-student zt-archive-row" onclick="ztOpenArchive('${item.id}')">
+            <div class="zt-archive-row-main">
                 <span class="zt-plan-student-name">${ztEsc(item.label)}</span>
                 ${typLabel ? `<span class="zt-archive-typ">${typLabel}</span>` : ''}
             </div>
-            <span class="zt-archive-date" style="white-space:nowrap;">${dateStr}</span>
+            <span class="zt-archive-date">${dateStr}</span>
             <button class="zt-plan-write" title="Öffnen" onclick="event.stopPropagation();ztOpenArchive('${item.id}')"><i class="fas fa-up-right-from-square"></i></button>
             <button class="zt-plan-del" title="Löschen" onclick="event.stopPropagation();ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
         </li>`;

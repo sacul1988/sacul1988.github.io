@@ -3991,6 +3991,21 @@ html.modal-open, body.modal-open {
 
 .zt-archive-list { display: flex; flex-direction: column; gap: 12px; }
 
+/* Archiv nutzt das Planungslisten-Layout (Karten + Zeilen) 1:1.
+   Blauer Akzent-Rand wie bei verknüpften Planungskursen. */
+.zt-archive-list .zt-plan-course { border-left: 3px solid var(--primary-color); }
+.zt-archive-row { cursor: pointer; }
+.zt-archive-row-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.zt-archive-row .zt-plan-student-name { flex: 0 1 auto; }
+.zt-archive-row .zt-archive-date { margin-left: 0; flex-shrink: 0; white-space: nowrap; }
+
 .zt-archive-group-head {
     font-weight: 700;
     font-size: 0.95rem;
