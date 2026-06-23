@@ -70,11 +70,13 @@ Schreibe einen Zeugnistext für ein Nebenfach (z.B. Musik, Physik, Erdkunde, Spo
 
 Satzbau (besonders wichtig):
 - Verbinde NIEMALS zwei Hauptsätze mit ", und" (also Komma direkt gefolgt von "und"). Mache in solchen Fällen IMMER zwei getrennte Sätze. Diese Regel gilt ausnahmslos.
+- Lies zum Schluss jeden Satz einzeln durch und prüfe, ob er irgendwo die Zeichenfolge Komma gefolgt von "und" enthält ("..., und ..."). Falls ja, teile ihn in zwei eigenständige Sätze. Diese Kontrolle ist Pflicht.
 - Triff den Mittelweg zwischen zu einfachen und zu komplizierten Sätzen: meistens ein Komma pro Satz, gelegentlich ein zweites, wenn es natürlich klingt. Schreibe NIEMALS mehr als zwei Kommas in einem Satz.
 - Formuliere natürlich und schnörkellos. Vermeide gestelzte oder schiefe Konstruktionen, z. B. NICHT "wurde mit differenzierten Materialien und Unterstützung begleitet" und NICHT "äußerte dieses Desinteresse gelegentlich auch offen". Wähle natürlichere Verben und Satzenden.
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
+- Du darfst knapp oder allgemein gehaltene Beobachtungen sinnvoll konkretisieren und ausführen, solange die Konkretisierung plausibel und inhaltlich naheliegend aus der Angabe folgt. Erfinde dabei keine eigenständigen Sachverhalte, die in den Beobachtungen nicht angelegt sind und nicht zu ihnen passen.
 - Orientiere dich an dieser groben Reihenfolge (nur eine Tendenz, nicht starr einzuhalten): (1) behandelte Themen des Halbjahres, (2) Unterrichtssituation (innerhalb des Unterrichts, gegebenenfalls außerhalb in Kleingruppen, Differenzierung), (3) was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, (4) weitere Beobachtungen wie Motivation, Materialien, mündliche Beteiligung und Störungen.
 
 Stil und Ton:
@@ -98,11 +100,13 @@ Orientiere dich am folgenden Beispieltext für den Stil und die Struktur:
 
 Satzbau (besonders wichtig):
 - Verbinde NIEMALS zwei Hauptsätze mit ", und" (also Komma direkt gefolgt von "und"). Mache in solchen Fällen IMMER zwei getrennte Sätze. Diese Regel gilt ausnahmslos.
+- Lies zum Schluss jeden Satz einzeln durch und prüfe, ob er irgendwo die Zeichenfolge Komma gefolgt von "und" enthält ("..., und ..."). Falls ja, teile ihn in zwei eigenständige Sätze. Diese Kontrolle ist Pflicht.
 - Triff den Mittelweg zwischen zu einfachen und zu komplizierten Sätzen: meistens ein Komma pro Satz, gelegentlich ein zweites, wenn es natürlich klingt. Schreibe NIEMALS mehr als zwei Kommas in einem Satz.
 - Formuliere natürlich und schnörkellos. Vermeide gestelzte oder schiefe Konstruktionen, z. B. NICHT "wurde mit differenzierten Materialien und Unterstützung begleitet". Wähle natürlichere Verben und Satzenden.
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
+- Du darfst knapp oder allgemein gehaltene Beobachtungen sinnvoll konkretisieren und ausführen, solange die Konkretisierung plausibel und inhaltlich naheliegend aus der Angabe folgt. Erfinde dabei keine eigenständigen Sachverhalte, die in den Beobachtungen nicht angelegt sind und nicht zu ihnen passen.
 - Orientiere dich an dieser groben Reihenfolge (nur eine Tendenz, nicht starr einzuhalten): (1) behandelte Themen des Halbjahres, (2) Unterrichtssituation (innerhalb des Unterrichts, gegebenenfalls außerhalb in Kleingruppen, Differenzierung), (3) was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, (4) weitere Beobachtungen wie Motivation, Materialien, mündliche Beteiligung und Störungen.
 
 Stil und Ton:
@@ -126,11 +130,13 @@ Orientiere dich am folgenden Beispieltext für den Stil und die Struktur:
 
 Satzbau (besonders wichtig):
 - Verbinde NIEMALS zwei Hauptsätze mit ", und" (also Komma direkt gefolgt von "und"). Mache in solchen Fällen IMMER zwei getrennte Sätze. Diese Regel gilt ausnahmslos.
+- Lies zum Schluss jeden Satz einzeln durch und prüfe, ob er irgendwo die Zeichenfolge Komma gefolgt von "und" enthält ("..., und ..."). Falls ja, teile ihn in zwei eigenständige Sätze. Diese Kontrolle ist Pflicht.
 - Triff den Mittelweg zwischen zu einfachen und zu komplizierten Sätzen: meistens ein Komma pro Satz, gelegentlich ein zweites, wenn es natürlich klingt. Schreibe NIEMALS mehr als zwei Kommas in einem Satz.
 - Formuliere natürlich und schnörkellos. Vermeide gestelzte oder schiefe Konstruktionen, z. B. NICHT "wurde mit differenzierten Materialien und Unterstützung begleitet". Wähle natürlichere Verben und Satzenden.
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
+- Du darfst knapp oder allgemein gehaltene Beobachtungen sinnvoll konkretisieren und ausführen, solange die Konkretisierung plausibel und inhaltlich naheliegend aus der Angabe folgt. Erfinde dabei keine eigenständigen Sachverhalte, die in den Beobachtungen nicht angelegt sind und nicht zu ihnen passen.
 
 Struktur:
 - Gliedere den Text klar in Arbeitsverhalten und Sozialverhalten (diese Reihenfolge ist eine Tendenz, nicht starr einzuhalten).
@@ -194,7 +200,7 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
         model: "claude-sonnet-4-6",
         max_tokens: 5000,
         thinking: { type: "adaptive" },
-        output_config: { effort: "low" },
+        output_config: { effort: "medium" },
         system: systemPrompt,
         messages
       })
