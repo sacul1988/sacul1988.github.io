@@ -10133,6 +10133,13 @@ function ztCloseResult() {
     if (inputContainer) inputContainer.style.display = '';
 }
 
+function ztBackToPlanung() {
+    ztFlushSave();
+    ztCloseResult();
+    ZtState.inlineMode = 'planung';
+    ztApplyInlineMode();
+}
+
 let ztSaveTimeout = null;
 function ztFlushSave() {
     if (ztSaveTimeout) {
@@ -10319,7 +10326,7 @@ function ztRenderResult() {
         <div class="zt-panel-body">
             <div class="zt-modal-head">
                 <span class="zt-result-badge"><i class="fas fa-file-alt"></i> ${ztEsc(ZtState.currentLabel)}</span>
-                <button class="zt-modal-close" onclick="ztNextStudent()" title="Schließen"><i class="fas fa-times"></i></button>
+                <button class="zt-modal-close" onclick="ztBackToPlanung()" title="Schließen"><i class="fas fa-times"></i></button>
             </div>
             <div class="zt-result-grid-desktop">
                 <div class="zt-result-left">
@@ -10328,13 +10335,7 @@ function ztRenderResult() {
                 <div class="zt-result-right">
                     <div class="zt-result-actions">
                         <button class="btn btn-primary btn-icon" onclick="ztShowBeobachtungen()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
-                        <button class="btn btn-secondary btn-icon" onclick="ztShortenText()"><i class="fas fa-compress-alt"></i> <span class="btn-text">Kürzen</span></button>
-                        <button class="btn btn-secondary btn-icon" onclick="ztLengthenText()"><i class="fas fa-expand-alt"></i> <span class="btn-text">Verlängern</span></button>
                         <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
-                    </div>
-                    <div class="zt-refine">
-                        <textarea id="zt-refine-input" class="form-control zt-refine-input" style="min-height: 220px;" placeholder="Eigene Anweisung, z. B. den letzten Satz freundlicher formulieren" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();ztRefineText();}"></textarea>
-                        <button class="btn btn-primary btn-icon zt-refine-btn" onclick="ztRefineText()"><i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Anwenden</span></button>
                     </div>
                 </div>
             </div>
@@ -10353,24 +10354,31 @@ function ztCopyText(btn) {
 // Eintrag; Fallback auf das aktuell ausgefüllte Eingabefeld).
 function ztShowBeobachtungen() {
     let beob = '';
+    let themen = '';
     if (ZtState.currentId) {
         const entry = ZtState.archive.find(a => a.id === ZtState.currentId);
         if (entry && typeof entry.beobachtungen === 'string') beob = entry.beobachtungen;
+        if (entry && typeof entry.themen === 'string') themen = entry.themen;
     }
     if (!beob) beob = (document.getElementById('zt-beobachtungen')?.value || '');
+    if (!themen) themen = (document.getElementById('zt-themen')?.value || '');
 
     const modal = document.getElementById('zt-beob-modal');
     if (!modal) {
-        swal('Beobachtungen & Gedanken', beob || 'Für diesen Text wurden keine Beobachtungen gespeichert.', 'info');
+        swal('Neu generieren', beob || 'Für diesen Text wurden keine Beobachtungen gespeichert.', 'info');
         return;
     }
+    const showThemen = ZtState.currentTyp !== 'sozialverhalten';
     modal.innerHTML = `
         <div class="zt-modal-head">
-            <span style="font-size:1.25rem;font-weight:700;">Beobachtungen &amp; Gedanken</span>
+            <span style="font-size:1.25rem;font-weight:700;">Neu generieren</span>
             <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
         </div>
         <div style="padding:4px 4px 0;">
-            <textarea id="zt-beob-edit" class="form-control" style="width:100%; min-height:280px; resize:vertical;">${ztEsc(beob)}</textarea>
+            ${showThemen ? `<label style="font-weight:600;margin-bottom:4px;display:block;">Themen</label>
+            <textarea id="zt-beob-themen" class="form-control" style="width:100%; min-height:80px; resize:vertical; margin-bottom:14px;">${ztEsc(themen)}</textarea>` : ''}
+            <label style="font-weight:600;margin-bottom:4px;display:block;">Beobachtungen &amp; Gedanken</label>
+            <textarea id="zt-beob-edit" class="form-control" style="width:100%; min-height:220px; resize:vertical;">${ztEsc(beob)}</textarea>
             <div style="margin-top:14px;">
                 <button class="btn btn-primary btn-icon btn-block" onclick="ztRegenerateFromBeob()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
             </div>
@@ -10387,6 +10395,16 @@ async function ztRegenerateFromBeob() {
     if (!newBeob) {
         swal('Warnung', 'Bitte gib Beobachtungen ein.', 'warning');
         return;
+    }
+    // Aktualisierte Themen (falls Feld vorhanden) ins Formular übernehmen
+    const themenModal = document.getElementById('zt-beob-themen');
+    if (themenModal) {
+        const themenEl = document.getElementById('zt-themen');
+        if (themenEl) themenEl.value = themenModal.value;
+        if (ZtState.currentId) {
+            const entry = ZtState.archive.find(a => a.id === ZtState.currentId);
+            if (entry) entry.themen = themenModal.value;
+        }
     }
     // Aktualisierte Beobachtungen ins Formular, in den Entwurf und in den Archiv-Eintrag übernehmen
     const beobEl = document.getElementById('zt-beobachtungen');
@@ -10452,6 +10470,7 @@ function ztPersistArchive() {
 // Neue Generierung -> sofort einen Archiv-Eintrag anlegen
 function ztCreateArchiveEntry() {
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
+    const themen = (document.getElementById('zt-themen')?.value || '').trim();
     // Kursbezug aus der Planung übernehmen, damit der Text im Archiv unter
     // demselben Kurs gruppiert wird wie in der Planungsliste.
     let courseId = '';
@@ -10467,6 +10486,7 @@ function ztCreateArchiveEntry() {
         typ: ZtState.currentTyp,
         text: ZtState.currentText,
         beobachtungen: beob,
+        themen: themen,
         courseId: courseId,
         courseName: courseName,
         date: new Date().toISOString()
@@ -10704,6 +10724,7 @@ window.ztOpenArchive = ztOpenArchive;
 window.ztDeleteArchive = ztDeleteArchive;
 window.ztCloseResult = ztCloseResult;
 window.ztNextStudent = ztNextStudent;
+window.ztBackToPlanung = ztBackToPlanung;
 window.ztOnTextEdited = ztOnTextEdited;
 window.ztOnTextEdited = ztOnTextEdited;
 window.ztSubmitAnswers = ztSubmitAnswers;
