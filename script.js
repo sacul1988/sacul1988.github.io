@@ -10348,11 +10348,14 @@ function ztPersistArchive() {
 // Neue Generierung -> sofort einen Archiv-Eintrag anlegen
 function ztCreateArchiveEntry() {
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
-    // Klassenbezug aus der Planung übernehmen (für die Gruppierung im Archiv)
-    let klasse = '';
+    // Kursbezug aus der Planung übernehmen, damit der Text im Archiv unter
+    // demselben Kurs gruppiert wird wie in der Planungsliste.
+    let courseId = '';
+    let courseName = '';
     if (ZtState.planungRef && ZtState.planungRef.courseId && typeof ZtPlanungState !== 'undefined') {
-        const refCourse = (ZtPlanungState.courses || []).find(c => c.id === ZtState.planungRef.courseId);
-        if (refCourse) klasse = ztArchiveExtractKlasse(refCourse.name || refCourse.fach || '');
+        courseId = ZtState.planungRef.courseId;
+        const refCourse = (ZtPlanungState.courses || []).find(c => c.id === courseId);
+        if (refCourse) courseName = refCourse.name || refCourse.fach || '';
     }
     const entry = {
         id: 'zt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
@@ -10360,7 +10363,8 @@ function ztCreateArchiveEntry() {
         typ: ZtState.currentTyp,
         text: ZtState.currentText,
         beobachtungen: beob,
-        klasse: klasse,
+        courseId: courseId,
+        courseName: courseName,
         date: new Date().toISOString()
     };
     ZtState.archive.unshift(entry);
@@ -10388,12 +10392,6 @@ function ztOpenArchiveModal() {
     showModal('zt-archive-modal');
 }
 
-// Klasse (z. B. "5c") aus einem Kurs-/Fachnamen ableiten – analog zur Planung.
-function ztArchiveExtractKlasse(str) {
-    const m = (str || '').match(/(\d+)\s*([a-zA-Z])/);
-    return m ? (m[1] + m[2].toLowerCase()) : '';
-}
-
 // HTML eines einzelnen Archiv-Eintrags.
 function ztArchiveItemHtml(item) {
     const d = item.date ? new Date(item.date) : null;
@@ -10418,28 +10416,40 @@ function ztArchiveItemHtml(item) {
         </div>`;
 }
 
-// Archiv-Einträge nach Klasse gruppiert und sortiert (wie die Planungsliste).
+// Archiv-Einträge nach Kurs gruppiert und sortiert – wie die Planungsliste.
 function ztArchiveGroupedHtml(items) {
-    const groups = new Map();
+    const groups = new Map(); // courseId -> { name, items }
     items.forEach(item => {
-        const k = item.klasse || '';
-        if (!groups.has(k)) groups.set(k, []);
-        groups.get(k).push(item);
+        const key = item.courseId || '';
+        if (!groups.has(key)) {
+            let name = '';
+            if (key && typeof ZtPlanungState !== 'undefined') {
+                const c = (ZtPlanungState.courses || []).find(x => x.id === key);
+                if (c) name = c.name || c.fach || '';
+            }
+            if (!name) name = item.courseName || '';
+            groups.set(key, { name, items: [] });
+        }
+        groups.get(key).items.push(item);
     });
-    const keyInfo = (k) => {
-        const m = k.match(/(\d+)\s*([a-zA-Z])/);
+    const sortInfo = (name) => {
+        const m = (name || '').match(/(\d+)\s*([a-zA-Z])/);
         return m ? { num: parseInt(m[1], 10), letter: m[2].toLowerCase() } : { num: 9999, letter: '' };
     };
     const keys = [...groups.keys()].sort((a, b) => {
-        if (!a) return 1;   // "Ohne Klasse" ans Ende
+        if (!a) return 1;   // "Ohne Kurs" ans Ende
         if (!b) return -1;
-        const ka = keyInfo(a), kb = keyInfo(b);
+        const ga = groups.get(a), gb = groups.get(b);
+        const ka = sortInfo(ga.name), kb = sortInfo(gb.name);
         if (ka.num !== kb.num) return ka.num - kb.num;
-        return ka.letter.localeCompare(kb.letter);
+        if (ka.letter !== kb.letter) return ka.letter.localeCompare(kb.letter);
+        return (ga.name || '').localeCompare(gb.name || '', 'de');
     });
     return '<div class="zt-archive-list">' + keys.map(k => {
-        const head = `<div class="zt-archive-group-head">${k ? ztEsc(k) : 'Ohne Klasse'}</div>`;
-        return head + groups.get(k).map(ztArchiveItemHtml).join('');
+        const g = groups.get(k);
+        const headLabel = k ? (g.name || 'Kurs') : 'Ohne Kurs';
+        const head = `<div class="zt-archive-group-head">${ztEsc(headLabel)}</div>`;
+        return head + g.items.map(ztArchiveItemHtml).join('');
     }).join('') + '</div>';
 }
 
