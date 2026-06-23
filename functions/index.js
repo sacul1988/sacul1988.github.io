@@ -104,7 +104,6 @@ Satzbau (besonders wichtig):
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
-- Orientiere dich an dieser groben Reihenfolge (nur eine Tendenz, nicht starr einzuhalten): (1) behandelte Themen des Halbjahres, (2) Unterrichtssituation (innerhalb des Unterrichts, gegebenenfalls außerhalb in Kleingruppen, Differenzierung), (3) was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, (4) weitere Beobachtungen wie Motivation, Materialien, mündliche Beteiligung und Störungen.
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
@@ -134,7 +133,6 @@ Satzbau (besonders wichtig):
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
-- Orientiere dich an dieser groben Reihenfolge (nur eine Tendenz, nicht starr einzuhalten): (1) behandelte Themen des Halbjahres, (2) Unterrichtssituation (innerhalb des Unterrichts, gegebenenfalls außerhalb in Kleingruppen, Differenzierung), (3) was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, (4) weitere Beobachtungen wie Motivation, Materialien, mündliche Beteiligung und Störungen.
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
@@ -164,12 +162,6 @@ Satzbau (besonders wichtig):
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
-
-Struktur:
-- Gliedere den Text klar in Arbeitsverhalten und Sozialverhalten (diese Reihenfolge ist eine Tendenz, nicht starr einzuhalten).
-- Beginne mit einem einleitenden Satz zur Gesamteinschätzung des Arbeitsverhaltens.
-- Beschreibe beim Arbeitsverhalten konkret: Selbstständigkeit, Motivation, Ablenkbarkeit, Materialien, Hilfe holen, mündliche Beteiligung.
-- Beschreibe beim Sozialverhalten: Integration, Konflikte, Regelverhalten, Ausdrucksfähigkeit.
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
