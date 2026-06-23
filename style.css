@@ -3860,6 +3860,31 @@ html.modal-open, body.modal-open {
     line-height: 1.6;
 }
 
+.zt-schreibhilfe {
+    grid-column: 1 / -1;
+    background: var(--light-color, #f8f9fa);
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 8px;
+    padding: 10px 14px 10px 14px;
+    font-size: 0.82rem;
+    color: var(--text-muted, #6c757d);
+}
+
+.zt-schreibhilfe-title {
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted, #6c757d);
+    margin-bottom: 6px;
+}
+
+.zt-schreibhilfe-list {
+    margin: 0;
+    padding-left: 18px;
+    line-height: 1.7;
+}
+
 .zt-textarea-wrap {
     position: relative;
 }
