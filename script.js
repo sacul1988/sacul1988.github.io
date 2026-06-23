@@ -10356,14 +10356,65 @@ function ztShowBeobachtungen() {
     let beob = '';
     if (ZtState.currentId) {
         const entry = ZtState.archive.find(a => a.id === ZtState.currentId);
-        if (entry && entry.beobachtungen) beob = entry.beobachtungen;
+        if (entry && typeof entry.beobachtungen === 'string') beob = entry.beobachtungen;
     }
-    if (!beob) beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
-    if (!beob) {
-        swal('Beobachtungen & Gedanken', 'Für diesen Text wurden keine Beobachtungen gespeichert.', 'info');
+    if (!beob) beob = (document.getElementById('zt-beobachtungen')?.value || '');
+
+    const modal = document.getElementById('zt-beob-modal');
+    if (!modal) {
+        swal('Beobachtungen & Gedanken', beob || 'Für diesen Text wurden keine Beobachtungen gespeichert.', 'info');
         return;
     }
-    swal('Beobachtungen & Gedanken', beob, 'info');
+    modal.innerHTML = `
+        <div class="zt-modal-head">
+            <span style="font-size:1.25rem;font-weight:700;">Beobachtungen &amp; Gedanken</span>
+            <button class="zt-modal-close" onclick="hideModal()" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        <div style="padding:4px 4px 0;">
+            <p style="margin:0 0 10px; color: var(--grey-color); font-size:0.9rem;">Du kannst die Beobachtungen ergänzen oder ändern. Über „Neu generieren" wird der Text mit den aktualisierten Beobachtungen erstellt – die Themen bleiben gleich.</p>
+            <textarea id="zt-beob-edit" class="form-control" style="width:100%; min-height:280px; resize:vertical;">${ztEsc(beob)}</textarea>
+            <div style="margin-top:14px;">
+                <button class="btn btn-primary btn-icon btn-block" onclick="ztRegenerateFromBeob()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
+            </div>
+        </div>`;
+    showModal('zt-beob-modal');
+    const ta = document.getElementById('zt-beob-edit');
+    if (ta) { try { ta.focus({ preventScroll: true }); ta.setSelectionRange(ta.value.length, ta.value.length); } catch (e) { /* ignore */ } }
+}
+
+// Beobachtungen aus dem Modal übernehmen und den Text damit neu generieren.
+async function ztRegenerateFromBeob() {
+    const ta = document.getElementById('zt-beob-edit');
+    const newBeob = ta ? ta.value.trim() : '';
+    if (!newBeob) {
+        swal('Warnung', 'Bitte gib Beobachtungen ein.', 'warning');
+        return;
+    }
+    // Aktualisierte Beobachtungen ins Formular, in den Entwurf und in den Archiv-Eintrag übernehmen
+    const beobEl = document.getElementById('zt-beobachtungen');
+    if (beobEl) beobEl.value = newBeob;
+    ztSaveInputDraft();
+    if (ZtState.currentId) {
+        const entry = ZtState.archive.find(a => a.id === ZtState.currentId);
+        if (entry) entry.beobachtungen = newBeob;
+    }
+    hideModal();
+    ztSetLoading();
+    try {
+        // Frische Generierung mit den neuen Beobachtungen (gleiche Themen/Fach/Halbjahr)
+        const initialMessages = [{ role: 'user', content: ztBuildUserMsg() }];
+        const apiResult = await ztCallAPI(initialMessages);
+        if (apiResult.questions && apiResult.questions.length > 0) {
+            showClarifyingQuestionsModal(apiResult.questions, initialMessages);
+        } else {
+            ZtState.currentText = ztNormalizeText(apiResult.text);
+            ztUpdateCurrentEntry();
+            ztRenderResult();
+        }
+    } catch (e) {
+        ztRenderResult();
+        swal('Fehler', formatKiGenerationError(e, 'Fehler beim Generieren.'), 'error');
+    }
 }
 
 // ===== Archiv (dauerhaft, Cloud-synchronisiert, sofort gespeichert) =====

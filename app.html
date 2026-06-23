@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=3.5">
+    <link rel="stylesheet" href="style.css?v=3.6">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -721,6 +721,8 @@
         <div id="modal-container" style="display: none;" onclick="closeModalOnOutsideClick(event)" role="dialog" aria-modal="true" aria-hidden="true">
             <!-- Zeugnistext Archiv Modal (dynamisch befüllt) -->
             <div id="zt-archive-modal" class="modal zt-modal" style="display: none;"></div>
+            <!-- Zeugnistext Beobachtungen Modal (bearbeitbar, dynamisch befüllt) -->
+            <div id="zt-beob-modal" class="modal zt-modal" style="display: none;"></div>
 
             <!-- Zeugnistext Planung: Listenansicht (dynamisch befüllt) -->
             <div id="zt-planung-modal" class="modal zt-modal" style="display: none;"></div>
@@ -2058,7 +2060,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=3.5"></script>
+    <script src="script.js?v=3.6"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
