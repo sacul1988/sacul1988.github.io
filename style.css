@@ -5019,7 +5019,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 }
 
 /* Mobile Optimierungen für das Zeugnistextgenerator-Ergebnis (Inklusion) */
-@media (max-width: 991px) {
+@media (max-width: 767px) {
     /* Verhindert das Scrollen des gesamten Fensters, wenn das Ergebnis zu sehen ist */
     .tool-window-overlay.open:not(.doc-scroll):has(#zeugnis-texte-module.active):has(#zt-result-container:not([style*="display: none"])) .tool-window {
         overflow-y: hidden;
@@ -5323,7 +5323,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 }
 
 /* ===== Zeugnistextgenerator Desktop-Optimierung ===== */
-@media (min-width: 992px) {
+@media (min-width: 768px) {
     /* Dehne das Tool-Fenster und die Card für zeugnis-texte-module bis zum unteren Bildschirmrand aus */
     .tool-window-overlay.open:not(.doc-scroll) .tool-window {
         height: 100vh;
