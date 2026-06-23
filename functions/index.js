@@ -99,14 +99,15 @@ Schreibe einen Zeugnistext für ein Nebenfach (z.B. Musik, Physik, Erdkunde, Spo
 Satzbau (besonders wichtig):
 - Verbinde NIEMALS zwei Hauptsätze mit ", und" (also Komma direkt gefolgt von "und"). Mache in solchen Fällen IMMER zwei getrennte Sätze. Diese Regel gilt ausnahmslos.
 - Lies zum Schluss jeden Satz einzeln durch und prüfe, ob er irgendwo die Zeichenfolge Komma gefolgt von "und" enthält ("..., und ..."). Falls ja, teile ihn in zwei eigenständige Sätze. Diese Kontrolle ist Pflicht.
+- Triff den Mittelweg zwischen zu einfachen und zu komplizierten Sätzen: meistens ein Komma pro Satz, gelegentlich ein zweites, wenn es natürlich klingt. Schreibe NIEMALS mehr als zwei Kommas in einem Satz.
+- Formuliere natürlich und schnörkellos. Vermeide gestelzte oder schiefe Konstruktionen, z. B. NICHT "wurde mit differenzierten Materialien und Unterstützung begleitet" und NICHT "äußerte dieses Desinteresse gelegentlich auch offen". Wähle natürlichere Verben und Satzenden.
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
-- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton.
-- Bevorzuge aktive Satzkonstruktionen und variiere die Satzanfänge. Schließe den Text mit einem konkreten, inhaltlich bezogenen Satz ab.
+- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage zum Lernstand oder Lernfortschritt ab.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
@@ -127,6 +128,8 @@ Orientiere dich am folgenden Beispieltext für den Stil und die Struktur:
 Satzbau (besonders wichtig):
 - Verbinde NIEMALS zwei Hauptsätze mit ", und" (also Komma direkt gefolgt von "und"). Mache in solchen Fällen IMMER zwei getrennte Sätze. Diese Regel gilt ausnahmslos.
 - Lies zum Schluss jeden Satz einzeln durch und prüfe, ob er irgendwo die Zeichenfolge Komma gefolgt von "und" enthält ("..., und ..."). Falls ja, teile ihn in zwei eigenständige Sätze. Diese Kontrolle ist Pflicht.
+- Triff den Mittelweg zwischen zu einfachen und zu komplizierten Sätzen: meistens ein Komma pro Satz, gelegentlich ein zweites, wenn es natürlich klingt. Schreibe NIEMALS mehr als zwei Kommas in einem Satz.
+- Formuliere natürlich und schnörkellos. Vermeide gestelzte oder schiefe Konstruktionen, z. B. NICHT "wurde mit differenzierten Materialien und Unterstützung begleitet". Wähle natürlichere Verben und Satzenden.
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
@@ -134,8 +137,7 @@ Umgang mit den Eingaben:
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
 - Beschreibe konkret, was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, und gehe auf Materialien, Beteiligung und Lernfortschritt ein.
-- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton.
-- Bevorzuge aktive Satzkonstruktionen und variiere die Satzanfänge. Schließe den Text mit einem konkreten, inhaltlich bezogenen Satz ab.
+- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage zum Lernstand oder Lernfortschritt ab.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
@@ -155,14 +157,15 @@ Orientiere dich am folgenden Beispieltext für den Stil und die Struktur:
 Satzbau (besonders wichtig):
 - Verbinde NIEMALS zwei Hauptsätze mit ", und" (also Komma direkt gefolgt von "und"). Mache in solchen Fällen IMMER zwei getrennte Sätze. Diese Regel gilt ausnahmslos.
 - Lies zum Schluss jeden Satz einzeln durch und prüfe, ob er irgendwo die Zeichenfolge Komma gefolgt von "und" enthält ("..., und ..."). Falls ja, teile ihn in zwei eigenständige Sätze. Diese Kontrolle ist Pflicht.
+- Triff den Mittelweg zwischen zu einfachen und zu komplizierten Sätzen: meistens ein Komma pro Satz, gelegentlich ein zweites, wenn es natürlich klingt. Schreibe NIEMALS mehr als zwei Kommas in einem Satz.
+- Formuliere natürlich und schnörkellos. Vermeide gestelzte oder schiefe Konstruktionen, z. B. NICHT "wurde mit differenzierten Materialien und Unterstützung begleitet". Wähle natürlichere Verben und Satzenden.
 
 Umgang mit den Eingaben:
 - Die Beobachtungen sind oft unstrukturiert; manche Punkte stehen mehrfach oder verteilt am Anfang und am Ende. Erkenne inhaltlich Gleiches und nimm jeden Punkt nur EINMAL in den Text auf. Keine Doppelungen.
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
-- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton.
-- Bevorzuge aktive Satzkonstruktionen und variiere die Satzanfänge. Schließe den Text mit einem konkreten, inhaltlich bezogenen Satz ab.
+- Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage ab.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "zuverlässig") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
