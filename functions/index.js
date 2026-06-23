@@ -109,6 +109,7 @@ Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
 - Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage zum Lernstand oder Lernfortschritt ab.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
+- Setze wo es passt und natürlich klingt qualifizierende Wörter und Übergänge ein – zum Beispiel: überwiegend, meistens, manchmal, gelegentlich, zeitweise, zumeist, vereinzelt, in der Regel, regelmäßig, weiterhin, zudem, dabei, darüber hinaus, ebenfalls, außerdem, insgesamt, ausreichend, grundlegend, weitgehend, selbstständig, zuverlässig, zunehmend, größtenteils. Diese Liste ist eine Inspiration, keine Pflicht – nur einsetzen, wo es wirklich passt.
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 - Beginne mit einer Einleitung zu den behandelten Themen des Halbjahres.
@@ -139,6 +140,7 @@ Stil und Ton:
 - Beschreibe konkret, was der Schüler/die Schülerin mit und ohne Hilfe leisten konnte, und gehe auf Materialien, Beteiligung und Lernfortschritt ein.
 - Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage zum Lernstand oder Lernfortschritt ab.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
+- Setze wo es passt und natürlich klingt qualifizierende Wörter und Übergänge ein – zum Beispiel: überwiegend, meistens, manchmal, gelegentlich, zeitweise, zumeist, vereinzelt, in der Regel, regelmäßig, weiterhin, zudem, dabei, darüber hinaus, ebenfalls, außerdem, insgesamt, ausreichend, grundlegend, weitgehend, selbstständig, zuverlässig, zunehmend, größtenteils. Diese Liste ist eine Inspiration, keine Pflicht – nur einsetzen, wo es wirklich passt.
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "differenziert") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 
@@ -167,6 +169,7 @@ Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
 - Sachlicher, professioneller und zugleich wertschätzender, konstruktiver Ton – auch wenn die Rückmeldung kritisch ausfällt. Benenne Schwierigkeiten sachlich ohne abwertenden Unterton und schließe mit einer kurzen einordnenden Aussage ab.
 - Formuliere Defizite, wo es passt, entwicklungsoffen mit "noch nicht" statt einem schlichten "nicht".
+- Setze wo es passt und natürlich klingt qualifizierende Wörter und Übergänge ein – zum Beispiel: überwiegend, meistens, manchmal, gelegentlich, zeitweise, zumeist, vereinzelt, in der Regel, regelmäßig, weiterhin, zudem, dabei, darüber hinaus, ebenfalls, außerdem, insgesamt, ausreichend, grundlegend, weitgehend, selbstständig, zuverlässig, zunehmend, größtenteils. Diese Liste ist eine Inspiration, keine Pflicht – nur einsetzen, wo es wirklich passt.
 - Vermeide die Häufung sinnverwandter Wörter im gesamten Text (z. B. "Unterstützung", "Hilfestellung", "Begleitung", "zuverlässig") und variiere diese bewusst.
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 
