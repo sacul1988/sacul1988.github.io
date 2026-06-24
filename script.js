@@ -10460,6 +10460,7 @@ function renderZeugnisTTexteModule() {
     }
     ztRestoreInputDraft();
     ztPlanungRenderInline();
+    ZtState.inlineMode = 'planung';
     ztApplyInlineMode();
 }
 
