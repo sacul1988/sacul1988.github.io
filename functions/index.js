@@ -215,6 +215,29 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
     } catch (e) {
       console.error("JSON parsing failed, falling back to raw text:", e);
     }
+
+    // Backend-Wortzahl-Prüfung: zu kurze Texte automatisch verlängern
+    const MIN_WORDS = { nebenfach: 110, hauptfach: 130, sozialverhalten: 210 };
+    const minWords = MIN_WORDS[typ] || 0;
+    if (result.text && !result.questions && minWords > 0) {
+      const wordCount = result.text.trim().split(/\s+/).filter(w => w.length > 0).length;
+      if (wordCount < minWords) {
+        const extendResponse = await anthropicMessagesRequest({
+          model: "claude-sonnet-4-6",
+          max_tokens: 2000,
+          system: basePrompt,
+          messages: [
+            ...messages,
+            { role: "assistant", content: result.text },
+            { role: "user", content: `Der Text hat nur ${wordCount} Wörter und muss mindestens ${minWords} Wörter haben. Verlängere ihn durch sinnvolle ergänzende Sätze auf Basis der vorhandenen Beobachtungen. Behalte Stil, Ton und Fließtext-Format bei. Gib NUR den vollständigen, verlängerten Text zurück – keine Erklärung, kein JSON.` }
+          ]
+        });
+        const extendData = await extendResponse.json();
+        const extended = extendData.content?.map(b => b.text || "").join("").trim();
+        if (extended) result.text = extended;
+      }
+    }
+
     return result;
   }
 );
