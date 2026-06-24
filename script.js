@@ -7729,13 +7729,29 @@ function zeugnisnoteInlineHtml(student, index) {
             ${triggerBtn}
             <div class="zn-grade-circle ${circleClass}">${note}</div>
         </div>
-        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})">${escapeHtml(text)}</div>
+        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text)}</div>
         <div class="zn-actions">
             <button class="zn-action-btn zn-new" onclick="zeugnisnoteGenerate(${index}, null)"><i class="fas fa-rotate-left"></i> Neu</button>
             <button class="zn-action-btn zn-better" onclick="zeugnisnoteGenerate(${index}, 'besser')"><i class="fas fa-caret-up"></i> Besser</button>
             <button class="zn-action-btn zn-worse" onclick="zeugnisnoteGenerate(${index}, 'schlechter')"><i class="fas fa-caret-down"></i> Schlechter</button>
             <button class="zn-action-btn zn-adjust" onclick="openZeugnisnoteHinweisModal(${index})"><i class="fas fa-sliders"></i> Anpassen</button>
         </div>`;
+}
+
+function znBegruendungKeydown(e) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    const newline = document.createTextNode('\n• ');
+    range.insertNode(newline);
+    range.setStartAfter(newline);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    newline.parentNode.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function openZeugnisnoteHinweisModal(index) {
