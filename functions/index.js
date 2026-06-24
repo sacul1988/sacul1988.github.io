@@ -115,7 +115,7 @@ Stil und Ton:
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 
 Form:
-- WICHTIG: Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze, OHNE Leerzeilen und ohne doppelte Zeilenumbrüche. Auch zwischen Einleitung und restlichem Text kein Absatz – alles fließt in einem zusammenhängenden Text. Keine Aufzählungen.
+- WICHTIG: Gib KEINEN Fließtext zurück. Schreibe jeden Satz als eigenen Aufzählungspunkt, beginnend mit "• ". Jeder Aufzählungspunkt enthält GENAU EINEN Satz. Niemals zwei Sätze in einem Aufzählungspunkt. Jeder Aufzählungspunkt steht in einer eigenen Zeile.
 - Ca. 100-130 Wörter.
 - Geschlechtergerechte Sprache (z.B. "Mitschülerinnen und Mitschüler", "Lehrkräfte").
 - Siehe die Ausgaberegel unten für das JSON-Format.`,
@@ -145,7 +145,7 @@ Stil und Ton:
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 
 Form:
-- WICHTIG: Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze, OHNE Leerzeilen und ohne doppelte Zeilenumbrüche. Auch zwischen Einleitung und restlichem Text kein Absatz – alles fließt in einem zusammenhängenden Text. Keine Aufzählungen.
+- WICHTIG: Gib KEINEN Fließtext zurück. Schreibe jeden Satz als eigenen Aufzählungspunkt, beginnend mit "• ". Jeder Aufzählungspunkt enthält GENAU EINEN Satz. Niemals zwei Sätze in einem Aufzählungspunkt. Jeder Aufzählungspunkt steht in einer eigenen Zeile.
 - Ca. 150-180 Wörter.
 - Geschlechtergerechte Sprache.
 - Siehe die Ausgaberegel unten für das JSON-Format.`,
@@ -174,7 +174,7 @@ Stil und Ton:
 - Achte auf grammatisch einheitliche Aufzählungen (gleicher Fall für alle aufgezählten Begriffe).
 
 Form:
-- WICHTIG: Schreibe einen einzigen, durchgehenden Fließtext OHNE Absätze, OHNE Leerzeilen und ohne doppelte Zeilenumbrüche. Auch zwischen Einleitung und restlichem Text kein Absatz – alles fließt in einem zusammenhängenden Text. Keine Aufzählungen.
+- WICHTIG: Gib KEINEN Fließtext zurück. Schreibe jeden Satz als eigenen Aufzählungspunkt, beginnend mit "• ". Jeder Aufzählungspunkt enthält GENAU EINEN Satz. Niemals zwei Sätze in einem Aufzählungspunkt. Jeder Aufzählungspunkt steht in einer eigenen Zeile.
 - Ca. 200-250 Wörter.
 - Geschlechtergerechte Sprache.
 - Siehe die Ausgaberegel unten für das JSON-Format.`
