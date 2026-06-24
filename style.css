@@ -5411,10 +5411,23 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     }
 
     .zt-col-left {
-        display: grid;
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 14px;
-        align-content: start;
+    }
+
+    .zt-col-left .zt-themen-field {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .zt-col-left .zt-themen-textarea {
+        flex: 1;
+        min-height: 120px;
+        height: 100%;
+        resize: vertical;
+        box-sizing: border-box;
     }
     
     /* Dynamisches Strecken der Eingabefelder auf der rechten Seite bis zum Rand */
