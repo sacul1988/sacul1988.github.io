@@ -94,6 +94,7 @@ function validateZeugnisnotePayload(data) {
     fachart: data.fachart === "nebenfach" ? "nebenfach" : "hauptfach",
     richtung: ["besser", "schlechter"].includes(data.richtung) ? data.richtung : "",
     hinweis: asOptionalString(data.hinweis, "hinweis", MAX_TEXT_FIELD_CHARS),
+    fachContext: asOptionalString(data.fachContext, "fachContext", MAX_SHORT_FIELD_CHARS),
     messages: null
   };
 
