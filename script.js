@@ -10507,8 +10507,10 @@ function setZtTyp(typ) {
     document.querySelectorAll('.zt-halbjahr-field, .zt-fach-field, .zt-themen-field').forEach(el => {
         el.style.display = isSozial ? 'none' : '';
     });
-    const schreibhilfe = document.querySelector('.zt-schreibhilfe');
-    if (schreibhilfe) schreibhilfe.style.display = isSozial ? 'none' : '';
+    const shHauptNeben = document.querySelector('.zt-schreibhilfe-hauptneben');
+    const shSozial = document.querySelector('.zt-schreibhilfe-sozial');
+    if (shHauptNeben) shHauptNeben.style.display = isSozial ? 'none' : '';
+    if (shSozial) shSozial.style.display = isSozial ? '' : 'none';
 }
 
 // Eingaben des Generator-Formulars lokal sichern, damit der Inhalt (besonders
