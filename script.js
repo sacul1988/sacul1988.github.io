@@ -10641,11 +10641,7 @@ async function ztCallAPI(messages) {
 function ztNormalizeText(text) {
     if (!text) return '';
     if (typeof text === 'object') text = text.text || '';
-    return String(text).trim()
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
-        .join('\n');
+    return String(text).replace(/\s*\n\s*/g, ' ').replace(/[ \t]{2,}/g, ' ').trim();
 }
 
 function ztBuildUserMsg() {
@@ -10761,7 +10757,7 @@ async function ztRegenerate() {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: userMsg },
             { role: 'assistant', content: ZtState.currentText },
-            { role: 'user', content: 'Schreibe einen neuen, anders formulierten Text mit denselben Inhalten. Behalte das Format bei: jeden Satz als eigenen Aufzählungspunkt mit "• ", ein Satz pro Zeile.' }
+            { role: 'user', content: 'Schreibe einen neuen, anders formulierten Text mit denselben Inhalten.' }
         ]));
         ztUpdateCurrentEntry();
         ztRenderResult();
@@ -10777,7 +10773,7 @@ async function ztShortenText() {
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: ZtState.currentText },
-            { role: 'user', content: 'Kürze diesen Text um ca. zwei Sätze. Behalte den Stil und alle wichtigen Informationen bei. Behalte das Format: jeden Satz als eigenen Aufzählungspunkt mit "• ", ein Satz pro Zeile.' }
+            { role: 'user', content: 'Kürze diesen Text um ca. zwei Sätze. Behalte den Stil und alle wichtigen Informationen bei.' }
         ]));
         ztUpdateCurrentEntry();
         ztRenderResult();
@@ -10793,7 +10789,7 @@ async function ztLengthenText() {
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: ZtState.currentText },
-            { role: 'user', content: 'Verlängere diesen Text um ca. zwei Sätze. Füge sinnvolle, passende Informationen hinzu und behalte den Stil bei. Behalte das Format: jeden Satz als eigenen Aufzählungspunkt mit "• ", ein Satz pro Zeile.' }
+            { role: 'user', content: 'Verlängere diesen Text um ca. zwei Sätze. Füge sinnvolle, passende Informationen hinzu und behalte den Stil bei.' }
         ]));
         ztUpdateCurrentEntry();
         ztRenderResult();
@@ -10813,7 +10809,7 @@ async function ztRefineText() {
     try {
         ZtState.currentText = ztNormalizeText(await ztCallAPI([
             { role: 'user', content: ZtState.currentText },
-            { role: 'user', content: 'Überarbeite den vorigen Zeugnistext nach dieser Anweisung und gib den vollständigen, überarbeiteten Text zurück. Behalte das Format: jeden Satz als eigenen Aufzählungspunkt mit "• ", ein Satz pro Zeile. Anweisung: ' + instruction }
+            { role: 'user', content: 'Überarbeite den vorigen Zeugnistext nach dieser Anweisung und gib den vollständigen, überarbeiteten Text zurück: ' + instruction }
         ]));
         ztUpdateCurrentEntry();
         ztRenderResult();
