@@ -7752,7 +7752,7 @@ function znBegruendungKeydown(e) {
     newline.parentNode.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-const ZN_GRADES = ['1','1-','2+','2','2-','3+','3','3-','4+','4','4-','5+','5'];
+const ZN_GRADES = ['','1','1-','2+','2','2-','3+','3','3-','4+','4','4-','5+','5'];
 
 function znOpenGradePicker(e, index) {
     e.stopPropagation();
@@ -7762,7 +7762,7 @@ function znOpenGradePicker(e, index) {
     picker.className = 'zn-grade-picker';
     ZN_GRADES.forEach(g => {
         const btn = document.createElement('button');
-        btn.className = 'zn-grade-picker-btn ' + Utils.getGradeColorClass(Utils.convertGrade(g));
+        btn.className = 'zn-grade-picker-btn ' + (g ? Utils.getGradeColorClass(Utils.convertGrade(g)) : 'zn-grade-picker-btn--empty');
         btn.textContent = g;
         btn.onclick = (ev) => { ev.stopPropagation(); znSetGradeManually(index, g); picker.remove(); };
         picker.appendChild(btn);

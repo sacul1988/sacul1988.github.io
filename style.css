@@ -4989,6 +4989,11 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     opacity: 0.9;
 }
 
+.zn-grade-picker-btn--empty {
+    background: #fff !important;
+    border: 2.5px solid var(--primary-color, #6c63ff) !important;
+}
+
 .zn-begruendung-wrap {
     position: relative;
 }
