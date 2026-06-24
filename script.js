@@ -7798,9 +7798,11 @@ function znGenerateFromField(index) {
     if (activeClassId === null) return;
     const student = classes[activeClassId]?.students?.[index];
     if (!student) return;
+    // Erst aktuellen DOM-Inhalt sichern, dann als Beobachtungen verwenden
     const el = document.getElementById(`zn-begruendung-${index}`);
-    const notizen = (el?.innerText || '').replace(/^•\s*/gm, '').replace(/•/g, '').trim();
-    student.zeugnisSonstiges = notizen;
+    const rawContent = el?.innerText || student.zeugnisBegruendung || '';
+    student.zeugnisBegruendung = rawContent;
+    student.zeugnisSonstiges = rawContent.replace(/^•\s*/gm, '').replace(/•/g, '').trim();
     zeugnisnoteGenerate(index, null);
 }
 
