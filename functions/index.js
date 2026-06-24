@@ -273,7 +273,7 @@ Wenn unten keine schriftlichen Noten angegeben sind, gib einen leeren String "" 
 
 Regeln für "mitarbeit_text":
 
-Gib KEINEN Fließtext zurück, sondern 3 bis 5 einzelne Stichpunkte, jeweils in einer eigenen Zeile und jeweils beginnend mit "• ".
+Gib KEINEN Fließtext zurück, sondern einzelne Stichpunkte, jeweils in einer eigenen Zeile und jeweils beginnend mit "• ". Jeder Stichpunkt enthält GENAU EINEN Satz. Niemals zwei Sätze in einem Stichpunkt. So viele Stichpunkte wie nötig – kein festes Limit.
 Der erste Stichpunkt leitet zur sonstigen Mitarbeit über. Beginne direkt mit einer konkreten Beobachtung in der Anrede "Du", ohne eine einleitende Floskeln wie "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen:".
 Jeder Stichpunkt steht in der direkten Anrede "Du" und bezieht sich konkret auf die unten genannten Beobachtungen zur mündlichen Mitarbeit. Formuliere kurze, klare Stichpunkte statt eines zusammenhängenden Fließtexts.
 Jeder einzelne Punkt aus den Beobachtungen muss im Text erscheinen – ohne Ausnahme. Fasse NICHTS zusammen und lasse NICHTS weg, auch wenn dir zwei Punkte ähnlich erscheinen. Deine einzige Aufgabe ist es, jeden Punkt sprachlich sauber in der Anrede "Du" in einen Stichpunkt zu übersetzen. Der Inhalt bleibt vollständig erhalten.
