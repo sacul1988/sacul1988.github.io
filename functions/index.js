@@ -108,7 +108,7 @@ Stil und Ton:
 
 Form:
 - Einziger durchgehender Fließtext, OHNE Absätze, OHNE Aufzählungen.
-- Ca. 100-130 Wörter.
+- Der Text MUSS zwischen 110 und 130 Wörtern liegen. Zähle die Wörter des fertigen Textes. Liegt die Anzahl darunter: ergänze sinnvolle Sätze auf Basis der vorhandenen Beobachtungen. Sind nicht genug Informationen vorhanden um den Text zu verlängern: stelle eine gezielte Nachfrage.
 - Geschlechtergerechte Sprache.
 - Siehe die Ausgaberegel unten für das JSON-Format.`,
 
@@ -130,7 +130,7 @@ Stil und Ton:
 
 Form:
 - Einziger durchgehender Fließtext, OHNE Absätze, OHNE Aufzählungen.
-- Ca. 150-180 Wörter.
+- Der Text MUSS zwischen 130 und 150 Wörtern liegen. Zähle die Wörter des fertigen Textes. Liegt die Anzahl darunter: ergänze sinnvolle Sätze auf Basis der vorhandenen Beobachtungen. Sind nicht genug Informationen vorhanden um den Text zu verlängern: stelle eine gezielte Nachfrage.
 - Geschlechtergerechte Sprache.
 - Siehe die Ausgaberegel unten für das JSON-Format.`,
 
@@ -152,7 +152,7 @@ Stil und Ton:
 
 Form:
 - Einziger durchgehender Fließtext, OHNE Absätze, OHNE Aufzählungen.
-- Ca. 200-250 Wörter.
+- Der Text MUSS zwischen 210 und 230 Wörtern liegen. Zähle die Wörter des fertigen Textes. Liegt die Anzahl darunter: ergänze sinnvolle Sätze auf Basis der vorhandenen Beobachtungen. Sind nicht genug Informationen vorhanden um den Text zu verlängern: stelle eine gezielte Nachfrage.
 - Geschlechtergerechte Sprache.
 - Siehe die Ausgaberegel unten für das JSON-Format.`
 };
