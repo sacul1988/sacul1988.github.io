@@ -7891,7 +7891,11 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
                 begruendungEl.style.height = _lockH + 'px';
                 begruendungEl.style.minHeight = '0';
                 begruendungEl.style.overflow = 'hidden';
-                begruendungEl.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%;"><i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i></div>`;
+                begruendungEl.style.display = 'flex';
+                begruendungEl.style.alignItems = 'center';
+                begruendungEl.style.justifyContent = 'center';
+                begruendungEl.style.padding = '0';
+                begruendungEl.innerHTML = `<i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>`;
             }
             const actionsEl = container.querySelector('.zn-actions');
             if (actionsEl) {
@@ -7909,7 +7913,7 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
                     <div class="zn-grade-circle zn-grade-circle--empty" style="margin-left:auto;"></div>
                 </div>
                 <div class="zn-begruendung-wrap">
-                    <div class="zn-begruendung" id="zn-begruendung-${index}" style="display: flex; align-items: center; justify-content: center; min-height: 260px;">
+                    <div class="zn-begruendung" id="zn-begruendung-${index}" style="display: flex; align-items: center; justify-content: center; min-height: 260px; padding: 0;">
                         <i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
                     </div>
                 </div>
