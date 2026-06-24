@@ -8597,7 +8597,7 @@ function exportAllStudentCards() {
             }).join('');
             const average = calculateProjectAverage(student.projects);
             if (average) {
-                averageHtml = `<div class="zg-avg">Durchschnitt: <strong>${average.rounded} (${average.exact})</strong></div>`;
+                averageHtml = `<div class="zg-avg">Durchschnitt: <strong>${average.rounded}</strong></div>`;
             }
         } else {
             gradesHtml = '<li>Keine Noten vorhanden</li>';
