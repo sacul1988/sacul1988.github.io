@@ -411,7 +411,7 @@ exports.generateZeugnisnote = onCall(
     if (fach === "nebenfach") {
       userMsg += `\nArt des Fachs: Nebenfach. Bei diesem Fach zählt die mündliche Leistung für die Endnote deutlich mehr als die schriftliche Leistung.\n`;
       userMsg += `\nNUR FÜR DIESES NEBENFACH gelten zusätzlich folgende beiden Vorgaben (sie überschreiben die allgemeinen Verbote im System-Prompt):\n`;
-      userMsg += `1. Baue an einer inhaltlich passenden Stelle EINEN Stichpunkt ein, der ausdrücklich auf die Gewichtung hinweist, sinngemäß: "• In diesem Fach zählt vor allem deine mündliche und sonstige Mitarbeit, deutlich mehr als die schriftlichen Noten." Formuliere ihn natürlich in der Anrede "Du".\n`;
+      userMsg += `1. Der ERSTE Stichpunkt des mitarbeit_text (also direkt nach der Auflistung der schriftlichen Noten und der Durchschnittsnote) muss der Gewichtungshinweis sein, wörtlich: "• In diesem Fach zählt jedoch vor allem deine mündliche und sonstige Mitarbeit deutlich mehr als die schriftlichen Noten." Erst danach folgen die Stichpunkte zu den Beobachtungen, und ganz zum Schluss der Satz mit der Endnote.\n`;
       userMsg += `2. Der letzte Stichpunkt mit der Endnote MUSS die Note kurz an den zentralen Punkt der Beobachtungen koppeln, sinngemäß: "• Da du dich regelmäßig beteiligst, bekommst du die Note X." oder bei Störungen/wenig Mitarbeit trotz guter Tests: "• Da du den Unterricht häufig störst, bekommst du trotz guter Tests die Note X." Wähle den wichtigsten Punkt aus den Beobachtungen.\n`;
     } else {
       userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
