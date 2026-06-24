@@ -7726,7 +7726,7 @@ function zeugnisnoteInlineHtml(student, index) {
             ${triggerBtn}
             <div class="zn-grade-circle ${circleClass}" onclick="znOpenGradePicker(event,${index})" title="Note manuell setzen" style="cursor:pointer;">${circleContent}</div>
         </div>
-        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text)}</div>
+        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text || '• ')}</div>
         <div class="zn-actions">
             <button class="zn-action-btn zn-new" onclick="zeugnisnoteGenerate(${index}, null)"><i class="fas fa-rotate-left"></i> Neu</button>
             <button class="zn-action-btn zn-better" onclick="zeugnisnoteGenerate(${index}, 'besser')"><i class="fas fa-caret-up"></i> Besser</button>
@@ -8099,7 +8099,7 @@ function zeugnisnoteBegruendungBlur(index) {
     const el = document.getElementById(`zn-begruendung-${index}`);
     const student = classes[activeClassId]?.students?.[index];
     if (!el || !student) return;
-    const txt = (el.innerText || '').trim();
+    const txt = (el.innerText || '').trim().replace(/^•\s*$/, '');
     if (!txt) {
         student.zeugnisnote = '';
         student.zeugnisBegruendung = '';
