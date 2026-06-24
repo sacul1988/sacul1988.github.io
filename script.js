@@ -7779,8 +7779,7 @@ function znOpenGradePicker(e, index) {
 }
 
 function znSetGradeManually(index, newGrade) {
-    const classes = window.classData || [];
-    const student = classes[index];
+    const student = classes[activeClassId]?.students?.[index];
     if (!student) return;
 
     const oldGrade = (student.zeugnisnote || '').trim();
@@ -7799,7 +7798,7 @@ function znSetGradeManually(index, newGrade) {
         }
     }
 
-    saveData(index);
+    saveData();
     const c = document.getElementById(`zn-inline-${index}`);
     if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
 }

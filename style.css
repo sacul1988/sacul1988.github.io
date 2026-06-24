@@ -4951,34 +4951,36 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 
 .zn-grade-picker {
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 8px);
     right: 0;
     background: #fff;
     border: 1px solid var(--border-color);
-    border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.13);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    padding: 8px;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 10px;
     z-index: 1000;
-    width: 180px;
+    width: 160px;
 }
 
 .zn-grade-picker-btn {
-    width: 44px;
-    height: 36px;
-    border-radius: 7px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     border: none;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #fff;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: transform 0.12s, opacity 0.12s;
+    justify-self: center;
 }
 
 .zn-grade-picker-btn:hover {
-    opacity: 0.8;
+    transform: scale(1.15);
+    opacity: 0.9;
 }
 
 .zn-begruendung {
