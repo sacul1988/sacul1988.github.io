@@ -7717,22 +7717,23 @@ function zeugnisnoteInlineHtml(student, index) {
     const note = student.zeugnisnote || '';
     const text = student.zeugnisBegruendung || '';
 
-    const triggerBtn = `<button class="zn-generate-trigger" onclick="openZeugnisnoteInput(${index})"><i class="fas fa-wand-magic-sparkles"></i> <span>Zeugnis erstellen</span></button>`;
-
     const circleClass = note ? Utils.getGradeColorClass(Utils.convertGrade(note)) : 'zn-grade-circle--empty';
     const circleContent = note || '';
+    const showActions = !!note;
     return `
         <div class="zn-top-row">
-            ${triggerBtn}
             <div class="zn-grade-circle ${circleClass}" onclick="znOpenGradePicker(event,${index})" title="Note manuell setzen" style="cursor:pointer;">${circleContent}</div>
         </div>
-        <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text || '• ')}</div>
-        <div class="zn-actions">
+        <div class="zn-begruendung-wrap">
+            <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text || '• ')}</div>
+            <button class="btn btn-primary btn-icon zn-wand-btn" onclick="znGenerateFromField(${index})" title="KI-Vorschlag generieren"><i class="fas fa-wand-magic-sparkles"></i></button>
+        </div>
+        ${showActions ? `<div class="zn-actions">
             <button class="zn-action-btn zn-new" onclick="zeugnisnoteGenerate(${index}, null)"><i class="fas fa-rotate-left"></i> Neu</button>
             <button class="zn-action-btn zn-better" onclick="zeugnisnoteGenerate(${index}, 'besser')"><i class="fas fa-caret-up"></i> Besser</button>
             <button class="zn-action-btn zn-worse" onclick="zeugnisnoteGenerate(${index}, 'schlechter')"><i class="fas fa-caret-down"></i> Schlechter</button>
             <button class="zn-action-btn zn-adjust" onclick="openZeugnisnoteHinweisModal(${index})"><i class="fas fa-sliders"></i> Anpassen</button>
-        </div>`;
+        </div>` : ''}`;
 }
 
 function znBegruendungKeydown(e) {
@@ -7798,6 +7799,16 @@ function znSetGradeManually(index, newGrade) {
     saveData();
     const c = document.getElementById(`zn-inline-${index}`);
     if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
+}
+
+function znGenerateFromField(index) {
+    if (activeClassId === null) return;
+    const student = classes[activeClassId]?.students?.[index];
+    if (!student) return;
+    const el = document.getElementById(`zn-begruendung-${index}`);
+    const notizen = (el?.innerText || '').replace(/^•\s*/gm, '').replace(/•/g, '').trim();
+    student.zeugnisSonstiges = notizen;
+    zeugnisnoteGenerate(index, null);
 }
 
 function openZeugnisnoteHinweisModal(index) {

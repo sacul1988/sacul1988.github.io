@@ -4989,6 +4989,24 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     opacity: 0.9;
 }
 
+.zn-begruendung-wrap {
+    position: relative;
+}
+
+.zn-wand-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
 .zn-begruendung {
     background: #fff;
     border: 1px solid var(--border-color);
@@ -4998,6 +5016,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     line-height: 1.65;
     color: var(--dark-color);
     min-height: 260px;
+    padding-bottom: 56px;
     outline: none;
     white-space: pre-wrap;
     transition: border-color 0.15s, box-shadow 0.15s;
