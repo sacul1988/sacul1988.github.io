@@ -4997,14 +4997,18 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     position: absolute;
     bottom: 10px;
     right: 10px;
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--primary-color) !important;
+    font-size: 1.3rem;
 }
 
 .zn-begruendung {
