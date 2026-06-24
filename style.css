@@ -4945,6 +4945,42 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 .zn-grade-circle.grade-poor { background-color: #fd7e14 !important; }
 .zn-grade-circle.grade-bad { background-color: #dc143c !important; }
 .zn-grade-circle.grade-very-bad { background-color: #6c757d !important; }
+.zn-grade-circle:hover {
+    opacity: 0.85;
+}
+
+.zn-grade-picker {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 8px;
+    z-index: 1000;
+    width: 180px;
+}
+
+.zn-grade-picker-btn {
+    width: 44px;
+    height: 36px;
+    border-radius: 7px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.zn-grade-picker-btn:hover {
+    opacity: 0.8;
+}
+
 .zn-begruendung {
     background: #fff;
     border: 1px solid var(--border-color);

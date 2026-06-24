@@ -7727,7 +7727,7 @@ function zeugnisnoteInlineHtml(student, index) {
     return `
         <div class="zn-top-row">
             ${triggerBtn}
-            <div class="zn-grade-circle ${circleClass}">${note}</div>
+            <div class="zn-grade-circle ${circleClass}" onclick="znOpenGradePicker(event,${index})" title="Note manuell ändern" style="cursor:pointer;">${note}</div>
         </div>
         <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text)}</div>
         <div class="zn-actions">
@@ -7752,6 +7752,56 @@ function znBegruendungKeydown(e) {
     sel.removeAllRanges();
     sel.addRange(range);
     newline.parentNode.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+const ZN_GRADES = ['1','1-','2+','2','2-','3+','3','3-','4+','4','4-','5+','5'];
+
+function znOpenGradePicker(e, index) {
+    e.stopPropagation();
+    document.querySelectorAll('.zn-grade-picker').forEach(el => el.remove());
+
+    const picker = document.createElement('div');
+    picker.className = 'zn-grade-picker';
+    ZN_GRADES.forEach(g => {
+        const btn = document.createElement('button');
+        btn.className = 'zn-grade-picker-btn ' + Utils.getGradeColorClass(Utils.convertGrade(g));
+        btn.textContent = g;
+        btn.onclick = (ev) => { ev.stopPropagation(); znSetGradeManually(index, g); picker.remove(); };
+        picker.appendChild(btn);
+    });
+
+    const circle = e.currentTarget;
+    circle.parentNode.style.position = 'relative';
+    circle.parentNode.appendChild(picker);
+
+    const close = (ev) => { if (!picker.contains(ev.target)) { picker.remove(); document.removeEventListener('click', close); } };
+    setTimeout(() => document.addEventListener('click', close), 0);
+}
+
+function znSetGradeManually(index, newGrade) {
+    const classes = window.classData || [];
+    const student = classes[index];
+    if (!student) return;
+
+    const oldGrade = (student.zeugnisnote || '').trim();
+    student.zeugnisnote = newGrade;
+
+    // Letztes Vorkommen der alten Note im Text ersetzen
+    if (student.zeugnisBegruendung && oldGrade) {
+        const oldPattern = `Note ${oldGrade}`;
+        const newPattern = `Note ${newGrade}`;
+        const lastIdx = student.zeugnisBegruendung.lastIndexOf(oldPattern);
+        if (lastIdx !== -1) {
+            student.zeugnisBegruendung =
+                student.zeugnisBegruendung.substring(0, lastIdx) +
+                newPattern +
+                student.zeugnisBegruendung.substring(lastIdx + oldPattern.length);
+        }
+    }
+
+    saveData(index);
+    const c = document.getElementById(`zn-inline-${index}`);
+    if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
 }
 
 function openZeugnisnoteHinweisModal(index) {
