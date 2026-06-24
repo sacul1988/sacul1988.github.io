@@ -252,6 +252,9 @@
                 <button class="topbar-btn sync-btn" type="button" id="sync-status-circle" data-state="synced" title="Synchronisierung" aria-label="Synchronisierung" onclick="openSyncModal()">
                     <span id="sync-status-icon"><i class="fas fa-circle-check"></i></span>
                 </button>
+                <button class="topbar-btn" type="button" title="Halbjahr archivieren oder altes Archiv ansehen" aria-label="Halbjahr-Archiv" onclick="openHalbjahrArchive()">
+                    <i class="fas fa-box-archive"></i>
+                </button>
                 <button class="topbar-btn logout-btn" type="button" title="Abmelden" aria-label="Abmelden" onclick="confirmLogout()">
                     <i class="fas fa-right-from-bracket"></i>
                 </button>
@@ -284,9 +287,6 @@
                                 </button>
                                 <button class="btn btn-secondary btn-icon" onclick="handleImportButtonClick(event)" title="Daten aus Datei importieren">
                                     <i class="fas fa-arrow-up"></i> <span class="btn-text">Importieren</span>
-                                </button>
-                                <button class="btn btn-secondary btn-icon" onclick="openHalbjahrArchive()" title="Halbjahr archivieren oder altes Archiv ansehen">
-                                    <i class="fas fa-box-archive"></i> <span class="btn-text">Halbjahr-Archiv</span>
                                 </button>
                             </div>
 
