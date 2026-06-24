@@ -11525,13 +11525,7 @@ function ztPlanungSortKey(course) {
 }
 
 function ztPlanungSortedCourses() {
-    return [...ZtPlanungState.courses].sort((a, b) => {
-        if (!!a.delegatedToTeacher !== !!b.delegatedToTeacher) return a.delegatedToTeacher ? 1 : -1;
-        const ka = ztPlanungSortKey(a), kb = ztPlanungSortKey(b);
-        if (ka.num !== kb.num) return ka.num - kb.num;
-        if (ka.letter !== kb.letter) return ka.letter.localeCompare(kb.letter);
-        return ka.rest.localeCompare(kb.rest, 'de');
-    });
+    return [...ZtPlanungState.courses];
 }
 
 function ztPlanungDashboardCourses() {
