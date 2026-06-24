@@ -100,6 +100,7 @@ Satzbau (besonders wichtig):
 - Verbinde NIEMALS zwei Hauptsätze mit ", und" (also Komma direkt gefolgt von "und"). Mache in solchen Fällen IMMER zwei getrennte Sätze. Diese Regel gilt ausnahmslos.
 - Lies zum Schluss jeden Satz einzeln durch und prüfe, ob er irgendwo die Zeichenfolge Komma gefolgt von "und" enthält ("..., und ..."). Falls ja, teile ihn in zwei eigenständige Sätze. Diese Kontrolle ist Pflicht.
 - Triff den Mittelweg zwischen zu einfachen und zu komplizierten Sätzen: meistens ein Komma pro Satz, gelegentlich ein zweites, wenn es natürlich klingt. Schreibe NIEMALS mehr als zwei Kommas in einem Satz.
+- Hänge KEINEN zweiten Relativsatz an einen Satz, der bereits einen Relativsatz oder eine Erweiterung mit Komma enthält. Beispiel – NICHT: "...nicht gesichert, was sich bei der Multiplikation bemerkbar macht, die sie nur mit Hilfe durchführen kann." Besser: "...nicht gesichert, was sich bei der Multiplikation bemerkbar macht. Die schriftliche Multiplikation kann sie nur mit Hilfe durchführen."
 - Formuliere natürlich und schnörkellos. Vermeide gestelzte oder schiefe Konstruktionen, z. B. NICHT "wurde mit differenzierten Materialien und Unterstützung begleitet" und NICHT "äußerte dieses Desinteresse gelegentlich auch offen". Wähle natürlichere Verben und Satzenden.
 
 Umgang mit den Eingaben:
@@ -130,6 +131,7 @@ Satzbau (besonders wichtig):
 - Verbinde NIEMALS zwei Hauptsätze mit ", und" (also Komma direkt gefolgt von "und"). Mache in solchen Fällen IMMER zwei getrennte Sätze. Diese Regel gilt ausnahmslos.
 - Lies zum Schluss jeden Satz einzeln durch und prüfe, ob er irgendwo die Zeichenfolge Komma gefolgt von "und" enthält ("..., und ..."). Falls ja, teile ihn in zwei eigenständige Sätze. Diese Kontrolle ist Pflicht.
 - Triff den Mittelweg zwischen zu einfachen und zu komplizierten Sätzen: meistens ein Komma pro Satz, gelegentlich ein zweites, wenn es natürlich klingt. Schreibe NIEMALS mehr als zwei Kommas in einem Satz.
+- Hänge KEINEN zweiten Relativsatz an einen Satz, der bereits einen Relativsatz oder eine Erweiterung mit Komma enthält. Beispiel – NICHT: "...nicht gesichert, was sich bei der Multiplikation bemerkbar macht, die sie nur mit Hilfe durchführen kann." Besser: "...nicht gesichert, was sich bei der Multiplikation bemerkbar macht. Die schriftliche Multiplikation kann sie nur mit Hilfe durchführen."
 - Formuliere natürlich und schnörkellos. Vermeide gestelzte oder schiefe Konstruktionen, z. B. NICHT "wurde mit differenzierten Materialien und Unterstützung begleitet". Wähle natürlichere Verben und Satzenden.
 
 Umgang mit den Eingaben:
@@ -160,6 +162,7 @@ Satzbau (besonders wichtig):
 - Verbinde NIEMALS zwei Hauptsätze mit ", und" (also Komma direkt gefolgt von "und"). Mache in solchen Fällen IMMER zwei getrennte Sätze. Diese Regel gilt ausnahmslos.
 - Lies zum Schluss jeden Satz einzeln durch und prüfe, ob er irgendwo die Zeichenfolge Komma gefolgt von "und" enthält ("..., und ..."). Falls ja, teile ihn in zwei eigenständige Sätze. Diese Kontrolle ist Pflicht.
 - Triff den Mittelweg zwischen zu einfachen und zu komplizierten Sätzen: meistens ein Komma pro Satz, gelegentlich ein zweites, wenn es natürlich klingt. Schreibe NIEMALS mehr als zwei Kommas in einem Satz.
+- Hänge KEINEN zweiten Relativsatz an einen Satz, der bereits einen Relativsatz oder eine Erweiterung mit Komma enthält. Beispiel – NICHT: "...nicht gesichert, was sich bei der Multiplikation bemerkbar macht, die sie nur mit Hilfe durchführen kann." Besser: "...nicht gesichert, was sich bei der Multiplikation bemerkbar macht. Die schriftliche Multiplikation kann sie nur mit Hilfe durchführen."
 - Formuliere natürlich und schnörkellos. Vermeide gestelzte oder schiefe Konstruktionen, z. B. NICHT "wurde mit differenzierten Materialien und Unterstützung begleitet". Wähle natürlichere Verben und Satzenden.
 
 Umgang mit den Eingaben:
