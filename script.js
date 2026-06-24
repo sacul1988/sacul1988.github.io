@@ -7684,6 +7684,7 @@ let _znPendingQuestions = null;
 let _znPendingMessages = null;
 let _znPendingIndex = null;
 let _znPendingRichtung = null;
+let _znQuestionQueue = [];  // Durchlauf Variante B: Schüler-Indizes mit offenen Rückfragen
 
 function formatKiGenerationError(error, fallback = 'Fehler beim Generieren.') {
     const message = String(error?.message || '').trim();
@@ -8082,9 +8083,27 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
       const KIQuestionsStr = JSON.stringify({ status: 'unclear', questions: questions });
       _znPendingMessages.push({ role: 'assistant', content: KIQuestionsStr });
       _znPendingMessages.push({ role: 'user', content: answerContent });
-      
-      await zeugnisnoteGenerate(_znPendingIndex, _znPendingRichtung, _znPendingMessages);
+
+      const answeredIndex = _znPendingIndex;
+      await zeugnisnoteGenerate(answeredIndex, _znPendingRichtung, _znPendingMessages);
+
+      // Durchlauf Variante B: Wenn dieser Schüler jetzt eine Note hat (also nicht
+      // erneut Rückfragen kamen) und noch weitere in der Warteschlange sind, weiter.
+      const resolved = classes[activeClassId]?.students?.[answeredIndex];
+      if (_znQuestionQueue.length > 0 && resolved && resolved.zeugnisnote) {
+          _znProcessNextQuestion();
+      }
   }
+
+// Rückfragen-Modal schließen. Im Durchlauf (Variante B) wird der Schüler dabei
+// übersprungen und der nächste Rückfragen-Fall aufgerufen.
+function znCloseQuestions() {
+    hideModal();
+    if (_znQuestionQueue.length > 0) {
+        _znProcessNextQuestion();
+    }
+}
+window.znCloseQuestions = znCloseQuestions;
 
 function saveZeugnisnoteBegruendung(index) {
     if (activeClassId === null) return;
@@ -8267,6 +8286,10 @@ async function zeugnisBatchGenerate() {
     }
 
     _zeugnisnoteBusy = true;
+    // Cloud-Realtime-Updates während des Durchlaufs pausieren. Sonst kann der
+    // onSnapshot-Listener das classes-Objekt mitten in der Schleife austauschen,
+    // wodurch bereits geschriebene Texte (außer dem ersten) verloren gehen.
+    window._zeugnisBatchRunning = true;
     const body = document.getElementById('zeugnis-batch-body');
     const footer = document.getElementById('zeugnis-batch-footer');
     if (footer) footer.style.display = 'none';
@@ -8274,48 +8297,85 @@ async function zeugnisBatchGenerate() {
     const fachart = classes[activeClassId]?.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
     let done = 0;
     const failed = [];
+    const needQuestions = [];  // Variante B: Rückfragen-Fälle erst nach dem Durchlauf abarbeiten
 
-    for (let k = 0; k < targets.length; k++) {
-        const idx = targets[k];
-        const student = classes[activeClassId].students[idx];
-        if (!student) continue;
-        if (body) {
-            body.innerHTML = `<div class="zn-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Generiere ${k + 1} von ${targets.length} …<br>${escapeHtml(student.name)}</span></div>`;
+    try {
+        for (let k = 0; k < targets.length; k++) {
+            const idx = targets[k];
+            const student = classes[activeClassId].students[idx];
+            if (!student) continue;
+            if (body) {
+                body.innerHTML = `<div class="zn-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Generiere ${k + 1} von ${targets.length} …<br>${escapeHtml(student.name)}</span></div>`;
+            }
+            try {
+                if (typeof window.callGenerateZeugnisnote !== 'function') throw new Error('Funktion nicht verfügbar.');
+                const { schriftlicheNoten, durchschnitt, durchschnittNote } = getZeugnisnoteContext(student);
+                const result = await window.callGenerateZeugnisnote({
+                    schriftlicheNoten,
+                    durchschnitt,
+                    durchschnittNote,
+                    sonstiges: student.zeugnisSonstiges || '',
+                    fachart,
+                    richtung: null,
+                    hinweis: '',
+                    fachContext: classes[activeClassId]?.name || ''
+                });
+                // Rückfrage der KI: nicht als Fehler behandeln, sondern für später vormerken
+                if (result && result.status === 'unclear' && Array.isArray(result.questions) && result.questions.length > 0) {
+                    needQuestions.push(idx);
+                    continue;
+                }
+                if (!result || !result.note) throw new Error('Kein gültiger Notenvorschlag erhalten.');
+                student.zeugnisnote = result.note;
+                student.zeugnisBegruendung = result.begruendung || '';
+                done++;
+            } catch (err) {
+                console.error('Durchlauf-Fehler bei', student.name, err);
+                failed.push(student.name);
+            }
         }
-        try {
-            if (typeof window.callGenerateZeugnisnote !== 'function') throw new Error('Funktion nicht verfügbar.');
-            const { schriftlicheNoten, durchschnitt, durchschnittNote } = getZeugnisnoteContext(student);
-            const result = await window.callGenerateZeugnisnote({
-                schriftlicheNoten,
-                durchschnitt,
-                durchschnittNote,
-                sonstiges: student.zeugnisSonstiges || '',
-                fachart,
-                richtung: null,
-                hinweis: '',
-                fachContext: classes[activeClassId]?.name || ''
-            });
-            if (!result || !result.note) throw new Error('Kein gültiger Notenvorschlag erhalten.');
-            student.zeugnisnote = result.note;
-            student.zeugnisBegruendung = result.begruendung || '';
-            saveData(idx);
-            done++;
-        } catch (err) {
-            console.error('Durchlauf-Fehler bei', student.name, err);
-            failed.push(student.name);
-        }
+    } finally {
+        window._zeugnisBatchRunning = false;
+        _zeugnisnoteBusy = false;
     }
 
-    _zeugnisnoteBusy = false;
+    // Erst jetzt einmal speichern – der Objekt-Tausch durch die Cloud ist vorbei.
+    saveData();
     hideModal();
     if (typeof renderZeugnisModule === 'function' && activeModule === 'zeugnis') {
         renderZeugnisModule();
+    }
+
+    // Variante B: Schüler mit Rückfragen nacheinander interaktiv abarbeiten
+    if (needQuestions.length > 0) {
+        _znQuestionQueue = needQuestions.slice();
+        let msg = `${done} Zeugnisnote${done === 1 ? '' : 'n'} erstellt.`;
+        msg += `\n\nBei ${needQuestions.length} Schüler${needQuestions.length === 1 ? '' : 'n'} hat die KI Rückfragen. Du wirst jetzt nacheinander gefragt.`;
+        if (failed.length) msg += `\n\nFehlgeschlagen (${failed.length}): ${failed.join(', ')}`;
+        swal('Fast fertig', msg, 'info').then(() => _znProcessNextQuestion());
+        return;
     }
 
     let msg = `${done} Zeugnisnote${done === 1 ? '' : 'n'} erstellt.`;
     if (failed.length) msg += `\n\nFehlgeschlagen (${failed.length}): ${failed.join(', ')}`;
     swal(failed.length ? 'Teilweise fertig' : 'Fertig', msg, failed.length ? 'warning' : 'success');
 }
+
+// Variante B: nächsten Rückfragen-Schüler aus der Warteschlange abarbeiten.
+// Ruft die normale Einzel-Generierung auf, die bei Bedarf das Rückfragen-Modal zeigt.
+// Löst der erneute Versuch den Fall direkt (ohne Rückfrage), geht es selbst weiter.
+async function _znProcessNextQuestion() {
+    if (!_znQuestionQueue || _znQuestionQueue.length === 0) return;
+    const idx = _znQuestionQueue.shift();
+    await zeugnisnoteGenerate(idx, null);
+    const s = classes[activeClassId]?.students?.[idx];
+    if (s && s.zeugnisnote) {
+        // Ohne Rückfrage gelöst → nächsten Fall starten. Sonst ist das Modal offen
+        // und znSubmitAnswers/znCloseQuestions treibt die Warteschlange weiter.
+        _znProcessNextQuestion();
+    }
+}
+window._znProcessNextQuestion = _znProcessNextQuestion;
 
 window.openZeugnisBatch = openZeugnisBatch;
 window.closeZeugnisBatch = closeZeugnisBatch;
