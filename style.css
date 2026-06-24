@@ -4939,6 +4939,12 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     background: var(--grey-color) !important;
     border: none;
 }
+.zn-grade-circle--empty {
+    background: #fff !important;
+    border: 2.5px solid var(--primary-color, #6c63ff) !important;
+    color: transparent !important;
+}
+
 .zn-grade-circle.grade-excellent { background-color: #007bff !important; }
 .zn-grade-circle.grade-good { background-color: #28a745 !important; }
 .zn-grade-circle.grade-average { background-color: #ffc107 !important; }

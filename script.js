@@ -7719,15 +7719,12 @@ function zeugnisnoteInlineHtml(student, index) {
 
     const triggerBtn = `<button class="zn-generate-trigger" onclick="openZeugnisnoteInput(${index})"><i class="fas fa-wand-magic-sparkles"></i> <span>Zeugnis erstellen</span></button>`;
 
-    if (!note) {
-        return `<div class="zn-top-row zn-top-row--empty">${triggerBtn}</div>`;
-    }
-
-    const circleClass = Utils.getGradeColorClass(Utils.convertGrade(note));
+    const circleClass = note ? Utils.getGradeColorClass(Utils.convertGrade(note)) : 'zn-grade-circle--empty';
+    const circleContent = note || '';
     return `
         <div class="zn-top-row">
             ${triggerBtn}
-            <div class="zn-grade-circle ${circleClass}" onclick="znOpenGradePicker(event,${index})" title="Note manuell ändern" style="cursor:pointer;">${note}</div>
+            <div class="zn-grade-circle ${circleClass}" onclick="znOpenGradePicker(event,${index})" title="Note manuell setzen" style="cursor:pointer;">${circleContent}</div>
         </div>
         <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text)}</div>
         <div class="zn-actions">
