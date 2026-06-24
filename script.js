@@ -7721,11 +7721,9 @@ function zeugnisnoteInlineHtml(student, index) {
     const circleContent = note || '';
     const showActions = !!note;
     return `
-        <div class="zn-top-row">
-            <div class="zn-grade-circle ${circleClass}" onclick="znOpenGradePicker(event,${index})" title="Note manuell setzen" style="cursor:pointer;">${circleContent}</div>
-        </div>
         <div class="zn-begruendung-wrap">
             <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text || '• ')}</div>
+            <div class="zn-grade-circle ${circleClass} zn-grade-circle--overlay" onclick="znOpenGradePicker(event,${index})" title="Note manuell setzen" style="cursor:pointer;">${circleContent}</div>
             <button class="btn btn-primary btn-icon zn-wand-btn" onclick="znGenerateFromField(${index})" title="KI-Vorschlag generieren"><i class="fas fa-wand-magic-sparkles"></i></button>
         </div>
         ${showActions ? `<div class="zn-actions">

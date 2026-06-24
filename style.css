@@ -4993,6 +4993,13 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     position: relative;
 }
 
+.zn-grade-circle--overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+}
+
 .zn-wand-btn {
     position: absolute;
     bottom: 10px;
@@ -5016,6 +5023,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     line-height: 1.65;
     color: var(--dark-color);
     min-height: 260px;
+    padding-top: 60px;
     padding-bottom: 56px;
     outline: none;
     white-space: pre-wrap;
