@@ -8121,9 +8121,10 @@ function openZeugnisnoteInput(index) {
     const ta = document.getElementById('zeugnis-input-textarea');
     if (titleEl) titleEl.textContent = `Beobachtungen (${student.name})`;
     // Vorausfüllen: gespeicherte Beobachtungen, sonst manuelle Notizen aus dem Textfeld
-    const manuelleNotizen = (student.zeugnisBegruendung || '')
-        .replace(/^•\s*/gm, '').trim();
-    if (ta) ta.value = student.zeugnisSonstiges || (!student.zeugnisnote ? manuelleNotizen : '');
+    const begruendungEl = document.getElementById(`zn-begruendung-${index}`);
+    const manuelleNotizen = ((begruendungEl?.innerText || student.zeugnisBegruendung || '')
+        .replace(/^•\s*/gm, '').replace(/•/g, '').trim());
+    if (ta) ta.value = student.zeugnisSonstiges || manuelleNotizen;
     showModal('zeugnis-input-modal');
     if (ta) ta.focus();
 }
