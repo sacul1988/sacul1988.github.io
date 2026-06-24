@@ -225,16 +225,31 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
         const extendResponse = await anthropicMessagesRequest({
           model: "claude-sonnet-4-6",
           max_tokens: 2000,
-          system: basePrompt,
+          system: systemPrompt,
           messages: [
             ...messages,
-            { role: "assistant", content: result.text },
-            { role: "user", content: `Der Text hat nur ${wordCount} Wörter und muss mindestens ${minWords} Wörter haben. Verlängere ihn durch sinnvolle ergänzende Sätze auf Basis der vorhandenen Beobachtungen. Behalte Stil, Ton und Fließtext-Format bei. Gib NUR den vollständigen, verlängerten Text zurück – keine Erklärung, kein JSON.` }
+            { role: "assistant", content: JSON.stringify({ status: "success", text: result.text }) },
+            { role: "user", content: `Der Text hat nur ${wordCount} Wörter und muss mindestens ${minWords} Wörter haben. Verlängere ihn durch sinnvolle ergänzende Sätze auf Basis der vorhandenen Beobachtungen und behalte Stil, Ton und Fließtext-Format bei. Falls die vorhandenen Beobachtungen NICHT ausreichen, um den Text sinnvoll auf die geforderte Länge zu bringen, stelle stattdessen gezielte Rückfragen (status "unclear"). Antworte wieder im vorgegebenen JSON-Format.` }
           ]
         });
         const extendData = await extendResponse.json();
-        const extended = extendData.content?.map(b => b.text || "").join("").trim();
-        if (extended) result.text = extended;
+        const extendedRaw = extendData.content?.map(b => b.text || "").join("").trim() || "";
+        try {
+          const jsonMatch = extendedRaw.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (parsed.status === "unclear" && Array.isArray(parsed.questions)) {
+              result = { text: "", questions: parsed.questions };
+            } else if (parsed.text) {
+              result = { text: parsed.text };
+            }
+          } else if (extendedRaw) {
+            result = { text: extendedRaw };
+          }
+        } catch (e) {
+          console.error("JSON parsing of extended text failed:", e);
+          if (extendedRaw) result = { text: extendedRaw };
+        }
       }
     }
 
