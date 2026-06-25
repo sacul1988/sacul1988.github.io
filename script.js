@@ -7931,7 +7931,14 @@ function jumpToStudentInList(index) {
     setTimeout(() => {
         const el = document.getElementById(`zn-begruendung-${index}`);
         const card = el ? el.closest('.student-card') : null;
-        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Karte kurz hervorheben (wie bei der Suchfunktion)
+            const originalBackground = card.style.backgroundColor;
+            card.style.transition = 'background-color 0.3s';
+            card.style.backgroundColor = '#e3f2fd';
+            setTimeout(() => { card.style.backgroundColor = originalBackground; }, 2000);
+        }
         if (el) {
             el.focus();
             const r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
