@@ -4387,19 +4387,27 @@ html.modal-open, body.modal-open {
 /* Planung – Formular */
 .zt-plan-form-grid { display: flex; gap: 12px; }
 .zt-plan-form-grid .form-group { flex: 1; }
-.zt-plan-form-students-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.zt-plan-form-student {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 12px; border: 1px solid var(--border-color);
-    border-radius: 10px; background: #f8fafc;
+.zt-plan-form-students-list {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
 }
-.zt-plan-form-student .zt-plan-student-name { cursor: default; }
+.zt-plan-form-student {
+    display: flex; align-items: center; gap: 8px; justify-content: space-between;
+    padding: 8px 10px; border: 1px solid var(--border-color);
+    border-radius: 10px; background: #f8fafc;
+    min-width: 0;
+}
+.zt-plan-form-student .zt-plan-student-name {
+    cursor: default;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
 .zt-plan-form-actions {
     display: flex; justify-content: flex-end; gap: 10px;
     margin-top: 18px;
 }
 @media (max-width: 599px) {
     .zt-plan-form-grid { flex-direction: column; gap: 0; }
+    .zt-plan-form-students-list { grid-template-columns: repeat(2, 1fr); }
     .zt-planung-inline {
         padding: 0 0 14px;
     }
