@@ -5005,6 +5005,16 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     height: 36px;
     font-size: 1rem;
 }
+.zn-sitz-avg {
+    position: absolute;
+    left: 6px;
+    bottom: 4px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #64748b;
+    line-height: 1;
+    pointer-events: none;
+}
 .zn-sitz-highlight {
     border-color: #2196F3 !important;
     animation: znSitzPulse 0.9s ease-in-out 0s 2;

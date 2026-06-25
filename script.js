@@ -7912,12 +7912,18 @@ function renderZeugnisSitzplan() {
         const student = cls.students[index];
         const note = student.zeugnisnote || '';
         const circleClass = note ? Utils.getGradeColorClass(Utils.convertGrade(note)) : 'zn-grade-circle--empty';
+        // Schriftlicher Durchschnitt (klein unten links)
+        const avg = (student.projects && student.projects.length) ? calculateProjectAverage(student.projects) : null;
+        const avgHtml = (avg && avg.rounded && avg.rounded !== 'Keine Noten')
+            ? `<div class="zn-sitz-avg" title="Schriftlicher Durchschnitt">⌀ ${escapeHtml(avg.rounded)}</div>`
+            : '';
         tiles += `
             <div class="zn-sitz-tile" id="zn-sitz-tile-${index}" style="left:${left}px; top:${top}px;" onclick="jumpToStudentInList(${index})" title="Zum Schüler in der Liste springen">
                 <div class="zn-sitz-name">${escapeHtml(student.name)}</div>
                 <div class="zn-sitz-circle-wrap" style="position:relative;">
                     <div class="zn-grade-circle ${circleClass}" id="zn-sitz-circle-${index}" onclick="znOpenGradePicker(event,${index})" title="Note setzen" style="cursor:pointer;">${note}</div>
                 </div>
+                ${avgHtml}
             </div>`;
     });
 
