@@ -10710,6 +10710,8 @@ function setZtTyp(typ) {
     document.querySelectorAll('.zt-halbjahr-field, .zt-fach-field, .zt-themen-field, .zt-usit-field').forEach(el => {
         el.style.display = isSozial ? 'none' : '';
     });
+    const leftCol = document.querySelector('#zt-input-container .zt-col-left');
+    if (leftCol) leftCol.classList.toggle('zt-left-sozial', isSozial);
     const shHauptNeben = document.querySelector('.zt-schreibhilfe-hauptneben');
     const shSozial = document.querySelector('.zt-schreibhilfe-sozial');
     if (shHauptNeben) shHauptNeben.style.display = isSozial ? 'none' : '';
