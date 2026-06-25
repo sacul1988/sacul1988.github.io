@@ -7891,7 +7891,7 @@ function renderZeugnisSitzplan() {
 
     // SCALE spreizt die Tische auseinander (die Originalpositionen liegen oft dicht
     // beieinander). PAD = Rand rundherum.
-    const TILE_W = 100, TILE_H = 86, PAD = 30, SCALE = 1.3;
+    const TILE_W = 100, TILE_H = 86, PAD = 30, SCALE = 1.15;
     let minX = Infinity, minY = Infinity;
     placed.forEach(d => { minX = Math.min(minX, d.x); minY = Math.min(minY, d.y); });
 
