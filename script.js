@@ -10707,7 +10707,7 @@ function setZtTyp(typ) {
     if (sel && sel.value !== typ) sel.value = typ;
     // Bei Arbeits-/Sozialverhalten entfallen Halbjahr, Fach und Themen
     const isSozial = typ === 'sozialverhalten';
-    document.querySelectorAll('.zt-halbjahr-field, .zt-fach-field, .zt-themen-field').forEach(el => {
+    document.querySelectorAll('.zt-halbjahr-field, .zt-fach-field, .zt-themen-field, .zt-usit-field').forEach(el => {
         el.style.display = isSozial ? 'none' : '';
     });
     const shHauptNeben = document.querySelector('.zt-schreibhilfe-hauptneben');
@@ -10718,7 +10718,7 @@ function setZtTyp(typ) {
 
 // Eingaben des Generator-Formulars lokal sichern, damit der Inhalt (besonders
 // "Beobachtungen & Gedanken") beim kurzen Schließen des Fensters nicht verloren geht.
-const ZT_DRAFT_FIELDS = ['zt-halbjahr', 'zt-typ', 'zt-fach', 'zt-name', 'zt-themen', 'zt-beobachtungen'];
+const ZT_DRAFT_FIELDS = ['zt-halbjahr', 'zt-typ', 'zt-fach', 'zt-name', 'zt-themen', 'zt-usit', 'zt-beobachtungen'];
 
 function ztSaveInputDraft() {
     try {
@@ -10737,7 +10737,7 @@ function ztRestoreInputDraft(force) {
     // werden auch die Textfelder gefüllt (z. B. nach einem Generierungs-Abbruch).
     if (draft['zt-typ']) { const t = document.getElementById('zt-typ'); if (t) { t.value = draft['zt-typ']; setZtTyp(draft['zt-typ']); } }
     if (draft['zt-halbjahr']) { const h = document.getElementById('zt-halbjahr'); if (h) h.value = draft['zt-halbjahr']; }
-    ['zt-fach', 'zt-name', 'zt-themen', 'zt-beobachtungen'].forEach(id => {
+    ['zt-fach', 'zt-name', 'zt-themen', 'zt-usit', 'zt-beobachtungen'].forEach(id => {
         const el = document.getElementById(id);
         if (!el || typeof draft[id] !== 'string') return;
         if (force || el.value == null || el.value === '') el.value = draft[id];
@@ -10779,8 +10779,9 @@ function ztBuildUserMsg() {
     const fach = (document.getElementById('zt-fach')?.value || '').trim();
     const halbjahr = document.getElementById('zt-halbjahr')?.value || 'ersten';
     const themen = (document.getElementById('zt-themen')?.value || '').trim();
+    const usit = (document.getElementById('zt-usit')?.value || '').trim();
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
-    return `Schüler/in: ${name}\n${fach ? 'Fach: ' + fach + '\n' : ''}${fach ? 'Halbjahr: ' + halbjahr + '\n' : ''}${themen ? 'Themen: ' + themen + '\n' : ''}Beobachtungen: ${beob}`;
+    return `Schüler/in: ${name}\n${fach ? 'Fach: ' + fach + '\n' : ''}${fach ? 'Halbjahr: ' + halbjahr + '\n' : ''}${themen ? 'Themen: ' + themen + '\n' : ''}${usit ? 'Unterrichtssituation: ' + usit + '\n' : ''}Beobachtungen: ${beob}`;
 }
 
 function ztCloseResult() {
@@ -11066,6 +11067,7 @@ function ztFillFormFromEntry(entry) {
     set('zt-fach', fach);
     set('zt-name', name);
     set('zt-themen', typeof entry.themen === 'string' ? entry.themen : '');
+    set('zt-usit', typeof entry.unterrichtssituation === 'string' ? entry.unterrichtssituation : '');
     set('zt-beobachtungen', typeof entry.beobachtungen === 'string' ? entry.beobachtungen : '');
 }
 
@@ -11212,6 +11214,7 @@ function ztPersistArchive() {
 function ztCreateArchiveEntry() {
     const beob = (document.getElementById('zt-beobachtungen')?.value || '').trim();
     const themen = (document.getElementById('zt-themen')?.value || '').trim();
+    const usit = (document.getElementById('zt-usit')?.value || '').trim();
     const halbjahr = (document.getElementById('zt-halbjahr')?.value || '').trim();
     const fach = (document.getElementById('zt-fach')?.value || '').trim();
     const name = (document.getElementById('zt-name')?.value || '').trim();
@@ -11231,6 +11234,7 @@ function ztCreateArchiveEntry() {
         text: ZtState.currentText,
         beobachtungen: beob,
         themen: themen,
+        unterrichtssituation: usit,
         halbjahr: halbjahr,
         fach: fach,
         name: name,
@@ -12269,11 +12273,12 @@ function ztPlanungOpenForm(courseId) {
             typ: c.typ || 'nebenfach',
             fach: c.fach || '',
             themen: c.themen || '',
+            unterrichtssituation: c.unterrichtssituation || '',
             students: (c.students || []).map(s => ({ id: s.id, name: s.name, done: !!s.done }))
         };
     } else {
         ZtPlanungState.formCourseId = null;
-        ZtPlanungState.formDraft = { name: '', halbjahr: 'ersten', typ: 'nebenfach', fach: '', themen: '', students: [] };
+        ZtPlanungState.formDraft = { name: '', halbjahr: 'ersten', typ: 'nebenfach', fach: '', themen: '', unterrichtssituation: '', students: [] };
     }
     ztPlanungRenderForm();
     showModal('zt-planung-form-modal');
@@ -12340,6 +12345,10 @@ function ztPlanungRenderForm() {
                 <label for="zt-plan-form-themen">Behandelte Themen</label>
                 <textarea id="zt-plan-form-themen" class="form-control" rows="3">${ztEsc(d.themen)}</textarea>
             </div>
+            <div class="form-group zt-plan-form-usit" style="${isSozial ? 'display:none;' : ''}">
+                <label for="zt-plan-form-usit">Unterrichtssituation (gilt für alle Schüler des Kurses)</label>
+                <textarea id="zt-plan-form-usit" class="form-control" rows="2" placeholder="z. B. Regelunterricht mit zusätzlichen Hilfestellungen und differenzierten Materialien">${ztEsc(d.unterrichtssituation || '')}</textarea>
+            </div>
 
             <div class="form-group">
                 <label>Schüler im Kurs</label>
@@ -12364,17 +12373,19 @@ function ztPlanungFormSyncInfo() {
     const typ = document.getElementById('zt-plan-form-typ');
     const fach = document.getElementById('zt-plan-form-fach');
     const themen = document.getElementById('zt-plan-form-themen');
+    const usit = document.getElementById('zt-plan-form-usit');
     if (nameEl) d.name = nameEl.value;
     if (hj) d.halbjahr = hj.value;
     if (typ) d.typ = typ.value;
     if (fach) d.fach = fach.value;
     if (themen) d.themen = themen.value;
+    if (usit) d.unterrichtssituation = usit.value;
 }
 
 function ztPlanungFormToggleTyp(typ) {
     if (ZtPlanungState.formDraft) ZtPlanungState.formDraft.typ = typ;
     const isSozial = typ === 'sozialverhalten';
-    document.querySelectorAll('#zt-planung-form-modal .zt-plan-form-fach, #zt-planung-form-modal .zt-plan-form-themen').forEach(el => {
+    document.querySelectorAll('#zt-planung-form-modal .zt-plan-form-fach, #zt-planung-form-modal .zt-plan-form-themen, #zt-planung-form-modal .zt-plan-form-usit').forEach(el => {
         el.style.display = isSozial ? 'none' : '';
     });
 }
@@ -12431,6 +12442,7 @@ function ztPlanungSaveCourse() {
             }
             c.halbjahr = d.halbjahr;
             c.themen = isSozial ? '' : (d.themen || '').trim();
+            c.unterrichtssituation = isSozial ? '' : (d.unterrichtssituation || '').trim();
         }
     } else {
         ZtPlanungState.courses.push({
@@ -12440,6 +12452,7 @@ function ztPlanungSaveCourse() {
             typ: d.typ,
             fach: isSozial ? '' : (d.fach || '').trim(),
             themen: isSozial ? '' : (d.themen || '').trim(),
+            unterrichtssituation: isSozial ? '' : (d.unterrichtssituation || '').trim(),
             students: d.students.map(s => ({ id: s.id, name: (s.name || '').trim(), done: false }))
         });
     }
@@ -12508,11 +12521,13 @@ function ztPlanungWriteText(courseId, studentId) {
     const hj = document.getElementById('zt-halbjahr');
     const fach = document.getElementById('zt-fach');
     const themen = document.getElementById('zt-themen');
+    const usit = document.getElementById('zt-usit');
     const name = document.getElementById('zt-name');
     const beob = document.getElementById('zt-beobachtungen');
     if (hj) hj.value = c.halbjahr || 'ersten';
     if (fach) fach.value = isSozial ? '' : (c.fach || '');
     if (themen) themen.value = isSozial ? '' : (c.themen || '');
+    if (usit) usit.value = isSozial ? '' : (c.unterrichtssituation || '');
     if (name) name.value = s.name || '';
     if (beob) { beob.value = ''; beob.focus(); }
 
