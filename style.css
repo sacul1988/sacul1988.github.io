@@ -5594,20 +5594,24 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         box-sizing: border-box;
     }
 
-    /* Hauptfach/Nebenfach: Unterrichtssituation füllt den Restplatz, damit die
-       linke Spalte unten bündig mit dem Beobachtungen-Feld rechts abschließt. */
+    /* Hauptfach/Nebenfach: Themen und Unterrichtssituation teilen sich den Restplatz
+       zu gleichen Teilen, damit beide gleich groß sind und die linke Spalte unten
+       bündig mit dem Beobachtungen-Feld rechts abschließt. */
     .zt-col-left:not(.zt-left-sozial) {
-        grid-template-rows: auto auto auto 1fr;
+        grid-template-rows: auto auto 1fr 1fr;
         align-content: stretch;
     }
+    .zt-col-left:not(.zt-left-sozial) .zt-themen-field,
     .zt-col-left:not(.zt-left-sozial) .zt-usit-field {
         display: flex;
         flex-direction: column;
         min-height: 0;
     }
+    .zt-col-left:not(.zt-left-sozial) .zt-themen-textarea,
     .zt-col-left:not(.zt-left-sozial) .zt-usit-textarea {
         flex: 1;
         height: 100%;
+        min-height: 90px;
     }
     
     /* Dynamisches Strecken der Eingabefelder auf der rechten Seite bis zum Rand */
