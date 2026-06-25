@@ -414,7 +414,7 @@ exports.generateZeugnisnote = onCall(
         userMsg += `\nUnterrichtsfach: ${fachContext.trim()}\n`;
       }
       userMsg += `\nNUR FÜR DIESES NEBENFACH gilt zusätzlich folgende Vorgabe (sie überschreibt das entsprechende Verbot im System-Prompt):\n`;
-      userMsg += `Der ERSTE Stichpunkt des mitarbeit_text (also direkt nach der Auflistung der schriftlichen Noten und der Durchschnittsnote) muss wörtlich so lauten (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählen deine mündlichen Beiträge, deine Arbeitshaltung und deine Motivation insgesamt mehr als die schriftlichen Noten. In deiner Mitarbeit im Unterricht ist mir Folgendes aufgefallen:". Dieser erste Stichpunkt darf ausnahmsweise zwei Sätze enthalten. Erst danach folgen die Stichpunkte zu den einzelnen Beobachtungen, und ganz zum Schluss der Stichpunkt mit der Endnote (nur die Note, ohne Begründung).\n`;
+      userMsg += `Reihenfolge der Stichpunkte im mitarbeit_text: zuerst die Stichpunkte zu den Beobachtungen. Danach als VORLETZTER Stichpunkt der Gewichtungshinweis, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählen deine mündlichen Beiträge, deine Arbeitshaltung und deine Motivation insgesamt mehr als die schriftlichen Noten." Als ALLERLETZTER Stichpunkt die Endnote (nur die Note, ohne Begründung).\n`;
     } else {
       userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
     }
