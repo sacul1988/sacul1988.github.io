@@ -10797,6 +10797,28 @@ function ztBackToPlanung() {
     ztApplyInlineMode();
 }
 
+// "Nächster Schüler": springt zum nächsten noch offenen Schüler desselben Kurses.
+// Sind alle abgearbeitet, geht es zurück zur Planungsliste.
+function ztNextStudentInCourse() {
+    ztFlushSave();
+    const entry = (ZtState.archive || []).find(e => e.id === ZtState.currentId);
+    const courseId = (entry && entry.courseId) ? entry.courseId
+        : (ZtState.planungRef && ZtState.planungRef.courseId ? ZtState.planungRef.courseId : '');
+    const currentName = entry ? (entry.name || '') : '';
+    if (!courseId || typeof ZtPlanungState === 'undefined') { ztBackToPlanung(); return; }
+    const course = (ZtPlanungState.courses || []).find(c => c.id === courseId);
+    if (!course) { ztBackToPlanung(); return; }
+    // Nächster Schüler = erster noch nicht erledigter im Kurs (der aktuelle ist bereits erledigt)
+    const next = (course.students || []).find(s => !s.done && s.name !== currentName);
+    if (next) {
+        ztPlanungWriteText(courseId, next.id);
+    } else {
+        ztBackToPlanung();
+        if (typeof swal === 'function') swal('Fertig', 'Alle Schüler dieses Kurses sind abgearbeitet.', 'success');
+    }
+}
+window.ztNextStudentInCourse = ztNextStudentInCourse;
+
 let ztSaveTimeout = null;
 function ztFlushSave() {
     if (ztSaveTimeout) {
@@ -10990,6 +11012,14 @@ function ztRenderResult() {
     container.style.display = '';
 
     ZtState.currentText = ztNormalizeText(ZtState.currentText);
+
+    // "Nächster Schüler" nur anzeigen, wenn der Text zu einem Kurs aus der Planung gehört
+    const _entry = (ZtState.archive || []).find(e => e.id === ZtState.currentId);
+    const _fromPlanung = !!(_entry && _entry.courseId) || !!(ZtState.planungRef && ZtState.planungRef.courseId);
+    const nextBtnHtml = _fromPlanung
+        ? `<button class="btn btn-secondary btn-icon btn-block zt-next-student-btn" onclick="ztNextStudentInCourse()"><i class="fas fa-arrow-right"></i> <span class="btn-text">Nächster Schüler</span></button>`
+        : '';
+
     container.innerHTML = `
         <div class="zt-panel-body">
             <div class="zt-modal-head">
@@ -11006,6 +11036,7 @@ function ztRenderResult() {
                     </div>
                 </div>
             </div>
+            ${nextBtnHtml ? `<div class="zt-result-footer">${nextBtnHtml}</div>` : ''}
         </div>`;
 }
 

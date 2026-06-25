@@ -3993,6 +3993,14 @@ html.modal-open, body.modal-open {
     background: var(--light-color);
 }
 
+.zt-result-footer {
+    margin-top: 12px;
+    padding: 0 16px 12px;
+}
+.zt-result-footer .zt-next-student-btn {
+    width: 100%;
+}
+
 .zt-spinner {
     width: 28px;
     height: 28px;
