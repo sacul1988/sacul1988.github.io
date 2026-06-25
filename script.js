@@ -12193,6 +12193,8 @@ function ztPlanungDeleteStudent(courseId, studentId) {
     if (!c) return;
     const s = (c.students || []).find(x => x.id === studentId);
     if (!s) return;
+    const _sc = _ztInlineScroller();
+    const _y = _sc ? _sc.scrollTop : 0;
     hideModal();
     swal({
         title: 'Schüler löschen?',
@@ -12205,7 +12207,7 @@ function ztPlanungDeleteStudent(courseId, studentId) {
             c.students = (c.students || []).filter(x => x.id !== studentId);
             ztPlanungPersist();
         }
-        ztPlanungOpen();
+        ztReturnToInlinePlanung(_y);
     });
 }
 
@@ -12213,6 +12215,8 @@ function ztPlanungDeleteCourse(courseId) {
     const c = ZtPlanungState.courses.find(x => x.id === courseId);
     if (!c) return;
     const label = c.name || (c.typ === 'sozialverhalten' ? 'Arbeits-/Sozialverhalten' : (c.fach || 'Kurs'));
+    const _sc = _ztInlineScroller();
+    const _y = _sc ? _sc.scrollTop : 0;
     hideModal();
     swal({
         title: 'Kurs löschen?',
@@ -12225,7 +12229,7 @@ function ztPlanungDeleteCourse(courseId) {
             ZtPlanungState.courses = ZtPlanungState.courses.filter(x => x.id !== courseId);
             ztPlanungPersist();
         }
-        ztPlanungOpen();
+        ztReturnToInlinePlanung(_y);
     });
 }
 
@@ -12243,16 +12247,18 @@ function ztPlanungClearAll() {
             ZtPlanungState.courses = [];
             ztPlanungPersist();
         }
-        ztPlanungOpen();
+        ztReturnToInlinePlanung(0);
     });
 }
 
 // ----- Formular (Anlegen / Bearbeiten) -----
 function ztPlanungOpenForm(courseId) {
     ztPlanungInit();
-    // Scroll-Position der Liste merken, bevor showModal sie auf display:none setzt
+    // Scroll-Position der Liste merken, bevor das Formular-Modal sie überdeckt
     const listModal = document.getElementById('zt-planung-modal');
     ZtPlanungState.listScrollTop = listModal ? listModal.scrollTop : 0;
+    const sc = _ztInlineScroller();
+    ZtPlanungState.inlineScrollTop = sc ? sc.scrollTop : 0;
     if (courseId) {
         const c = ZtPlanungState.courses.find(x => x.id === courseId);
         if (!c) return;
@@ -12441,8 +12447,7 @@ function ztPlanungSaveCourse() {
     ZtPlanungState.formCourseId = null;
     ZtPlanungState.formDraft = null;
     ztPlanungPersist();
-    ztPlanungOpen(); // zurück zur Liste
-    ztPlanungRestoreListScroll();
+    ztReturnToInlinePlanung(); // zurück zur Inline-Liste (gleiche Scroll-Position)
 }
 
 // Liste wieder an die vor dem Öffnen des Formulars gemerkte Stelle scrollen
@@ -12451,6 +12456,32 @@ function ztPlanungSaveCourse() {
 function ztPlanungRestoreListScroll() {
     const y = ZtPlanungState.listScrollTop || 0;
     const restore = () => { const m = document.getElementById('zt-planung-modal'); if (m) m.scrollTop = y; };
+    restore();
+    requestAnimationFrame(restore);
+}
+
+// Scrollbares Eltern-Element der Inline-Planungsliste finden
+function _ztInlineScroller() {
+    const el = document.getElementById('zt-planung-inline');
+    let n = el ? el.parentElement : null;
+    while (n && n !== document.body) {
+        const oy = window.getComputedStyle(n).overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && n.scrollHeight > n.clientHeight + 2) return n;
+        n = n.parentElement;
+    }
+    return document.scrollingElement || document.documentElement;
+}
+
+// Nach Speichern/Löschen zurück zur INLINE-Planungsliste (nicht mehr das alte Modal),
+// mit Wiederherstellung der Scroll-Position.
+function ztReturnToInlinePlanung(scrollTop) {
+    hideModal();
+    ZtState.inlineMode = 'planung';
+    ztPlanungRenderInline();
+    ztApplyInlineMode();
+    const y = Number.isFinite(scrollTop) ? scrollTop : (ZtPlanungState.inlineScrollTop || 0);
+    const sc = _ztInlineScroller();
+    const restore = () => { if (sc) sc.scrollTop = y; };
     restore();
     requestAnimationFrame(restore);
 }
