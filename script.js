@@ -7565,9 +7565,17 @@ function renderZeugnisModule() {
 
     const container = safeGetElement('zeugnis-container');
     if (!container) return;
-    
+
+    // Immer mit der Listenansicht starten – Sitzplan-Ansicht zurücksetzen
+    _zeugnisSitzplanView = false;
+    const _sitzC = safeGetElement('zeugnis-sitzplan-container');
+    if (_sitzC) _sitzC.style.display = 'none';
+    container.style.display = '';
+    const _sbtn = safeGetElement('zeugnis-sitzplan-toggle');
+    if (_sbtn) { _sbtn.classList.remove('btn-warning'); _sbtn.classList.add('btn-primary'); }
+
     container.innerHTML = '';
-    
+
     if (!classes[activeClassId] || !classes[activeClassId].students || classes[activeClassId].students.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -7647,6 +7655,7 @@ function renderZeugnisModule() {
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(student.name)}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
                     <button class="btn-back-to-top-circle${notesActive ? ' notes-btn-active' : ''}" onclick="event.stopPropagation(); openNotesModal(${index})" title="Notizen"><i class="fas fa-pen"></i></button>
+                    <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); jumpToStudentInSitzplan(${index})" title="Im Sitzplan zeigen"><i class="fas fa-chair"></i></button>
                     <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);" title="Nach oben"><i class="fas fa-arrow-up"></i></button>
                     <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); openSearchModal('zeugnis')" title="Suchen"><i class="fas fa-search"></i></button>
                 </div>
@@ -7680,6 +7689,7 @@ function renderZeugnisModule() {
 
 // ===== Zeugnisnote (KI-Notenvorschlag) – inline in der Schülerkarte =====
 let _zeugnisnoteBusy = false;
+let _zeugnisSitzplanView = false;  // false = Liste, true = Sitzplan-Ansicht (startet immer mit Liste)
 let _znPendingQuestions = null;
 let _znPendingMessages = null;
 let _znPendingIndex = null;
@@ -7793,6 +7803,13 @@ function znSetGradeManually(index, newGrade) {
     saveData();
     const c = document.getElementById(`zn-inline-${index}`);
     if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
+    // Notenkreis in der Sitzplan-Ansicht (falls offen) mit aktualisieren
+    const sc = document.getElementById(`zn-sitz-circle-${index}`);
+    if (sc) {
+        const note2 = student.zeugnisnote || '';
+        sc.className = 'zn-grade-circle ' + (note2 ? Utils.getGradeColorClass(Utils.convertGrade(note2)) : 'zn-grade-circle--empty');
+        sc.textContent = note2;
+    }
 }
 
 function znGenerateFromField(index) {
@@ -7806,6 +7823,108 @@ function znGenerateFromField(index) {
     student.zeugnisSonstiges = rawContent.replace(/^•\s*/gm, '').replace(/•/g, '').trim();
     zeugnisnoteGenerate(index, null);
 }
+
+// ===== Zeugnis-Sitzplan-Ansicht (reduziert, scrollbar, Endnoten als Kreise) =====
+function toggleZeugnisSitzplanView() {
+    _zeugnisSitzplanView = !_zeugnisSitzplanView;
+    _applyZeugnisView();
+}
+
+function _applyZeugnisView() {
+    const listC = safeGetElement('zeugnis-container');
+    const sitzC = safeGetElement('zeugnis-sitzplan-container');
+    const btn = safeGetElement('zeugnis-sitzplan-toggle');
+    if (_zeugnisSitzplanView) {
+        if (listC) listC.style.display = 'none';
+        if (sitzC) sitzC.style.display = 'block';
+        if (btn) { btn.classList.remove('btn-primary'); btn.classList.add('btn-warning'); }
+        renderZeugnisSitzplan();
+    } else {
+        if (sitzC) sitzC.style.display = 'none';
+        if (listC) listC.style.display = '';
+        if (btn) { btn.classList.remove('btn-warning'); btn.classList.add('btn-primary'); }
+    }
+}
+
+function renderZeugnisSitzplan() {
+    const container = safeGetElement('zeugnis-sitzplan-container');
+    if (!container) return;
+    const cls = classes[activeClassId];
+    if (!cls || !cls.students || cls.students.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-chair"></i><p>Keine Schüler in dieser Klasse</p></div>`;
+        return;
+    }
+    const desks = (cls.sitzplan && Array.isArray(cls.sitzplan.desks)) ? cls.sitzplan.desks : [];
+    const placed = desks.filter(d => d && cls.students[d.studentIndex]);
+    if (placed.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-chair"></i><p>Noch kein Sitzplan vorhanden. Lege ihn zuerst im Tab „Sitzplan" an.</p></div>`;
+        return;
+    }
+
+    const TILE_W = 100, TILE_H = 86, PAD = 30, PAD_BOTTOM = 200;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    placed.forEach(d => {
+        minX = Math.min(minX, d.x); minY = Math.min(minY, d.y);
+        maxX = Math.max(maxX, d.x + TILE_W); maxY = Math.max(maxY, d.y + TILE_H);
+    });
+    const offX = PAD - minX, offY = PAD - minY;
+    const canvasW = (maxX - minX) + PAD * 2;
+    const canvasH = (maxY - minY) + PAD + PAD_BOTTOM;
+
+    let tiles = '';
+    placed.forEach(d => {
+        const index = d.studentIndex;
+        const student = cls.students[index];
+        const note = student.zeugnisnote || '';
+        const circleClass = note ? Utils.getGradeColorClass(Utils.convertGrade(note)) : 'zn-grade-circle--empty';
+        const left = d.x + offX, top = d.y + offY;
+        tiles += `
+            <div class="zn-sitz-tile" id="zn-sitz-tile-${index}" style="left:${left}px; top:${top}px;" onclick="jumpToStudentInList(${index})" title="Zum Schüler in der Liste springen">
+                <div class="zn-sitz-name">${escapeHtml(student.name)}</div>
+                <div class="zn-sitz-circle-wrap" style="position:relative;">
+                    <div class="zn-grade-circle ${circleClass}" id="zn-sitz-circle-${index}" onclick="znOpenGradePicker(event,${index})" title="Note setzen" style="cursor:pointer;">${note}</div>
+                </div>
+            </div>`;
+    });
+
+    container.innerHTML = `<div class="zn-sitzplan-canvas" style="width:${canvasW}px; height:${canvasH}px;">${tiles}</div>`;
+}
+
+// Vom Sitzplan zur Liste: zur Karte scrollen und das Textfeld fokussieren
+function jumpToStudentInList(index) {
+    _zeugnisSitzplanView = false;
+    _applyZeugnisView();
+    setTimeout(() => {
+        const el = document.getElementById(`zn-begruendung-${index}`);
+        const card = el ? el.closest('.student-card') : null;
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (el) {
+            el.focus();
+            const r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
+            const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        }
+    }, 60);
+}
+
+// Von der Liste zum Sitzplan: Ansicht wechseln und den Schüler kurz hervorheben
+function jumpToStudentInSitzplan(index) {
+    _zeugnisSitzplanView = true;
+    _applyZeugnisView();
+    setTimeout(() => {
+        const tile = document.getElementById(`zn-sitz-tile-${index}`);
+        if (tile) {
+            tile.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            tile.classList.add('zn-sitz-highlight');
+            setTimeout(() => tile.classList.remove('zn-sitz-highlight'), 2000);
+        } else {
+            swal('Hinweis', 'Für diesen Schüler gibt es noch keinen Platz im Sitzplan.', 'info');
+        }
+    }, 80);
+}
+
+window.toggleZeugnisSitzplanView = toggleZeugnisSitzplanView;
+window.jumpToStudentInList = jumpToStudentInList;
+window.jumpToStudentInSitzplan = jumpToStudentInSitzplan;
 
 function openZeugnisnoteHinweisModal(index) {
     window.currentAdjustingStudentIndex = index;

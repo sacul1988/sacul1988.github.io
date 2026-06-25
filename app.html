@@ -528,6 +528,9 @@
                                 <h2>Zeugnis</h2>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
+                                        <button class="btn btn-primary btn-icon" id="zeugnis-sitzplan-toggle" onclick="toggleZeugnisSitzplanView()">
+                                            <i class="fas fa-chair"></i> <span class="btn-text">Sitzplan</span>
+                                        </button>
                                         <button class="btn btn-primary btn-icon" id="zeugnis-view-toggle" onclick="toggleZeugnisView()">
                                             <i class="fas fa-calculator"></i> <span class="btn-text">Durchschnitt</span>
                                         </button>
@@ -553,9 +556,12 @@
                             <div id="zeugnis-container">
                                 <!-- Hier werden die Schüler-Karteikarten dynamisch eingefügt -->
                             </div>
+                            <div id="zeugnis-sitzplan-container" style="display: none;">
+                                <!-- Hier wird die Sitzplan-Ansicht der Zeugnisnoten eingefügt -->
+                            </div>
                         </div>
                     </div>
-                    
+
                     <!-- Zeugnis Texte Modul -->
                     <div id="zeugnis-texte-module" class="module" style="display: none;">
                         <div class="card">
