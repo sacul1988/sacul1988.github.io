@@ -282,71 +282,33 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
 );
 
 // ===== Zeugnisnoten-Vorschlag: Note abwägen + Begründung schreiben =====
-const ZEUGNISNOTE_SYSTEM = `Du unterstützt eine Lehrkraft dabei, einer Schülerin oder einem Schüler eine Rückmeldung zur sonstigen Mitarbeit und zur Endnote zu geben. Der Text wird DIREKT AN DIE SCHÜLERIN ODER DEN SCHÜLER gerichtet, also in der Anrede "Du".
-Deine Aufgabe: Die Lehrkraft gibt dir stichwortartige, oft unfertige Beobachtungen zur Mitarbeit. Bringe diese in eine saubere, korrekte Form (Korrektur lesen, vollständige und richtig geschriebene Sätze, schülernahe Sprache) und schlage eine passende Endnote vor. Erfinde keine zusätzlichen Inhalte. Die schriftlichen Einzelnoten und die Durchschnittsnote werden separat angezeigt – gib sie NICHT noch einmal aus.
+const ZEUGNISNOTE_SYSTEM = `Du unterstützt eine Lehrkraft dabei, einer Schülerin oder einem Schüler eine Rückmeldung zur sonstigen Mitarbeit zu geben. Der Text wird DIREKT AN DIE SCHÜLERIN ODER DEN SCHÜLER gerichtet, also in der Anrede "Du".
+Deine Aufgabe: Die Lehrkraft gibt dir stichwortartige, oft unfertige Beobachtungen zur Mitarbeit. Bringe diese in eine saubere, korrekte Form (Korrektur lesen, vollständige und richtig geschriebene Sätze). Erfinde keine zusätzlichen Inhalte. Du schlägst KEINE Note vor und nennst KEINE Note – die Note setzt die Lehrkraft selbst.
 
 [WICHTIGE AUSGABE-REGEL (JSON)]
 Du musst als Antwort IMMER ein valides JSON-Objekt zurückgeben.
-Analysiere die eingegebenen Beobachtungen und Informationen des Nutzers. Wenn wichtige Kerndetails fehlen, um die sonstige Mitarbeit oder die Note fair und angemessen zu bewerten (z.B. wenn die Beobachtungen zur mündlichen Mitarbeit völlig unklar, widersprüchlich oder extrem mager sind), oder wenn du dir bezüglich der Endnote unsicher bist, stelle gezielte Rückfragen.
-WICHTIG: Wenn der Nutzer in der Historie bereits Fragen beantwortet hat (oder die Nachrichtenhistorie mehrere Runden hat), stelle KEINE weiteren Fragen mehr, sondern erstelle in jedem Fall die endgültige Note und die Begründung!
+Analysiere die eingegebenen Beobachtungen. Nur wenn die Beobachtungen zur Mitarbeit völlig unklar, widersprüchlich oder extrem mager sind, stelle gezielte Rückfragen.
+WICHTIG: Wenn der Nutzer in der Historie bereits Fragen beantwortet hat (oder die Nachrichtenhistorie mehrere Runden hat), stelle KEINE weiteren Fragen mehr, sondern erstelle in jedem Fall den Text!
 
 Antworte in genau diesem JSON-Format:
-- Wenn wichtige Informationen fehlen oder du bezüglich der Note unsicher bist und Rückfragen nötig sind:
+- Wenn wichtige Informationen fehlen und Rückfragen nötig sind:
   {"status": "unclear", "questions": ["Frage 1...", "Frage 2...", "Frage 3..."]} (Gib maximal 3 gezielte, kurze Fragen zurück)
-  
-- Wenn alle Informationen ausreichend sind oder bereits Fragen beantwortet wurden:
-  {"status": "success", "abwaegung": "...", "endnote": "...", "mitarbeit_text": "..."}
-  Das Feld "abwaegung" kommt ZUERST und dient nur deinem internen Abwägen (es wird der Schülerin oder dem Schüler NICHT angezeigt): Halte dort in 1-3 kurzen Sätzen fest, welche Kategorie am besten passt, in welche Richtung und um wie viele Notenschritte du die gerundete Durchschnittsnote verschiebst und wie du dadurch auf die Endnote kommst. Erst danach füllst du "endnote" und "mitarbeit_text".
+
+- Wenn die Informationen ausreichen oder bereits Fragen beantwortet wurden:
+  {"status": "success", "mitarbeit_text": "..."}
 
 Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohne Einleitung, Erklärung oder sonstigen Text davor/danach).
 
 Regeln für "mitarbeit_text":
 
-Gib KEINEN Fließtext zurück, sondern einzelne Stichpunkte, jeweils in einer eigenen Zeile und jeweils beginnend mit "• ". Jeder Stichpunkt enthält GENAU EINEN Satz. Niemals zwei Sätze in einem Stichpunkt. So viele Stichpunkte wie nötig – kein festes Limit.
-Der erste Stichpunkt leitet zur sonstigen Mitarbeit über. Beginne direkt mit einer konkreten Beobachtung in der Anrede "Du", ohne eine einleitende Floskeln wie "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen:".
-Jeder Stichpunkt steht in der direkten Anrede "Du" und bezieht sich konkret auf die unten genannten Beobachtungen zur mündlichen Mitarbeit. Formuliere kurze, klare Stichpunkte statt eines zusammenhängenden Fließtexts.
-Jeder einzelne Punkt aus den Beobachtungen muss im Text erscheinen – ohne Ausnahme. Fasse NICHTS zusammen und lasse NICHTS weg, auch wenn dir zwei Punkte ähnlich erscheinen. Deine einzige Aufgabe ist es, jeden Punkt sprachlich sauber in der Anrede "Du" in einen Stichpunkt zu übersetzen. Der Inhalt bleibt vollständig erhalten.
-Schreibe in einfacher, schülernaher Sprache. Vermeide verschachtelte Satzstrukturen und lange Relativsätze. Setze überwiegend gar kein Komma in einem Stichpunkt – Ausnahme: Aufzählungen. Enthält ein Satz ein Komma, das keine Aufzählung ist, mache daraus lieber zwei getrennte Sätze.
-Hänge keine wertenden Satzreste an, z. B. NICHT: "..., das ist positiv." Schreibe stattdessen direkt und natürlich, z. B. "• Du arbeitest zuverlässig und ruhig im Unterricht mit." oder "• Das hilft dir im Unterricht."
-Vermeide verschachtelte Konstruktionen wie "was in einem Hauptfach, in dem ..., ins Gewicht fällt". Formuliere einfacher, z. B. "• Du meldest dich noch zu selten."
-Nenne die Endnote NICHT im Text. Es gibt KEINEN Schlusssatz mit der Note (also NICHT "Insgesamt ergibt das für dich die Note X."). Die Note gibst du nur im Feld "endnote" zurück.
-Formuliere wertschätzend. Der Text beschreibt den Leistungsstand – keine Ratschläge oder Tipps, wie der Schüler/die Schülerin sich verbessern könnte.
-Schreibe NIEMALS Sätze, die erklären wie sich etwas auf die Note auswirkt oder wie mündliche und schriftliche Leistung gewichtet werden – also NICHT "Das wirkt sich auf deine Note aus", NICHT "Da mündliche und schriftliche Leistung gleich viel zählen ..." und keine ähnlichen Formulierungen. Das Abwägen bleibt ausschließlich im internen Feld "abwaegung". (Ausnahme: Wenn die Nutzernachricht weiter unten für ein Nebenfach ausdrücklich einen Hinweis zur Gewichtung verlangt, befolge diese Anweisung.)
-Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.
-Wenn die Beobachtungen sehr knapp oder widersprüchlich sind (und du dich entscheidest, keine Rückfragen zu stellen), weise das kurz und sachlich an passender Stelle darauf hin.
-
-Regeln für "endnote":
-
-EIN eindeutiger Wert als String, ohne Spanne (z. B. "2+", "3", "3-"). Nutze aktiv Tendenzen ("2+", "3-" usw.), um Nuancen abzubilden; vermeide den übermäßigen Hang zu glatten ganzen Noten, außer die Leistung liegt eindeutig genau dort.
-
-HERLEITUNG DER ENDNOTE (Orientierung, kein starres Rechenschema):
-Gehe IMMER von der gerundeten schriftlichen Durchschnittsnote aus und verschiebe sie in Notenschritten (halbe Stufen in der Reihe: 1, 1-, 2+, 2, 2-, 3+, 3, 3-, 4+, 4, 4-, 5+, 5) nach oben (= bessere Note) oder unten (= schlechtere Note). Die wichtigsten Stellschrauben sind die Häufigkeit und Qualität der mündlichen Beteiligung sowie das Ausmaß von Störungen und Ablenkungen.
-Zähle die Notenschritte sorgfältig, jede halbe Stufe der Reihe einzeln. Beispiele: Von 3 drei Schritte nach oben: 3 -> 3+ -> 2- -> 2. Von 3 zwei Schritte nach unten: 3 -> 3- -> 4+. Von 2- einen Schritt nach oben: 2- -> 2. Von 4 zwei Schritte nach oben: 4 -> 4+ -> 3-.
-
-WICHTIG – DU MUSST SELBST URTEILEN: Die folgenden Kategorien und Schritt-Spannen sind nur Orientierung, kein Automatismus und keine Rechenaufgabe. Man kann unmöglich alle denkbaren Beobachtungen in feste Formulierungen fassen. Lies die Beobachtungen daher wie eine erfahrene Lehrkraft, wäge selbst ab und entscheide nach Gesamteindruck und Gefühl, ob insgesamt das Positive oder das Negative überwiegt und wie stark – und leite daraus eine stimmige Endnote ab. Rechne nicht stur Schritte ab, sondern triff eine begründete, menschliche Einschätzung. Liegt eine Beschreibung zwischen zwei Kategorien, wähle die passende Zwischenstufe. Die Beispielformulierungen unten beschreiben nur den TENOR; die echten Beobachtungen sind oft anders formuliert – ordne sie sinngemäß ein.
-
-Bei jeder Kategorie gilt: erster Wert = Hauptfach, zweiter Wert = Nebenfach. Im Nebenfach zählt die mündliche Leistung deutlich stärker, deshalb dort die kräftigere Verschiebung.
-
-1. SEHR POSITIV -> bis zu +3 (Hauptfach) / bis zu +4 (Nebenfach) Notenschritte nach oben
-Tenor z. B.: "meldet sich sehr regelmäßig", "bringt selbstständig weiterführende Beiträge", "arbeitet durchgehend konzentriert und eigenständig", "sehr ruhig und zuverlässig", "stört nie, lässt sich nicht ablenken", "hilft anderen / übernimmt Verantwortung".
-
-2. ÜBERWIEGEND POSITIV (deutlich mehr positiv als negativ) -> +1 bis +2 (Hauptfach) / +2 bis +3 (Nebenfach) nach oben
-Tenor z. B.: "beteiligt sich gut/häufig", "gutes Grundwissen", "arbeitet meist selbstständig und zuverlässig", "nur selten abgelenkt", "kaum Störungen".
-
-3. AUSGEGLICHEN / NORMAL / SCHWANKEND -> ±0 (in beiden Fällen), die Note bleibt
-Tenor z. B.: "meldet sich eher selten", "mal mehr, mal weniger beteiligt", "teilweise abgelenkt", "gelegentlich kleinere Störungen", "Mitarbeit schwankt". Positives und Negatives halten sich ungefähr die Waage.
-
-4. ÜBERWIEGEND NEGATIV -> -1 bis -2 (Hauptfach) / -2 bis -3 (Nebenfach) Notenschritte nach unten
-Tenor z. B.: "stört regelmäßig", "arbeitet unzuverlässig", "wenig Motivation", "häufig abgelenkt", "muss oft ermahnt werden", "bringt selten etwas ein".
-
-5. SEHR NEGATIV -> bis zu -3 (Hauptfach) / bis zu -4 (Nebenfach) Notenschritte nach unten
-Tenor z. B.: "massive, wiederholte Störungen, die den Unterricht unterbrechen", "verweigert die Mitarbeit", "keine Beteiligung", "kaum Motivation trotz Ansprache", "lenkt andere stark ab".
-
-6. SONDERFALL – still, aber ordentlich -> in der Regel +1 (kleine Aufwertung in beiden Fächern)
-Tenor z. B.: "meldet sich wenig, arbeitet aber ruhig und ordentlich mit", "zurückhaltend, aber zuverlässig und störungsfrei", "beteiligt sich kaum mündlich, erledigt seine Aufgaben aber gut". Die geringe mündliche Beteiligung ist hier der einzige Schwachpunkt; das gute Arbeits- und Sozialverhalten rechtfertigt eine kleine Aufwertung.
-
-GRENZEN: Beste mögliche Note ist "1" (kein "1+"), schlechteste ist "5" (keine "5-" oder "6"). Korrekturen werden an diesen Grenzen gekappt.
-Die Note steht NUR im Feld "endnote", nicht im Text.`;
+Gib KEINEN Fließtext zurück, sondern einzelne Stichpunkte, jeweils in einer eigenen Zeile und jeweils beginnend mit "• ". Mache aus jedem eingegebenen Punkt einen eigenen Stichpunkt. So viele Stichpunkte wie nötig – kein festes Limit.
+Jeder Stichpunkt steht in der direkten Anrede "Du" und bezieht sich auf die unten genannten Beobachtungen zur Mitarbeit. Beginne ohne einleitende Floskeln (also NICHT "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen:").
+Übernimm jeden Punkt aus den Eingaben einzeln. Lasse nichts weg. Fasse nur dann etwas zusammen, wenn es wörtlich dasselbe ist – ähnliche, aber eigenständige Angaben bleiben getrennt. Vollständigkeit geht vor Kürze.
+SANFTE KORREKTUR statt Umformulierung: Verändere meinen Schreibstil so wenig wie möglich. Korrigiere NUR Rechtschreibung, Kommasetzung, Grammatik und offensichtliche Fehler und vervollständige halbe Sätze zu ganzen Sätzen. Formuliere NICHT um, ersetze keine Wörter durch Synonyme, kürze nicht und vereinfache nicht. Der fertige Stichpunkt soll so klingen wie meine Eingabe – nur sprachlich korrekt und in der Anrede "Du". Füge keine eigenen Inhalte oder Bewertungen hinzu.
+Nenne KEINE Note im Text. Es gibt KEINEN Schlusssatz mit einer Note (also NICHT "Insgesamt ergibt das für dich die Note X.").
+Füge keine Ratschläge oder Tipps hinzu, wie der Schüler/die Schülerin sich verbessern könnte.
+Schreibe keine Sätze, die etwas über eine Note oder deren Zustandekommen aussagen.
+Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.`;
 
 function formatAverageSentence(durchschnitt, durchschnittNote) {
   return durchschnitt ? `Daraus ergibt sich die schriftliche Durchschnittsnote ${durchschnittNote}.` : "";
@@ -410,37 +372,11 @@ exports.generateZeugnisnote = onCall(
     } catch (e) {
       throw toInvalidArgument(e);
     }
-    const { schriftlicheNoten, durchschnitt, durchschnittNote, sonstiges, fachart, richtung, hinweis, fachContext, messages } = payload;
-    const fach = fachart === "nebenfach" ? "nebenfach" : "hauptfach";
+    const { sonstiges, hinweis, messages } = payload;
 
-    let userMsg = "";
-    if (Array.isArray(schriftlicheNoten) && schriftlicheNoten.length > 0) {
-      const liste = schriftlicheNoten.map(n => `${n.name || "Arbeit"}: ${n.grade}`).join(", ");
-      userMsg += `Schriftliche Einzelnoten (Name der Arbeit: Note): ${liste}\n`;
-    } else {
-      userMsg += `Es liegen keine schriftlichen Noten vor.\n`;
-    }
-    if (durchschnitt) {
-      userMsg += `Schriftliche Durchschnittsnote: ${durchschnittNote}\n`;
-    }
-    userMsg += `Beobachtungen zur mündlichen Mitarbeit:\n\n${sonstiges && sonstiges.trim() ? sonstiges.trim() : "Keine Angabe"}\n`;
-
-    if (fach === "nebenfach") {
-      userMsg += `\nArt des Fachs: Nebenfach. Bei diesem Fach zählt die mündliche Leistung für die Endnote deutlich mehr als die schriftliche Leistung.\n`;
-      if (fachContext && fachContext.trim()) {
-        userMsg += `\nUnterrichtsfach: ${fachContext.trim()}\n`;
-      }
-      userMsg += `\nNUR FÜR DIESES NEBENFACH gilt zusätzlich folgende Vorgabe (sie überschreibt das entsprechende Verbot im System-Prompt):\n`;
-      userMsg += `Reihenfolge der Stichpunkte im mitarbeit_text: zuerst die Stichpunkte zu den Beobachtungen. Als LETZTER Stichpunkt der Gewichtungshinweis, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählen deine mündlichen Beiträge, deine Arbeitshaltung und deine Motivation insgesamt mehr als die schriftlichen Noten." Es folgt KEIN Satz mit der Endnote.\n`;
-    } else {
-      userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
-    }
-
-    if (richtung === "besser") {
-      userMsg += `\nWICHTIG: Schlage eine etwas BESSERE Note vor als beim normalen Abwägen und passe die Begründung entsprechend an.`;
-    } else if (richtung === "schlechter") {
-      userMsg += `\nWICHTIG: Schlage eine etwas SCHLECHTERE Note vor als beim normalen Abwägen und passe die Begründung entsprechend an.`;
-    }
+    // Die KI bekommt nur die Beobachtungen (und einen optionalen Hinweis) – keine Noten,
+    // keinen Durchschnitt, keine Fachgewichtung. Es wird keine Note mehr berechnet.
+    let userMsg = `Beobachtungen zur Mitarbeit:\n\n${sonstiges && sonstiges.trim() ? sonstiges.trim() : "Keine Angabe"}\n`;
     if (hinweis && hinweis.trim()) {
       userMsg += `\nZusätzlicher Hinweis der Lehrkraft, den du berücksichtigen sollst: ${hinweis.trim()}`;
     }
@@ -460,28 +396,22 @@ exports.generateZeugnisnote = onCall(
     const raw = data.content?.map(b => b.text || "").join("").trim() || "";
 
     let status = "success";
-    let note = "";
     let begruendung = "";
     let questions = [];
 
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
-      
+
       if (parsed.status === "unclear" && Array.isArray(parsed.questions)) {
         status = "unclear";
         questions = parsed.questions;
       } else {
-        note = (parsed.note || parsed.endnote || "").toString().trim();
         const mitarbeitText = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
-
-        // Noten-Auflistung und Durchschnitt werden NICHT mehr ausgegeben (stehen oben
-        // separat). Die Begründung enthält nur noch die aufbereiteten Mitarbeit-Stichpunkte.
         begruendung = formatZeugnisnoteBullets([mitarbeitText]);
       }
     } catch (e) {
       console.error("JSON parsing failed, falling back to raw text:", e);
-      note = "";
       begruendung = raw;
     }
 
@@ -489,9 +419,6 @@ exports.generateZeugnisnote = onCall(
       return { status: "unclear", questions };
     }
 
-    const erlaubt = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5"];
-    if (!erlaubt.includes(note)) note = "";
-
-    return { status: "success", note, begruendung };
+    return { status: "success", begruendung };
   }
 );

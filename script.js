@@ -7989,44 +7989,15 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
     if (!student) return;
 
     let hinweis = '';
-    let apiRichtung = null;
 
-    // Bestimme die Zielnote und den passenden Prompt-Hinweis für "besser" und "schlechter", wenn bereits eine Note existiert
-    if ((richtung === 'besser' || richtung === 'schlechter') && student.zeugnisnote) {
-        const allowedGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5"];
-        const currentGrade = student.zeugnisnote.trim();
-        const currentIndex = allowedGrades.indexOf(currentGrade);
-        
-        if (currentIndex !== -1) {
-            let newIndex = currentIndex;
-            if (richtung === 'besser') {
-                newIndex = currentIndex - 1; // Besser -> Index verringern (Richtung 1)
-            } else {
-                newIndex = currentIndex + 1; // Schlechter -> Index erhöhen (Richtung 6)
-            }
-
-            if (newIndex >= 0 && newIndex < allowedGrades.length) {
-                const newGrade = allowedGrades[newIndex];
-                if (richtung === 'besser') {
-                    hinweis = `WICHTIG: Die neue Endnote MUSS exakt "${newGrade}" sein (eine halbe Stufe besser als die vorherige Note "${currentGrade}"). Bitte formuliere den Begründungstext so um, dass er ganz leicht positiver/lobender ist und perfekt zu der Note "${newGrade}" passt.`;
-                } else {
-                    hinweis = `WICHTIG: Die neue Endnote MUSS exakt "${newGrade}" sein (eine halbe Stufe schlechter als die vorherige Note "${currentGrade}"). Bitte formuliere den Begründungstext so um, dass er ganz leicht kritischer bzw. weniger lobend ist und perfekt zu der Note "${newGrade}" passt.`;
-                }
-                apiRichtung = null; // Über den Hinweis steuern, um Doppel-Modifikatoren zu vermeiden
-            }
-        }
-    } else if (richtung === 'hinweis') {
+    // Optionaler Zusatz-Hinweis der Lehrkraft (über das Hinweis-Modal). Es wird keine
+    // Note mehr berechnet – die Note setzt die Lehrkraft selbst über den Notenkreis.
+    if (richtung === 'hinweis') {
         const hinweisEl = document.getElementById('zeugnis-hinweis-textarea');
         hinweis = hinweisEl ? hinweisEl.value.trim() : '';
         if (!hinweis) { swal('Hinweis', 'Bitte gib einen Hinweis ein.', 'info'); return; }
         hideModal();
-        apiRichtung = null;
-    } else {
-        apiRichtung = richtung;
     }
-
-    const { schriftlicheNoten, durchschnitt, durchschnittNote } = getZeugnisnoteContext(student);
-    const fachart = classes[activeClassId]?.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
 
     // Ladeansicht
     const container = document.getElementById(`zn-inline-${index}`);
@@ -8079,35 +8050,7 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
     // Baue die initialen Messages auf, falls nicht übergeben
     let activeMessages = customMessages;
     if (!activeMessages) {
-        let userMsg = '';
-        if (Array.isArray(schriftlicheNoten) && schriftlicheNoten.length > 0) {
-            const liste = schriftlicheNoten.map(n => `${n.name || 'Arbeit'}: ${n.grade}`).join(', ');
-            userMsg += `Schriftliche Einzelnoten (Name der Arbeit: Note): ${liste}\n`;
-        } else {
-            userMsg += `Es liegen keine schriftlichen Noten vor.\n`;
-        }
-        if (durchschnitt) {
-            userMsg += `Schriftliche Durchschnittsnote: ${durchschnittNote}\n`;
-        }
-        userMsg += `Beobachtungen zur mündlichen Mitarbeit:\n\n${(student.zeugnisSonstiges || '').trim() || "Keine Angabe"}\n`;
-
-        if (fachart === "nebenfach") {
-            userMsg += `\nArt des Fachs: Nebenfach. Bei diesem Fach zählt die mündliche Leistung für die Endnote deutlich mehr als die schriftliche Leistung.\n`;
-            const _fachName = (classes[activeClassId]?.name || '').trim();
-            if (_fachName) {
-                userMsg += `\nUnterrichtsfach: ${_fachName}\n`;
-            }
-            userMsg += `\nNUR FÜR DIESES NEBENFACH gilt zusätzlich folgende Vorgabe (sie überschreibt das entsprechende Verbot im System-Prompt):\n`;
-            userMsg += `Reihenfolge der Stichpunkte im mitarbeit_text: zuerst die Stichpunkte zu den Beobachtungen. Als LETZTER Stichpunkt der Gewichtungshinweis, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählen deine mündlichen Beiträge, deine Arbeitshaltung und deine Motivation insgesamt mehr als die schriftlichen Noten." Es folgt KEIN Satz mit der Endnote.\n`;
-        } else {
-            userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
-        }
-
-        if (apiRichtung === "besser") {
-            userMsg += `\nWICHTIG: Schlage eine etwas BESSERE Note vor als beim normalen Abwägen und passe die Begründung entsprechend an.`;
-        } else if (apiRichtung === "schlechter") {
-            userMsg += `\nWICHTIG: Schlage eine etwas SCHLECHTERE Note vor als beim normalen Abwägen und passe die Begründung entsprechend an.`;
-        }
+        let userMsg = `Beobachtungen zur Mitarbeit:\n\n${(student.zeugnisSonstiges || '').trim() || "Keine Angabe"}\n`;
         if (hinweis && hinweis.trim()) {
             userMsg += `\nZusätzlicher Hinweis der Lehrkraft, den du berücksichtigen sollst: ${hinweis.trim()}`;
         }
@@ -8119,14 +8062,8 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
             throw new Error('Funktion nicht verfügbar.');
         }
         const result = await window.callGenerateZeugnisnote({
-            schriftlicheNoten,
-            durchschnitt,
-            durchschnittNote,
             sonstiges: student.zeugnisSonstiges || '',
-            fachart,
-            richtung: apiRichtung,
             hinweis: hinweis,
-            fachContext: classes[activeClassId]?.name || '',
             messages: activeMessages
         });
 
@@ -8140,48 +8077,17 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
             return;
         }
 
-        if (!result || !result.note) {
-            throw new Error('Kein gültiger Notenvorschlag erhalten.');
+        if (!result || typeof result.begruendung !== 'string') {
+            throw new Error('Kein gültiger Text erhalten.');
         }
 
-        let noteToSet = result.note;
-        let textToSet = result.begruendung || '';
-
-        // Falls die KI trotz Hinweis eine andere Note generiert hat (Fallbacksicherung),
-        // erzwingen wir die gewünschte Zielnote und korrigieren den Schlusssatz.
-        if ((richtung === 'besser' || richtung === 'schlechter') && student.zeugnisnote) {
-            const allowedGrades = ["1", "1-", "2+", "2", "2-", "3+", "3", "3-", "4+", "4", "4-", "5+", "5"];
-            const currentGrade = student.zeugnisnote.trim();
-            const currentIndex = allowedGrades.indexOf(currentGrade);
-            if (currentIndex !== -1) {
-                const targetIndex = richtung === 'besser' ? currentIndex - 1 : currentIndex + 1;
-                if (targetIndex >= 0 && targetIndex < allowedGrades.length) {
-                    const expectedGrade = allowedGrades[targetIndex];
-                    if (noteToSet !== expectedGrade) {
-                        console.warn(`KI gab Note ${noteToSet} statt ${expectedGrade} zurück. Erzwinge ${expectedGrade}.`);
-                        noteToSet = expectedGrade;
-                        const escapedOldGrade = result.note.replace(/[-+]/g, '\\$&');
-                        const regex = new RegExp(`Note\\s+${escapedOldGrade}(?=\\s*\\.?\\s*$)`, 'i');
-                        if (regex.test(textToSet)) {
-                            textToSet = textToSet.replace(regex, `Note ${expectedGrade}`);
-                        } else {
-                            const lastIndex = textToSet.lastIndexOf(`Note ${result.note}`);
-                            if (lastIndex !== -1) {
-                                textToSet = textToSet.substring(0, lastIndex) + `Note ${expectedGrade}` + textToSet.substring(lastIndex + `Note ${result.note}`.length);
-                            }
-                        }
-                      }
-                  }
-              }
-          }
-
-          // Note direkt setzen + speichern
-          student.zeugnisnote = noteToSet;
-          student.zeugnisBegruendung = textToSet;
-          saveData(index);
-          if (window.temporaryAiHints) {
-              delete window.temporaryAiHints[index];
-          }
+        // Nur den Text setzen – die Note bleibt unangetastet (sie wird manuell
+        // über den Notenkreis gesetzt). Generieren überschreibt die Note also nie.
+        student.zeugnisBegruendung = result.begruendung || '';
+        saveData(index);
+        if (window.temporaryAiHints) {
+            delete window.temporaryAiHints[index];
+        }
       } catch (err) {
           console.error('Zeugnisnote-Fehler:', err);
           swal('Fehler', formatKiGenerationError(err), 'error');
@@ -8246,10 +8152,10 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
       const answeredIndex = _znPendingIndex;
       await zeugnisnoteGenerate(answeredIndex, _znPendingRichtung, _znPendingMessages);
 
-      // Durchlauf Variante B: Wenn dieser Schüler jetzt eine Note hat (also nicht
+      // Durchlauf Variante B: Wenn dieser Schüler jetzt einen Text hat (also nicht
       // erneut Rückfragen kamen) und noch weitere in der Warteschlange sind, weiter.
       const resolved = classes[activeClassId]?.students?.[answeredIndex];
-      if (_znQuestionQueue.length > 0 && resolved && resolved.zeugnisnote) {
+      if (_znQuestionQueue.length > 0 && resolved && String(resolved.zeugnisBegruendung || '').trim()) {
           _znProcessNextQuestion();
       }
   }
@@ -8337,11 +8243,11 @@ window.zeugnisInputGenerate = zeugnisInputGenerate;
 let _zbOpenIndices = [];   // Schüler-Indizes (offen, Variante B: nicht Note UND Text)
 let _zbPos = 0;            // Position innerhalb von _zbOpenIndices
 
-// Ein Zeugnis gilt nur als fertig, wenn Note UND ein nicht-leerer Begründungstext da sind.
-// .trim() ist wichtig: ein geleertes contenteditable-Feld hinterlässt oft Whitespace/\n,
-// sonst würde ein gelöschter Text weiterhin als "fertig" zählen.
+// Im Durchlauf wird nur der Text erzeugt (die Note setzt die Lehrkraft selbst).
+// Daher gilt ein Schüler als "fertig", sobald ein nicht-leerer Begründungstext da ist.
+// .trim() ist wichtig: ein geleertes contenteditable-Feld hinterlässt oft Whitespace/\n.
 function zeugnisIstFertig(s) {
-    return !!(s && String(s.zeugnisnote || '').trim() && String(s.zeugnisBegruendung || '').trim());
+    return !!(s && String(s.zeugnisBegruendung || '').trim());
 }
 
 function openZeugnisBatch() {
@@ -8352,7 +8258,7 @@ function openZeugnisBatch() {
         .map((s, i) => i)
         .filter(i => !zeugnisIstFertig(students[i]));
     if (_zbOpenIndices.length === 0) {
-        swal('Durchlauf', 'Alle Schüler haben bereits eine Zeugnisnote.', 'info');
+        swal('Durchlauf', 'Alle Schüler haben bereits einen Text.', 'info');
         return;
     }
     _zbPos = 0;
@@ -8391,8 +8297,8 @@ function _zbUpdateGenerateLabel() {
         return s && (s.zeugnisSonstiges || '').trim();
     }).length;
     labelEl.textContent = count === 0 ? 'Erstellen'
-        : count === 1 ? '1 Zeugnis erstellen'
-        : `${count} Zeugnisse erstellen`;
+        : count === 1 ? '1 Text erstellen'
+        : `${count} Texte erstellen`;
 }
 
 function _zbReadCurrentToModel() {
@@ -8453,7 +8359,6 @@ async function zeugnisBatchGenerate() {
     const footer = document.getElementById('zeugnis-batch-footer');
     if (footer) footer.style.display = 'none';
 
-    const fachart = classes[activeClassId]?.gewichtung === 'nebenfach' ? 'nebenfach' : 'hauptfach';
     let done = 0;
     const failed = [];
     const needQuestions = [];  // Variante B: Rückfragen-Fälle erst nach dem Durchlauf abarbeiten
@@ -8468,24 +8373,17 @@ async function zeugnisBatchGenerate() {
             }
             try {
                 if (typeof window.callGenerateZeugnisnote !== 'function') throw new Error('Funktion nicht verfügbar.');
-                const { schriftlicheNoten, durchschnitt, durchschnittNote } = getZeugnisnoteContext(student);
                 const result = await window.callGenerateZeugnisnote({
-                    schriftlicheNoten,
-                    durchschnitt,
-                    durchschnittNote,
                     sonstiges: student.zeugnisSonstiges || '',
-                    fachart,
-                    richtung: null,
-                    hinweis: '',
-                    fachContext: classes[activeClassId]?.name || ''
+                    hinweis: ''
                 });
                 // Rückfrage der KI: nicht als Fehler behandeln, sondern für später vormerken
                 if (result && result.status === 'unclear' && Array.isArray(result.questions) && result.questions.length > 0) {
                     needQuestions.push(idx);
                     continue;
                 }
-                if (!result || !result.note) throw new Error('Kein gültiger Notenvorschlag erhalten.');
-                student.zeugnisnote = result.note;
+                if (!result || typeof result.begruendung !== 'string') throw new Error('Kein gültiger Text erhalten.');
+                // Nur den Text setzen – die Note bleibt manuell.
                 student.zeugnisBegruendung = result.begruendung || '';
                 done++;
             } catch (err) {
@@ -8508,14 +8406,14 @@ async function zeugnisBatchGenerate() {
     // Variante B: Schüler mit Rückfragen nacheinander interaktiv abarbeiten
     if (needQuestions.length > 0) {
         _znQuestionQueue = needQuestions.slice();
-        let msg = `${done} Zeugnisnote${done === 1 ? '' : 'n'} erstellt.`;
+        let msg = `${done} Text${done === 1 ? '' : 'e'} erstellt.`;
         msg += `\n\nBei ${needQuestions.length} Schüler${needQuestions.length === 1 ? '' : 'n'} hat die KI Rückfragen. Du wirst jetzt nacheinander gefragt.`;
         if (failed.length) msg += `\n\nFehlgeschlagen (${failed.length}): ${failed.join(', ')}`;
         swal('Fast fertig', msg, 'info').then(() => _znProcessNextQuestion());
         return;
     }
 
-    let msg = `${done} Zeugnisnote${done === 1 ? '' : 'n'} erstellt.`;
+    let msg = `${done} Text${done === 1 ? '' : 'e'} erstellt.`;
     if (failed.length) msg += `\n\nFehlgeschlagen (${failed.length}): ${failed.join(', ')}`;
     swal(failed.length ? 'Teilweise fertig' : 'Fertig', msg, failed.length ? 'warning' : 'success');
 }
@@ -8528,7 +8426,7 @@ async function _znProcessNextQuestion() {
     const idx = _znQuestionQueue.shift();
     await zeugnisnoteGenerate(idx, null);
     const s = classes[activeClassId]?.students?.[idx];
-    if (s && s.zeugnisnote) {
+    if (s && String(s.zeugnisBegruendung || '').trim()) {
         // Ohne Rückfrage gelöst → nächsten Fall starten. Sonst ist das Modal offen
         // und znSubmitAnswers/znCloseQuestions treibt die Warteschlange weiter.
         _znProcessNextQuestion();
