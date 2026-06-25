@@ -108,7 +108,7 @@ Satzbau:
 - Vermeide gestelzte Formulierungen.
 
 Vollständigkeit:
-- Jeder inhaltlich eigenständige Punkt aus den Eingaben muss im Text vorkommen. Lasse nichts weg. Fasse nur doppelte oder inhaltlich gleiche Angaben zusammen.
+- Übernimm jeden Punkt aus den Eingaben einzeln. Lasse nichts weg. Fasse nur dann etwas zusammen, wenn es wörtlich dasselbe ist – ähnliche, aber eigenständige Angaben bleiben getrennt.
 - Vollständigkeit geht vor Kürze: Lieber etwas länger als einen Punkt weglassen.
 
 Stil und Ton:
@@ -140,7 +140,7 @@ Satzbau:
 - Vermeide gestelzte Formulierungen.
 
 Vollständigkeit:
-- Jeder inhaltlich eigenständige Punkt aus den Eingaben muss im Text vorkommen. Lasse nichts weg. Fasse nur doppelte oder inhaltlich gleiche Angaben zusammen.
+- Übernimm jeden Punkt aus den Eingaben einzeln. Lasse nichts weg. Fasse nur dann etwas zusammen, wenn es wörtlich dasselbe ist – ähnliche, aber eigenständige Angaben bleiben getrennt.
 - Vollständigkeit geht vor Kürze: Lieber etwas länger als einen Punkt weglassen.
 
 Stil und Ton:
@@ -166,7 +166,7 @@ Satzbau:
 - Vermeide gestelzte Formulierungen.
 
 Vollständigkeit:
-- Jeder inhaltlich eigenständige Punkt aus den Eingaben muss im Text vorkommen. Lasse nichts weg. Fasse nur doppelte oder inhaltlich gleiche Angaben zusammen.
+- Übernimm jeden Punkt aus den Eingaben einzeln. Lasse nichts weg. Fasse nur dann etwas zusammen, wenn es wörtlich dasselbe ist – ähnliche, aber eigenständige Angaben bleiben getrennt.
 - Vollständigkeit geht vor Kürze: Lieber etwas länger als einen Punkt weglassen.
 
 Stil und Ton:
