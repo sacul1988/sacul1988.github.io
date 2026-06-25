@@ -270,8 +270,8 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
 );
 
 // ===== Zeugnisnoten-Vorschlag: Note abwägen + Begründung schreiben =====
-const ZEUGNISNOTE_SYSTEM = `Du unterstützt eine Lehrkraft dabei, einer Schülerin oder einem Schüler eine Rückmeldung zur Endnote zu geben. Der Text wird DIREKT AN DIE SCHÜLERIN ODER DEN SCHÜLER gerichtet, also in der Anrede "Du".
-Der Rückmeldetext besteht aus drei Teilen, die später als einzelne Stichpunkte untereinander angezeigt werden: (1) dein Feld "noten_auflistung" zählt die einzelnen schriftlichen Noten auf, (2) direkt danach wird automatisch ein Stichpunkt mit der gerundeten Durchschnittsnote ergänzt (z. B. "Daraus ergibt sich die schriftliche Durchschnittsnote 2.") – diesen Stichpunkt schreibst du NICHT selbst und nimmst ihn auch nicht vorweg, (3) dein Feld "mitarbeit_text" zur sonstigen Mitarbeit inkl. Endnote.
+const ZEUGNISNOTE_SYSTEM = `Du unterstützt eine Lehrkraft dabei, einer Schülerin oder einem Schüler eine Rückmeldung zur sonstigen Mitarbeit und zur Endnote zu geben. Der Text wird DIREKT AN DIE SCHÜLERIN ODER DEN SCHÜLER gerichtet, also in der Anrede "Du".
+Deine Aufgabe: Die Lehrkraft gibt dir stichwortartige, oft unfertige Beobachtungen zur Mitarbeit. Bringe diese in eine saubere, korrekte Form (Korrektur lesen, vollständige und richtig geschriebene Sätze, schülernahe Sprache) und schlage eine passende Endnote vor. Erfinde keine zusätzlichen Inhalte. Die schriftlichen Einzelnoten und die Durchschnittsnote werden separat angezeigt – gib sie NICHT noch einmal aus.
 
 [WICHTIGE AUSGABE-REGEL (JSON)]
 Du musst als Antwort IMMER ein valides JSON-Objekt zurückgeben.
@@ -283,17 +283,10 @@ Antworte in genau diesem JSON-Format:
   {"status": "unclear", "questions": ["Frage 1...", "Frage 2...", "Frage 3..."]} (Gib maximal 3 gezielte, kurze Fragen zurück)
   
 - Wenn alle Informationen ausreichend sind oder bereits Fragen beantwortet wurden:
-  {"status": "success", "abwaegung": "...", "noten_auflistung": "...", "endnote": "...", "mitarbeit_text": "..."}
-  Das Feld "abwaegung" kommt ZUERST und dient nur deinem internen Abwägen (es wird der Schülerin oder dem Schüler NICHT angezeigt): Halte dort in 1-3 kurzen Sätzen fest, welche Kategorie am besten passt, in welche Richtung und um wie viele Notenschritte du die gerundete Durchschnittsnote verschiebst und wie du dadurch auf die Endnote kommst. Erst danach füllst du "noten_auflistung", "endnote" und "mitarbeit_text".
+  {"status": "success", "abwaegung": "...", "endnote": "...", "mitarbeit_text": "..."}
+  Das Feld "abwaegung" kommt ZUERST und dient nur deinem internen Abwägen (es wird der Schülerin oder dem Schüler NICHT angezeigt): Halte dort in 1-3 kurzen Sätzen fest, welche Kategorie am besten passt, in welche Richtung und um wie viele Notenschritte du die gerundete Durchschnittsnote verschiebst und wie du dadurch auf die Endnote kommst. Erst danach füllst du "endnote" und "mitarbeit_text".
 
 Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohne Einleitung, Erklärung oder sonstigen Text davor/danach).
-
-Regeln für "noten_auflistung":
-
-Ein bis zwei kurze Sätze in der Anrede "Du", die exakt die unten angegebenen einzelnen schriftlichen Noten (Name der Arbeit + Note) nennen, z. B. "Du hast im Musiktest die Note 2 und bei dem Lapbook über die Musikinstrumente die Note 3- geschrieben."
-Nutze die Namen und Noten EXAKT wie unten angegeben, erfinde oder verändere nichts. Wähle für jede Arbeit eine passende, natürlich klingende Formulierung/Präposition statt alle Arbeiten gleich anzuhängen (z. B. "im Test", "in der Klassenarbeit", "bei dem Projekt/Lapbook über ..."), je nachdem, was zur Art der Arbeit passt. Einfache, klare Sprache.
-Schließe NICHT mit der Durchschnittsnote ab – der Stichpunkt dazu wird automatisch ergänzt.
-Wenn unten keine schriftlichen Noten angegeben sind, gib einen leeren String "" zurück.
 
 Regeln für "mitarbeit_text":
 
@@ -304,7 +297,7 @@ Jeder einzelne Punkt aus den Beobachtungen muss im Text erscheinen – ohne Ausn
 Schreibe in einfacher, schülernaher Sprache. Vermeide verschachtelte Satzstrukturen und lange Relativsätze. Setze überwiegend gar kein Komma in einem Stichpunkt – Ausnahme: Aufzählungen. Enthält ein Satz ein Komma, das keine Aufzählung ist, mache daraus lieber zwei getrennte Sätze.
 Hänge keine wertenden Satzreste an, z. B. NICHT: "..., das ist positiv." Schreibe stattdessen direkt und natürlich, z. B. "• Du arbeitest zuverlässig und ruhig im Unterricht mit." oder "• Das hilft dir im Unterricht."
 Vermeide verschachtelte Konstruktionen wie "was in einem Hauptfach, in dem ..., ins Gewicht fällt". Formuliere einfacher, z. B. "• Du meldest dich noch zu selten."
-Der letzte Stichpunkt nennt die Endnote, z. B. "• Insgesamt ergibt das für dich die Note X." – ohne Erklärung wie sie zustande kommt.
+Nenne die Endnote NICHT im Text. Es gibt KEINEN Schlusssatz mit der Note (also NICHT "Insgesamt ergibt das für dich die Note X."). Die Note gibst du nur im Feld "endnote" zurück.
 Formuliere wertschätzend. Der Text beschreibt den Leistungsstand – keine Ratschläge oder Tipps, wie der Schüler/die Schülerin sich verbessern könnte.
 Schreibe NIEMALS Sätze, die erklären wie sich etwas auf die Note auswirkt oder wie mündliche und schriftliche Leistung gewichtet werden – also NICHT "Das wirkt sich auf deine Note aus", NICHT "Da mündliche und schriftliche Leistung gleich viel zählen ..." und keine ähnlichen Formulierungen. Das Abwägen bleibt ausschließlich im internen Feld "abwaegung". (Ausnahme: Wenn die Nutzernachricht weiter unten für ein Nebenfach ausdrücklich einen Hinweis zur Gewichtung verlangt, befolge diese Anweisung.)
 Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.
@@ -341,7 +334,7 @@ Tenor z. B.: "massive, wiederholte Störungen, die den Unterricht unterbrechen",
 Tenor z. B.: "meldet sich wenig, arbeitet aber ruhig und ordentlich mit", "zurückhaltend, aber zuverlässig und störungsfrei", "beteiligt sich kaum mündlich, erledigt seine Aufgaben aber gut". Die geringe mündliche Beteiligung ist hier der einzige Schwachpunkt; das gute Arbeits- und Sozialverhalten rechtfertigt eine kleine Aufwertung.
 
 GRENZEN: Beste mögliche Note ist "1" (kein "1+"), schlechteste ist "5" (keine "5-" oder "6"). Korrekturen werden an diesen Grenzen gekappt.
-Die im Schlusssatz von "mitarbeit_text" genannte Note muss exakt dem Wert von "endnote" entsprechen.`;
+Die Note steht NUR im Feld "endnote", nicht im Text.`;
 
 function formatAverageSentence(durchschnitt, durchschnittNote) {
   return durchschnitt ? `Daraus ergibt sich die schriftliche Durchschnittsnote ${durchschnittNote}.` : "";
@@ -426,7 +419,7 @@ exports.generateZeugnisnote = onCall(
         userMsg += `\nUnterrichtsfach: ${fachContext.trim()}\n`;
       }
       userMsg += `\nNUR FÜR DIESES NEBENFACH gilt zusätzlich folgende Vorgabe (sie überschreibt das entsprechende Verbot im System-Prompt):\n`;
-      userMsg += `Reihenfolge der Stichpunkte im mitarbeit_text: zuerst die Stichpunkte zu den Beobachtungen. Danach als VORLETZTER Stichpunkt der Gewichtungshinweis, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählen deine mündlichen Beiträge, deine Arbeitshaltung und deine Motivation insgesamt mehr als die schriftlichen Noten." Als ALLERLETZTER Stichpunkt die Endnote (nur die Note, ohne Begründung).\n`;
+      userMsg += `Reihenfolge der Stichpunkte im mitarbeit_text: zuerst die Stichpunkte zu den Beobachtungen. Als LETZTER Stichpunkt der Gewichtungshinweis, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählen deine mündlichen Beiträge, deine Arbeitshaltung und deine Motivation insgesamt mehr als die schriftlichen Noten." Es folgt KEIN Satz mit der Endnote.\n`;
     } else {
       userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
     }
@@ -470,13 +463,9 @@ exports.generateZeugnisnote = onCall(
         note = (parsed.note || parsed.endnote || "").toString().trim();
         const mitarbeitText = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
 
-        let notenAuflistung = (parsed.noten_auflistung || "").toString().trim();
-        if (!listingHasAllGrades(notenAuflistung, schriftlicheNoten)) {
-          notenAuflistung = formatFallbackListing(schriftlicheNoten);
-        }
-        const averageSentence = formatAverageSentence(durchschnitt, durchschnittNote);
-
-        begruendung = formatZeugnisnoteBullets([notenAuflistung, averageSentence, mitarbeitText]);
+        // Noten-Auflistung und Durchschnitt werden NICHT mehr ausgegeben (stehen oben
+        // separat). Die Begründung enthält nur noch die aufbereiteten Mitarbeit-Stichpunkte.
+        begruendung = formatZeugnisnoteBullets([mitarbeitText]);
       }
     } catch (e) {
       console.error("JSON parsing failed, falling back to raw text:", e);

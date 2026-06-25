@@ -8098,7 +8098,7 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
                 userMsg += `\nUnterrichtsfach: ${_fachName}\n`;
             }
             userMsg += `\nNUR FÜR DIESES NEBENFACH gilt zusätzlich folgende Vorgabe (sie überschreibt das entsprechende Verbot im System-Prompt):\n`;
-            userMsg += `Reihenfolge der Stichpunkte im mitarbeit_text: zuerst die Stichpunkte zu den Beobachtungen. Danach als VORLETZTER Stichpunkt der Gewichtungshinweis, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählen deine mündlichen Beiträge, deine Arbeitshaltung und deine Motivation insgesamt mehr als die schriftlichen Noten." Als ALLERLETZTER Stichpunkt die Endnote (nur die Note, ohne Begründung).\n`;
+            userMsg += `Reihenfolge der Stichpunkte im mitarbeit_text: zuerst die Stichpunkte zu den Beobachtungen. Als LETZTER Stichpunkt der Gewichtungshinweis, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählen deine mündlichen Beiträge, deine Arbeitshaltung und deine Motivation insgesamt mehr als die schriftlichen Noten." Es folgt KEIN Satz mit der Endnote.\n`;
         } else {
             userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
         }
