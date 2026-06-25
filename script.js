@@ -12348,7 +12348,7 @@ function ztPlanungRenderForm() {
                 <textarea id="zt-plan-form-themen" class="form-control" rows="4">${ztEsc(d.themen)}</textarea>
             </div>
             <div class="form-group zt-plan-form-usit" style="${isSozial ? 'display:none;' : ''}">
-                <label for="zt-plan-form-usit">Unterrichtssituation (gilt für alle Schüler des Kurses)</label>
+                <label for="zt-plan-form-usit">Unterrichtssituation und verwendete Unterrichtsmaterialien (gilt für alle Schüler des Kurses)</label>
                 <textarea id="zt-plan-form-usit" class="form-control" rows="4">${ztEsc(d.unterrichtssituation || '')}</textarea>
             </div>
 
