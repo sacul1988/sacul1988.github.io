@@ -107,6 +107,10 @@ Satzbau:
 - Vermeide einen zweiten Relativsatz an einem Satz, der bereits einen Relativsatz oder eine Erweiterung mit Komma enthält. Stattdessen zwei Sätze.
 - Vermeide gestelzte Formulierungen.
 
+Vollständigkeit:
+- Jeder inhaltlich eigenständige Punkt aus den Eingaben muss im Text vorkommen. Lasse nichts weg. Fasse nur doppelte oder inhaltlich gleiche Angaben zusammen.
+- Vollständigkeit geht vor Kürze: Lieber etwas länger als einen Punkt weglassen.
+
 Stil und Ton:
 - Zeitform: Einleitung, Übergangssatz, Materialien/Beteiligung/Motivation und Abschlusssatz in Vergangenheitsform. Leistungsstand im Präsens.
 - Sachlich und wertschätzend. Keine Ratschläge.
@@ -135,6 +139,10 @@ Satzbau:
 - Vermeide einen zweiten Relativsatz an einem Satz, der bereits einen Relativsatz oder eine Erweiterung mit Komma enthält. Stattdessen zwei Sätze.
 - Vermeide gestelzte Formulierungen.
 
+Vollständigkeit:
+- Jeder inhaltlich eigenständige Punkt aus den Eingaben muss im Text vorkommen. Lasse nichts weg. Fasse nur doppelte oder inhaltlich gleiche Angaben zusammen.
+- Vollständigkeit geht vor Kürze: Lieber etwas länger als einen Punkt weglassen.
+
 Stil und Ton:
 - Zeitform: Einleitung, Übergangssatz, Materialien/Beteiligung/Motivation und Abschlusssatz in Vergangenheitsform. Leistungsstand im Präsens.
 - Sachlich und wertschätzend. Keine Ratschläge.
@@ -156,6 +164,10 @@ Satzbau:
 - Meistens ein Komma pro Satz, gelegentlich ein zweites. Vermeide mehr als zwei Kommas in einem Satz.
 - Vermeide einen zweiten Relativsatz an einem Satz, der bereits einen Relativsatz oder eine Erweiterung mit Komma enthält. Stattdessen zwei Sätze.
 - Vermeide gestelzte Formulierungen.
+
+Vollständigkeit:
+- Jeder inhaltlich eigenständige Punkt aus den Eingaben muss im Text vorkommen. Lasse nichts weg. Fasse nur doppelte oder inhaltlich gleiche Angaben zusammen.
+- Vollständigkeit geht vor Kürze: Lieber etwas länger als einen Punkt weglassen.
 
 Stil und Ton:
 - Schreibe ausschließlich in der Vergangenheitsform.
