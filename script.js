@@ -7944,9 +7944,8 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
             if (_fachName) {
                 userMsg += `\nUnterrichtsfach: ${_fachName}\n`;
             }
-            userMsg += `\nNUR FÜR DIESES NEBENFACH gelten zusätzlich folgende beiden Vorgaben (sie überschreiben die allgemeinen Verbote im System-Prompt):\n`;
-            userMsg += `1. Der ERSTE Stichpunkt des mitarbeit_text (also direkt nach der Auflistung der schriftlichen Noten und der Durchschnittsnote) muss der Gewichtungshinweis sein, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählt deine mündliche Mitarbeit, deine Arbeitshaltung und deine Motivation jedoch insgesamt mehr als die schriftlichen Noten." Erst danach folgen die Stichpunkte zu den Beobachtungen, und ganz zum Schluss der Satz mit der Endnote.\n`;
-            userMsg += `2. Der letzte Stichpunkt mit der Endnote MUSS die Note kurz an den zentralen Punkt der Beobachtungen koppeln, sinngemäß: "• Da du dich regelmäßig beteiligst, bekommst du die Note X." oder bei Störungen/wenig Mitarbeit trotz guter Tests: "• Da du den Unterricht häufig störst, bekommst du trotz guter Tests die Note X." Wähle den wichtigsten Punkt aus den Beobachtungen.\n`;
+            userMsg += `\nNUR FÜR DIESES NEBENFACH gilt zusätzlich folgende Vorgabe (sie überschreibt das entsprechende Verbot im System-Prompt):\n`;
+            userMsg += `Der ERSTE Stichpunkt des mitarbeit_text (also direkt nach der Auflistung der schriftlichen Noten und der Durchschnittsnote) muss der Gewichtungshinweis sein, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählt deine mündliche Mitarbeit, deine Arbeitshaltung und deine Motivation jedoch insgesamt mehr als die schriftlichen Noten." Erst danach folgen die Stichpunkte zu den Beobachtungen, und ganz zum Schluss der Stichpunkt mit der Endnote (nur die Note, ohne Begründung).\n`;
         } else {
             userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
         }

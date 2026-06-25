@@ -292,7 +292,7 @@ Jeder einzelne Punkt aus den Beobachtungen muss im Text erscheinen – ohne Ausn
 Schreibe in einfacher, schülernaher Sprache. Vermeide verschachtelte Satzstrukturen und lange Relativsätze. Setze überwiegend gar kein Komma in einem Stichpunkt – Ausnahme: Aufzählungen. Enthält ein Satz ein Komma, das keine Aufzählung ist, mache daraus lieber zwei getrennte Sätze.
 Hänge keine wertenden Satzreste an, z. B. NICHT: "..., das ist positiv." Schreibe stattdessen direkt und natürlich, z. B. "• Du arbeitest zuverlässig und ruhig im Unterricht mit." oder "• Das hilft dir im Unterricht."
 Vermeide verschachtelte Konstruktionen wie "was in einem Hauptfach, in dem ..., ins Gewicht fällt". Formuliere einfacher, z. B. "• Du meldest dich noch zu selten."
-Der letzte Stichpunkt nennt die Endnote, z. B. "• Insgesamt ergibt das für dich die Note X." – ohne Erklärung wie sie zustande kommt. (Ausnahme: Wenn die Nutzernachricht weiter unten für ein Nebenfach ausdrücklich eine Begründung der Note verlangt, befolge diese Anweisung.)
+Der letzte Stichpunkt nennt die Endnote, z. B. "• Insgesamt ergibt das für dich die Note X." – ohne Erklärung wie sie zustande kommt.
 Formuliere wertschätzend. Der Text beschreibt den Leistungsstand – keine Ratschläge oder Tipps, wie der Schüler/die Schülerin sich verbessern könnte.
 Schreibe NIEMALS Sätze, die erklären wie sich etwas auf die Note auswirkt oder wie mündliche und schriftliche Leistung gewichtet werden – also NICHT "Das wirkt sich auf deine Note aus", NICHT "Da mündliche und schriftliche Leistung gleich viel zählen ..." und keine ähnlichen Formulierungen. Das Abwägen bleibt ausschließlich im internen Feld "abwaegung". (Ausnahme: Wenn die Nutzernachricht weiter unten für ein Nebenfach ausdrücklich einen Hinweis zur Gewichtung verlangt, befolge diese Anweisung.)
 Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.
@@ -413,9 +413,8 @@ exports.generateZeugnisnote = onCall(
       if (fachContext && fachContext.trim()) {
         userMsg += `\nUnterrichtsfach: ${fachContext.trim()}\n`;
       }
-      userMsg += `\nNUR FÜR DIESES NEBENFACH gelten zusätzlich folgende beiden Vorgaben (sie überschreiben die allgemeinen Verbote im System-Prompt):\n`;
-      userMsg += `1. Der ERSTE Stichpunkt des mitarbeit_text (also direkt nach der Auflistung der schriftlichen Noten und der Durchschnittsnote) muss der Gewichtungshinweis sein, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählt deine mündliche Mitarbeit, deine Arbeitshaltung und deine Motivation jedoch insgesamt mehr als die schriftlichen Noten." Erst danach folgen die Stichpunkte zu den Beobachtungen, und ganz zum Schluss der Satz mit der Endnote.\n`;
-      userMsg += `2. Der letzte Stichpunkt mit der Endnote MUSS die Note kurz an den zentralen Punkt der Beobachtungen koppeln, sinngemäß: "• Da du dich regelmäßig beteiligst, bekommst du die Note X." oder bei Störungen/wenig Mitarbeit trotz guter Tests: "• Da du den Unterricht häufig störst, bekommst du trotz guter Tests die Note X." Wähle den wichtigsten Punkt aus den Beobachtungen.\n`;
+      userMsg += `\nNUR FÜR DIESES NEBENFACH gilt zusätzlich folgende Vorgabe (sie überschreibt das entsprechende Verbot im System-Prompt):\n`;
+      userMsg += `Der ERSTE Stichpunkt des mitarbeit_text (also direkt nach der Auflistung der schriftlichen Noten und der Durchschnittsnote) muss der Gewichtungshinweis sein, wörtlich (setze für FACH nur den Namen des Unterrichtsfachs ein, z. B. Musik – ohne Klassen- oder Jahrgangsangabe): "• Im Nebenfach FACH zählt deine mündliche Mitarbeit, deine Arbeitshaltung und deine Motivation jedoch insgesamt mehr als die schriftlichen Noten." Erst danach folgen die Stichpunkte zu den Beobachtungen, und ganz zum Schluss der Stichpunkt mit der Endnote (nur die Note, ohne Begründung).\n`;
     } else {
       userMsg += `\nArt des Fachs: Hauptfach. Bei diesem Fach zählen die schriftliche und die mündliche Leistung für die Endnote ungefähr gleich viel.\n`;
     }
