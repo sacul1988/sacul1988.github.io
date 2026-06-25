@@ -5015,9 +5015,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 }
 
 .zn-grade-picker {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
+    position: fixed;
     background: #fff;
     border: 1px solid var(--border-color);
     border-radius: 14px;
@@ -5026,7 +5024,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     grid-template-columns: repeat(3, 1fr);
     gap: 6px;
     padding: 10px;
-    z-index: 1000;
+    z-index: 3000;
     width: 160px;
 }
 

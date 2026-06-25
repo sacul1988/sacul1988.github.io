@@ -7768,16 +7768,44 @@ function znOpenGradePicker(e, index) {
         const btn = document.createElement('button');
         btn.className = 'zn-grade-picker-btn ' + (g ? Utils.getGradeColorClass(Utils.convertGrade(g)) : 'zn-grade-picker-btn--empty');
         btn.textContent = g;
-        btn.onclick = (ev) => { ev.stopPropagation(); znSetGradeManually(index, g); picker.remove(); };
+        btn.onclick = (ev) => { ev.stopPropagation(); znSetGradeManually(index, g); cleanup(); };
         picker.appendChild(btn);
     });
 
+    // Fest am Viewport positionieren (position: fixed), damit der Picker NIE vom
+    // scrollbaren Sitzplan-Container oder Karten-Rand abgeschnitten wird. An den
+    // Rändern klappt er automatisch um.
     const circle = e.currentTarget;
-    circle.parentNode.style.position = 'relative';
-    circle.parentNode.appendChild(picker);
+    const rect = circle.getBoundingClientRect();
+    document.body.appendChild(picker);
 
-    const close = (ev) => { if (!picker.contains(ev.target)) { picker.remove(); document.removeEventListener('click', close); } };
-    setTimeout(() => document.addEventListener('click', close), 0);
+    const pw = picker.offsetWidth || 160;
+    const ph = picker.offsetHeight || 220;
+    const margin = 8;
+    // Horizontal: am Kreis zentrieren, dann in den Viewport einpassen
+    let left = rect.left + rect.width / 2 - pw / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - pw - margin));
+    // Vertikal: bevorzugt unter den Kreis, sonst darüber
+    let top = rect.bottom + margin;
+    if (top + ph > window.innerHeight - margin) {
+        const above = rect.top - ph - margin;
+        top = above >= margin ? above : Math.max(margin, window.innerHeight - ph - margin);
+    }
+    picker.style.left = left + 'px';
+    picker.style.top = top + 'px';
+
+    const cleanup = () => {
+        picker.remove();
+        document.removeEventListener('click', close, true);
+        window.removeEventListener('scroll', cleanup, true);
+        window.removeEventListener('resize', cleanup);
+    };
+    const close = (ev) => { if (!picker.contains(ev.target)) cleanup(); };
+    setTimeout(() => {
+        document.addEventListener('click', close, true);
+        window.addEventListener('scroll', cleanup, true);
+        window.addEventListener('resize', cleanup);
+    }, 0);
 }
 
 function znSetGradeManually(index, newGrade) {
@@ -7861,23 +7889,29 @@ function renderZeugnisSitzplan() {
         return;
     }
 
-    const TILE_W = 100, TILE_H = 86, PAD = 30, PAD_BOTTOM = 200;
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    placed.forEach(d => {
-        minX = Math.min(minX, d.x); minY = Math.min(minY, d.y);
-        maxX = Math.max(maxX, d.x + TILE_W); maxY = Math.max(maxY, d.y + TILE_H);
+    // SCALE spreizt die Tische auseinander (die Originalpositionen liegen oft dicht
+    // beieinander). PAD = Rand rundherum.
+    const TILE_W = 100, TILE_H = 86, PAD = 30, SCALE = 1.3;
+    let minX = Infinity, minY = Infinity;
+    placed.forEach(d => { minX = Math.min(minX, d.x); minY = Math.min(minY, d.y); });
+
+    let maxRight = 0, maxBottom = 0;
+    const positioned = placed.map(d => {
+        const left = (d.x - minX) * SCALE + PAD;
+        const top = (d.y - minY) * SCALE + PAD;
+        maxRight = Math.max(maxRight, left + TILE_W);
+        maxBottom = Math.max(maxBottom, top + TILE_H);
+        return { d, left, top };
     });
-    const offX = PAD - minX, offY = PAD - minY;
-    const canvasW = (maxX - minX) + PAD * 2;
-    const canvasH = (maxY - minY) + PAD + PAD_BOTTOM;
+    const canvasW = maxRight + PAD;
+    const canvasH = maxBottom + PAD;
 
     let tiles = '';
-    placed.forEach(d => {
+    positioned.forEach(({ d, left, top }) => {
         const index = d.studentIndex;
         const student = cls.students[index];
         const note = student.zeugnisnote || '';
         const circleClass = note ? Utils.getGradeColorClass(Utils.convertGrade(note)) : 'zn-grade-circle--empty';
-        const left = d.x + offX, top = d.y + offY;
         tiles += `
             <div class="zn-sitz-tile" id="zn-sitz-tile-${index}" style="left:${left}px; top:${top}px;" onclick="jumpToStudentInList(${index})" title="Zum Schüler in der Liste springen">
                 <div class="zn-sitz-name">${escapeHtml(student.name)}</div>
