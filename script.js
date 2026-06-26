@@ -8192,11 +8192,6 @@ function saveZeugnisnoteBegruendung(index) {
     saveData(index);
 }
 
-// Beim Verlassen des Begründungsfeldes: Ist der Text leer (auch nur Whitespace/\n
-// aus einem geleerten contenteditable), wird die Endnote ebenfalls entfernt –
-// ohne Begründungstext soll es keine Endnote geben. Es muss dann ein neuer Text
-// generiert werden. Bewusst onblur statt oninput, damit das Kästchen nicht mitten
-// im Bearbeiten wegspringt und den Fokus reißt.
 function zeugnisnoteBegruendungBlur(index) {
     if (activeClassId === null) return;
     const el = document.getElementById(`zn-begruendung-${index}`);
@@ -8204,7 +8199,6 @@ function zeugnisnoteBegruendungBlur(index) {
     if (!el || !student) return;
     const txt = (el.innerText || '').trim().replace(/^•\s*$/, '');
     if (!txt) {
-        student.zeugnisnote = '';
         student.zeugnisBegruendung = '';
         saveData(index);
         const c = document.getElementById(`zn-inline-${index}`);
