@@ -1851,21 +1851,23 @@ function renderTagesprotokollTile() {
 
     let html = '';
     classesWithIncidents.forEach(({ classIdx, name, incidents }) => {
-        html += `<div class="tp-class-group"><div class="tp-class-name">${escapeHtml(name)}</div><div class="tp-pills-row">`;
+        html += `<div class="tp-class-group"><div class="tp-class-name">${escapeHtml(name)}</div>`;
         incidents.forEach(({ studentIdx, name: sName, hw, mat, stoer }) => {
             const mkPill = (type, label) => {
                 const key = classIdx + '_' + studentIdx + '_' + type;
                 const done = !!dateAbgehakt[key];
-                return `<div class="tp-pill${done ? ' tp-pill-done' : ''}" onclick="toggleTagesprotokollAbgehakt(${classIdx},${studentIdx},'${dateStr}','${type}')">
-                    <span class="tp-pill-name">${escapeHtml(sName)}</span>
-                    <span class="tp-pill-info">${label}</span>
-                </div>`;
+                return `<span class="tp-pill${done ? ' tp-pill-done' : ''}" onclick="toggleTagesprotokollAbgehakt(${classIdx},${studentIdx},'${dateStr}','${type}')">${label}</span>`;
             };
-            if (hw > 0) html += mkPill('hw', 'Hausaufgaben');
-            if (mat > 0) html += mkPill('mat', 'Material');
-            if (stoer > 0) html += mkPill('stoer', `Störung&nbsp;${stoer}`);
+            let pills = '';
+            if (hw > 0) pills += mkPill('hw', 'Hausaufgaben');
+            if (mat > 0) pills += mkPill('mat', 'Material');
+            if (stoer > 0) pills += mkPill('stoer', `Störung&nbsp;${stoer}`);
+            html += `<div class="tp-student-row">
+                <span class="tp-name">${escapeHtml(sName)}</span>
+                <span class="tp-pills">${pills}</span>
+            </div>`;
         });
-        html += '</div></div>';
+        html += '</div>';
     });
     container.innerHTML = html;
 }

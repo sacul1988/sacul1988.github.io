@@ -6835,35 +6835,49 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     padding: 16px 0;
 }
 .tp-class-group {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 .tp-class-name {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 6px 0 4px;
+    color: #444;
+    padding: 6px 0 6px;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 4px;
 }
-.tp-pills-row {
+.tp-student-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+    flex-wrap: wrap;
+}
+.tp-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    min-width: 90px;
+    flex-shrink: 0;
+}
+.tp-pills {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
 }
 .tp-pill {
     display: inline-flex;
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     background: #3b82f6;
     color: #fff;
     border-radius: 12px;
-    padding: 5px 10px;
+    padding: 3px 11px;
     cursor: pointer;
     user-select: none;
     transition: background 0.15s, color 0.15s;
-    font-size: 0.78rem;
-    line-height: 1.3;
-    max-width: 150px;
+    font-size: 0.76rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
 }
 .tp-pill:hover { background: #2563eb; }
 .tp-pill-done {
@@ -6871,18 +6885,6 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     color: #1e40af;
 }
 .tp-pill-done:hover { background: #93c5fd; }
-.tp-pill-name {
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 130px;
-}
-.tp-pill-info {
-    font-size: 0.72rem;
-    opacity: 0.85;
-    white-space: nowrap;
-}
 
 /* ===== HALBJAHR-ARCHIV ===== */
 /* Banner für den Archiv-Ansichtsmodus (Zeitreise, read-only) */
