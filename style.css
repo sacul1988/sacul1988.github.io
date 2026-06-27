@@ -6801,17 +6801,6 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .dashboard-tp-card {
     min-width: 0;
 }
-/* Header: Titel links, Breiten-Griff rechts, Navigation absolut mittig zentriert */
-.tp-header { position: relative; }
-.tp-nav-center {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
 .tp-nav-circle {
     width: 26px;
     height: 26px;
