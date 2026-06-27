@@ -6882,7 +6882,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .tp-pill {
     display: inline-flex;
     align-items: center;
-    background: #3b82f6;
+    background: var(--primary-color);
     color: #fff;
     border-radius: 12px;
     padding: 3px 11px;
@@ -6894,7 +6894,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     line-height: 1.4;
     white-space: nowrap;
 }
-.tp-pill:hover { background: #2563eb; }
+.tp-pill:hover { background: var(--primary-hover); }
 .tp-pill-done {
     background: #bfdbfe;
     color: #1e40af;
