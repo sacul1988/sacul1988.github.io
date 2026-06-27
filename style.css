@@ -6828,16 +6828,13 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     text-align: center;
 }
 #dashboard-tp-list {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    padding-right: 2px;
+    display: block;
 }
 .tp-empty {
-    margin: auto;
-    text-align: center;
+    min-height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #86efac;
 }
 .tp-empty i { font-size: 2.6rem; }
