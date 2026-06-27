@@ -6797,6 +6797,99 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     .sp-grid { gap: 6px; }
 }
 
+/* ===== TAGESPROTOKOLL-KACHEL ===== */
+.dashboard-tp-card {
+    min-width: 0;
+}
+.tp-nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+.tp-nav-btn {
+    background: none;
+    border: none;
+    color: #555;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    line-height: 1;
+}
+.tp-nav-btn:hover:not(:disabled) { background: #e9ecef; color: #000; }
+.tp-nav-btn:disabled { color: #ccc; cursor: default; }
+.tp-nav-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    min-width: 80px;
+    text-align: center;
+}
+.tp-empty {
+    color: #aaa;
+    font-size: 0.82rem;
+    text-align: center;
+    padding: 16px 0;
+}
+.tp-class-group {
+    margin-bottom: 8px;
+}
+.tp-class-name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 6px 0 2px;
+}
+.tp-student-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.83rem;
+}
+.tp-student-row:last-child { border-bottom: none; }
+.tp-done .tp-name { text-decoration: line-through; color: #aaa; }
+.tp-done .tp-badges { opacity: 0.4; }
+.tp-check-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.tp-checkbox { cursor: pointer; accent-color: #28a745; }
+.tp-name {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #333;
+}
+.tp-badges {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.tp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+.tp-hw  { background: #fff3cd; color: #856404; }
+.tp-mat { background: #d1ecf1; color: #0c5460; }
+.tp-stoer { background: #f8d7da; color: #721c24; }
+
 /* ===== HALBJAHR-ARCHIV ===== */
 /* Banner für den Archiv-Ansichtsmodus (Zeitreise, read-only) */
 #archive-view-banner {

@@ -1762,6 +1762,145 @@ function scheduleDashboardScrollRestore() {
     setTimeout(applyDashboardScrollRestore, 900);
 }
 
+// ===================================================================
+// ===== Tagesprotokoll-Kachel =======================================
+// ===================================================================
+let _tpOffset = 0; // 0 = heute, 1 = gestern, 2 = vorgestern, 3 = drittgestern
+
+function _tpDateStr(offset) {
+    const d = new Date();
+    d.setDate(d.getDate() - offset);
+    return d.toISOString().split('T')[0];
+}
+
+function _tpDateLabel(offset) {
+    if (offset === 0) return 'Heute';
+    if (offset === 1) return 'Gestern';
+    const d = new Date();
+    d.setDate(d.getDate() - offset);
+    const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return `${days[d.getDay()]} ${dd}.${mm}.`;
+}
+
+function _tpGetAbgehakt() {
+    try { return JSON.parse(localStorage.getItem('tagesprotokoll') || '{}'); }
+    catch (e) { return {}; }
+}
+
+function _tpSaveAbgehakt(data) {
+    localStorage.setItem('tagesprotokoll', JSON.stringify(data));
+    if (typeof window.triggerCloudSync === 'function') window.triggerCloudSync();
+    else if (typeof window.flushCloudSyncNow === 'function') window.flushCloudSyncNow();
+}
+
+function toggleTagesprotokollAbgehakt(classIdx, studentIdx, dateStr, checked) {
+    const data = _tpGetAbgehakt();
+    if (!data[dateStr]) data[dateStr] = {};
+    const key = classIdx + '_' + studentIdx;
+    if (checked) data[dateStr][key] = true;
+    else delete data[dateStr][key];
+    _tpSaveAbgehakt(data);
+    renderTagesprotokollTile();
+}
+
+function tpNavPrev() {
+    if (_tpOffset < 3) { _tpOffset++; _tpUpdateNav(); renderTagesprotokollTile(); }
+}
+function tpNavNext() {
+    if (_tpOffset > 0) { _tpOffset--; _tpUpdateNav(); renderTagesprotokollTile(); }
+}
+
+function _tpUpdateNav() {
+    const lbl = document.getElementById('tp-nav-label');
+    if (lbl) lbl.textContent = _tpDateLabel(_tpOffset);
+    const prev = document.getElementById('tp-nav-prev');
+    const next = document.getElementById('tp-nav-next');
+    if (prev) prev.disabled = _tpOffset >= 3;
+    if (next) next.disabled = _tpOffset <= 0;
+}
+
+function renderTagesprotokollTile() {
+    const container = document.getElementById('dashboard-tp-list');
+    if (!container) return;
+    _tpUpdateNav();
+    const dateStr = _tpDateStr(_tpOffset);
+    const abgehakt = _tpGetAbgehakt();
+    const dateAbgehakt = abgehakt[dateStr] || {};
+
+    const classesWithIncidents = [];
+    (classes || []).forEach((cls, classIdx) => {
+        const incidents = [];
+        (cls.students || []).forEach((student, studentIdx) => {
+            const hw = (student.hwHistory || []).filter(e => e.type === 'homework' && (e.date || '').startsWith(dateStr)).length;
+            const mat = (student.hwHistory || []).filter(e => e.type === 'materials' && (e.date || '').startsWith(dateStr)).length;
+            const negEntry = (student.dailyNegativeHistory || []).find(e => e.date === dateStr);
+            const stoer = negEntry ? (negEntry.count || 0) : 0;
+            if (hw > 0 || mat > 0 || stoer > 0) {
+                incidents.push({ studentIdx, name: student.name, hw, mat, stoer });
+            }
+        });
+        if (incidents.length > 0) classesWithIncidents.push({ classIdx, name: cls.name, incidents });
+    });
+
+    if (classesWithIncidents.length === 0) {
+        container.innerHTML = '<div class="tp-empty">Keine Vorfälle</div>';
+        return;
+    }
+
+    let html = '';
+    classesWithIncidents.forEach(({ classIdx, name, incidents }) => {
+        html += `<div class="tp-class-group"><div class="tp-class-name">${escapeHtml(name)}</div>`;
+        incidents.forEach(({ studentIdx, name: sName, hw, mat, stoer }) => {
+            const key = classIdx + '_' + studentIdx;
+            const done = !!dateAbgehakt[key];
+            html += `<div class="tp-student-row${done ? ' tp-done' : ''}">
+                <label class="tp-check-label"><input type="checkbox" class="tp-checkbox"${done ? ' checked' : ''} onchange="toggleTagesprotokollAbgehakt(${classIdx},${studentIdx},'${dateStr}',this.checked)"></label>
+                <span class="tp-name">${escapeHtml(sName)}</span>
+                <span class="tp-badges">
+                    ${hw > 0 ? `<span class="tp-badge tp-hw" title="Hausaufgaben vergessen">HA&nbsp;<b>${hw}</b></span>` : ''}
+                    ${mat > 0 ? `<span class="tp-badge tp-mat" title="Material vergessen">M&nbsp;<b>${mat}</b></span>` : ''}
+                    ${stoer > 0 ? `<span class="tp-badge tp-stoer" title="Störungen (Arbeitsphase)">S&nbsp;<b>${stoer}</b></span>` : ''}
+                </span>
+            </div>`;
+        });
+        html += '</div>';
+    });
+    container.innerHTML = html;
+}
+
+function cleanupTagesprotokollData() {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 4);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    const data = _tpGetAbgehakt();
+    let changed = false;
+    Object.keys(data).forEach(k => { if (k < cutoffStr) { delete data[k]; changed = true; } });
+    if (changed) localStorage.setItem('tagesprotokoll', JSON.stringify(data));
+
+    // negativeHistory in Schülern auf 7 Tage begrenzen
+    const cutoff7 = new Date();
+    cutoff7.setDate(cutoff7.getDate() - 7);
+    const cutoff7Str = cutoff7.toISOString().split('T')[0];
+    let dataChanged = false;
+    (classes || []).forEach(cls => {
+        (cls.students || []).forEach(student => {
+            if (Array.isArray(student.dailyNegativeHistory) && student.dailyNegativeHistory.length > 0) {
+                const before = student.dailyNegativeHistory.length;
+                student.dailyNegativeHistory = student.dailyNegativeHistory.filter(e => e.date >= cutoff7Str);
+                if (student.dailyNegativeHistory.length < before) dataChanged = true;
+            }
+        });
+    });
+    if (dataChanged) saveData();
+}
+
+window.toggleTagesprotokollAbgehakt = toggleTagesprotokollAbgehakt;
+window.tpNavPrev = tpNavPrev;
+window.tpNavNext = tpNavNext;
+window.renderTagesprotokollTile = renderTagesprotokollTile;
+
 function renderClassesGrid() {
     // Referenzen global verfügbar machen
     window.renderClassesGrid = renderClassesGrid;
@@ -1912,6 +2051,27 @@ function renderClassesGrid() {
     `;
     classesGrid.appendChild(ztPlanungCard);
     if (typeof renderDashboardZtPlanungTile === 'function') renderDashboardZtPlanungTile();
+
+    // Tagesprotokoll-Kachel
+    const tpCard = document.createElement('div');
+    tpCard.className = 'class-card dashboard-tp-card';
+    tpCard.dataset.tileKey = 'tagesprotokoll';
+    tpCard.innerHTML = `
+        <div class="class-card-header">
+            <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Tagesprotokoll</span>
+            <span class="tile-head-tools"><button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button></span>
+        </div>
+        <div class="tp-nav-row">
+            <button class="tp-nav-btn" id="tp-nav-prev" onclick="tpNavPrev()" title="Einen Tag zurück"><i class="fas fa-chevron-left"></i></button>
+            <span class="tp-nav-label" id="tp-nav-label">Heute</span>
+            <button class="tp-nav-btn" id="tp-nav-next" onclick="tpNavNext()" title="Einen Tag vor" disabled><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="class-card-body" style="padding: 8px 12px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto; max-height:320px;">
+            <div id="dashboard-tp-list"></div>
+        </div>
+    `;
+    classesGrid.appendChild(tpCard);
+    renderTagesprotokollTile();
 
     // Gespeicherte Reihenfolge anwenden, dann Masonry sofort vor dem ersten sichtbaren Paint berechnen.
     applyDashboardTileOrder();
@@ -3300,6 +3460,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadData();
     loadTermine();
     loadPlanung();
+    setTimeout(cleanupTagesprotokollData, 500);
     // Startseite erst jetzt rendern – wenn Klassen, Termine UND Planung geladen sind.
     // So zeigt der Kalender die Termine sofort aus dem localStorage, ohne auf den
     // Cloud-Abgleich zu warten (kein verzögertes Nachladen beim Neuladen der Seite).
@@ -6745,6 +6906,11 @@ function updateParticipation(studentIndex, type, delta = 1) {
         if (student.dailyParticipation.negative + delta < 0) delta = -student.dailyParticipation.negative;
         student.dailyParticipation.negative += delta;
         student.participation.negative += delta;
+        // Tägliche Negative-Historie für Tagesprotokoll-Kachel aktuell halten
+        if (!student.dailyNegativeHistory) student.dailyNegativeHistory = [];
+        const _negEntry = student.dailyNegativeHistory.find(e => e.date === today);
+        if (_negEntry) { _negEntry.count = student.dailyParticipation.negative; }
+        else { student.dailyNegativeHistory.push({ date: today, count: student.dailyParticipation.negative }); }
     }
     
     // Statistiken im Modal aktualisieren (Gesamtwerte)

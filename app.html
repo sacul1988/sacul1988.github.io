@@ -1813,6 +1813,23 @@
             applyCloudBlob(cloudData.stundenplan, 'stundenplan', window.setStundenplan);
             applyCloudPlanung(cloudData.planung);
 
+            // Tagesprotokoll (abgehakt-Zustand): mergen, beide Geräte können Häkchen setzen
+            if (cloudData.tagesprotokoll) {
+                try {
+                    const localObj = JSON.parse(localStorage.getItem('tagesprotokoll') || '{}');
+                    const cloudObj = typeof cloudData.tagesprotokoll === 'string'
+                        ? JSON.parse(cloudData.tagesprotokoll)
+                        : cloudData.tagesprotokoll;
+                    const merged = Object.assign({}, localObj);
+                    Object.keys(cloudObj).forEach(date => {
+                        if (!merged[date]) merged[date] = {};
+                        Object.assign(merged[date], cloudObj[date]);
+                    });
+                    localStorage.setItem('tagesprotokoll', JSON.stringify(merged));
+                    if (typeof window.renderTagesprotokollTile === 'function') window.renderTagesprotokollTile();
+                } catch (e) {}
+            }
+
             // Termine immer mergen (nie ersetzen), um Datenverlust zwischen Geräten zu vermeiden.
             // Gelöschte IDs (Tombstones) werden aus beiden Quellen zusammengeführt.
             if (Array.isArray(cloudData.termine)) {
@@ -1897,7 +1914,8 @@
                     contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
                     dashboardNotes: JSON.parse(localStorage.getItem('dashboardNotes') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp,
-                    ztInputDraft: localStorage.getItem('ztInputDraft') || ''
+                    ztInputDraft: localStorage.getItem('ztInputDraft') || '',
+                    tagesprotokoll: localStorage.getItem('tagesprotokoll') || '{}'
                 };
 
                 if (specificStudentIndex !== null) {
