@@ -6829,9 +6829,11 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 }
 #dashboard-tp-list {
     flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    padding-right: 2px;
 }
 .tp-empty {
     margin: auto;

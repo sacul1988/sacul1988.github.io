@@ -2068,7 +2068,7 @@ function renderClassesGrid() {
                 <button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button>
             </span>
         </div>
-        <div class="class-card-body" style="padding: 8px 12px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto; max-height:320px;">
+        <div class="class-card-body" style="padding: 8px 12px; display:flex; flex-direction:column; flex-grow:1; min-height:0;">
             <div id="dashboard-tp-list"></div>
         </div>
     `;
