@@ -6836,24 +6836,25 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 }
 .tp-class-group {
     margin-bottom: 14px;
-}
-.tp-class-name {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--dark-color);
-    padding: 6px 14px;
-    background: #eef2ff;
     border: 1px solid #c7d2fe;
     border-radius: var(--border-radius);
-    margin-bottom: 6px;
+    overflow: hidden;
+}
+.tp-class-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    padding: 8px 14px;
+    background: #eef2ff;
+    border-bottom: 1px solid #c7d2fe;
 }
 .tp-student-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 6px 14px;
-    margin-bottom: 6px;
+    padding: 6px 12px;
+    margin: 6px 8px;
     background: #f8fafc;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
