@@ -2061,12 +2061,12 @@ function renderClassesGrid() {
     tpCard.innerHTML = `
         <div class="class-card-header">
             <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Tagesprotokoll</span>
-            <span class="tile-head-tools"><button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button></span>
-        </div>
-        <div class="tp-nav-row">
-            <button class="tp-nav-btn" id="tp-nav-prev" onclick="tpNavPrev()" title="Einen Tag zurück"><i class="fas fa-chevron-left"></i></button>
-            <span class="tp-nav-label" id="tp-nav-label">Heute</span>
-            <button class="tp-nav-btn" id="tp-nav-next" onclick="tpNavNext()" title="Einen Tag vor" disabled><i class="fas fa-chevron-right"></i></button>
+            <span class="tile-head-tools">
+                <button type="button" class="tp-nav-circle" id="tp-nav-prev" onclick="tpNavPrev()" title="Einen Tag zurück"><i class="fas fa-chevron-left"></i></button>
+                <span class="tp-nav-label" id="tp-nav-label">Heute</span>
+                <button type="button" class="tp-nav-circle" id="tp-nav-next" onclick="tpNavNext()" title="Einen Tag vor" disabled><i class="fas fa-chevron-right"></i></button>
+                <button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button>
+            </span>
         </div>
         <div class="class-card-body" style="padding: 8px 12px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto; max-height:320px;">
             <div id="dashboard-tp-list"></div>

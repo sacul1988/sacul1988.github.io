@@ -6801,31 +6801,30 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .dashboard-tp-card {
     min-width: 0;
 }
-.tp-nav-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 12px;
-    border-bottom: 1px solid #e9ecef;
-    background: #f8f9fa;
-}
-.tp-nav-btn {
-    background: none;
+.tp-nav-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
     border: none;
-    color: #555;
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
     cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
     line-height: 1;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s, opacity 0.15s;
 }
-.tp-nav-btn:hover:not(:disabled) { background: #e9ecef; color: #000; }
-.tp-nav-btn:disabled { color: #ccc; cursor: default; }
+.tp-nav-circle:hover:not(:disabled) { background: rgba(255, 255, 255, 0.38); }
+.tp-nav-circle:disabled { opacity: 0.35; cursor: default; }
 .tp-nav-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    color: #333;
-    min-width: 80px;
+    color: #fff;
+    min-width: 62px;
     text-align: center;
 }
 .tp-empty {
