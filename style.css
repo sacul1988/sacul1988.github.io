@@ -6835,34 +6835,48 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     padding: 16px 0;
 }
 .tp-class-group {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 .tp-class-name {
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    color: #444;
-    padding: 6px 0 6px;
-    border-bottom: 1px solid #e9ecef;
-    margin-bottom: 4px;
+    color: var(--dark-color);
+    padding: 6px 14px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: var(--border-radius);
+    margin-bottom: 6px;
 }
 .tp-student-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
-    padding: 4px 0;
-    flex-wrap: wrap;
+    padding: 6px 14px;
+    margin-bottom: 6px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+.tp-student-row:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
 }
 .tp-name {
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     font-weight: 600;
-    color: #333;
-    min-width: 90px;
+    color: var(--dark-color);
     flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .tp-pills {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    justify-content: flex-end;
 }
 .tp-pill {
     display: inline-flex;
