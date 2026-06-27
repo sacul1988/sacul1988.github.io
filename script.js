@@ -1845,7 +1845,7 @@ function renderTagesprotokollTile() {
     });
 
     if (classesWithIncidents.length === 0) {
-        container.innerHTML = '<div class="tp-empty">Keine Vorfälle</div>';
+        container.innerHTML = '<div class="tp-empty"><i class="fas fa-circle-check" title="Keine Vorfälle"></i></div>';
         return;
     }
 
