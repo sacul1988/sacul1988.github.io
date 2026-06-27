@@ -1851,7 +1851,7 @@ function renderTagesprotokollTile() {
 
     let html = '';
     classesWithIncidents.forEach(({ classIdx, name, incidents }) => {
-        html += `<div class="tp-class-group"><div class="tp-class-name">${escapeHtml(name)}</div>`;
+        html += `<div class="tp-class-group"><div class="tp-class-name">${escapeHtml(name)}</div><div class="tp-students">`;
         incidents.forEach(({ studentIdx, name: sName, hw, mat, stoer }) => {
             const mkPill = (type, label) => {
                 const key = classIdx + '_' + studentIdx + '_' + type;
@@ -1867,7 +1867,7 @@ function renderTagesprotokollTile() {
                 <span class="tp-pills">${pills}</span>
             </div>`;
         });
-        html += '</div>';
+        html += '</div></div>';
     });
     container.innerHTML = html;
 }

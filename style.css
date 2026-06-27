@@ -6846,6 +6846,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     border: 1px solid #c7d2fe;
     border-radius: var(--border-radius);
     overflow: hidden;
+    background: #fff;
 }
 .tp-class-name {
     font-size: 0.85rem;
@@ -6855,13 +6856,20 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
     background: #eef2ff;
     border-bottom: 1px solid #c7d2fe;
 }
+.tp-students {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+}
 .tp-student-row {
+    box-sizing: border-box;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
     padding: 6px 12px;
-    margin: 6px 8px;
     background: #f8fafc;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
