@@ -1795,12 +1795,12 @@ function _tpSaveAbgehakt(data) {
     else if (typeof window.flushCloudSyncNow === 'function') window.flushCloudSyncNow();
 }
 
-function toggleTagesprotokollAbgehakt(classIdx, studentIdx, dateStr, checked) {
+function toggleTagesprotokollAbgehakt(classIdx, studentIdx, dateStr) {
     const data = _tpGetAbgehakt();
     if (!data[dateStr]) data[dateStr] = {};
     const key = classIdx + '_' + studentIdx;
-    if (checked) data[dateStr][key] = true;
-    else delete data[dateStr][key];
+    if (data[dateStr][key]) delete data[dateStr][key];
+    else data[dateStr][key] = true;
     _tpSaveAbgehakt(data);
     renderTagesprotokollTile();
 }
@@ -1851,21 +1851,20 @@ function renderTagesprotokollTile() {
 
     let html = '';
     classesWithIncidents.forEach(({ classIdx, name, incidents }) => {
-        html += `<div class="tp-class-group"><div class="tp-class-name">${escapeHtml(name)}</div>`;
+        html += `<div class="tp-class-group"><div class="tp-class-name">${escapeHtml(name)}</div><div class="tp-pills-row">`;
         incidents.forEach(({ studentIdx, name: sName, hw, mat, stoer }) => {
             const key = classIdx + '_' + studentIdx;
             const done = !!dateAbgehakt[key];
-            html += `<div class="tp-student-row${done ? ' tp-done' : ''}">
-                <label class="tp-check-label"><input type="checkbox" class="tp-checkbox"${done ? ' checked' : ''} onchange="toggleTagesprotokollAbgehakt(${classIdx},${studentIdx},'${dateStr}',this.checked)"></label>
-                <span class="tp-name">${escapeHtml(sName)}</span>
-                <span class="tp-badges">
-                    ${hw > 0 ? `<span class="tp-badge tp-hw" title="Hausaufgaben vergessen">HA&nbsp;<b>${hw}</b></span>` : ''}
-                    ${mat > 0 ? `<span class="tp-badge tp-mat" title="Material vergessen">M&nbsp;<b>${mat}</b></span>` : ''}
-                    ${stoer > 0 ? `<span class="tp-badge tp-stoer" title="Störungen (Arbeitsphase)">S&nbsp;<b>${stoer}</b></span>` : ''}
-                </span>
+            const parts = [];
+            if (hw > 0) parts.push(`HA&nbsp;${hw}`);
+            if (mat > 0) parts.push(`M&nbsp;${mat}`);
+            if (stoer > 0) parts.push(`S&nbsp;${stoer}`);
+            html += `<div class="tp-pill${done ? ' tp-pill-done' : ''}" onclick="toggleTagesprotokollAbgehakt(${classIdx},${studentIdx},'${dateStr}')" title="${escapeHtml(sName)}">
+                <span class="tp-pill-name">${escapeHtml(sName)}</span>
+                <span class="tp-pill-info">${parts.join(' · ')}</span>
             </div>`;
         });
-        html += '</div>';
+        html += '</div></div>';
     });
     container.innerHTML = html;
 }
@@ -2122,7 +2121,7 @@ function saveDashboardTileWidths(widths) {
 }
 
 function dashboardSetTileWidth(key, span) {
-    if (key !== 'notes' && key !== 'zeugnistexte') return;
+    if (key !== 'notes' && key !== 'zeugnistexte' && key !== 'tagesprotokoll') return;
     const widths = getDashboardTileWidths();
     const grid = safeGetElement('classes-grid');
     const columns = grid ? dashboardColumnCount(grid) : 12;
@@ -2543,7 +2542,7 @@ function onTileWidthPointerDown(e) {
     if (!grid || !card) return;
     if (dashboardColumnCount(grid) <= dashboardBaseTileSpan(grid)) return;
     const key = card.dataset && card.dataset.tileKey;
-    if (key !== 'notes' && key !== 'zeugnistexte') return;
+    if (key !== 'notes' && key !== 'zeugnistexte' && key !== 'tagesprotokoll') return;
 
     e.preventDefault();
     e.stopPropagation();
