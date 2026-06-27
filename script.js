@@ -1795,10 +1795,10 @@ function _tpSaveAbgehakt(data) {
     else if (typeof window.flushCloudSyncNow === 'function') window.flushCloudSyncNow();
 }
 
-function toggleTagesprotokollAbgehakt(classIdx, studentIdx, dateStr) {
+function toggleTagesprotokollAbgehakt(classIdx, studentIdx, dateStr, type) {
     const data = _tpGetAbgehakt();
     if (!data[dateStr]) data[dateStr] = {};
-    const key = classIdx + '_' + studentIdx;
+    const key = classIdx + '_' + studentIdx + '_' + type;
     if (data[dateStr][key]) delete data[dateStr][key];
     else data[dateStr][key] = true;
     _tpSaveAbgehakt(data);
@@ -1853,16 +1853,17 @@ function renderTagesprotokollTile() {
     classesWithIncidents.forEach(({ classIdx, name, incidents }) => {
         html += `<div class="tp-class-group"><div class="tp-class-name">${escapeHtml(name)}</div><div class="tp-pills-row">`;
         incidents.forEach(({ studentIdx, name: sName, hw, mat, stoer }) => {
-            const key = classIdx + '_' + studentIdx;
-            const done = !!dateAbgehakt[key];
-            const parts = [];
-            if (hw > 0) parts.push(`HA&nbsp;${hw}`);
-            if (mat > 0) parts.push(`M&nbsp;${mat}`);
-            if (stoer > 0) parts.push(`S&nbsp;${stoer}`);
-            html += `<div class="tp-pill${done ? ' tp-pill-done' : ''}" onclick="toggleTagesprotokollAbgehakt(${classIdx},${studentIdx},'${dateStr}')" title="${escapeHtml(sName)}">
-                <span class="tp-pill-name">${escapeHtml(sName)}</span>
-                <span class="tp-pill-info">${parts.join(' · ')}</span>
-            </div>`;
+            const mkPill = (type, label) => {
+                const key = classIdx + '_' + studentIdx + '_' + type;
+                const done = !!dateAbgehakt[key];
+                return `<div class="tp-pill${done ? ' tp-pill-done' : ''}" onclick="toggleTagesprotokollAbgehakt(${classIdx},${studentIdx},'${dateStr}','${type}')">
+                    <span class="tp-pill-name">${escapeHtml(sName)}</span>
+                    <span class="tp-pill-info">${label}</span>
+                </div>`;
+            };
+            if (hw > 0) html += mkPill('hw', 'Hausaufgaben');
+            if (mat > 0) html += mkPill('mat', 'Material');
+            if (stoer > 0) html += mkPill('stoer', `Störung&nbsp;${stoer}`);
         });
         html += '</div></div>';
     });
@@ -2146,7 +2147,8 @@ function dashboardTileDefinitions() {
         { key: 'notes', label: 'Notizen', group: 'Kacheln', icon: 'fa-list-check' },
         { key: 'calendar', label: 'Kalender', group: 'Kacheln', icon: 'fa-calendar-alt' },
         { key: 'stundenplan', label: 'Stundenplan', group: 'Kacheln', icon: 'fa-clock' },
-        { key: 'zeugnistexte', label: 'Zeugnistexte', group: 'Kacheln', icon: 'fa-list-check' }
+        { key: 'zeugnistexte', label: 'Zeugnistexte', group: 'Kacheln', icon: 'fa-list-check' },
+        { key: 'tagesprotokoll', label: 'Tagesprotokoll', group: 'Kacheln', icon: 'fa-clipboard-check' }
     ]);
 }
 
@@ -2297,7 +2299,7 @@ function dashboardEffectiveTileWidths() {
 // texte dürfen breiter sein – gespeichert oder als Standard doppelt breit).
 function computeTileColSpan(item, columns, baseSpan, widths) {
     const key = item.dataset.tileKey;
-    const canBeWide = item.classList.contains('dashboard-notes-card') || item.classList.contains('dashboard-zt-card');
+    const canBeWide = item.classList.contains('dashboard-notes-card') || item.classList.contains('dashboard-zt-card') || item.classList.contains('dashboard-tp-card');
     let colSpan = Math.min(baseSpan, columns);
     if (canBeWide && columns > baseSpan) {
         if (widths[key]) {
