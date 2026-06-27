@@ -2009,7 +2009,7 @@ function renderClassesGrid() {
     calendarCard.innerHTML = `
         <div class="class-card-header">
             <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Kalender</span>
-            <span id="dashboard-calendar-today-badge" class="class-card-count">-</span>
+            <span class="tile-head-tools"><span id="dashboard-calendar-today-badge" class="class-card-count">-</span><button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button></span>
         </div>
         <div class="class-card-body" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
             <ul id="dashboard-calendar-list" class="dashboard-calendar-list" style="flex-grow: 1;">
@@ -2029,7 +2029,7 @@ function renderClassesGrid() {
     stundenplanCard.innerHTML = `
         <div class="class-card-header">
             <span class="tile-head-left"><span class="tile-drag-grip" title="Verschieben"><span class="tile-drag-dots" aria-hidden="true"></span></span>Stundenplan</span>
-            <span id="dashboard-sp-day" class="class-card-count">–</span>
+            <span class="tile-head-tools"><span id="dashboard-sp-day" class="class-card-count">–</span><button type="button" class="tile-width-grip" title="Breite ziehen"><i class="fas fa-left-right"></i></button></span>
         </div>
         <div class="class-card-body" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
             <div id="dashboard-sp-list" style="flex-grow: 1; display: flex; flex-direction: column;"></div>
@@ -2124,7 +2124,7 @@ function saveDashboardTileWidths(widths) {
 }
 
 function dashboardSetTileWidth(key, span) {
-    if (key !== 'notes' && key !== 'zeugnistexte' && key !== 'tagesprotokoll') return;
+    if (key !== 'notes' && key !== 'zeugnistexte' && key !== 'tagesprotokoll' && key !== 'calendar' && key !== 'stundenplan') return;
     const widths = getDashboardTileWidths();
     const grid = safeGetElement('classes-grid');
     const columns = grid ? dashboardColumnCount(grid) : 12;
@@ -2301,12 +2301,16 @@ function dashboardEffectiveTileWidths() {
 // texte dürfen breiter sein – gespeichert oder als Standard doppelt breit).
 function computeTileColSpan(item, columns, baseSpan, widths) {
     const key = item.dataset.tileKey;
-    const canBeWide = item.classList.contains('dashboard-notes-card') || item.classList.contains('dashboard-zt-card') || item.classList.contains('dashboard-tp-card');
+    // Standardmäßig doppelt breit (Notizen/Zeugnistexte/Tagesprotokoll)
+    const defaultsWide = item.classList.contains('dashboard-notes-card') || item.classList.contains('dashboard-zt-card') || item.classList.contains('dashboard-tp-card');
+    // Nur per Ziehgriff verbreiterbar, aber standardmäßig Basisbreite (Kalender/Stundenplan)
+    const resizableOnly = item.classList.contains('dashboard-calendar-card') || item.classList.contains('dashboard-stundenplan-card');
+    const canBeWide = defaultsWide || resizableOnly;
     let colSpan = Math.min(baseSpan, columns);
     if (canBeWide && columns > baseSpan) {
         if (widths[key]) {
             colSpan = Math.max(baseSpan, Math.min(columns, Number(widths[key]) || baseSpan));
-        } else {
+        } else if (defaultsWide) {
             colSpan = columns >= baseSpan * 2 ? baseSpan * 2 : baseSpan;
         }
     }
@@ -2546,7 +2550,7 @@ function onTileWidthPointerDown(e) {
     if (!grid || !card) return;
     if (dashboardColumnCount(grid) <= dashboardBaseTileSpan(grid)) return;
     const key = card.dataset && card.dataset.tileKey;
-    if (key !== 'notes' && key !== 'zeugnistexte' && key !== 'tagesprotokoll') return;
+    if (key !== 'notes' && key !== 'zeugnistexte' && key !== 'tagesprotokoll' && key !== 'calendar' && key !== 'stundenplan') return;
 
     e.preventDefault();
     e.stopPropagation();
