@@ -5313,6 +5313,19 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         display: none;
     }
 
+    /* "Nächster Schüler" bleibt auch auf Mobile ein voller, beschrifteter Button */
+    #zt-result-container .zt-result-actions .zt-next-student-btn {
+        flex: 1 1 100%;
+        background: var(--primary-color);
+        color: #fff;
+        border-radius: var(--border-radius);
+        padding: 12px 16px;
+        font-size: 1rem;
+    }
+    #zt-result-container .zt-result-actions .zt-next-student-btn .btn-text {
+        display: inline;
+    }
+
     /* Eigene Anweisung (Wand-Button unter dem Eingabefeld, vollflächig) */
     #zt-result-container .zt-refine {
         display: flex;

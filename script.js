@@ -11203,10 +11203,10 @@ function ztRenderResult() {
                     <div class="zt-result-actions">
                         <button class="btn btn-primary btn-icon" onclick="ztBackToInputForm()"><i class="fas fa-sync"></i> <span class="btn-text">Neu generieren</span></button>
                         <button class="btn btn-primary btn-icon zt-copy-btn" onclick="ztCopyText(this)"><i class="fas fa-copy"></i> <span class="btn-text">Kopieren</span></button>
+                        ${nextBtnHtml}
                     </div>
                 </div>
             </div>
-            ${nextBtnHtml ? `<div class="zt-result-footer">${nextBtnHtml}</div>` : ''}
         </div>`;
 }
 
