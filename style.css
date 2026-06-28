@@ -4339,33 +4339,21 @@ html.modal-open, body.modal-open {
     background: var(--primary-color);
     color: #fff;
 }
-/* "Zuständig"/"Nicht zuständig": schlichter Text-Button */
+/* "Zuständig": gleiche helle Outline-Pille wie "Themen / Situation".
+   "Nicht zuständig" (delegiert): grüne Outline-Variante. */
 .zt-plan-pill-teacher {
-    border: 0;
-    background: transparent;
-    padding: 2px 0;
-    color: var(--grey-color);
-    font-size: 13px;
-    font-weight: 700;
-    text-align: right;
-    white-space: nowrap;
+    max-width: 46%;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 46%;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-}
-.zt-plan-pill-teacher:hover {
-    color: var(--primary-color);
 }
 .zt-plan-pill-teacher.delegated {
+    border-color: var(--success-color);
+    background: #f0fdf4;
     color: var(--success-color);
 }
 .zt-plan-pill-teacher.delegated:hover {
-    color: var(--success-color);
+    background: var(--success-color);
+    color: #fff;
 }
 .zt-plan-course-teacher-sep {
     color: #cbd5e1;
