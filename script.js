@@ -12206,9 +12206,9 @@ function ztPlanungCourseCardHtml(course) {
         ? `<button type="button" class="zt-plan-course-teacher${delegatedClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>`
         : '';
     const titleOnclick = `onclick="ztPlanungOpenForm('${course.id}')" title="Kurs bearbeiten"`;
+    const themenBtn = `<button type="button" class="zt-plan-themen-btn" onclick="ztPlanungOpenForm('${course.id}')" title="Themen & Unterrichtssituation eingeben"><i class="fas fa-list-ul"></i> Themen</button>`;
     const actions = isLinked ? '' : `
                 <div class="zt-plan-course-actions">
-                    <button class="btn btn-sm btn-primary btn-circle-sm" title="Bearbeiten" onclick="ztPlanungOpenForm('${course.id}')"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger btn-circle-sm" title="Kurs löschen" onclick="ztPlanungDeleteCourse('${course.id}')"><i class="fas fa-trash"></i></button>
                 </div>`;
 
@@ -12217,8 +12217,8 @@ function ztPlanungCourseCardHtml(course) {
             <div class="zt-plan-course-head">
                 <div class="zt-plan-course-title" ${titleOnclick}>
                     <span class="zt-plan-course-name">${title} ${linkedBadge}</span>
-                    <span class="zt-plan-course-progress">${done}/${total} erledigt</span>
                 </div>
+                ${themenBtn}
                 ${fachlehrerHtml}
                 ${actions}
             </div>
