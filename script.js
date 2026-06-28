@@ -3489,7 +3489,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // zur Planungsliste zurück – nicht das ganze Fenster schließen / zur Startseite.
         if (window._activeToolWindow === 'zeugnis-texte' && typeof ZtState !== 'undefined'
             && (ZtState.inlineMode === 'text' || ZtState.inlineMode === 'archive')) {
-            if (typeof ztShowPlanningInline === 'function') ztShowPlanningInline();
+            if (ZtState.inlineMode === 'text' && typeof ztReturnToInlinePlanung === 'function') {
+                // Zurück zur Liste inkl. gemerkter Scroll-Position
+                ztReturnToInlinePlanung();
+            } else if (typeof ztShowPlanningInline === 'function') {
+                ztShowPlanningInline();
+            }
             history.pushState({ page: currentPage, classId: activeClassId, module: activeModule, toolWindow: 'zeugnis-texte' }, '');
             return;
         }
@@ -12688,6 +12693,10 @@ function ztPlanungWriteText(courseId, studentId) {
     if (!c) return;
     const s = (c.students || []).find(x => x.id === studentId);
     if (!s) return;
+
+    // Scroll-Position der Liste merken, damit "Zurück" wieder dorthin springt
+    const _sc = _ztInlineScroller();
+    ZtPlanungState.inlineScrollTop = _sc ? _sc.scrollTop : 0;
 
     hideModal();
     if (typeof ztCloseResult === 'function') ztCloseResult();
