@@ -4347,11 +4347,24 @@ html.modal-open, body.modal-open {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* Zuständig + noch offen: hell-orange */
+.zt-plan-pill-teacher.responsible {
+    border-color: #f59e0b;
+    background: #fff7ed;
+    color: #b45309;
+}
+.zt-plan-pill-teacher.responsible:hover {
+    background: #f59e0b;
+    color: #fff;
+}
+/* Alle Schüler erledigt ODER nicht zuständig: grün */
+.zt-plan-pill-teacher.done,
 .zt-plan-pill-teacher.delegated {
     border-color: var(--success-color);
     background: #f0fdf4;
     color: var(--success-color);
 }
+.zt-plan-pill-teacher.done:hover,
 .zt-plan-pill-teacher.delegated:hover {
     background: var(--success-color);
     color: #fff;

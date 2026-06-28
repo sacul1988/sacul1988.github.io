@@ -12210,14 +12210,21 @@ function ztPlanungCourseCardHtml(course) {
     const fachlehrer = (course.fachlehrer || '').trim();
     const responsibleName = ztPlanungResponsibleName(course);
     const responsible = course.textResponsible || (course.delegatedToTeacher ? 'teacher' : '');
-    const delegatedClass = (responsible === 'teacher' || responsible === 'other') ? ' delegated' : '';
+    const allDone = total > 0 && done === total;
+    // Status-Farbe: alle erledigt = grün, zuständig = orange, delegiert = grün
+    let teacherStateClass = '';
+    if (responsible === 'me') {
+        teacherStateClass = allDone ? ' done' : ' responsible';
+    } else if (responsible === 'teacher' || responsible === 'other') {
+        teacherStateClass = ' delegated';
+    }
     const teacherLabel = responsible === 'me'
         ? 'Zuständig'
         : (responsible === 'teacher' || responsible === 'other')
             ? `Nicht zuständig: ${ztEsc(responsibleName)}`
             : ztEsc(responsibleName);
     const fachlehrerHtml = (responsibleName || responsible === 'me')
-        ? `<button type="button" class="zt-plan-pill-btn zt-plan-pill-teacher${delegatedClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>`
+        ? `<button type="button" class="zt-plan-pill-btn zt-plan-pill-teacher${teacherStateClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>`
         : '';
     const themenBtn = `<button type="button" class="zt-plan-pill-btn" onclick="ztPlanungOpenForm('${course.id}')" title="Themen & Unterrichtssituation eingeben"><i class="fas fa-list-ul"></i> Themen / Situation</button>`;
     const actions = isLinked ? '' : `
