@@ -12203,10 +12203,9 @@ function ztPlanungCourseCardHtml(course) {
             ? `Nicht zuständig: ${ztEsc(responsibleName)}`
             : ztEsc(responsibleName);
     const fachlehrerHtml = (responsibleName || responsible === 'me')
-        ? `<button type="button" class="zt-plan-course-teacher${delegatedClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>`
+        ? `<button type="button" class="zt-plan-pill-btn zt-plan-pill-teacher${delegatedClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>`
         : '';
-    const titleOnclick = `onclick="ztPlanungOpenForm('${course.id}')" title="Kurs bearbeiten"`;
-    const themenBtn = `<button type="button" class="zt-plan-themen-btn" onclick="ztPlanungOpenForm('${course.id}')" title="Themen & Unterrichtssituation eingeben"><i class="fas fa-list-ul"></i> Themen</button>`;
+    const themenBtn = `<button type="button" class="zt-plan-pill-btn" onclick="ztPlanungOpenForm('${course.id}')" title="Themen & Unterrichtssituation eingeben"><i class="fas fa-list-ul"></i> Themen / Situation</button>`;
     const actions = isLinked ? '' : `
                 <div class="zt-plan-course-actions">
                     <button class="btn btn-sm btn-danger btn-circle-sm" title="Kurs löschen" onclick="ztPlanungDeleteCourse('${course.id}')"><i class="fas fa-trash"></i></button>
@@ -12215,7 +12214,7 @@ function ztPlanungCourseCardHtml(course) {
     return `
         <div class="zt-plan-course ${isLinked ? 'linked' : ''}" data-course-id="${spJsAttr(course.id)}">
             <div class="zt-plan-course-head">
-                <div class="zt-plan-course-title" ${titleOnclick}>
+                <div class="zt-plan-course-title">
                     <span class="zt-plan-course-name">${title} ${linkedBadge}</span>
                 </div>
                 ${themenBtn}
