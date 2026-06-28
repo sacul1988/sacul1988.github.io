@@ -4323,9 +4323,9 @@ html.modal-open, body.modal-open {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    border: 1px solid var(--border-color);
-    background: #fff;
-    color: var(--grey-color);
+    border: 1px solid var(--primary-color);
+    background: var(--primary-color);
+    color: #fff;
     border-radius: 8px;
     padding: 4px 10px;
     font-size: 12px;
@@ -4339,18 +4339,21 @@ html.modal-open, body.modal-open {
     transition: var(--transition);
 }
 .zt-plan-pill-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: #fff;
 }
-/* Zuständigkeits-Pill: delegiert (nicht zuständig) hervorheben */
+/* Zuständigkeits-Pill: delegiert (nicht zuständig) in Grün */
 .zt-plan-pill-teacher.delegated {
-    color: var(--success-color);
+    background: var(--success-color);
     border-color: var(--success-color);
-    background: #f0fdf4;
+    color: #fff;
 }
 .zt-plan-pill-teacher.delegated:hover {
-    color: var(--success-color);
+    background: var(--success-color);
     border-color: var(--success-color);
+    color: #fff;
+    opacity: 0.9;
 }
 .zt-plan-course-teacher-sep {
     color: #cbd5e1;
