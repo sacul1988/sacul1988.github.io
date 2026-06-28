@@ -12219,7 +12219,7 @@ function ztPlanungCourseCardHtml(course) {
         teacherStateClass = ' delegated';
     }
     const teacherLabel = responsible === 'me'
-        ? 'Zuständig'
+        ? (allDone ? 'Fertig' : 'Zuständig')
         : (responsible === 'teacher' || responsible === 'other')
             ? `Nicht zuständig: ${ztEsc(responsibleName)}`
             : ztEsc(responsibleName);
