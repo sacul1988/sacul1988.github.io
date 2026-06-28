@@ -3484,7 +3484,16 @@ document.addEventListener('DOMContentLoaded', function() {
             history.pushState({ page: currentPage, classId: activeClassId, module: activeModule, toolWindow: window._activeToolWindow }, '');
             return;
         }
-        
+
+        // Zeugnistexte: aus dem Eingabe-/Ergebnis- oder Archiv-Bereich führt "Zurück"
+        // zur Planungsliste zurück – nicht das ganze Fenster schließen / zur Startseite.
+        if (window._activeToolWindow === 'zeugnis-texte' && typeof ZtState !== 'undefined'
+            && (ZtState.inlineMode === 'text' || ZtState.inlineMode === 'archive')) {
+            if (typeof ztShowPlanningInline === 'function') ztShowPlanningInline();
+            history.pushState({ page: currentPage, classId: activeClassId, module: activeModule, toolWindow: 'zeugnis-texte' }, '');
+            return;
+        }
+
         const state = event.state;
         const toolWindowOverlay = document.getElementById('tool-window-overlay');
         const isToolWindowOpen = toolWindowOverlay && toolWindowOverlay.classList.contains('open');
