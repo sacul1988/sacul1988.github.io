@@ -12203,9 +12203,9 @@ function ztPlanungCourseCardHtml(course) {
         </li>`).join('');
 
     const linkedBadge = course.source === 'stundenplan'
-        ? `<span class="zt-plan-linked-badge" title="Automatisch aus dem Stundenplan"><i class="fas fa-clock"></i> Stundenplan</span>`
+        ? `<span class="zt-plan-linked-badge" title="Automatisch aus dem Stundenplan"><i class="fas fa-clock"></i></span>`
         : course.source === 'klassenlehrer'
-            ? `<span class="zt-plan-linked-badge" title="Automatisch aus der Klassenlehrer-Klasse"><i class="fas fa-chalkboard-user"></i> Klassenlehrer</span>`
+            ? `<span class="zt-plan-linked-badge" title="Automatisch aus der Klassenlehrer-Klasse"><i class="fas fa-chalkboard-user"></i></span>`
             : '';
     const fachlehrer = (course.fachlehrer || '').trim();
     const responsibleName = ztPlanungResponsibleName(course);
