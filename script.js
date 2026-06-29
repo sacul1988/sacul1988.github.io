@@ -11492,13 +11492,37 @@ function ztArchiveItemHtml(item) {
                 <span class="zt-plan-student-name">${ztEsc(item.label)}</span>
                 ${typLabel ? `<span class="zt-archive-typ">${typLabel}</span>` : ''}
             </div>
-            <span class="zt-archive-date">${dateStr}</span>
             <div class="zt-archive-actions">
+                <button class="btn btn-sm btn-secondary btn-circle-sm" title="Text anzeigen" onclick="event.stopPropagation();ztShowTextOnly('${item.id}')"><i class="fas fa-eye"></i></button>
                 <button class="btn btn-sm btn-primary btn-circle-sm" title="Öffnen / Bearbeiten" onclick="event.stopPropagation();ztOpenArchive('${item.id}')"><i class="fas fa-edit"></i></button>
                 <button class="btn btn-sm btn-danger btn-circle-sm" title="Löschen" onclick="event.stopPropagation();ztDeleteArchive('${item.id}')"><i class="fas fa-trash"></i></button>
             </div>
         </li>`;
 }
+
+// Zeigt nur den Text eines Archiv-Eintrags in einem minimalen Modal (sonst nichts).
+function ztShowTextOnly(id) {
+    const item = (ZtState.archive || []).find(a => a.id === id);
+    if (!item) return;
+    const text = (typeof ztNormalizeText === 'function') ? ztNormalizeText(item.text || '') : (item.text || '');
+    const overlay = document.createElement('div');
+    overlay.className = 'zt-textonly-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    const box = document.createElement('div');
+    box.className = 'zt-textonly-box';
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'zt-textonly-close';
+    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    closeBtn.onclick = () => overlay.remove();
+    const txt = document.createElement('div');
+    txt.className = 'zt-textonly-text';
+    txt.textContent = text;
+    box.appendChild(closeBtn);
+    box.appendChild(txt);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+}
+window.ztShowTextOnly = ztShowTextOnly;
 
 // Archiv-Einträge nach Kurs gruppiert und sortiert – wie die Planungsliste.
 function ztArchiveGroupedHtml(items) {
