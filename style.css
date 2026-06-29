@@ -116,6 +116,8 @@ body {
 .js-class-title .ct-mobile { display: none; }          /* Desktop: nur Modulname (.ct-desktop) */
 .ct-home-title { display: none; }                      /* Desktop: "Startseite" kommt aus der Leiste */
 .tool-window-body .card-header > h2 { display: none; } /* Desktop: Tool-Titel kommt aus der Leiste */
+/* Desktop: ohne Titel im Header die Buttons wieder rechtsbündig statt links */
+.tool-window-body .card-header { justify-content: flex-end; }
 
 @media (max-width: 599px) {
     /* Mobil: Titel oben ausblenden (Flex-Platz bleibt erhalten), Karten-Header zeigt ihn */
@@ -125,6 +127,7 @@ body {
     .js-class-title .ct-mobile { display: inline; }
     .ct-home-title { display: inline; }
     .tool-window-body .card-header > h2 { display: block; }
+    .tool-window-body .card-header { justify-content: space-between; }
 }
 
 #noten-module .card-header > div {
