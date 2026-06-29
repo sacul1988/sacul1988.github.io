@@ -105,7 +105,7 @@ Aufbau (verbindlich einzuhalten):
 - Der LETZTE Satz MUSS lauten, sinngemäß und an die Beobachtungen angepasst: "Insgesamt konnte (Name) in diesem Halbjahr einen [guten / grundlegenden / nur einen geringen] Lernfortschritt erreichen."
 
 Satzbau:
-- Verbinde NIEMALS zwei Hauptsätze mit ", und". Mache IMMER zwei getrennte Sätze.
+- Ziehe gelegentlich zwei kurze, thematisch verwandte Beobachtungen, die in den Eingaben DIREKT ODER NAH HINTEREINANDER stehen, zu einem flüssigen Satz zusammen (gern mit ", und" / ", jedoch"). Verbinde nur nah beieinander stehende Beobachtungen, niemals weit voneinander entfernte. Halte die zusammengezogenen Sätze kurz und gut lesbar – KEINE langen, überladenen Sätze, in denen mehrere Teile mit Komma aneinandergereiht werden.
 - Meistens ein Komma pro Satz, gelegentlich ein zweites. Vermeide mehr als zwei Kommas in einem Satz.
 - Vermeide einen zweiten Relativsatz an einem Satz, der bereits einen Relativsatz oder eine Erweiterung mit Komma enthält. Stattdessen zwei Sätze.
 - Vermeide gestelzte Formulierungen.
@@ -140,7 +140,7 @@ Aufbau (verbindlich einzuhalten):
 - Der LETZTE Satz MUSS lauten, sinngemäß und an die Beobachtungen angepasst: "Insgesamt konnte (Name) in diesem Halbjahr einen [guten / grundlegenden / nur einen geringen] Lernfortschritt erreichen."
 
 Satzbau:
-- Verbinde NIEMALS zwei Hauptsätze mit ", und". Mache IMMER zwei getrennte Sätze.
+- Ziehe gelegentlich zwei kurze, thematisch verwandte Beobachtungen, die in den Eingaben DIREKT ODER NAH HINTEREINANDER stehen, zu einem flüssigen Satz zusammen (gern mit ", und" / ", jedoch"). Verbinde nur nah beieinander stehende Beobachtungen, niemals weit voneinander entfernte. Halte die zusammengezogenen Sätze kurz und gut lesbar – KEINE langen, überladenen Sätze, in denen mehrere Teile mit Komma aneinandergereiht werden.
 - Meistens ein Komma pro Satz, gelegentlich ein zweites. Vermeide mehr als zwei Kommas in einem Satz.
 - Vermeide einen zweiten Relativsatz an einem Satz, der bereits einen Relativsatz oder eine Erweiterung mit Komma enthält. Stattdessen zwei Sätze.
 - Vermeide gestelzte Formulierungen.
@@ -166,7 +166,7 @@ Orientiere dich am folgenden Beispieltext für den Stil und die Struktur:
 "Das Arbeitsverhalten von (Name) entspricht weitestgehend den Erwartungen. (Name) wird in allen Fächern innerhalb des Klassenverbandes unterrichtet. Im Unterricht arbeitet er sowohl mit Regelschulmaterial als auch mit differenziertem Material. Insgesamt zeigt (Name) eine gute allgemeine Motivation, im Unterricht mitzuarbeiten. Er beginnt zumeist selbstständig mit der Bearbeitung der gestellten Aufgaben. Verstandene Aufgaben werden insgesamt zuverlässig und ordentlich bearbeitet. Bei Fragen wendet sich (Name) selbstständig an die anwesende Lehrkraft. Teilweise lässt er sich ablenken, findet jedoch nach einer Ermahnung zuverlässig zurück zur Arbeit. Die Materialien werden zuverlässig mitgebracht. Die mündliche Beteiligung ist jedoch nur sehr gering vorhanden. (Name)s Sozialverhalten entspricht den Erwartungen. Er ist gut in die Klassengemeinschaft integriert und verhält sich seinen Mitschülerinnen und Mitschülern gegenüber respektvoll."
 
 Satzbau:
-- Verbinde NIEMALS zwei Hauptsätze mit ", und". Mache IMMER zwei getrennte Sätze.
+- Ziehe gelegentlich zwei kurze, thematisch verwandte Beobachtungen, die in den Eingaben DIREKT ODER NAH HINTEREINANDER stehen, zu einem flüssigen Satz zusammen (gern mit ", und" / ", jedoch"). Verbinde nur nah beieinander stehende Beobachtungen, niemals weit voneinander entfernte. Halte die zusammengezogenen Sätze kurz und gut lesbar – KEINE langen, überladenen Sätze, in denen mehrere Teile mit Komma aneinandergereiht werden.
 - Meistens ein Komma pro Satz, gelegentlich ein zweites. Vermeide mehr als zwei Kommas in einem Satz.
 - Vermeide einen zweiten Relativsatz an einem Satz, der bereits einen Relativsatz oder eine Erweiterung mit Komma enthält. Stattdessen zwei Sätze.
 - Vermeide gestelzte Formulierungen.
