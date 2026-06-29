@@ -2230,9 +2230,9 @@ html.login-active, body.login-active {
     background: #fff;
     border-radius: var(--border-radius-lg, 14px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-    max-width: 460px;
+    max-width: 620px;
     width: 100%;
-    max-height: 80vh;
+    max-height: 88vh;
     overflow-y: auto;
     padding: 18px 20px 20px;
 }
@@ -2255,7 +2255,7 @@ html.login-active, body.login-active {
     color: var(--dark-color);
     font-size: 0.9rem;
     line-height: 1.5;
-    max-height: 160px;
+    max-height: 45vh;
     overflow-y: auto;
 }
 .sp-note-empty { color: var(--grey-color); font-size: 0.88rem; margin-bottom: 12px; }
