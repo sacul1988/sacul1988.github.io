@@ -12058,12 +12058,10 @@ function ztArchiveGroupedHtml(items) {
     return '<div class="zt-archive-list">' + keys.map(k => {
         const g = groups.get(k);
         const headLabel = k ? (g.name || 'Kurs') : 'Ohne Kurs';
-        const count = g.items.length;
         return `<div class="zt-plan-course">
             <div class="zt-plan-course-head">
                 <div class="zt-plan-course-title">
                     <span class="zt-plan-course-name">${ztEsc(headLabel)}</span>
-                    <span class="zt-plan-course-progress">${count} ${count === 1 ? 'Eintrag' : 'Einträge'}</span>
                 </div>
             </div>
             <ul class="zt-plan-students">${g.items.map(ztArchiveItemHtml).join('')}</ul>
