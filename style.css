@@ -1751,10 +1751,21 @@ html.login-active, body.login-active {
 .export-choice-dialog .app-dialog-buttons .export-opt:hover,
 .export-choice-dialog .app-dialog-buttons .export-opt:focus-visible {
     border-color: var(--primary-color);
-    background: #f4f6ff;
+    background: var(--primary-color);
+    color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(67, 97, 238, 0.16);
+    box-shadow: 0 8px 20px rgba(67, 97, 238, 0.25);
     outline: none;
+}
+.export-choice-dialog .app-dialog-buttons .export-opt:hover i,
+.export-choice-dialog .app-dialog-buttons .export-opt:focus-visible i,
+.export-choice-dialog .app-dialog-buttons .export-opt:hover .export-opt-title,
+.export-choice-dialog .app-dialog-buttons .export-opt:focus-visible .export-opt-title {
+    color: #fff;
+}
+.export-choice-dialog .app-dialog-buttons .export-opt:hover .export-opt-desc,
+.export-choice-dialog .app-dialog-buttons .export-opt:focus-visible .export-opt-desc {
+    color: rgba(255, 255, 255, 0.85);
 }
 .export-choice-dialog .app-dialog-buttons .export-opt i {
     font-size: 1.7rem;
