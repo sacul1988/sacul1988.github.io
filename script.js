@@ -11367,14 +11367,9 @@ function ztInitArchive() {
 }
 
 function ztUpdateArchiveBadge() {
+    // Anzahl-Badge am Archiv-Button wird nicht mehr angezeigt
     const badge = document.getElementById('zt-archive-badge');
-    if (!badge) return;
-    if (ZtState.archive.length) {
-        badge.textContent = ZtState.archive.length;
-        badge.style.display = '';
-    } else {
-        badge.style.display = 'none';
-    }
+    if (badge) badge.style.display = 'none';
 }
 
 function ztPersistArchive() {
