@@ -307,9 +307,16 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
 
 Regeln für "mitarbeit_text":
 
-Gib KEINEN Fließtext zurück, sondern einzelne Stichpunkte, jeweils in einer eigenen Zeile und jeweils beginnend mit "• ". Mache aus jedem eingegebenen Punkt einen eigenen Stichpunkt. So viele Stichpunkte wie nötig – kein festes Limit.
+Gib KEINEN Fließtext zurück, sondern einzelne Stichpunkte, jeweils in einer eigenen Zeile und jeweils beginnend mit "• ". So viele Stichpunkte wie nötig – kein festes Limit.
 Jeder Stichpunkt steht in der direkten Anrede "Du" und bezieht sich auf die unten genannten Beobachtungen zur Mitarbeit. Beginne ohne einleitende Floskeln (also NICHT "In der sonstigen Mitarbeit ist mir Folgendes aufgefallen:").
-Übernimm jeden Punkt aus den Eingaben einzeln. Lasse nichts weg. Fasse nur dann etwas zusammen, wenn es wörtlich dasselbe ist – ähnliche, aber eigenständige Angaben bleiben getrennt. Vollständigkeit geht vor Kürze.
+
+VOLLSTÄNDIGKEIT (oberste Regel, unbedingt einhalten):
+- Jede einzelne Eingabezeile bzw. jede mit "•" markierte Beobachtung wird zu GENAU EINEM Stichpunkt. Eine Eingabe = ein Stichpunkt.
+- Die Anzahl deiner Stichpunkte MUSS mit der Anzahl der eingegebenen Beobachtungen übereinstimmen.
+- Lasse NIEMALS einen Punkt weg – auch keine kurzen, unscheinbaren oder scheinbar nebensächlichen.
+- Fasse NICHTS zusammen und führe NICHTS zusammen, auch keine inhaltlich ähnlichen Punkte. Nur wörtlich identische Dopplungen dürfen zu einem Punkt werden.
+- Vollständigkeit geht IMMER vor Kürze.
+- PRÜFE ZUM SCHLUSS: Zähle die eingegebenen Beobachtungen und deine Stichpunkte. Stimmen die Anzahlen nicht überein, ergänze die fehlenden Punkte, BEVOR du antwortest.
 SANFTE KORREKTUR statt Umformulierung: Verändere meinen Schreibstil so wenig wie möglich. Korrigiere NUR Rechtschreibung, Kommasetzung, Grammatik und offensichtliche Fehler und vervollständige halbe Sätze zu ganzen Sätzen. Formuliere NICHT um, ersetze keine Wörter durch Synonyme, kürze nicht und vereinfache nicht. Der fertige Stichpunkt soll so klingen wie meine Eingabe – nur sprachlich korrekt und in der Anrede "Du". Füge keine eigenen Inhalte oder Bewertungen hinzu.
 Nenne KEINE Note im Text. Es gibt KEINEN Schlusssatz mit einer Note (also NICHT "Insgesamt ergibt das für dich die Note X.").
 Füge keine Ratschläge oder Tipps hinzu, wie der Schüler/die Schülerin sich verbessern könnte.
