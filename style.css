@@ -5381,9 +5381,16 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 .znq-chip-grip { color: var(--grey-color); cursor: grab; flex-shrink: 0; font-size: 0.85rem; opacity: 0.7; }
 .znq-chip-grip:active { cursor: grabbing; }
 .znq-chip.selected .znq-chip-grip { color: rgba(255, 255, 255, 0.85); }
-.znq-chip.znq-dragging { opacity: 0.5; }
-.znq-chip.znq-drop-before { box-shadow: inset 0 3px 0 var(--primary-color); }
-.znq-chip.znq-drop-after { box-shadow: inset 0 -3px 0 var(--primary-color); }
+.znq-chip.znq-dragging { opacity: 0.4; }
+/* Deutliche orange Ablege-Markierung (Linie im Abstand zwischen den Chips) */
+.znq-chip.znq-drop-before {
+    box-shadow: 0 -4px 0 0 #f97316;
+    border-color: #f97316;
+}
+.znq-chip.znq-drop-after {
+    box-shadow: 0 4px 0 0 #f97316;
+    border-color: #f97316;
+}
 .znq-chip-text { flex: 1; min-width: 0; }
 .znq-chip-tools { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
 .znq-chip-tools button {
