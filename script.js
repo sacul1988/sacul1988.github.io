@@ -8120,10 +8120,21 @@ function znSetGradeManually(index, newGrade) {
     }
 }
 
-function znGenerateFromField(index) {
+async function znGenerateFromField(index) {
     if (activeClassId === null) return;
     const student = classes[activeClassId]?.students?.[index];
     if (!student) return;
+    // Ausgabeformat wählen: Stichpunkte oder Fließtext
+    const choice = await swal({
+        title: 'Wie soll der Text aussehen?',
+        text: 'Die KI verbessert deine Eingabe sprachlich – wähle das Ausgabeformat.',
+        buttons: {
+            cancel: { text: 'Abbrechen', value: null },
+            bullets: { text: 'Stichpunkte', value: 'bullets' },
+            fliess: { text: 'Fließtext', value: 'fliess' }
+        }
+    });
+    if (!choice) return;
     // Erst aktuellen DOM-Inhalt sichern, dann als Beobachtungen verwenden
     const el = document.getElementById(`zn-begruendung-${index}`);
     const rawContent = el?.innerText || student.zeugnisBegruendung || '';
@@ -8131,7 +8142,7 @@ function znGenerateFromField(index) {
     _znUndoBackup[index] = rawContent;
     student.zeugnisBegruendung = rawContent;
     student.zeugnisSonstiges = rawContent.replace(/^•\s*/gm, '').replace(/•/g, '').trim();
-    zeugnisnoteGenerate(index, null);
+    zeugnisnoteGenerate(index, null, null, choice === 'fliess');
 }
 
 // Wie znGenerateFromField, aber die KI schreibt einen kurzen Fließtext (Schnell-Eingabe)
