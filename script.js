@@ -6338,11 +6338,12 @@ function renderSitzplanModule() {
     const currentMode = cls.sitzplan.currentMode || 'evaluation';
     
     if (workspace) {
-        workspace.classList.remove('evaluation-mode', 'oral-mode', 'work-mode', 'note-mode');
+        workspace.classList.remove('evaluation-mode', 'oral-mode', 'work-mode', 'note-mode', 'edit-mode');
         if (currentMode === 'evaluation') workspace.classList.add('evaluation-mode');
         else if (currentMode === 'oral') workspace.classList.add('oral-mode');
         else if (currentMode === 'work') workspace.classList.add('work-mode');
         else if (currentMode === 'note') workspace.classList.add('note-mode');
+        else if (currentMode === 'edit') workspace.classList.add('edit-mode');
     }
 
     if (editBtn) {
