@@ -8014,9 +8014,9 @@ function zeugnisnoteInlineHtml(student, index) {
         </div>
         <div class="zn-begruendung-wrap">
             <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text || '• ')}</div>
-            ${_znUndoBackup[index] != null ? `<button class="btn btn-icon zn-undo-btn" onclick="znUndoGenerate(${index})" title="KI-Überarbeitung rückgängig machen"><i class="fas fa-rotate-left"></i></button>` : ''}
-            <button class="btn btn-primary btn-icon zn-fragen-btn" onclick="openZeugnisQuestionsModal(${index})" title="Schnell-Eingabe per Fragen"><i class="fas fa-circle-question"></i></button>
-            <button class="btn btn-primary btn-icon zn-wand-btn" onclick="znGenerateFromField(${index})" title="Sprache verbessern (KI)"><i class="fas fa-wand-magic-sparkles"></i></button>
+            ${_znUndoBackup[index] != null ? `<button type="button" class="zn-icon-btn zn-undo-btn" onclick="znUndoGenerate(${index})" title="KI-Überarbeitung rückgängig machen"><i class="fas fa-rotate-left"></i></button>` : ''}
+            <button type="button" class="zn-icon-btn zn-fragen-btn" onclick="openZeugnisQuestionsModal(${index})" title="Schnell-Eingabe per Fragen"><i class="fas fa-circle-question"></i></button>
+            <button type="button" class="zn-icon-btn zn-wand-btn" onclick="znGenerateFromField(${index})" title="Sprache verbessern (KI)"><i class="fas fa-wand-magic-sparkles"></i></button>
         </div>`;
 }
 
