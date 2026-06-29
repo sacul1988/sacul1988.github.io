@@ -8235,16 +8235,43 @@ function _znGradeInt(note) {
     return m ? parseInt(m[0], 10) : null;
 }
 
+// Gestylter Eingabe-Dialog (passend zum App-Design) – Promise<string|null>
+function _znPrompt(title, initial) {
+    return new Promise((resolve) => {
+        const ov = document.createElement('div');
+        ov.className = 'app-dialog-overlay';
+        const dlg = document.createElement('div');
+        dlg.className = 'app-dialog znq-prompt';
+        dlg.innerHTML = `
+            <h2 class="app-dialog-title">${escapeHtml(title)}</h2>
+            <textarea class="znq-prompt-input" rows="3"></textarea>
+            <div class="app-dialog-buttons">
+                <button type="button" class="btn btn-secondary znq-prompt-cancel">Abbrechen</button>
+                <button type="button" class="btn btn-primary znq-prompt-ok">OK</button>
+            </div>`;
+        ov.appendChild(dlg);
+        document.body.appendChild(ov);
+        const ta = dlg.querySelector('.znq-prompt-input');
+        ta.value = initial || '';
+        const done = (val) => { ov.remove(); document.removeEventListener('keydown', key, true); resolve(val); };
+        dlg.querySelector('.znq-prompt-cancel').onclick = () => done(null);
+        dlg.querySelector('.znq-prompt-ok').onclick = () => done(ta.value.trim());
+        ov.addEventListener('click', (e) => { if (e.target === ov) done(null); });
+        const key = (e) => {
+            if (e.key === 'Escape') { e.preventDefault(); done(null); }
+            else if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); done(ta.value.trim()); }
+        };
+        document.addEventListener('keydown', key, true);
+        setTimeout(() => { ta.focus(); ta.select(); }, 30);
+    });
+}
+
 function openZeugnisQuestionsModal(index) {
     const student = classes[activeClassId]?.students?.[index];
     if (!student) return;
-    const gradeInt = _znGradeInt(student.zeugnisnote);
 
-    // Antwort-Status pro Frage (über die Schritte hinweg gemerkt)
-    const answers = ZN_QUESTIONS.map(q => ({
-        selected: new Set(q.chips.filter(c => gradeInt !== null && Array.isArray(c.grades) && c.grades.includes(gradeInt)).map(c => c.text)),
-        note: ''
-    }));
+    // Antwort-Status pro Frage (über die Schritte hinweg gemerkt) – ohne Vorauswahl
+    const answers = ZN_QUESTIONS.map(() => ({ selected: new Set(), note: '' }));
     let step = 0;
     const total = ZN_QUESTIONS.length;
 
@@ -8324,28 +8351,34 @@ function openZeugnisQuestionsModal(index) {
         });
         // Chip bearbeiten
         box.querySelectorAll('.znq-chip-edit').forEach(btn => {
-            btn.onclick = (e) => {
+            btn.onclick = async (e) => {
                 e.stopPropagation();
                 const ci = parseInt(btn.closest('.znq-chip').dataset.ci, 10);
                 const old = ZN_QUESTIONS[step].chips[ci].text;
-                const nv = window.prompt('Antwort bearbeiten:', old);
-                if (nv == null) return;
-                const t = nv.trim();
-                if (!t) return;
                 saveStep();
-                if (answers[step].selected.has(old)) { answers[step].selected.delete(old); answers[step].selected.add(t); }
-                ZN_QUESTIONS[step].chips[ci].text = t;
+                const nv = await _znPrompt('Antwort bearbeiten', old);
+                if (nv == null || !nv) return;
+                if (answers[step].selected.has(old)) { answers[step].selected.delete(old); answers[step].selected.add(nv); }
+                ZN_QUESTIONS[step].chips[ci].text = nv;
                 _znSaveQuestions();
                 render();
             };
         });
-        // Chip löschen
+        // Chip löschen (mit Bestätigung)
         box.querySelectorAll('.znq-chip-del').forEach(btn => {
-            btn.onclick = (e) => {
+            btn.onclick = async (e) => {
                 e.stopPropagation();
                 const ci = parseInt(btn.closest('.znq-chip').dataset.ci, 10);
                 const old = ZN_QUESTIONS[step].chips[ci].text;
                 saveStep();
+                const ok = await swal({
+                    title: 'Antwort löschen?',
+                    text: `„${old}" wird dauerhaft aus dieser Frage entfernt.`,
+                    icon: 'warning',
+                    buttons: [false, 'Löschen'],
+                    dangerMode: true
+                });
+                if (!ok) return;
                 answers[step].selected.delete(old);
                 ZN_QUESTIONS[step].chips.splice(ci, 1);
                 _znSaveQuestions();
@@ -8354,14 +8387,12 @@ function openZeugnisQuestionsModal(index) {
         });
         // Neue Antwort hinzufügen
         const addBtn = box.querySelector('.znq-chip-add');
-        if (addBtn) addBtn.onclick = () => {
-            const nv = window.prompt('Neue Antwort:');
-            if (nv == null) return;
-            const t = nv.trim();
-            if (!t) return;
+        if (addBtn) addBtn.onclick = async () => {
             saveStep();
-            ZN_QUESTIONS[step].chips.push({ text: t, grades: [] });
-            answers[step].selected.add(t);
+            const nv = await _znPrompt('Neue Antwort', '');
+            if (nv == null || !nv) return;
+            ZN_QUESTIONS[step].chips.push({ text: nv, grades: [] });
+            answers[step].selected.add(nv);
             _znSaveQuestions();
             render();
         };

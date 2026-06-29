@@ -5410,6 +5410,19 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     user-select: none;
 }
 .znq-chip-add:hover { background: #eef2ff; }
+.app-dialog.znq-prompt { text-align: left; }
+.znq-prompt-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    margin: 6px 0 4px;
+}
+.znq-prompt-input:focus { outline: none; border-color: var(--primary-color); }
 .znq-actions {
     display: flex;
     gap: 8px;
