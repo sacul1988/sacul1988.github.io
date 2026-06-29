@@ -3513,6 +3513,19 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Zeugnis-Tab: aus der Sitzplan-Ansicht führt "Zurück" zurück zur Liste beim
+        // zuletzt angesprungenen Schüler – nicht das Modul/die Seite verlassen.
+        if (currentPage === 'class' && activeModule === 'zeugnis' && typeof _zeugnisSitzplanView !== 'undefined' && _zeugnisSitzplanView) {
+            if (typeof jumpToStudentInList === 'function' && _zeugnisLastStudentIndex !== null) {
+                jumpToStudentInList(_zeugnisLastStudentIndex);
+            } else {
+                _zeugnisSitzplanView = false;
+                _applyZeugnisView();
+            }
+            history.pushState({ page: currentPage, classId: activeClassId, module: activeModule, toolWindow: null }, '');
+            return;
+        }
+
         const state = event.state;
         const toolWindowOverlay = document.getElementById('tool-window-overlay');
         const isToolWindowOpen = toolWindowOverlay && toolWindowOverlay.classList.contains('open');
@@ -7937,6 +7950,7 @@ function renderZeugnisModule() {
 // ===== Zeugnisnote (KI-Notenvorschlag) – inline in der Schülerkarte =====
 let _zeugnisnoteBusy = false;
 let _zeugnisSitzplanView = false;  // false = Liste, true = Sitzplan-Ansicht (startet immer mit Liste)
+let _zeugnisLastStudentIndex = null;  // zuletzt im Sitzplan angesprungener Schüler (für "Zurück")
 let _znPendingQuestions = null;
 let _znPendingMessages = null;
 let _znPendingIndex = null;
@@ -8202,6 +8216,7 @@ function jumpToStudentInList(index) {
 
 // Von der Liste zum Sitzplan: Ansicht wechseln und den Schüler kurz hervorheben
 function jumpToStudentInSitzplan(index) {
+    _zeugnisLastStudentIndex = index; // für "Zurück" zurück zum Schüler in der Liste
     _zeugnisSitzplanView = true;
     _applyZeugnisView();
     setTimeout(() => {
