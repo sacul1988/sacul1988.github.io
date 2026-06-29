@@ -8607,6 +8607,40 @@ function renderZeugnisSitzplan() {
     });
 
     container.innerHTML = `<div class="zn-sitzplan-canvas" style="width:${canvasW}px; height:${canvasH}px;">${tiles}</div>`;
+    _znEnableSitzplanPan(container);
+}
+
+// Zeugnis-Sitzplan mit der Maus verschiebbar machen (Finger scrollt nativ über overflow).
+function _znEnableSitzplanPan(container) {
+    if (!container || container._znPanInit) return;
+    container._znPanInit = true;
+    let dragging = false, startX = 0, startY = 0, startL = 0, startT = 0, moved = false;
+    container.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        dragging = true;
+        moved = false;
+        startX = e.clientX; startY = e.clientY;
+        startL = container.scrollLeft; startT = container.scrollTop;
+        container.classList.add('zn-panning');
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - startX, dy = e.clientY - startY;
+        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+        container.scrollLeft = startL - dx;
+        container.scrollTop = startT - dy;
+    });
+    window.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = false;
+        container.classList.remove('zn-panning');
+        if (moved) {
+            // Klick nach dem Ziehen unterdrücken (sonst öffnet sich eine Kachel)
+            const suppress = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+            container.addEventListener('click', suppress, true);
+            setTimeout(() => container.removeEventListener('click', suppress, true), 0);
+        }
+    });
 }
 
 // Vom Sitzplan zur Liste: zur Karte scrollen und das Textfeld fokussieren.

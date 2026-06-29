@@ -5167,6 +5167,11 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     background: #f7f8fc;
     -webkit-overflow-scrolling: touch;
     margin-top: 10px;
+    cursor: grab;
+}
+#zeugnis-sitzplan-container.zn-panning {
+    cursor: grabbing;
+    user-select: none;
 }
 .zn-sitzplan-canvas {
     position: relative;
