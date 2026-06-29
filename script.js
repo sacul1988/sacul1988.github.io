@@ -8188,6 +8188,11 @@ const ZN_QUESTIONS_DEFAULT = [
         { text: 'Deine Beiträge zeigen ein grundlegendes Verständnis der Inhalte.', grades: [4] },
         { text: 'Deine Beiträge bleiben manchmal noch etwas an der Oberfläche.', grades: [5] }
     ]},
+    { key: 'motivation', label: 'Motivation', chips: [
+        { text: 'Du bringst eine hohe Motivation in den Unterricht mit.', grades: [1, 2] },
+        { text: 'Deine Motivation ist insgesamt eher wechselhaft.', grades: [3, 4] },
+        { text: 'Du zeigst insgesamt eher wenig Motivation.', grades: [5, 6] }
+    ]},
     { key: 'arbeitsweise', label: 'Arbeitsweise in den Arbeitsphasen', chips: [
         { text: 'Du arbeitest in den Arbeitsphasen selbstständig, konzentriert und zuverlässig.', grades: [1, 2] },
         { text: 'Du arbeitest in den Arbeitsphasen überwiegend gut und selbstständig mit.', grades: [3] },
@@ -8200,11 +8205,6 @@ const ZN_QUESTIONS_DEFAULT = [
         { text: 'Gelegentlich gibt es kleinere Ablenkungen im Unterricht.', grades: [3] },
         { text: 'Du lässt dich regelmäßig durch deine Sitznachbarn ablenken.', grades: [4] },
         { text: 'Du störst den Unterricht regelmäßig.', grades: [5, 6] }
-    ]},
-    { key: 'motivation', label: 'Motivation', chips: [
-        { text: 'Du bringst eine hohe Motivation in den Unterricht mit.', grades: [1, 2] },
-        { text: 'Deine Motivation ist insgesamt eher wechselhaft.', grades: [3, 4] },
-        { text: 'Du zeigst insgesamt eher wenig Motivation.', grades: [5, 6] }
     ]},
     { key: 'material', label: 'Material', chips: [
         { text: 'Deine Materialien hast du zuverlässig dabei.', grades: [1, 2, 3] },
@@ -8242,6 +8242,19 @@ function _znMigrateQuestions(arr) {
     return arr;
 }
 
+// Migration v2: "Motivation" an die 3. Stelle verschieben (nach "Qualität der Beiträge").
+function _znMigrateQuestionsV2(arr) {
+    if (localStorage.getItem('znQuestionsMig_v2') === '1') return arr;
+    const mi = arr.findIndex(q => q.key === 'motivation');
+    if (mi > 2) {
+        const [m] = arr.splice(mi, 1);
+        arr.splice(2, 0, m);
+        try { localStorage.setItem('znQuestions', JSON.stringify(arr)); } catch (e) {}
+    }
+    try { localStorage.setItem('znQuestionsMig_v2', '1'); } catch (e) {}
+    return arr;
+}
+
 // Anpassbare Version (bearbeitbar/erweiterbar, gespeichert + synchronisiert)
 function _znLoadQuestions() {
     let arr = null;
@@ -8253,7 +8266,9 @@ function _znLoadQuestions() {
         }
     } catch (e) { /* ignore */ }
     if (!arr) arr = JSON.parse(JSON.stringify(ZN_QUESTIONS_DEFAULT));
-    return _znMigrateQuestions(arr);
+    arr = _znMigrateQuestions(arr);
+    arr = _znMigrateQuestionsV2(arr);
+    return arr;
 }
 let ZN_QUESTIONS = _znLoadQuestions();
 function _znSaveQuestions() {
