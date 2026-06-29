@@ -8305,7 +8305,8 @@ function openZeugnisQuestionsModal(index) {
         answers[step].note = ta ? ta.value.trim() : '';
     }
 
-    function applyAll() {
+    // asFliess=true: KI macht einen kurzen Fließtext; sonst: ausgewählte Sätze als Stichpunkte einfügen
+    function applyAll(asFliess) {
         saveStep();
         const additions = [];
         ZN_QUESTIONS.forEach((q, i) => {
@@ -8315,17 +8316,22 @@ function openZeugnisQuestionsModal(index) {
         });
         overlay.remove();
         if (!additions.length) return;
-        // Ausgewählte Sätze + vorhandene Notizen zusammenführen, dann von der KI überarbeiten lassen.
         const el = document.getElementById(`zn-begruendung-${index}`);
-        const prevRaw = (el?.innerText || student.zeugnisBegruendung || '').replace(/^•\s*$/gm, '').trim();
+        const originalContent = (el?.innerText || student.zeugnisBegruendung || '').replace(/^•\s*$/gm, '').trim();
+        // Rückgängig stellt den Ursprungszustand vor der Schnell-Eingabe wieder her
+        _znUndoBackup[index] = originalContent;
         const block = additions.map(t => '• ' + t).join('\n');
-        const combined = prevRaw ? prevRaw + '\n' + block : block;
+        const combined = originalContent ? originalContent + '\n' + block : block;
         student.zeugnisBegruendung = combined;
+        student.zeugnisSonstiges = combined.replace(/^•\s*/gm, '').replace(/•/g, '').trim();
         saveData(index);
         const c = document.getElementById(`zn-inline-${index}`);
         if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
-        // KI macht aus allem einen kurzen Fließtext (sichert intern den Stand für Rückgängig)
-        znGenerateFliesstextFromField(index);
+        if (asFliess) {
+            // KI macht aus allem einen kurzen Fließtext (Undo-Backup bleibt = Ursprungszustand)
+            zeugnisnoteGenerate(index, null, null, true);
+        }
+        // Bei Stichpunkten bleiben die eingefügten Sätze stehen; Rückgängig-Button ist verfügbar.
     }
 
     function render() {
@@ -8353,7 +8359,8 @@ function openZeugnisQuestionsModal(index) {
             <div class="znq-actions">
                 <button class="btn btn-secondary btn-icon znq-back"${step === 0 ? ' disabled' : ''}><i class="fas fa-arrow-left"></i> Zurück</button>
                 ${isLast
-                    ? `<button class="btn btn-primary btn-icon znq-apply"><i class="fas fa-check"></i> Fertig & einfügen</button>`
+                    ? `<button class="btn btn-secondary btn-icon znq-apply-bullets"><i class="fas fa-list-ul"></i> Als Stichpunkte</button>
+                       <button class="btn btn-primary btn-icon znq-apply-fliess"><i class="fas fa-align-left"></i> Als Fließtext</button>`
                     : `<button class="btn btn-primary btn-icon znq-next">Weiter <i class="fas fa-arrow-right"></i></button>`}
             </div>`;
         box.querySelectorAll('.znq-chip').forEach(chip => {
@@ -8414,8 +8421,10 @@ function openZeugnisQuestionsModal(index) {
         if (backBtn) backBtn.onclick = () => { saveStep(); if (step > 0) { step--; render(); } };
         const nextBtn = box.querySelector('.znq-next');
         if (nextBtn) nextBtn.onclick = () => { saveStep(); if (step < total - 1) { step++; render(); } };
-        const applyBtn = box.querySelector('.znq-apply');
-        if (applyBtn) applyBtn.onclick = applyAll;
+        const applyFliess = box.querySelector('.znq-apply-fliess');
+        if (applyFliess) applyFliess.onclick = () => applyAll(true);
+        const applyBullets = box.querySelector('.znq-apply-bullets');
+        if (applyBullets) applyBullets.onclick = () => applyAll(false);
     }
 
     render();
