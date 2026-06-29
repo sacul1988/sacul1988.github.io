@@ -6958,6 +6958,7 @@ html.modal-open-scroll-lock, body.modal-open-scroll-lock {
 .tp-pill-done {
     background: #bfdbfe;
     color: #1e40af;
+    text-decoration: line-through;
 }
 .tp-pill-done:hover { background: #93c5fd; }
 
