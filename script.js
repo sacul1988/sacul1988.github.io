@@ -641,11 +641,9 @@ function openToolWindow(which, shouldPushState = true) {
     window._activeToolWindow = which;
     window._toolWindowOrigin = currentPage;
 
+    // Titel nicht mehr oben in der Leiste – er steht bereits im Karten-Header (Button-Zeile)
     const titleEl = document.getElementById('tool-window-title');
-    if (titleEl) {
-        const titles = { kalender: 'Kalender', stundenplan: 'Stundenplan', kontakte: 'Adressbuch', 'zeugnis-texte': 'Zeugnistexte (Inklusion)' };
-        titleEl.textContent = titles[which] || '';
-    }
+    if (titleEl) titleEl.textContent = '';
 
     overlay.classList.add('open');
 
