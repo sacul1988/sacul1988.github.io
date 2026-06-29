@@ -323,6 +323,27 @@ Füge keine Ratschläge oder Tipps hinzu, wie der Schüler/die Schülerin sich v
 Schreibe keine Sätze, die etwas über eine Note oder deren Zustandekommen aussagen.
 Erfinde keine Fakten, die nicht aus den Beobachtungen hervorgehen oder logisch naheliegen.`;
 
+const ZEUGNISNOTE_FLIESS_SYSTEM = `Du unterstützt eine Lehrkraft dabei, einer Schülerin oder einem Schüler eine Rückmeldung zur sonstigen Mitarbeit zu geben. Der Text wird DIREKT AN DIE SCHÜLERIN ODER DEN SCHÜLER gerichtet, also in der Anrede "Du".
+Deine Aufgabe: Die Lehrkraft gibt dir stichwortartige, oft unfertige Beobachtungen zur Mitarbeit. Mache daraus einen KURZEN, FLÜSSIGEN Fließtext (zusammenhängende Sätze, KEINE Stichpunkte, KEINE Aufzählungen). Du schlägst KEINE Note vor und nennst KEINE Note.
+
+[WICHTIGE AUSGABE-REGEL (JSON)]
+Du musst als Antwort IMMER ein valides JSON-Objekt zurückgeben.
+Nur wenn die Beobachtungen völlig unklar, widersprüchlich oder extrem mager sind, stelle gezielte Rückfragen.
+WICHTIG: Wenn der Nutzer in der Historie bereits Fragen beantwortet hat, stelle KEINE weiteren Fragen mehr, sondern erstelle in jedem Fall den Text!
+
+Antworte in genau diesem JSON-Format:
+- Wenn Rückfragen nötig sind: {"status": "unclear", "questions": ["Frage 1...", "Frage 2..."]} (maximal 3 kurze Fragen)
+- Sonst: {"status": "success", "mitarbeit_text": "..."}
+Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json-Markierung, ohne Text davor/danach).
+
+Regeln für "mitarbeit_text":
+- Schreibe einen zusammenhängenden Fließtext in der direkten Anrede "Du". KEINE Stichpunkte, KEINE "• "-Zeichen, KEINE Zeilenumbrüche zur Auflistung.
+- Halte dich SEHR NAH an die eingegebenen Beobachtungen. Übernimm jeden inhaltlichen Punkt, lasse nichts weg. Du darfst inhaltlich verwandte Punkte zu einem flüssigen Satz zusammenziehen (gern mit ", und" / ", jedoch"), aber halte die Sätze kurz und gut lesbar – keine langen, überladenen Sätze.
+- Verändere meinen Schreibstil so wenig wie möglich. Korrigiere Rechtschreibung, Kommasetzung und Grammatik, formuliere aber nicht frei um und erfinde keine neuen Inhalte oder Bewertungen.
+- Nenne KEINE Note im Text. Kein Schlusssatz mit einer Note.
+- Füge keine Ratschläge oder Tipps hinzu.
+- Der Text soll kurz bleiben (in der Regel 3–6 Sätze, je nach Menge der Beobachtungen).`;
+
 function formatAverageSentence(durchschnitt, durchschnittNote) {
   return durchschnitt ? `Daraus ergibt sich die schriftliche Durchschnittsnote ${durchschnittNote}.` : "";
 }
@@ -385,7 +406,8 @@ exports.generateZeugnisnote = onCall(
     } catch (e) {
       throw toInvalidArgument(e);
     }
-    const { sonstiges, hinweis, messages } = payload;
+    const { sonstiges, hinweis, messages, format } = payload;
+    const isFliess = format === "fliesstext";
 
     // Die KI bekommt nur die Beobachtungen (und einen optionalen Hinweis) – keine Noten,
     // keinen Durchschnitt, keine Fachgewichtung. Es wird keine Note mehr berechnet.
@@ -401,7 +423,7 @@ exports.generateZeugnisnote = onCall(
     const response = await anthropicMessagesRequest({
       model: "claude-sonnet-4-6",
       max_tokens: 1500,
-      system: ZEUGNISNOTE_SYSTEM,
+      system: isFliess ? ZEUGNISNOTE_FLIESS_SYSTEM : ZEUGNISNOTE_SYSTEM,
       messages: messagesToSend
     });
 
@@ -421,7 +443,8 @@ exports.generateZeugnisnote = onCall(
         questions = parsed.questions;
       } else {
         const mitarbeitText = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
-        begruendung = formatZeugnisnoteBullets([mitarbeitText]);
+        // Fließtext bleibt unverändert; sonst in Stichpunkte umwandeln
+        begruendung = isFliess ? mitarbeitText : formatZeugnisnoteBullets([mitarbeitText]);
       }
     } catch (e) {
       console.error("JSON parsing failed, falling back to raw text:", e);

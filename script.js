@@ -8134,6 +8134,19 @@ function znGenerateFromField(index) {
     zeugnisnoteGenerate(index, null);
 }
 
+// Wie znGenerateFromField, aber die KI schreibt einen kurzen Fließtext (Schnell-Eingabe)
+function znGenerateFliesstextFromField(index) {
+    if (activeClassId === null) return;
+    const student = classes[activeClassId]?.students?.[index];
+    if (!student) return;
+    const el = document.getElementById(`zn-begruendung-${index}`);
+    const rawContent = el?.innerText || student.zeugnisBegruendung || '';
+    _znUndoBackup[index] = rawContent;
+    student.zeugnisBegruendung = rawContent;
+    student.zeugnisSonstiges = rawContent.replace(/^•\s*/gm, '').replace(/•/g, '').trim();
+    zeugnisnoteGenerate(index, null, null, true);
+}
+
 // KI-Überarbeitung rückgängig machen: vorherigen Feldinhalt wiederherstellen
 function znUndoGenerate(index) {
     const student = classes[activeClassId]?.students?.[index];
@@ -8311,8 +8324,8 @@ function openZeugnisQuestionsModal(index) {
         saveData(index);
         const c = document.getElementById(`zn-inline-${index}`);
         if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
-        // KI über alles laufen lassen (sichert intern den Stand für Rückgängig)
-        znGenerateFromField(index);
+        // KI macht aus allem einen kurzen Fließtext (sichert intern den Stand für Rückgängig)
+        znGenerateFliesstextFromField(index);
     }
 
     function render() {
@@ -8560,7 +8573,7 @@ function saveTemporaryAiHint() {
     }
 }
 
-async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
+async function zeugnisnoteGenerate(index, richtung, customMessages = null, fliesstext = false) {
     if (_zeugnisnoteBusy || activeClassId === null) return;
     const student = classes[activeClassId]?.students?.[index];
     if (!student) return;
@@ -8641,7 +8654,8 @@ async function zeugnisnoteGenerate(index, richtung, customMessages = null) {
         const result = await window.callGenerateZeugnisnote({
             sonstiges: student.zeugnisSonstiges || '',
             hinweis: hinweis,
-            messages: activeMessages
+            messages: activeMessages,
+            format: fliesstext ? 'fliesstext' : ''
         });
 
         if (result && result.status === 'unclear' && Array.isArray(result.questions) && result.questions.length > 0) {
