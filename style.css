@@ -4628,6 +4628,11 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     font-weight: 700;
     margin-left: 2px;
 }
+/* Offene-Texte-Badge am Planung-Button: rot */
+#zt-planung-open-badge {
+    background: var(--danger-color, #dc3545);
+    color: #fff;
+}
 
 /* ===== Kopfzeile über dem Inhalt ===== */
 .app-topbar {
