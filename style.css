@@ -5506,15 +5506,22 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 .znq-chip-grip:active { cursor: grabbing; }
 .znq-chip.selected .znq-chip-grip { color: var(--grey-color); }
 .znq-chip.znq-dragging { opacity: 0.4; }
-/* Deutliche orange Ablege-Markierung (Linie im Abstand zwischen den Chips) */
-.znq-chip.znq-drop-before {
-    box-shadow: 0 -4px 0 0 #f97316;
-    border-color: #f97316;
+/* Echte orange Einfüge-Linie im Zwischenraum zwischen den Chips (zeigt davor/dahinter) */
+.znq-chip.znq-drop-before,
+.znq-chip.znq-drop-after { position: relative; }
+.znq-chip.znq-drop-before::before,
+.znq-chip.znq-drop-after::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #f97316;
+    border-radius: 3px;
+    pointer-events: none;
 }
-.znq-chip.znq-drop-after {
-    box-shadow: 0 4px 0 0 #f97316;
-    border-color: #f97316;
-}
+.znq-chip.znq-drop-before::before { top: -6px; }
+.znq-chip.znq-drop-after::after { bottom: -6px; }
 .znq-chip-text { flex: 1; min-width: 0; }
 .znq-chip-tools { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
 .znq-chip-tools button {
