@@ -8338,11 +8338,20 @@ function openZeugnisQuestionsModal(index) {
         const q = ZN_QUESTIONS[step];
         const isLast = step === total - 1;
         let chipsHtml = '';
+        const chipCount = q.chips.length;
         q.chips.forEach((c, ci) => {
             const sel = answers[step].selected.has(c.text);
-            chipsHtml += `<span class="znq-chip${sel ? ' selected' : ''}" data-ci="${ci}" data-text="${escapeHtml(c.text)}"><span class="znq-chip-text">${escapeHtml(c.text)}</span><button class="znq-chip-edit" title="Bearbeiten"><i class="fas fa-pen"></i></button><button class="znq-chip-del" title="Löschen"><i class="fas fa-times"></i></button></span>`;
+            chipsHtml += `<div class="znq-chip${sel ? ' selected' : ''}" data-ci="${ci}" data-text="${escapeHtml(c.text)}">
+                <span class="znq-chip-text">${escapeHtml(c.text)}</span>
+                <span class="znq-chip-tools">
+                    <button class="znq-chip-up" title="Nach oben"${ci === 0 ? ' disabled' : ''}><i class="fas fa-chevron-up"></i></button>
+                    <button class="znq-chip-down" title="Nach unten"${ci === chipCount - 1 ? ' disabled' : ''}><i class="fas fa-chevron-down"></i></button>
+                    <button class="znq-chip-edit" title="Bearbeiten"><i class="fas fa-pen"></i></button>
+                    <button class="znq-chip-del" title="Löschen"><i class="fas fa-trash"></i></button>
+                </span>
+            </div>`;
         });
-        chipsHtml += `<span class="znq-chip-add" title="Antwort hinzufügen"><i class="fas fa-plus"></i> Antwort</span>`;
+        chipsHtml += `<button type="button" class="znq-chip-add" title="Antwort hinzufügen"><i class="fas fa-plus"></i> Antwort hinzufügen</button>`;
         box.innerHTML = `
             <div class="znq-head">
                 <span class="znq-title">${escapeHtml(student.name)}${student.zeugnisnote ? ' · Note ' + escapeHtml(student.zeugnisnote) : ''}</span>
@@ -8365,8 +8374,33 @@ function openZeugnisQuestionsModal(index) {
             </div>`;
         box.querySelectorAll('.znq-chip').forEach(chip => {
             chip.onclick = (e) => {
-                if (e.target.closest('.znq-chip-edit') || e.target.closest('.znq-chip-del')) return;
+                if (e.target.closest('.znq-chip-tools')) return;
                 chip.classList.toggle('selected');
+            };
+        });
+        // Reihenfolge ändern (synchronisiert über _znSaveQuestions)
+        box.querySelectorAll('.znq-chip-up').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const ci = parseInt(btn.closest('.znq-chip').dataset.ci, 10);
+                if (ci <= 0) return;
+                saveStep();
+                const arr = ZN_QUESTIONS[step].chips;
+                [arr[ci - 1], arr[ci]] = [arr[ci], arr[ci - 1]];
+                _znSaveQuestions();
+                render();
+            };
+        });
+        box.querySelectorAll('.znq-chip-down').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const ci = parseInt(btn.closest('.znq-chip').dataset.ci, 10);
+                const arr = ZN_QUESTIONS[step].chips;
+                if (ci >= arr.length - 1) return;
+                saveStep();
+                [arr[ci + 1], arr[ci]] = [arr[ci], arr[ci + 1]];
+                _znSaveQuestions();
+                render();
             };
         });
         // Chip bearbeiten
