@@ -8129,7 +8129,6 @@ async function znGenerateFromField(index) {
         title: 'Wie soll der Text aussehen?',
         text: 'Die KI verbessert deine Eingabe sprachlich – wähle das Ausgabeformat.',
         buttons: {
-            cancel: { text: 'Abbrechen', value: null },
             bullets: { text: 'Stichpunkte', value: 'bullets' },
             fliess: { text: 'Fließtext', value: 'fliess' }
         }
