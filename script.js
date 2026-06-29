@@ -1881,9 +1881,9 @@ function renderTagesprotokollTile() {
                 return `<span class="tp-pill${done ? ' tp-pill-done' : ''}" onclick="toggleTagesprotokollAbgehakt(${classIdx},${studentIdx},'${dateStr}','${type}')">${label}</span>`;
             };
             let pills = '';
-            if (hw > 0) pills += mkPill('hw', `Hausaufgaben&nbsp;${hwTotal}`);
-            if (mat > 0) pills += mkPill('mat', `Material&nbsp;${matTotal}`);
-            if (stoer > 0) pills += mkPill('stoer', `Störung&nbsp;${stoer}`);
+            if (hw > 0) pills += mkPill('hw', `Hausaufgaben&nbsp;${hwTotal}x`);
+            if (mat > 0) pills += mkPill('mat', `Material&nbsp;${matTotal}x`);
+            if (stoer > 0) pills += mkPill('stoer', `Störung&nbsp;${stoer}x`);
             html += `<div class="tp-student-row">
                 <span class="tp-name">${escapeHtml(sName)}</span>
                 <span class="tp-pills">${pills}</span>
