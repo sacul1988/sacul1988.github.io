@@ -7964,6 +7964,7 @@ function renderZeugnisModule() {
 
 // ===== Zeugnisnote (KI-Notenvorschlag) – inline in der Schülerkarte =====
 let _zeugnisnoteBusy = false;
+let _znUndoBackup = {};  // index -> Feldinhalt vor der letzten KI-Überarbeitung (für Rückgängig)
 let _zeugnisSitzplanView = false;  // false = Liste, true = Sitzplan-Ansicht (startet immer mit Liste)
 let _zeugnisLastStudentIndex = null;  // zuletzt im Sitzplan angesprungener Schüler (für "Zurück")
 let _zeugnisReturnToSitzplan = false; // true = "Zurück" aus der Liste soll zur Sitzplan-Ansicht
@@ -8013,6 +8014,7 @@ function zeugnisnoteInlineHtml(student, index) {
         </div>
         <div class="zn-begruendung-wrap">
             <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text || '• ')}</div>
+            ${_znUndoBackup[index] != null ? `<button class="btn btn-icon zn-undo-btn" onclick="znUndoGenerate(${index})" title="KI-Überarbeitung rückgängig machen"><i class="fas fa-rotate-left"></i></button>` : ''}
             <button class="btn btn-primary btn-icon zn-fragen-btn" onclick="openZeugnisQuestionsModal(${index})" title="Schnell-Eingabe per Fragen"><i class="fas fa-circle-question"></i></button>
             <button class="btn btn-primary btn-icon zn-wand-btn" onclick="znGenerateFromField(${index})" title="Sprache verbessern (KI)"><i class="fas fa-wand-magic-sparkles"></i></button>
         </div>`;
@@ -8125,10 +8127,25 @@ function znGenerateFromField(index) {
     // Erst aktuellen DOM-Inhalt sichern, dann als Beobachtungen verwenden
     const el = document.getElementById(`zn-begruendung-${index}`);
     const rawContent = el?.innerText || student.zeugnisBegruendung || '';
+    // Stand vor der KI-Überarbeitung sichern (für Rückgängig)
+    _znUndoBackup[index] = rawContent;
     student.zeugnisBegruendung = rawContent;
     student.zeugnisSonstiges = rawContent.replace(/^•\s*/gm, '').replace(/•/g, '').trim();
     zeugnisnoteGenerate(index, null);
 }
+
+// KI-Überarbeitung rückgängig machen: vorherigen Feldinhalt wiederherstellen
+function znUndoGenerate(index) {
+    const student = classes[activeClassId]?.students?.[index];
+    if (!student || _znUndoBackup[index] == null) return;
+    student.zeugnisBegruendung = _znUndoBackup[index];
+    student.zeugnisSonstiges = _znUndoBackup[index].replace(/^•\s*/gm, '').replace(/•/g, '').trim();
+    delete _znUndoBackup[index];
+    saveData(index);
+    const c = document.getElementById(`zn-inline-${index}`);
+    if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
+}
+window.znUndoGenerate = znUndoGenerate;
 
 // ===== Schnell-Eingabe per Fragen (notenabhängig vorausgewählte Antwort-Chips) =====
 // Jede Frage: feste Antwort-Chips (fertige "Du"-Stichpunkte). grades = bei welchen
@@ -8228,16 +8245,19 @@ function openZeugnisQuestionsModal(index) {
             q.chips.forEach(c => { if (answers[i].selected.has(c.text)) additions.push(c.text); });
             if (answers[i].note) additions.push(answers[i].note);
         });
-        if (additions.length) {
-            const el = document.getElementById(`zn-begruendung-${index}`);
-            const prevRaw = (el?.innerText || student.zeugnisBegruendung || '').replace(/^•\s*$/gm, '').trim();
-            const block = additions.map(t => '• ' + t).join('\n');
-            student.zeugnisBegruendung = prevRaw ? prevRaw + '\n' + block : block;
-            saveData(index);
-            const c = document.getElementById(`zn-inline-${index}`);
-            if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
-        }
         overlay.remove();
+        if (!additions.length) return;
+        // Ausgewählte Sätze + vorhandene Notizen zusammenführen, dann von der KI überarbeiten lassen.
+        const el = document.getElementById(`zn-begruendung-${index}`);
+        const prevRaw = (el?.innerText || student.zeugnisBegruendung || '').replace(/^•\s*$/gm, '').trim();
+        const block = additions.map(t => '• ' + t).join('\n');
+        const combined = prevRaw ? prevRaw + '\n' + block : block;
+        student.zeugnisBegruendung = combined;
+        saveData(index);
+        const c = document.getElementById(`zn-inline-${index}`);
+        if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
+        // KI über alles laufen lassen (sichert intern den Stand für Rückgängig)
+        znGenerateFromField(index);
     }
 
     function render() {
@@ -8627,6 +8647,13 @@ function saveZeugnisnoteBegruendung(index) {
     const student = classes[activeClassId]?.students?.[index];
     if (!el || !student) return;
     student.zeugnisBegruendung = el.innerText;
+    // Manuelle Änderung -> Undo-Backup verwerfen (Rückgängig-Button entfernen)
+    if (_znUndoBackup[index] != null) {
+        delete _znUndoBackup[index];
+        const wrap = el.closest('.zn-begruendung-wrap');
+        const undoBtn = wrap && wrap.querySelector('.zn-undo-btn');
+        if (undoBtn) undoBtn.remove();
+    }
     saveData(index);
 }
 

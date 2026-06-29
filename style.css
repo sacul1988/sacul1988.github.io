@@ -5273,6 +5273,23 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     color: var(--primary-color) !important;
     font-size: 1.3rem;
 }
+.zn-undo-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 90px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #b45309 !important;
+    font-size: 1.25rem;
+}
 
 /* Schnell-Eingabe per Fragen (Modal) */
 .znq-overlay {
