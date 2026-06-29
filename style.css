@@ -5310,7 +5310,25 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 }
 .znq-close:hover { background: #f1f5f9; color: var(--dark-color); }
 .znq-hint { padding: 10px 20px 0; color: var(--grey-color); font-size: 0.85rem; }
+.znq-progress {
+    padding: 12px 20px 0;
+    color: var(--primary-color);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
 .znq-questions { padding: 12px 20px; overflow-y: auto; }
+.znq-note {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+}
+.znq-note:focus { outline: none; border-color: var(--primary-color); }
 .znq-q { margin-bottom: 14px; }
 .znq-q-label {
     font-size: 0.8rem;

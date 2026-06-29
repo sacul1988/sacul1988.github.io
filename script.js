@@ -8195,56 +8195,91 @@ function openZeugnisQuestionsModal(index) {
     if (!student) return;
     const gradeInt = _znGradeInt(student.zeugnisnote);
 
+    // Antwort-Status pro Frage (über die Schritte hinweg gemerkt)
+    const answers = ZN_QUESTIONS.map(q => ({
+        selected: new Set(q.chips.filter(c => gradeInt !== null && Array.isArray(c.grades) && c.grades.includes(gradeInt)).map(c => c.text)),
+        note: ''
+    }));
+    let step = 0;
+    const total = ZN_QUESTIONS.length;
+
     const overlay = document.createElement('div');
     overlay.className = 'znq-overlay';
-    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    overlay.onclick = (e) => { if (e.target === overlay) { saveStep(); overlay.remove(); } };
 
     const box = document.createElement('div');
     box.className = 'znq-box';
-
-    let html = `
-        <div class="znq-head">
-            <span class="znq-title">Schnell-Eingabe: ${escapeHtml(student.name)}${student.zeugnisnote ? ' · Note ' + escapeHtml(student.zeugnisnote) : ''}</span>
-            <button class="znq-close" title="Schließen"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="znq-hint">Antworten anklicken (passend zur Note vorausgewählt) – dann „Stichpunkte einfügen".</div>
-        <div class="znq-questions">`;
-    ZN_QUESTIONS.forEach(q => {
-        html += `<div class="znq-q"><div class="znq-q-label">${escapeHtml(q.label)}</div><div class="znq-chips">`;
-        q.chips.forEach(c => {
-            const pre = gradeInt !== null && Array.isArray(c.grades) && c.grades.includes(gradeInt);
-            html += `<span class="znq-chip${pre ? ' selected' : ''}" data-text="${escapeHtml(c.text)}">${escapeHtml(c.text)}</span>`;
-        });
-        html += `</div></div>`;
-    });
-    html += `</div>
-        <div class="znq-actions">
-            <button class="btn btn-secondary btn-icon znq-cancel">Abbrechen</button>
-            <button class="btn btn-primary btn-icon znq-apply"><i class="fas fa-plus"></i> Stichpunkte einfügen</button>
-        </div>`;
-    box.innerHTML = html;
     overlay.appendChild(box);
     document.body.appendChild(overlay);
 
-    box.querySelectorAll('.znq-chip').forEach(chip => {
-        chip.onclick = () => chip.classList.toggle('selected');
-    });
-    box.querySelector('.znq-close').onclick = () => overlay.remove();
-    box.querySelector('.znq-cancel').onclick = () => overlay.remove();
-    box.querySelector('.znq-apply').onclick = () => {
-        const selected = [...box.querySelectorAll('.znq-chip.selected')].map(c => c.dataset.text);
-        if (selected.length) {
-            // aktuellen Feldinhalt sichern, dann Stichpunkte anhängen
+    // Auswahl + Notiz des aktuellen Schritts sichern, bevor gewechselt wird
+    function saveStep() {
+        const sel = new Set([...box.querySelectorAll('.znq-chip.selected')].map(c => c.dataset.text));
+        answers[step].selected = sel;
+        const ta = box.querySelector('.znq-note');
+        answers[step].note = ta ? ta.value.trim() : '';
+    }
+
+    function applyAll() {
+        saveStep();
+        const additions = [];
+        ZN_QUESTIONS.forEach((q, i) => {
+            // Chips in ursprünglicher Reihenfolge
+            q.chips.forEach(c => { if (answers[i].selected.has(c.text)) additions.push(c.text); });
+            if (answers[i].note) additions.push(answers[i].note);
+        });
+        if (additions.length) {
             const el = document.getElementById(`zn-begruendung-${index}`);
             const prevRaw = (el?.innerText || student.zeugnisBegruendung || '').replace(/^•\s*$/gm, '').trim();
-            const additions = selected.map(t => '• ' + t).join('\n');
-            student.zeugnisBegruendung = prevRaw ? prevRaw + '\n' + additions : additions;
+            const block = additions.map(t => '• ' + t).join('\n');
+            student.zeugnisBegruendung = prevRaw ? prevRaw + '\n' + block : block;
             saveData(index);
             const c = document.getElementById(`zn-inline-${index}`);
             if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
         }
         overlay.remove();
-    };
+    }
+
+    function render() {
+        const q = ZN_QUESTIONS[step];
+        const isLast = step === total - 1;
+        let chipsHtml = '';
+        q.chips.forEach(c => {
+            const sel = answers[step].selected.has(c.text);
+            chipsHtml += `<span class="znq-chip${sel ? ' selected' : ''}" data-text="${escapeHtml(c.text)}">${escapeHtml(c.text)}</span>`;
+        });
+        box.innerHTML = `
+            <div class="znq-head">
+                <span class="znq-title">${escapeHtml(student.name)}${student.zeugnisnote ? ' · Note ' + escapeHtml(student.zeugnisnote) : ''}</span>
+                <button class="znq-close" title="Schließen"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="znq-progress">Schritt ${step + 1} von ${total}</div>
+            <div class="znq-questions">
+                <div class="znq-q">
+                    <div class="znq-q-label">${escapeHtml(q.label)}</div>
+                    <div class="znq-chips">${chipsHtml}</div>
+                    <textarea class="znq-note" rows="2" placeholder="Individuelle Notiz (optional)…">${escapeHtml(answers[step].note || '')}</textarea>
+                </div>
+            </div>
+            <div class="znq-actions">
+                <button class="btn btn-secondary btn-icon znq-back"${step === 0 ? ' disabled' : ''}><i class="fas fa-arrow-left"></i> Zurück</button>
+                ${isLast
+                    ? `<button class="btn btn-primary btn-icon znq-apply"><i class="fas fa-check"></i> Fertig & einfügen</button>`
+                    : `<button class="btn btn-primary btn-icon znq-next">Weiter <i class="fas fa-arrow-right"></i></button>`}
+            </div>`;
+        box.querySelectorAll('.znq-chip').forEach(chip => {
+            chip.onclick = () => chip.classList.toggle('selected');
+        });
+        box.querySelector('.znq-close').onclick = () => { saveStep(); overlay.remove(); };
+        const backBtn = box.querySelector('.znq-back');
+        if (backBtn) backBtn.onclick = () => { saveStep(); if (step > 0) { step--; render(); } };
+        const nextBtn = box.querySelector('.znq-next');
+        if (nextBtn) nextBtn.onclick = () => { saveStep(); if (step < total - 1) { step++; render(); } };
+        const applyBtn = box.querySelector('.znq-apply');
+        if (applyBtn) applyBtn.onclick = applyAll;
+    }
+
+    render();
 }
 window.openZeugnisQuestionsModal = openZeugnisQuestionsModal;
 
