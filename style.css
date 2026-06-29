@@ -5256,6 +5256,96 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     color: var(--primary-color) !important;
     font-size: 1.3rem;
 }
+.zn-fragen-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 50px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--primary-color) !important;
+    font-size: 1.3rem;
+}
+
+/* Schnell-Eingabe per Fragen (Modal) */
+.znq-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.znq-box {
+    background: #fff;
+    border-radius: var(--border-radius-lg, 14px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    max-width: 640px;
+    width: 100%;
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.znq-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+.znq-title { font-size: 1.1rem; font-weight: 700; color: var(--dark-color); }
+.znq-close {
+    width: 30px; height: 30px; border: none; background: none;
+    color: var(--grey-color); cursor: pointer; font-size: 17px; border-radius: 8px;
+}
+.znq-close:hover { background: #f1f5f9; color: var(--dark-color); }
+.znq-hint { padding: 10px 20px 0; color: var(--grey-color); font-size: 0.85rem; }
+.znq-questions { padding: 12px 20px; overflow-y: auto; }
+.znq-q { margin-bottom: 14px; }
+.znq-q-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 6px;
+}
+.znq-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.znq-chip {
+    border: 1px solid var(--border-color);
+    background: #f8fafc;
+    color: var(--dark-color);
+    border-radius: 14px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+    transition: var(--transition);
+}
+.znq-chip:hover { border-color: var(--primary-color); }
+.znq-chip.selected {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+.znq-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-color);
+}
+.znq-actions .btn { justify-content: center; }
 
 .zn-begruendung {
     background: #fff;

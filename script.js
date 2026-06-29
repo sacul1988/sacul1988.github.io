@@ -8013,7 +8013,8 @@ function zeugnisnoteInlineHtml(student, index) {
         </div>
         <div class="zn-begruendung-wrap">
             <div class="zn-begruendung" contenteditable="true" id="zn-begruendung-${index}" oninput="saveZeugnisnoteBegruendung(${index})" onblur="zeugnisnoteBegruendungBlur(${index})" onkeydown="znBegruendungKeydown(event)">${escapeHtml(text || '• ')}</div>
-            <button class="btn btn-primary btn-icon zn-wand-btn" onclick="znGenerateFromField(${index})" title="KI-Vorschlag generieren"><i class="fas fa-wand-magic-sparkles"></i></button>
+            <button class="btn btn-primary btn-icon zn-fragen-btn" onclick="openZeugnisQuestionsModal(${index})" title="Schnell-Eingabe per Fragen"><i class="fas fa-circle-question"></i></button>
+            <button class="btn btn-primary btn-icon zn-wand-btn" onclick="znGenerateFromField(${index})" title="Sprache verbessern (KI)"><i class="fas fa-wand-magic-sparkles"></i></button>
         </div>`;
 }
 
@@ -8128,6 +8129,124 @@ function znGenerateFromField(index) {
     student.zeugnisSonstiges = rawContent.replace(/^•\s*/gm, '').replace(/•/g, '').trim();
     zeugnisnoteGenerate(index, null);
 }
+
+// ===== Schnell-Eingabe per Fragen (notenabhängig vorausgewählte Antwort-Chips) =====
+// Jede Frage: feste Antwort-Chips (fertige "Du"-Stichpunkte). grades = bei welchen
+// Endnoten der Chip vorausgewählt ist. Mehrfachauswahl möglich.
+const ZN_QUESTIONS = [
+    { key: 'beteiligung', label: 'Mündliche Beteiligung', chips: [
+        { text: 'Du beteiligst dich rege und regelmäßig am Unterricht.', grades: [1] },
+        { text: 'Du beteiligst dich regelmäßig am Unterricht.', grades: [2] },
+        { text: 'Du beteiligst dich gelegentlich am Unterricht.', grades: [3] },
+        { text: 'Deine mündliche Beteiligung ist insgesamt eher gering.', grades: [4] },
+        { text: 'Du beteiligst dich kaum mündlich am Unterricht.', grades: [5, 6] },
+        { text: 'Deine mündliche Beteiligung hat sich zuletzt deutlich verbessert.', grades: [] }
+    ]},
+    { key: 'qualitaet', label: 'Qualität der Beiträge', chips: [
+        { text: 'Deine Beiträge zeigen ein tiefgehendes Verständnis der Unterrichtsinhalte.', grades: [1] },
+        { text: 'Deine Beiträge zeigen ein gutes inhaltliches Verständnis.', grades: [2, 3] },
+        { text: 'Deine Beiträge zeigen ein grundlegendes Verständnis der Inhalte.', grades: [4] },
+        { text: 'Deine Beiträge bleiben manchmal noch etwas an der Oberfläche.', grades: [5] }
+    ]},
+    { key: 'arbeitsweise', label: 'Arbeitsweise in den Arbeitsphasen', chips: [
+        { text: 'Du arbeitest in den Arbeitsphasen selbstständig, konzentriert und zuverlässig.', grades: [1, 2] },
+        { text: 'Du arbeitest in den Arbeitsphasen überwiegend gut und selbstständig mit.', grades: [3] },
+        { text: 'Deine Arbeitsweise ist insgesamt eher schwankend.', grades: [4] },
+        { text: 'Du arbeitest häufig unkonzentriert und benötigst oft eine Aufforderung, um zu beginnen.', grades: [5, 6] },
+        { text: 'Dein Arbeitstempo ist insgesamt eher langsam.', grades: [] }
+    ]},
+    { key: 'aufgaben', label: 'Aufgaben & Ergebnisse', chips: [
+        { text: 'Du erledigst deine Aufgaben zuverlässig und ordentlich.', grades: [1, 2] },
+        { text: 'Du bearbeitest die Aufgaben meistens zuverlässig.', grades: [3] },
+        { text: 'Aufgaben werden häufig nicht in der vorgegebenen Zeit fertig bearbeitet.', grades: [4, 5] },
+        { text: 'Du hast ein ordentlich geführtes Heft abgegeben.', grades: [] }
+    ]},
+    { key: 'material', label: 'Material', chips: [
+        { text: 'Deine Materialien hast du zuverlässig dabei.', grades: [1, 2, 3] },
+        { text: 'Deine Materialien fehlen teilweise.', grades: [4] },
+        { text: 'Deine Materialien fehlen häufig zu Stundenbeginn.', grades: [5, 6] }
+    ]},
+    { key: 'stoerung', label: 'Störungen & Ablenkung', chips: [
+        { text: 'Du arbeitest ruhig und störst den Unterricht nicht.', grades: [1, 2] },
+        { text: 'Gelegentlich gibt es kleinere Ablenkungen im Unterricht.', grades: [3] },
+        { text: 'Du lässt dich regelmäßig durch deine Sitznachbarn ablenken.', grades: [4] },
+        { text: 'Du störst den Unterricht regelmäßig.', grades: [5, 6] }
+    ]},
+    { key: 'motivation', label: 'Motivation', chips: [
+        { text: 'Du bringst eine hohe Motivation in den Unterricht mit.', grades: [1, 2] },
+        { text: 'Deine Motivation ist insgesamt eher wechselhaft.', grades: [3, 4] },
+        { text: 'Du zeigst insgesamt eher wenig Motivation.', grades: [5, 6] }
+    ]},
+    { key: 'sonstiges', label: 'Sonstiges (optional)', chips: [
+        { text: 'Du kannst Hilfe gut annehmen und umsetzen.', grades: [] },
+        { text: 'Du holst dir bei Unklarheiten selbstständig Hilfe.', grades: [] },
+        { text: 'Du bist sehr sozial und unterstützt deine Mitschülerinnen und Mitschüler.', grades: [] },
+        { text: 'Insgesamt hast du dich im Laufe des Halbjahres verbessert.', grades: [] }
+    ]}
+];
+
+function _znGradeInt(note) {
+    const m = String(note || '').match(/[1-6]/);
+    return m ? parseInt(m[0], 10) : null;
+}
+
+function openZeugnisQuestionsModal(index) {
+    const student = classes[activeClassId]?.students?.[index];
+    if (!student) return;
+    const gradeInt = _znGradeInt(student.zeugnisnote);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'znq-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+    const box = document.createElement('div');
+    box.className = 'znq-box';
+
+    let html = `
+        <div class="znq-head">
+            <span class="znq-title">Schnell-Eingabe: ${escapeHtml(student.name)}${student.zeugnisnote ? ' · Note ' + escapeHtml(student.zeugnisnote) : ''}</span>
+            <button class="znq-close" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="znq-hint">Antworten anklicken (passend zur Note vorausgewählt) – dann „Stichpunkte einfügen".</div>
+        <div class="znq-questions">`;
+    ZN_QUESTIONS.forEach(q => {
+        html += `<div class="znq-q"><div class="znq-q-label">${escapeHtml(q.label)}</div><div class="znq-chips">`;
+        q.chips.forEach(c => {
+            const pre = gradeInt !== null && Array.isArray(c.grades) && c.grades.includes(gradeInt);
+            html += `<span class="znq-chip${pre ? ' selected' : ''}" data-text="${escapeHtml(c.text)}">${escapeHtml(c.text)}</span>`;
+        });
+        html += `</div></div>`;
+    });
+    html += `</div>
+        <div class="znq-actions">
+            <button class="btn btn-secondary btn-icon znq-cancel">Abbrechen</button>
+            <button class="btn btn-primary btn-icon znq-apply"><i class="fas fa-plus"></i> Stichpunkte einfügen</button>
+        </div>`;
+    box.innerHTML = html;
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    box.querySelectorAll('.znq-chip').forEach(chip => {
+        chip.onclick = () => chip.classList.toggle('selected');
+    });
+    box.querySelector('.znq-close').onclick = () => overlay.remove();
+    box.querySelector('.znq-cancel').onclick = () => overlay.remove();
+    box.querySelector('.znq-apply').onclick = () => {
+        const selected = [...box.querySelectorAll('.znq-chip.selected')].map(c => c.dataset.text);
+        if (selected.length) {
+            // aktuellen Feldinhalt sichern, dann Stichpunkte anhängen
+            const el = document.getElementById(`zn-begruendung-${index}`);
+            const prevRaw = (el?.innerText || student.zeugnisBegruendung || '').replace(/^•\s*$/gm, '').trim();
+            const additions = selected.map(t => '• ' + t).join('\n');
+            student.zeugnisBegruendung = prevRaw ? prevRaw + '\n' + additions : additions;
+            saveData(index);
+            const c = document.getElementById(`zn-inline-${index}`);
+            if (c) c.innerHTML = zeugnisnoteInlineHtml(student, index);
+        }
+        overlay.remove();
+    };
+}
+window.openZeugnisQuestionsModal = openZeugnisQuestionsModal;
 
 // ===== Zeugnis-Sitzplan-Ansicht (reduziert, scrollbar, Endnoten als Kreise) =====
 function toggleZeugnisSitzplanView() {
