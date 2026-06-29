@@ -5320,6 +5320,19 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     font-size: 1.25rem;
 }
 
+/* Kein blauer Kasten beim Hover/Fokus – nur dezentes Vergrößern + dunkleres Icon */
+.zn-fragen-btn:hover, .zn-wand-btn:hover, .zn-undo-btn:hover,
+.zn-fragen-btn:focus, .zn-wand-btn:focus, .zn-undo-btn:focus,
+.zn-fragen-btn:active, .zn-wand-btn:active, .zn-undo-btn:active {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transform: scale(1.15);
+}
+.zn-fragen-btn:hover, .zn-wand-btn:hover { color: var(--primary-hover) !important; }
+.zn-undo-btn:hover { color: #92400e !important; }
+
 /* Schnell-Eingabe per Fragen (Modal) */
 .znq-overlay {
     position: fixed;
