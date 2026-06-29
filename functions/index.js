@@ -357,6 +357,17 @@ function normalizeBulletLines(text) {
     .map(line => `• ${line}`);
 }
 
+// Wandelt eine evtl. als Stichpunkte/Zeilen vorliegende Antwort in einen Fließtext-Absatz um.
+function flattenToParagraph(text) {
+  return String(text || "")
+    .split(/\r?\n+/)
+    .map(line => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim())
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function formatZeugnisnoteBullets(parts) {
   return parts
     .flatMap(part => normalizeBulletLines(part))
@@ -443,8 +454,9 @@ exports.generateZeugnisnote = onCall(
         questions = parsed.questions;
       } else {
         const mitarbeitText = (parsed.begruendung || parsed.mitarbeit_text || "").toString().trim();
-        // Fließtext bleibt unverändert; sonst in Stichpunkte umwandeln
-        begruendung = isFliess ? mitarbeitText : formatZeugnisnoteBullets([mitarbeitText]);
+        // Fließtext: etwaige Stichpunkte/Zeilenumbrüche garantiert zu einem Absatz zusammenführen.
+        // Sonst: in Stichpunkte umwandeln.
+        begruendung = isFliess ? flattenToParagraph(mitarbeitText) : formatZeugnisnoteBullets([mitarbeitText]);
       }
     } catch (e) {
       console.error("JSON parsing failed, falling back to raw text:", e);
