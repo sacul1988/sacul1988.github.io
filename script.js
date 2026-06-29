@@ -9354,12 +9354,29 @@ function saveStudentNotes(studentIndex, isDebounced = false) {
 // getExportGradeWord ist nach grades.js ausgelagert (global verfügbar).
 
 // Alle Schüler-Karteikarten exportieren
-function exportAllStudentCards() {
+// Export-Auswahl: Zeugnisse (wie bisher) oder Notenliste (Namen + Endnoten)
+async function exportAllStudentCards() {
     if (!classes[activeClassId] || !classes[activeClassId].students || classes[activeClassId].students.length === 0) {
-        alert('Keine Schüler vorhanden');
+        swal('Hinweis', 'Keine Schüler vorhanden.', 'info');
         return;
     }
-    
+    const choice = await swal({
+        title: 'Was möchtest du exportieren?',
+        buttons: {
+            zeugnisse: { text: 'Zeugnisse', value: 'zeugnisse' },
+            notenliste: { text: 'Notenliste', value: 'notenliste' }
+        }
+    });
+    if (choice === 'zeugnisse') exportZeugnisseCards();
+    else if (choice === 'notenliste') exportNotenliste();
+}
+
+function exportZeugnisseCards() {
+    if (!classes[activeClassId] || !classes[activeClassId].students || classes[activeClassId].students.length === 0) {
+        swal('Hinweis', 'Keine Schüler vorhanden.', 'info');
+        return;
+    }
+
     let allPrintHtml = `
         <!DOCTYPE html>
         <html>
@@ -9472,6 +9489,55 @@ function exportAllStudentCards() {
     printWindow.focus();
 
     // Druckdialog öffnen
+    printWindow.print();
+}
+
+// Notenliste: nur Schülernamen + Endnoten als einfache Tabelle
+function exportNotenliste() {
+    if (!classes[activeClassId] || !classes[activeClassId].students || classes[activeClassId].students.length === 0) {
+        swal('Hinweis', 'Keine Schüler vorhanden.', 'info');
+        return;
+    }
+    const className = classes[activeClassId].name || '';
+    const rows = classes[activeClassId].students.map((student, i) => {
+        const note = (student.zeugnisnote || '').trim() || '–';
+        return `<tr><td class="nr">${i + 1}</td><td class="nm">${escapeHtml(student.name)}</td><td class="no">${escapeHtml(note)}</td></tr>`;
+    }).join('');
+
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Notenliste${className ? ' – ' + className : ''}</title>
+            <style>
+                @page { size: A4; margin: 1.5cm; }
+                * { box-sizing: border-box; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; margin: 0; }
+                h1 { font-size: 1.4rem; margin: 0 0 16px; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #cbd5e1; font-size: 0.98rem; }
+                th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; border-bottom: 2px solid #1f2937; }
+                td.nr { width: 40px; color: #64748b; }
+                td.no { width: 90px; text-align: center; font-weight: 700; }
+                th.no { text-align: center; }
+                tr { page-break-inside: avoid; }
+            </style>
+        </head>
+        <body>
+            <h1>Notenliste${className ? ' – ' + escapeHtml(className) : ''}</h1>
+            <table>
+                <thead><tr><th>Nr.</th><th>Name</th><th class="no">Endnote</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </body>
+        </html>
+    `;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) { swal('Hinweis', 'Bitte Popup-Blocker deaktivieren um zu exportieren.', 'info'); return; }
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
     printWindow.print();
 }
 
