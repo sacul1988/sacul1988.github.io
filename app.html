@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=3.86">
+    <link rel="stylesheet" href="style.css?v=3.87">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -536,9 +536,6 @@
                                         </button>
                                         <button class="btn btn-primary btn-icon" id="zeugnis-view-toggle" onclick="toggleZeugnisView()">
                                             <i class="fas fa-calculator"></i> <span class="btn-text">Durchschnitt</span>
-                                        </button>
-                                        <button class="btn btn-primary btn-icon" onclick="openZeugnisBatch()">
-                                            <i class="fas fa-wand-magic-sparkles"></i> <span class="btn-text">Durchlauf</span>
                                         </button>
                                         <button class="btn btn-primary btn-icon" onclick="exportAllStudentCards()">
                                             <i class="fas fa-arrow-down"></i>
@@ -2206,7 +2203,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=3.86"></script>
+    <script src="script.js?v=3.87"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
