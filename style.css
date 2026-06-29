@@ -2271,6 +2271,15 @@ html.login-active, body.login-active {
     margin-bottom: 12px;
 }
 .sp-note-input:focus { outline: none; border-color: var(--primary-color); }
+.sp-note-actions {
+    display: flex;
+    gap: 8px;
+}
+.sp-note-actions .btn {
+    flex: 1;
+    justify-content: center;
+    white-space: nowrap;
+}
 
 /* Tische mit hoher negativer Beteiligung (3 oder mehr negative Punkte) */
 #sitzplan-module .desk.high-negatives {

@@ -6460,8 +6460,10 @@ function openSitzplanNoteModal(studentIndex) {
         </div>
         ${existingHtml}
         <textarea class="sp-note-input" rows="3" placeholder="Notiz eintippen…"></textarea>
-        <button class="btn btn-primary btn-block sp-note-save"><i class="fas fa-plus"></i> Als Stichpunkt hinzufügen</button>
-        <button class="btn btn-secondary btn-block sp-note-show"><i class="fas fa-up-right-from-square"></i> Im Zeugnis anzeigen</button>
+        <div class="sp-note-actions">
+            <button class="btn btn-primary btn-icon sp-note-save"><i class="fas fa-plus"></i> Hinzufügen</button>
+            <button class="btn btn-secondary btn-icon sp-note-show"><i class="fas fa-up-right-from-square"></i> Im Zeugnis anzeigen</button>
+        </div>
     `;
     overlay.appendChild(box);
     document.body.appendChild(overlay);
