@@ -6467,14 +6467,6 @@ function openSitzplanNoteModal(studentIndex) {
     const student = classes[activeClassId]?.students?.[studentIndex];
     if (!student) return;
 
-    const existing = (student.zeugnisBegruendung || '').trim();
-    const existingBullets = existing
-        ? existing.split('\n').map(l => l.replace(/^•\s*/, '').trim()).filter(Boolean)
-        : [];
-    const existingHtml = existingBullets.length
-        ? '<ul class="sp-note-existing">' + existingBullets.map(b => `<li>${escapeHtml(b)}</li>`).join('') + '</ul>'
-        : '<div class="sp-note-empty">Noch keine Notizen.</div>';
-
     const overlay = document.createElement('div');
     overlay.className = 'sp-note-overlay';
     overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
@@ -6486,7 +6478,7 @@ function openSitzplanNoteModal(studentIndex) {
             <span class="sp-note-title">Notiz für ${escapeHtml(student.name)}</span>
             <button class="sp-note-close" title="Schließen"><i class="fas fa-times"></i></button>
         </div>
-        ${existingHtml}
+        <div class="sp-note-list"></div>
         <textarea class="sp-note-input" rows="3" placeholder="Notiz eintippen…"></textarea>
         <div class="sp-note-actions">
             <button class="btn btn-primary btn-icon sp-note-save"><i class="fas fa-plus"></i> Hinzufügen</button>
@@ -6497,31 +6489,47 @@ function openSitzplanNoteModal(studentIndex) {
     document.body.appendChild(overlay);
 
     const input = box.querySelector('.sp-note-input');
+    const listEl = box.querySelector('.sp-note-list');
+
+    // Vorhandene Notizen anzeigen (live aktualisiert)
+    function renderList() {
+        const existing = (student.zeugnisBegruendung || '').trim();
+        const bullets = existing
+            ? existing.split('\n').map(l => l.replace(/^•\s*/, '').trim()).filter(Boolean)
+            : [];
+        listEl.innerHTML = bullets.length
+            ? '<ul class="sp-note-existing">' + bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('') + '</ul>'
+            : '<div class="sp-note-empty">Noch keine Notizen.</div>';
+    }
+    renderList();
+
+    // Notiz oben als Stichpunkt einfügen – Modal bleibt offen, Liste aktualisiert live
     const save = () => {
         const note = (input.value || '').trim();
-        if (!note) { overlay.remove(); return; }
+        if (!note) return;
         const prev = (student.zeugnisBegruendung || '').trim();
         const bullet = '• ' + note;
-        student.zeugnisBegruendung = prev ? prev + '\n' + bullet : bullet;
+        student.zeugnisBegruendung = prev ? bullet + '\n' + prev : bullet;
         saveData(studentIndex);
-        overlay.remove();
-        if (typeof showToast === 'function') showToast(`Notiz für ${student.name} gespeichert`);
+        input.value = '';
+        renderList();
+        input.focus();
     };
     box.querySelector('.sp-note-save').onclick = save;
     box.querySelector('.sp-note-close').onclick = () => overlay.remove();
-    // "Im Zeugnis anzeigen": nicht gespeicherte Eingabe noch übernehmen, dann zum Schüler springen
+    // "Im Zeugnis anzeigen": nicht eingefügte Eingabe noch übernehmen, dann zum Schüler springen
     box.querySelector('.sp-note-show').onclick = () => {
         const note = (input.value || '').trim();
         if (note) {
             const prev = (student.zeugnisBegruendung || '').trim();
-            student.zeugnisBegruendung = prev ? prev + '\n• ' + note : '• ' + note;
+            student.zeugnisBegruendung = prev ? '• ' + note + '\n' + prev : '• ' + note;
             saveData(studentIndex);
         }
         overlay.remove();
         showModule('zeugnis');
         setTimeout(() => { if (typeof jumpToStudentInList === 'function') jumpToStudentInList(studentIndex); }, 120);
     };
-    // Enter speichert, Shift+Enter macht eine neue Zeile
+    // Enter fügt hinzu, Shift+Enter macht eine neue Zeile
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save(); }
     });
