@@ -6461,6 +6461,7 @@ function openSitzplanNoteModal(studentIndex) {
         ${existingHtml}
         <textarea class="sp-note-input" rows="3" placeholder="Notiz eintippen…"></textarea>
         <button class="btn btn-primary btn-block sp-note-save"><i class="fas fa-plus"></i> Als Stichpunkt hinzufügen</button>
+        <button class="btn btn-secondary btn-block sp-note-show"><i class="fas fa-up-right-from-square"></i> Im Zeugnis anzeigen</button>
     `;
     overlay.appendChild(box);
     document.body.appendChild(overlay);
@@ -6478,6 +6479,18 @@ function openSitzplanNoteModal(studentIndex) {
     };
     box.querySelector('.sp-note-save').onclick = save;
     box.querySelector('.sp-note-close').onclick = () => overlay.remove();
+    // "Im Zeugnis anzeigen": nicht gespeicherte Eingabe noch übernehmen, dann zum Schüler springen
+    box.querySelector('.sp-note-show').onclick = () => {
+        const note = (input.value || '').trim();
+        if (note) {
+            const prev = (student.zeugnisBegruendung || '').trim();
+            student.zeugnisBegruendung = prev ? prev + '\n• ' + note : '• ' + note;
+            saveData(studentIndex);
+        }
+        overlay.remove();
+        showModule('zeugnis');
+        setTimeout(() => { if (typeof jumpToStudentInList === 'function') jumpToStudentInList(studentIndex); }, 120);
+    };
     // Enter speichert, Shift+Enter macht eine neue Zeile
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save(); }
