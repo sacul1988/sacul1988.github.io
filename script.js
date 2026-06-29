@@ -9551,15 +9551,17 @@ function exportNotenliste() {
             <meta charset="UTF-8">
             <title>Notenliste${className ? ' – ' + className : ''}</title>
             <style>
-                @page { size: A4; margin: 1.5cm; }
+                /* So bemessen, dass 30 Schüler genau auf eine A4-Seite passen */
+                @page { size: A4 portrait; margin: 1cm 1.5cm; }
                 * { box-sizing: border-box; }
+                html, body { height: 100%; }
                 body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; margin: 0; }
-                h1 { font-size: 1.4rem; margin: 0 0 16px; }
+                h1 { font-size: 16px; margin: 0 0 8px; }
                 table { width: 100%; border-collapse: collapse; }
-                th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #cbd5e1; font-size: 0.98rem; }
-                th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; border-bottom: 2px solid #1f2937; }
-                td.nr { width: 40px; color: #64748b; }
-                td.no { width: 90px; text-align: center; font-weight: 700; }
+                th, td { text-align: left; padding: 4px 10px; border-bottom: 1px solid #cbd5e1; font-size: 13px; line-height: 1.2; }
+                th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; border-bottom: 2px solid #1f2937; padding-bottom: 5px; }
+                td.nr { width: 36px; color: #64748b; }
+                td.no { width: 80px; text-align: center; font-weight: 700; }
                 th.no { text-align: center; }
                 tr { page-break-inside: avoid; }
             </style>
