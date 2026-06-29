@@ -12745,7 +12745,8 @@ function ztPlanungCourseCardHtml(course) {
     const fachlehrerHtml = (responsibleName || responsible === 'me')
         ? `<button type="button" class="zt-plan-pill-btn zt-plan-pill-teacher${teacherStateClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>`
         : '';
-    const themenBtn = `<button type="button" class="zt-plan-pill-btn" onclick="ztPlanungOpenForm('${course.id}')" title="Themen & Unterrichtssituation eingeben"><i class="fas fa-list-ul"></i> Themen / Situation</button>`;
+    // Bei Arbeits- und Sozialverhalten wird kein "Themen / Situation"-Button benötigt
+    const themenBtn = isSozial ? '' : `<button type="button" class="zt-plan-pill-btn" onclick="ztPlanungOpenForm('${course.id}')" title="Themen & Unterrichtssituation eingeben"><i class="fas fa-list-ul"></i> Themen / Situation</button>`;
     const actions = isLinked ? '' : `
                 <div class="zt-plan-course-actions">
                     <button class="btn btn-sm btn-danger btn-circle-sm" title="Kurs löschen" onclick="ztPlanungDeleteCourse('${course.id}')"><i class="fas fa-trash"></i></button>
