@@ -3513,11 +3513,26 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Zeugnis-Tab: aus der Liste (nach Kachel-Klick) führt "Zurück" zurück zur
+        // Sitzplan-Ansicht – nicht das Modul/die Seite verlassen.
+        if (currentPage === 'class' && activeModule === 'zeugnis' && typeof _zeugnisSitzplanView !== 'undefined'
+            && !_zeugnisSitzplanView && _zeugnisReturnToSitzplan) {
+            _zeugnisReturnToSitzplan = false;
+            if (typeof jumpToStudentInSitzplan === 'function' && _zeugnisLastStudentIndex !== null) {
+                jumpToStudentInSitzplan(_zeugnisLastStudentIndex);
+            } else {
+                _zeugnisSitzplanView = true;
+                _applyZeugnisView();
+            }
+            history.pushState({ page: currentPage, classId: activeClassId, module: activeModule, toolWindow: null }, '');
+            return;
+        }
+
         // Zeugnis-Tab: aus der Sitzplan-Ansicht führt "Zurück" zurück zur Liste beim
         // zuletzt angesprungenen Schüler – nicht das Modul/die Seite verlassen.
         if (currentPage === 'class' && activeModule === 'zeugnis' && typeof _zeugnisSitzplanView !== 'undefined' && _zeugnisSitzplanView) {
             if (typeof jumpToStudentInList === 'function' && _zeugnisLastStudentIndex !== null) {
-                jumpToStudentInList(_zeugnisLastStudentIndex);
+                jumpToStudentInList(_zeugnisLastStudentIndex, true);
             } else {
                 _zeugnisSitzplanView = false;
                 _applyZeugnisView();
@@ -7951,6 +7966,7 @@ function renderZeugnisModule() {
 let _zeugnisnoteBusy = false;
 let _zeugnisSitzplanView = false;  // false = Liste, true = Sitzplan-Ansicht (startet immer mit Liste)
 let _zeugnisLastStudentIndex = null;  // zuletzt im Sitzplan angesprungener Schüler (für "Zurück")
+let _zeugnisReturnToSitzplan = false; // true = "Zurück" aus der Liste soll zur Sitzplan-Ansicht
 let _znPendingQuestions = null;
 let _znPendingMessages = null;
 let _znPendingIndex = null;
@@ -8191,8 +8207,14 @@ function renderZeugnisSitzplan() {
     container.innerHTML = `<div class="zn-sitzplan-canvas" style="width:${canvasW}px; height:${canvasH}px;">${tiles}</div>`;
 }
 
-// Vom Sitzplan zur Liste: zur Karte scrollen und das Textfeld fokussieren
-function jumpToStudentInList(index) {
+// Vom Sitzplan zur Liste: zur Karte scrollen und das Textfeld fokussieren.
+// fromHistory=true: Aufruf kommt vom Browser-Zurück -> kein Rücksprung-Flag setzen.
+function jumpToStudentInList(index, fromHistory) {
+    // Kam man aus der Sitzplan-Ansicht (Kachel-Klick)? Dann soll "Zurück" wieder dorthin.
+    if (_zeugnisSitzplanView === true && !fromHistory) {
+        _zeugnisReturnToSitzplan = true;
+        _zeugnisLastStudentIndex = index;
+    }
     _zeugnisSitzplanView = false;
     _applyZeugnisView();
     setTimeout(() => {
