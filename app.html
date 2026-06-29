@@ -725,6 +725,31 @@
                         <i class="fas fa-home"></i>
                     </button>
                     <div class="tool-window-title" id="tool-window-title"></div>
+                    <!-- Globale Werkzeuge auch im Tool-Fenster (direktes Wechseln) -->
+                    <div class="topbar-tools">
+                        <button class="topbar-btn" type="button" data-tool="kalender" title="Kalender (zentrale Termine)" aria-label="Kalender" onclick="openToolWindow('kalender')">
+                            <i class="fas fa-calendar-alt"></i>
+                        </button>
+                        <button class="topbar-btn" type="button" data-tool="stundenplan" title="Stundenplan" aria-label="Stundenplan" onclick="openToolWindow('stundenplan')">
+                            <i class="fas fa-clock"></i>
+                        </button>
+                        <button class="topbar-btn" type="button" data-tool="kontakte" title="Adressbuch" aria-label="Adressbuch" onclick="openToolWindow('kontakte')">
+                            <i class="fas fa-address-book"></i>
+                        </button>
+                        <button class="topbar-btn" type="button" data-tool="zeugnis-texte" title="Zeugnistexte" aria-label="Zeugnistexte" onclick="openToolWindow('zeugnis-texte')">
+                            <i class="fas fa-list-check"></i>
+                        </button>
+                        <span class="topbar-sep" aria-hidden="true"></span>
+                        <button class="topbar-btn sync-btn" type="button" data-state="synced" title="Synchronisierung" aria-label="Synchronisierung" onclick="openSyncModal()">
+                            <span><i class="fas fa-circle-check"></i></span>
+                        </button>
+                        <button class="topbar-btn" type="button" title="Halbjahr archivieren oder altes Archiv ansehen" aria-label="Halbjahr-Archiv" onclick="openHalbjahrArchive()">
+                            <i class="fas fa-box-archive"></i>
+                        </button>
+                        <button class="topbar-btn logout-btn" type="button" title="Abmelden" aria-label="Abmelden" onclick="confirmLogout()">
+                            <i class="fas fa-right-from-bracket"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="tool-window-body" id="tool-window-body">
                     <!-- Kalender-Panel: die Kalenderansicht wird per JS hier eingehängt -->
