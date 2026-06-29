@@ -11985,14 +11985,12 @@ function ztOpenArchiveModal() {
 
 // HTML eines einzelnen Archiv-Eintrags – visuell wie eine Planungslisten-Zeile.
 function ztArchiveItemHtml(item) {
-    const d = item.date ? new Date(item.date) : null;
-    const dateStr = d ? d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
-    const typLabel = ztTypLabel(item.typ);
+    // Nur der Name – ohne Fach und ohne Haupt-/Nebenfach-Kennzeichnung
+    const nameOnly = item.name || (item.label || '').split('·')[0].trim() || item.label || '';
     return `
         <li class="zt-plan-student zt-archive-row" onclick="ztOpenArchive('${item.id}')">
             <div class="zt-archive-row-main">
-                <span class="zt-plan-student-name">${ztEsc(item.label)}</span>
-                ${typLabel ? `<span class="zt-archive-typ">${typLabel}</span>` : ''}
+                <span class="zt-plan-student-name">${ztEsc(nameOnly)}</span>
             </div>
             <div class="zt-archive-actions">
                 <button class="btn btn-sm btn-secondary btn-circle-sm" title="Text anzeigen" onclick="event.stopPropagation();ztShowTextOnly('${item.id}')"><i class="fas fa-eye"></i></button>
