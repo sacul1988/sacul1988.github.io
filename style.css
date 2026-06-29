@@ -111,9 +111,20 @@ body {
     letter-spacing: -0.02em;
 }
 
-/* Klassen-Header: "Klassenname · Tab" – auf Mobile nur Klassenname */
+/* Titel-Position: Desktop = oben in der Leiste, Mobil = im Karten-Header */
+/* Basis = Desktop-Verhalten */
+.js-class-title .ct-mobile { display: none; }          /* Desktop: nur Modulname (.ct-desktop) */
+.ct-home-title { display: none; }                      /* Desktop: "Startseite" kommt aus der Leiste */
+.tool-window-body .card-header > h2 { display: none; } /* Desktop: Tool-Titel kommt aus der Leiste */
+
 @media (max-width: 599px) {
-    .js-class-title .ct-module { display: none; }
+    /* Mobil: Titel oben ausblenden (Flex-Platz bleibt erhalten), Karten-Header zeigt ihn */
+    .topbar-title { visibility: hidden; }
+    .tool-window-title { visibility: hidden; }
+    .js-class-title .ct-desktop { display: none; }
+    .js-class-title .ct-mobile { display: inline; }
+    .ct-home-title { display: inline; }
+    .tool-window-body .card-header > h2 { display: block; }
 }
 
 #noten-module .card-header > div {

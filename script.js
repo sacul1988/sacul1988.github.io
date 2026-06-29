@@ -268,22 +268,22 @@ function getGradeColor(grade) {
 
 // ===== NAVIGATION UND UI =====
 
-// Setzt in allen Modul-Headern den Titel "Klassenname · Tab".
-// Auf Mobile wird der Tab-Teil per CSS (.ct-module) ausgeblendet -> nur Klassenname.
+// Füllt die Modul-Header mit zwei Varianten:
+//  - Desktop (.ct-desktop): nur der Tab-/Modulname (Titel oben in der Leiste = Klassenname)
+//  - Mobil   (.ct-mobile):  "Klassenname · Tab" (oben in der Leiste steht nichts)
+// Welche Variante sichtbar ist, steuert CSS per Breakpoint.
 function setClassModuleTitles(className) {
     document.querySelectorAll('.js-class-title').forEach(el => {
         const mod = el.getAttribute('data-module-title') || '';
         el.innerHTML = '';
-        const cls = document.createElement('span');
-        cls.className = 'ct-class';
-        cls.textContent = className;
-        el.appendChild(cls);
-        if (mod) {
-            const m = document.createElement('span');
-            m.className = 'ct-module';
-            m.textContent = ' · ' + mod;
-            el.appendChild(m);
-        }
+        const d = document.createElement('span');
+        d.className = 'ct-desktop';
+        d.textContent = mod || className;
+        el.appendChild(d);
+        const m = document.createElement('span');
+        m.className = 'ct-mobile';
+        m.textContent = mod ? (className + ' · ' + mod) : className;
+        el.appendChild(m);
     });
 }
 
@@ -319,14 +319,15 @@ function showPage(page, classId = null, shouldPushState = true) {
     const breadcrumbActive = safeGetElement('breadcrumb-active');
     if (breadcrumbActive) {
         if (page === 'home') {
-            breadcrumbActive.innerHTML = '';
+            // Desktop: Titel oben in der Leiste; Mobil per CSS ausgeblendet (Karten-Header zeigt ihn)
+            breadcrumbActive.textContent = 'Startseite';
             localStorage.removeItem('activeClassId');
         } else if (page === 'class' && classId !== null && classes[classId]) {
             activeClassId = classId;
             localStorage.setItem('activeClassId', classId);
             const className = classes[classId].name;
-            // Titel nicht mehr oben in der Leiste, sondern in den Modul-Headern
-            breadcrumbActive.innerHTML = '';
+            // Desktop: Klassenname oben in der Leiste; Mobil per CSS ausgeblendet
+            breadcrumbActive.textContent = className;
             setClassModuleTitles(className);
 
             // Standardmodus für Sitzplan auf Bewerten setzen
@@ -641,9 +642,12 @@ function openToolWindow(which, shouldPushState = true) {
     window._activeToolWindow = which;
     window._toolWindowOrigin = currentPage;
 
-    // Titel nicht mehr oben in der Leiste – er steht bereits im Karten-Header (Button-Zeile)
+    // Desktop: Titel oben in der Tool-Fenster-Leiste; Mobil per CSS ausgeblendet (Karten-Header zeigt ihn)
     const titleEl = document.getElementById('tool-window-title');
-    if (titleEl) titleEl.textContent = '';
+    if (titleEl) {
+        const toolTitles = { kalender: 'Kalender', stundenplan: 'Stundenplan', kontakte: 'Adressbuch', 'zeugnis-texte': 'Zeugnistexte' };
+        titleEl.textContent = toolTitles[which] || '';
+    }
 
     overlay.classList.add('open');
 
@@ -3349,8 +3353,10 @@ async function saveEditedClass() {
         saveData();
         renderClassesGrid();
         
-        // Falls aktive Klasse, Titel in den Modul-Headern aktualisieren
+        // Falls aktive Klasse, Titel oben (Desktop) und in den Modul-Headern aktualisieren
         if (currentPage === 'class' && activeClassId === classToEditId) {
+            const bc = safeGetElement('breadcrumb-active');
+            if (bc) bc.textContent = classes[classToEditId].name;
             setClassModuleTitles(classes[classToEditId].name);
         }
     }
