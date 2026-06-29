@@ -12727,9 +12727,7 @@ function ztPlanungCourseCardHtml(course) {
     }
     const teacherLabel = responsible === 'me'
         ? (allDone ? 'Fertig' : 'Zuständig')
-        : (responsible === 'teacher' || responsible === 'other')
-            ? `Nicht zuständig: ${ztEsc(responsibleName)}`
-            : ztEsc(responsibleName);
+        : ztEsc(responsibleName);
     const fachlehrerHtml = (responsibleName || responsible === 'me')
         ? `<button type="button" class="zt-plan-pill-btn zt-plan-pill-teacher${teacherStateClass}" onclick="ztPlanungChooseResponsible('${course.id}')" title="Zuständigkeit wählen">${teacherLabel}</button>`
         : '';
