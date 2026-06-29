@@ -4286,9 +4286,10 @@ html.modal-open, body.modal-open {
 
 .zt-plan-list { display: flex; flex-direction: column; gap: 14px; }
 
-/* Desktop: zwei Kurse nebeneinander in der Inline-Planungsliste */
+/* Desktop: zwei Kurse nebeneinander in der Inline-Planungsliste UND im Archiv */
 @media (min-width: 900px) {
-    .zt-planung-inline .zt-plan-list {
+    .zt-planung-inline .zt-plan-list,
+    .zt-archive-list {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 14px;
