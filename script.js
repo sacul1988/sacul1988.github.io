@@ -11566,11 +11566,10 @@ function ztRenderArchiveInline() {
         : ztArchiveGroupedHtml(items);
     container.classList.toggle('zt-planung-empty-state', isEmpty);
     container.innerHTML = body;
-    // Header-Zusammenfassung auf Archiv-Anzahl setzen
+    // Header-Badge im Archiv leeren (Anzahl steht bereits am Archiv-Button oben rechts)
     const summary = document.getElementById('zt-planung-header-summary');
     if (summary && ZtState.inlineMode === 'archive') {
-        const n = items.length;
-        summary.innerHTML = `<span class="zt-plan-inline-open">${n} ${n === 1 ? 'Eintrag' : 'Einträge'}</span>`;
+        summary.innerHTML = '';
     }
 }
 
