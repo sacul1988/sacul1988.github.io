@@ -8338,14 +8338,12 @@ function openZeugnisQuestionsModal(index) {
         const q = ZN_QUESTIONS[step];
         const isLast = step === total - 1;
         let chipsHtml = '';
-        const chipCount = q.chips.length;
         q.chips.forEach((c, ci) => {
             const sel = answers[step].selected.has(c.text);
-            chipsHtml += `<div class="znq-chip${sel ? ' selected' : ''}" data-ci="${ci}" data-text="${escapeHtml(c.text)}">
+            chipsHtml += `<div class="znq-chip${sel ? ' selected' : ''}" draggable="true" data-ci="${ci}" data-text="${escapeHtml(c.text)}">
+                <span class="znq-chip-grip" title="Ziehen zum Sortieren"><i class="fas fa-grip-vertical"></i></span>
                 <span class="znq-chip-text">${escapeHtml(c.text)}</span>
                 <span class="znq-chip-tools">
-                    <button class="znq-chip-up" title="Nach oben"${ci === 0 ? ' disabled' : ''}><i class="fas fa-chevron-up"></i></button>
-                    <button class="znq-chip-down" title="Nach unten"${ci === chipCount - 1 ? ' disabled' : ''}><i class="fas fa-chevron-down"></i></button>
                     <button class="znq-chip-edit" title="Bearbeiten"><i class="fas fa-pen"></i></button>
                     <button class="znq-chip-del" title="Löschen"><i class="fas fa-trash"></i></button>
                 </span>
@@ -8374,34 +8372,50 @@ function openZeugnisQuestionsModal(index) {
             </div>`;
         box.querySelectorAll('.znq-chip').forEach(chip => {
             chip.onclick = (e) => {
-                if (e.target.closest('.znq-chip-tools')) return;
+                if (e.target.closest('.znq-chip-tools') || e.target.closest('.znq-chip-grip')) return;
                 chip.classList.toggle('selected');
             };
         });
-        // Reihenfolge ändern (synchronisiert über _znSaveQuestions)
-        box.querySelectorAll('.znq-chip-up').forEach(btn => {
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                const ci = parseInt(btn.closest('.znq-chip').dataset.ci, 10);
-                if (ci <= 0) return;
+        // Reihenfolge per Drag & Drop ändern (synchronisiert über _znSaveQuestions)
+        let dragCi = null;
+        const clearDropMarks = () => box.querySelectorAll('.znq-chip').forEach(c => c.classList.remove('znq-drop-before', 'znq-drop-after'));
+        box.querySelectorAll('.znq-chip').forEach(chip => {
+            chip.addEventListener('dragstart', (e) => {
+                dragCi = parseInt(chip.dataset.ci, 10);
+                chip.classList.add('znq-dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                try { e.dataTransfer.setData('text/plain', String(dragCi)); } catch (_) {}
+            });
+            chip.addEventListener('dragend', () => {
+                chip.classList.remove('znq-dragging');
+                clearDropMarks();
+                dragCi = null;
+            });
+            chip.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const rect = chip.getBoundingClientRect();
+                const after = (e.clientY - rect.top) > rect.height / 2;
+                clearDropMarks();
+                chip.classList.add(after ? 'znq-drop-after' : 'znq-drop-before');
+            });
+            chip.addEventListener('drop', (e) => {
+                e.preventDefault();
+                clearDropMarks();
+                const targetCi = parseInt(chip.dataset.ci, 10);
+                if (dragCi === null || dragCi === targetCi) return;
+                const rect = chip.getBoundingClientRect();
+                const after = (e.clientY - rect.top) > rect.height / 2;
                 saveStep();
                 const arr = ZN_QUESTIONS[step].chips;
-                [arr[ci - 1], arr[ci]] = [arr[ci], arr[ci - 1]];
+                const moved = arr.splice(dragCi, 1)[0];
+                let insertIndex = (dragCi < targetCi) ? targetCi - 1 : targetCi;
+                if (after) insertIndex += 1;
+                insertIndex = Math.max(0, Math.min(arr.length, insertIndex));
+                arr.splice(insertIndex, 0, moved);
                 _znSaveQuestions();
                 render();
-            };
-        });
-        box.querySelectorAll('.znq-chip-down').forEach(btn => {
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                const ci = parseInt(btn.closest('.znq-chip').dataset.ci, 10);
-                const arr = ZN_QUESTIONS[step].chips;
-                if (ci >= arr.length - 1) return;
-                saveStep();
-                [arr[ci + 1], arr[ci]] = [arr[ci], arr[ci + 1]];
-                _znSaveQuestions();
-                render();
-            };
+            });
         });
         // Chip bearbeiten
         box.querySelectorAll('.znq-chip-edit').forEach(btn => {
