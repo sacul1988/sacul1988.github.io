@@ -12728,8 +12728,14 @@ function ztPlanungCourseCardHtml(course) {
                     <button class="btn btn-sm btn-danger btn-circle-sm" title="Kurs löschen" onclick="ztPlanungDeleteCourse('${course.id}')"><i class="fas fa-trash"></i></button>
                 </div>`;
 
+    // Status der ganzen Karte: delegiert = nicht zuständig (grau), alle erledigt = fertig (grün), sonst offen (orange)
+    let courseStatusClass;
+    if (responsible === 'teacher' || responsible === 'other') courseStatusClass = 'zt-course-delegated';
+    else if (allDone) courseStatusClass = 'zt-course-done';
+    else courseStatusClass = 'zt-course-open';
+
     return `
-        <div class="zt-plan-course ${isLinked ? 'linked' : ''}" data-course-id="${spJsAttr(course.id)}">
+        <div class="zt-plan-course ${courseStatusClass} ${isLinked ? 'linked' : ''}" data-course-id="${spJsAttr(course.id)}">
             <div class="zt-plan-course-head">
                 <div class="zt-plan-course-title">
                     <span class="zt-plan-course-name">${title} ${linkedBadge}</span>
