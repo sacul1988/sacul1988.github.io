@@ -8349,12 +8349,24 @@ function openZeugnisQuestionsModal(index) {
 
     const overlay = document.createElement('div');
     overlay.className = 'znq-overlay';
-    overlay.onclick = (e) => { if (e.target === overlay) { saveStep(); overlay.remove(); } };
+    overlay.onclick = (e) => { if (e.target === overlay) { saveStep(); closeOverlay(); } };
 
     const box = document.createElement('div');
     box.className = 'znq-box';
     overlay.appendChild(box);
     document.body.appendChild(overlay);
+
+    // Hintergrund-Scroll sperren (Position merken), damit nichts mitscrollt
+    // und man beim Schließen wieder an derselben Stelle landet.
+    const _znqScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.top = `-${_znqScrollY}px`;
+    document.body.classList.add('znq-scroll-lock');
+    function closeOverlay() {
+        document.body.classList.remove('znq-scroll-lock');
+        document.body.style.top = '';
+        overlay.remove();
+        window.scrollTo(0, _znqScrollY);
+    }
 
     // Auswahl + Notiz des aktuellen Schritts sichern, bevor gewechselt wird
     function saveStep() {
@@ -8373,7 +8385,7 @@ function openZeugnisQuestionsModal(index) {
             q.chips.forEach(c => { if (answers[i].selected.has(c.text)) additions.push(c.text); });
             if (answers[i].note) additions.push(answers[i].note);
         });
-        overlay.remove();
+        closeOverlay();
         if (!additions.length) return;
         const el = document.getElementById(`zn-begruendung-${index}`);
         const originalContent = (el?.innerText || student.zeugnisBegruendung || '').replace(/^•\s*$/gm, '').trim();
@@ -8523,7 +8535,7 @@ function openZeugnisQuestionsModal(index) {
             _znSaveQuestions();
             render();
         };
-        box.querySelector('.znq-close').onclick = () => { saveStep(); overlay.remove(); };
+        box.querySelector('.znq-close').onclick = () => { saveStep(); closeOverlay(); };
         const backBtn = box.querySelector('.znq-back');
         if (backBtn) backBtn.onclick = () => { saveStep(); if (step > 0) { step--; render(); } };
         const nextBtn = box.querySelector('.znq-next');
