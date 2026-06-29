@@ -5357,11 +5357,14 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 }
 .znq-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .znq-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     border: 1px solid var(--border-color);
     background: #f8fafc;
     color: var(--dark-color);
     border-radius: 14px;
-    padding: 6px 12px;
+    padding: 6px 10px 6px 12px;
     font-size: 0.85rem;
     cursor: pointer;
     user-select: none;
@@ -5373,6 +5376,40 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     border-color: var(--primary-color);
     color: #fff;
 }
+.znq-chip-edit, .znq-chip-del {
+    border: none;
+    background: none;
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: var(--grey-color);
+    opacity: 0.55;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.znq-chip-edit:hover, .znq-chip-del:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+.znq-chip.selected .znq-chip-edit, .znq-chip.selected .znq-chip-del { color: #fff; opacity: 0.8; }
+.znq-chip.selected .znq-chip-edit:hover, .znq-chip.selected .znq-chip-del:hover { background: rgba(255,255,255,0.25); }
+.znq-chip-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px dashed var(--primary-color);
+    background: #fff;
+    color: var(--primary-color);
+    border-radius: 14px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+}
+.znq-chip-add:hover { background: #eef2ff; }
 .znq-actions {
     display: flex;
     gap: 8px;

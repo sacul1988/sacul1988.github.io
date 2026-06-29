@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=3.59">
+    <link rel="stylesheet" href="style.css?v=3.60">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -1817,6 +1817,14 @@
             applyCloudBlob(cloudData.stundenplan, 'stundenplan', window.setStundenplan);
             applyCloudPlanung(cloudData.planung);
 
+            // Zeugnis-Schnellfragen (anpassbare Chips) übernehmen
+            if (shouldApplyExtra && typeof cloudData.znQuestions === 'string' && cloudData.znQuestions) {
+                localStorage.setItem('znQuestions', cloudData.znQuestions);
+                try {
+                    if (typeof window.setZnQuestions === 'function') window.setZnQuestions(JSON.parse(cloudData.znQuestions));
+                } catch (e) {}
+            }
+
             // Tagesprotokoll (abgehakt-Zustand): mergen, beide Geräte können Häkchen setzen
             if (cloudData.tagesprotokoll) {
                 try {
@@ -1919,7 +1927,8 @@
                     dashboardNotes: JSON.parse(localStorage.getItem('dashboardNotes') || '[]'),
                     extraDataLastUpdate: localStorage.getItem('extraDataLastUpdate') || timestamp,
                     ztInputDraft: localStorage.getItem('ztInputDraft') || '',
-                    tagesprotokoll: localStorage.getItem('tagesprotokoll') || '{}'
+                    tagesprotokoll: localStorage.getItem('tagesprotokoll') || '{}',
+                    znQuestions: localStorage.getItem('znQuestions') || ''
                 };
 
                 if (specificStudentIndex !== null) {
@@ -2197,7 +2206,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=3.59"></script>
+    <script src="script.js?v=3.60"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {

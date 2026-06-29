@@ -8150,7 +8150,7 @@ window.znUndoGenerate = znUndoGenerate;
 // ===== Schnell-Eingabe per Fragen (notenabhängig vorausgewählte Antwort-Chips) =====
 // Jede Frage: feste Antwort-Chips (fertige "Du"-Stichpunkte). grades = bei welchen
 // Endnoten der Chip vorausgewählt ist. Mehrfachauswahl möglich.
-const ZN_QUESTIONS = [
+const ZN_QUESTIONS_DEFAULT = [
     { key: 'beteiligung', label: 'Mündliche Beteiligung', chips: [
         { text: 'Du beteiligst dich rege und regelmäßig am Unterricht.', grades: [1] },
         { text: 'Du beteiligst dich regelmäßig am Unterricht.', grades: [2] },
@@ -8201,6 +8201,34 @@ const ZN_QUESTIONS = [
         { text: 'Insgesamt hast du dich im Laufe des Halbjahres verbessert.', grades: [] }
     ]}
 ];
+
+// Anpassbare Version (bearbeitbar/erweiterbar, gespeichert + synchronisiert)
+function _znLoadQuestions() {
+    try {
+        const raw = localStorage.getItem('znQuestions');
+        if (raw) {
+            const p = JSON.parse(raw);
+            if (Array.isArray(p) && p.length) return p;
+        }
+    } catch (e) { /* ignore */ }
+    return JSON.parse(JSON.stringify(ZN_QUESTIONS_DEFAULT));
+}
+let ZN_QUESTIONS = _znLoadQuestions();
+function _znSaveQuestions() {
+    try {
+        localStorage.setItem('znQuestions', JSON.stringify(ZN_QUESTIONS));
+        localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
+    } catch (e) { /* ignore */ }
+    if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.saveDataToCloud === 'function') {
+        window.saveDataToCloud();
+    }
+}
+window.setZnQuestions = function(arr) {
+    if (Array.isArray(arr) && arr.length) {
+        ZN_QUESTIONS = arr;
+        try { localStorage.setItem('znQuestions', JSON.stringify(arr)); } catch (e) {}
+    }
+};
 
 function _znGradeInt(note) {
     const m = String(note || '').match(/[1-6]/);
@@ -8264,10 +8292,11 @@ function openZeugnisQuestionsModal(index) {
         const q = ZN_QUESTIONS[step];
         const isLast = step === total - 1;
         let chipsHtml = '';
-        q.chips.forEach(c => {
+        q.chips.forEach((c, ci) => {
             const sel = answers[step].selected.has(c.text);
-            chipsHtml += `<span class="znq-chip${sel ? ' selected' : ''}" data-text="${escapeHtml(c.text)}">${escapeHtml(c.text)}</span>`;
+            chipsHtml += `<span class="znq-chip${sel ? ' selected' : ''}" data-ci="${ci}" data-text="${escapeHtml(c.text)}"><span class="znq-chip-text">${escapeHtml(c.text)}</span><button class="znq-chip-edit" title="Bearbeiten"><i class="fas fa-pen"></i></button><button class="znq-chip-del" title="Löschen"><i class="fas fa-times"></i></button></span>`;
         });
+        chipsHtml += `<span class="znq-chip-add" title="Antwort hinzufügen"><i class="fas fa-plus"></i> Antwort</span>`;
         box.innerHTML = `
             <div class="znq-head">
                 <span class="znq-title">${escapeHtml(student.name)}${student.zeugnisnote ? ' · Note ' + escapeHtml(student.zeugnisnote) : ''}</span>
@@ -8288,8 +8317,54 @@ function openZeugnisQuestionsModal(index) {
                     : `<button class="btn btn-primary btn-icon znq-next">Weiter <i class="fas fa-arrow-right"></i></button>`}
             </div>`;
         box.querySelectorAll('.znq-chip').forEach(chip => {
-            chip.onclick = () => chip.classList.toggle('selected');
+            chip.onclick = (e) => {
+                if (e.target.closest('.znq-chip-edit') || e.target.closest('.znq-chip-del')) return;
+                chip.classList.toggle('selected');
+            };
         });
+        // Chip bearbeiten
+        box.querySelectorAll('.znq-chip-edit').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const ci = parseInt(btn.closest('.znq-chip').dataset.ci, 10);
+                const old = ZN_QUESTIONS[step].chips[ci].text;
+                const nv = window.prompt('Antwort bearbeiten:', old);
+                if (nv == null) return;
+                const t = nv.trim();
+                if (!t) return;
+                saveStep();
+                if (answers[step].selected.has(old)) { answers[step].selected.delete(old); answers[step].selected.add(t); }
+                ZN_QUESTIONS[step].chips[ci].text = t;
+                _znSaveQuestions();
+                render();
+            };
+        });
+        // Chip löschen
+        box.querySelectorAll('.znq-chip-del').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const ci = parseInt(btn.closest('.znq-chip').dataset.ci, 10);
+                const old = ZN_QUESTIONS[step].chips[ci].text;
+                saveStep();
+                answers[step].selected.delete(old);
+                ZN_QUESTIONS[step].chips.splice(ci, 1);
+                _znSaveQuestions();
+                render();
+            };
+        });
+        // Neue Antwort hinzufügen
+        const addBtn = box.querySelector('.znq-chip-add');
+        if (addBtn) addBtn.onclick = () => {
+            const nv = window.prompt('Neue Antwort:');
+            if (nv == null) return;
+            const t = nv.trim();
+            if (!t) return;
+            saveStep();
+            ZN_QUESTIONS[step].chips.push({ text: t, grades: [] });
+            answers[step].selected.add(t);
+            _znSaveQuestions();
+            render();
+        };
         box.querySelector('.znq-close').onclick = () => { saveStep(); overlay.remove(); };
         const backBtn = box.querySelector('.znq-back');
         if (backBtn) backBtn.onclick = () => { saveStep(); if (step > 0) { step--; render(); } };
