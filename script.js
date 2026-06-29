@@ -8185,17 +8185,6 @@ const ZN_QUESTIONS_DEFAULT = [
         { text: 'Du arbeitest häufig unkonzentriert und benötigst oft eine Aufforderung, um zu beginnen.', grades: [5, 6] },
         { text: 'Dein Arbeitstempo ist insgesamt eher langsam.', grades: [] }
     ]},
-    { key: 'aufgaben', label: 'Aufgaben & Ergebnisse', chips: [
-        { text: 'Du erledigst deine Aufgaben zuverlässig und ordentlich.', grades: [1, 2] },
-        { text: 'Du bearbeitest die Aufgaben meistens zuverlässig.', grades: [3] },
-        { text: 'Aufgaben werden häufig nicht in der vorgegebenen Zeit fertig bearbeitet.', grades: [4, 5] },
-        { text: 'Du hast ein ordentlich geführtes Heft abgegeben.', grades: [] }
-    ]},
-    { key: 'material', label: 'Material', chips: [
-        { text: 'Deine Materialien hast du zuverlässig dabei.', grades: [1, 2, 3] },
-        { text: 'Deine Materialien fehlen teilweise.', grades: [4] },
-        { text: 'Deine Materialien fehlen häufig zu Stundenbeginn.', grades: [5, 6] }
-    ]},
     { key: 'stoerung', label: 'Störungen & Ablenkung', chips: [
         { text: 'Du arbeitest ruhig und störst den Unterricht nicht.', grades: [1, 2] },
         { text: 'Gelegentlich gibt es kleinere Ablenkungen im Unterricht.', grades: [3] },
@@ -8207,6 +8196,11 @@ const ZN_QUESTIONS_DEFAULT = [
         { text: 'Deine Motivation ist insgesamt eher wechselhaft.', grades: [3, 4] },
         { text: 'Du zeigst insgesamt eher wenig Motivation.', grades: [5, 6] }
     ]},
+    { key: 'material', label: 'Material', chips: [
+        { text: 'Deine Materialien hast du zuverlässig dabei.', grades: [1, 2, 3] },
+        { text: 'Deine Materialien fehlen teilweise.', grades: [4] },
+        { text: 'Deine Materialien fehlen häufig zu Stundenbeginn.', grades: [5, 6] }
+    ]},
     { key: 'sonstiges', label: 'Sonstiges (optional)', chips: [
         { text: 'Du kannst Hilfe gut annehmen und umsetzen.', grades: [] },
         { text: 'Du holst dir bei Unklarheiten selbstständig Hilfe.', grades: [] },
@@ -8215,16 +8209,41 @@ const ZN_QUESTIONS_DEFAULT = [
     ]}
 ];
 
+// Einmalige Migration der gespeicherten Fragen: "Aufgaben & Ergebnisse" entfernen,
+// "Material" direkt vor "Sonstiges" einsortieren (Chip-Anpassungen bleiben erhalten).
+function _znMigrateQuestions(arr) {
+    if (localStorage.getItem('znQuestionsMig_v1') === '1') return arr;
+    let changed = false;
+    const before = arr.length;
+    arr = arr.filter(q => q && q.key !== 'aufgaben');
+    if (arr.length !== before) changed = true;
+    const mi = arr.findIndex(q => q.key === 'material');
+    const si = arr.findIndex(q => q.key === 'sonstiges');
+    if (mi !== -1 && si !== -1 && mi !== si - 1) {
+        const [m] = arr.splice(mi, 1);
+        const newSi = arr.findIndex(q => q.key === 'sonstiges');
+        arr.splice(newSi === -1 ? arr.length : newSi, 0, m);
+        changed = true;
+    }
+    try {
+        localStorage.setItem('znQuestionsMig_v1', '1');
+        if (changed) localStorage.setItem('znQuestions', JSON.stringify(arr));
+    } catch (e) { /* ignore */ }
+    return arr;
+}
+
 // Anpassbare Version (bearbeitbar/erweiterbar, gespeichert + synchronisiert)
 function _znLoadQuestions() {
+    let arr = null;
     try {
         const raw = localStorage.getItem('znQuestions');
         if (raw) {
             const p = JSON.parse(raw);
-            if (Array.isArray(p) && p.length) return p;
+            if (Array.isArray(p) && p.length) arr = p;
         }
     } catch (e) { /* ignore */ }
-    return JSON.parse(JSON.stringify(ZN_QUESTIONS_DEFAULT));
+    if (!arr) arr = JSON.parse(JSON.stringify(ZN_QUESTIONS_DEFAULT));
+    return _znMigrateQuestions(arr);
 }
 let ZN_QUESTIONS = _znLoadQuestions();
 function _znSaveQuestions() {
