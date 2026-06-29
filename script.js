@@ -4005,26 +4005,6 @@ function increaseHomeworkCounter(studentIndex, counterType) {
         newValue = classes[activeClassId].students[originalIndex].schulplaner;
     }
     
-    // Prüfen, ob ein Hinweis für Eintrag angezeigt werden soll
-    if ((counterType === 'homework' || counterType === 'materials') && [3,6,9,12,15].includes(newValue)) {
-        const counterName = counterType === 'homework' ? 'Hausaufgaben' : 'Material';
-        const student = classes[activeClassId].students[originalIndex];
-        setTimeout(() => {
-            swal({
-                title: `${student.name}: ${newValue}x ${counterName} vergessen`,
-                text: `Soll ein Eintrag für ${student.name} gegeben werden?`,
-                icon: "warning",
-                buttons: ["Nein", "Ja"],
-                dangerMode: false,
-            }).then((willGiveEntry) => {
-                if (willGiveEntry) {
-                    // Automatisch Eintrag erhöhen
-                    increaseHomeworkCounter(originalIndex, 'schulplaner');
-                }
-            });
-        }, 100); // Kleiner Timeout, um sicherzustellen, dass die UI aktualisiert ist
-    }
-    
     // Verlaufseintrag hinzufügen
     if (!classes[activeClassId].students[originalIndex].hwHistory) {
         classes[activeClassId].students[originalIndex].hwHistory = [];
