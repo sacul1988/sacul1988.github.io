@@ -1856,8 +1856,11 @@ function renderTagesprotokollTile() {
             const mat = (student.hwHistory || []).filter(e => e.type === 'materials' && (e.date || '').startsWith(dateStr)).length;
             const negEntry = (student.dailyNegativeHistory || []).find(e => e.date === dateStr);
             const stoer = negEntry ? (negEntry.count || 0) : 0;
+            // Gesamtzähler aus dem Sitzplan (insgesamt vergessen)
+            const hwTotal = typeof student.homework === 'number' ? student.homework : 0;
+            const matTotal = typeof student.materials === 'number' ? student.materials : 0;
             if (hw > 0 || mat > 0 || stoer > 0) {
-                incidents.push({ studentIdx, name: student.name, hw, mat, stoer });
+                incidents.push({ studentIdx, name: student.name, hw, mat, stoer, hwTotal, matTotal });
             }
         });
         if (incidents.length > 0) classesWithIncidents.push({ classIdx, name: cls.name, incidents });
@@ -1871,15 +1874,15 @@ function renderTagesprotokollTile() {
     let html = '';
     classesWithIncidents.forEach(({ classIdx, name, incidents }) => {
         html += `<div class="tp-class-group"><div class="tp-class-name">${escapeHtml(name)}</div><div class="tp-students">`;
-        incidents.forEach(({ studentIdx, name: sName, hw, mat, stoer }) => {
+        incidents.forEach(({ studentIdx, name: sName, hw, mat, stoer, hwTotal, matTotal }) => {
             const mkPill = (type, label) => {
                 const key = classIdx + '_' + studentIdx + '_' + type;
                 const done = !!dateAbgehakt[key];
                 return `<span class="tp-pill${done ? ' tp-pill-done' : ''}" onclick="toggleTagesprotokollAbgehakt(${classIdx},${studentIdx},'${dateStr}','${type}')">${label}</span>`;
             };
             let pills = '';
-            if (hw > 0) pills += mkPill('hw', 'Hausaufgaben');
-            if (mat > 0) pills += mkPill('mat', 'Material');
+            if (hw > 0) pills += mkPill('hw', `Hausaufgaben&nbsp;${hwTotal}`);
+            if (mat > 0) pills += mkPill('mat', `Material&nbsp;${matTotal}`);
             if (stoer > 0) pills += mkPill('stoer', `Störung&nbsp;${stoer}`);
             html += `<div class="tp-student-row">
                 <span class="tp-name">${escapeHtml(sName)}</span>
