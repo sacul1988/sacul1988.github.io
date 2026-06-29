@@ -306,10 +306,9 @@ function showPage(page, classId = null, shouldPushState = true) {
             activeClassId = classId;
             localStorage.setItem('activeClassId', classId);
             const className = classes[classId].name;
-            breadcrumbActive.innerHTML = `
-                <span class="separator">/</span>
-                <span>${className}</span>
-            `;
+            // Titel nicht mehr oben in der Leiste, sondern in den Modul-Headern
+            breadcrumbActive.innerHTML = '';
+            document.querySelectorAll('.js-class-title').forEach(el => { el.textContent = className; });
 
             // Standardmodus für Sitzplan auf Bewerten setzen
             if (classes[classId].sitzplan) {
@@ -3329,15 +3328,10 @@ async function saveEditedClass() {
         saveData();
         renderClassesGrid();
         
-        // Falls aktive Klasse, Breadcrumb aktualisieren
+        // Falls aktive Klasse, Titel in den Modul-Headern aktualisieren
         if (currentPage === 'class' && activeClassId === classToEditId) {
-            const breadcrumbActive = safeGetElement('breadcrumb-active');
-            if (breadcrumbActive) {
-                breadcrumbActive.innerHTML = `
-                    <span class="separator">/</span>
-                    <span>${classes[classToEditId].name}</span>
-                `;
-            }
+            const newName = classes[classToEditId].name;
+            document.querySelectorAll('.js-class-title').forEach(el => { el.textContent = newName; });
         }
     }
     
