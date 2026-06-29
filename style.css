@@ -4375,7 +4375,7 @@ html.modal-open, body.modal-open {
 
 .zt-plan-course {
     border: 1px solid #d6dce6;
-    border-left: 6px solid #d6dce6;
+    border-left: 6px solid #94a3b8;
     border-radius: var(--border-radius);
     background: #fff;
     overflow: hidden;
@@ -4389,36 +4389,36 @@ html.modal-open, body.modal-open {
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
-    background: #edf0f6;
-    border-bottom: 1px solid #dbe1ea;
+    background: #e2e8f0;
+    border-bottom: 1px solid #cbd5e1;
 }
 
 /* Status der Kurs-Karte deutlich erkennbar */
 /* OFFEN (zuständig, noch nicht fertig) – orange */
 .zt-plan-course.zt-course-open {
-    border-left-color: #f59e0b;
+    border-left-color: #ea580c;
 }
 .zt-plan-course.zt-course-open .zt-plan-course-head {
-    background: #fff7ed;
-    border-bottom-color: #fcd9a5;
+    background: #ffedd5;
+    border-bottom-color: #fdba74;
 }
-/* FERTIG (alle erledigt) – grün, leicht zurückgenommen */
+/* FERTIG (alle erledigt) – grün */
 .zt-plan-course.zt-course-done {
-    border-left-color: var(--success-color, #22c55e);
-    opacity: 0.82;
+    border-left-color: #16a34a;
+    opacity: 0.85;
 }
 .zt-plan-course.zt-course-done .zt-plan-course-head {
-    background: #f0fdf4;
-    border-bottom-color: #bbf7d0;
+    background: #dcfce7;
+    border-bottom-color: #86efac;
 }
 /* NICHT ZUSTÄNDIG (jemand anderes zuständig) – grün wie "Fertig" */
 .zt-plan-course.zt-course-delegated {
-    border-left-color: var(--success-color, #22c55e);
-    opacity: 0.82;
+    border-left-color: #16a34a;
+    opacity: 0.85;
 }
 .zt-plan-course.zt-course-delegated .zt-plan-course-head {
-    background: #f0fdf4;
-    border-bottom-color: #bbf7d0;
+    background: #dcfce7;
+    border-bottom-color: #86efac;
 }
 .zt-plan-course-title {
     flex: 1;
