@@ -1633,8 +1633,9 @@ function loadData() {
                     // Sicherstellen, dass alle Schüler die erweiterten Eigenschaften haben
                     if (cls.students) {
                         cls.students.forEach(student => {
-                            if (!student.homework) student.homework = 0;
-                            if (!student.materials) student.materials = 0;
+                            // Zähler müssen Zahlen sein – korrupte Objekt-Werte zurücksetzen
+                            if (typeof student.homework !== 'number') student.homework = 0;
+                            if (typeof student.materials !== 'number') student.materials = 0;
 
                             if (!student.isExpanded) student.isExpanded = false; // Für Noten-Tab
 
@@ -4028,14 +4029,17 @@ function increaseHomeworkCounter(studentIndex, counterType) {
         const statsMaterials = safeGetElement(`stats-materials-${originalIndex}`);
         const statsSchulplaner = safeGetElement(`stats-schulplaner-${originalIndex}`);
         
+        const _hw = classes[activeClassId].students[originalIndex].homework;
+        const _mat = classes[activeClassId].students[originalIndex].materials;
+        const _sp = classes[activeClassId].students[originalIndex].schulplaner;
         if (statsHomework) {
-            statsHomework.textContent = classes[activeClassId].students[originalIndex].homework || 0;
+            statsHomework.textContent = typeof _hw === 'number' ? _hw : 0;
         }
         if (statsMaterials) {
-            statsMaterials.textContent = classes[activeClassId].students[originalIndex].materials || 0;
+            statsMaterials.textContent = typeof _mat === 'number' ? _mat : 0;
         }
         if (statsSchulplaner) {
-            statsSchulplaner.textContent = classes[activeClassId].students[originalIndex].schulplaner || 0;
+            statsSchulplaner.textContent = typeof _sp === 'number' ? _sp : 0;
         }
     }
     
@@ -4283,15 +4287,15 @@ function deleteHWHistoryEntry(studentIndex, entryId) {
                 const statsSchulplaner = safeGetElement(`stats-schulplaner-${studentIndex}`);
                 
                 if (statsHomework) {
-                    statsHomework.textContent = student.homework || 0;
+                    statsHomework.textContent = typeof student.homework === 'number' ? student.homework : 0;
                 }
                 if (statsMaterials) {
-                    statsMaterials.textContent = student.materials || 0;
+                    statsMaterials.textContent = typeof student.materials === 'number' ? student.materials : 0;
                 }
                 if (statsSchulplaner) {
-                    statsSchulplaner.textContent = student.schulplaner || 0;
+                    statsSchulplaner.textContent = typeof student.schulplaner === 'number' ? student.schulplaner : 0;
                 }
-                
+
                 // Schulplaner-Punkte im Sitzplan aktualisieren
                 updateSchulplanerDotsForStudent(studentIndex);
                 
