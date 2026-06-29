@@ -268,6 +268,25 @@ function getGradeColor(grade) {
 
 // ===== NAVIGATION UND UI =====
 
+// Setzt in allen Modul-Headern den Titel "Klassenname · Tab".
+// Auf Mobile wird der Tab-Teil per CSS (.ct-module) ausgeblendet -> nur Klassenname.
+function setClassModuleTitles(className) {
+    document.querySelectorAll('.js-class-title').forEach(el => {
+        const mod = el.getAttribute('data-module-title') || '';
+        el.innerHTML = '';
+        const cls = document.createElement('span');
+        cls.className = 'ct-class';
+        cls.textContent = className;
+        el.appendChild(cls);
+        if (mod) {
+            const m = document.createElement('span');
+            m.className = 'ct-module';
+            m.textContent = ' · ' + mod;
+            el.appendChild(m);
+        }
+    });
+}
+
 // Seitennavigation
 function showPage(page, classId = null, shouldPushState = true) {
     // Sitzplan-Vollbild beim Seitenwechsel sicher verlassen
@@ -308,7 +327,7 @@ function showPage(page, classId = null, shouldPushState = true) {
             const className = classes[classId].name;
             // Titel nicht mehr oben in der Leiste, sondern in den Modul-Headern
             breadcrumbActive.innerHTML = '';
-            document.querySelectorAll('.js-class-title').forEach(el => { el.textContent = className; });
+            setClassModuleTitles(className);
 
             // Standardmodus für Sitzplan auf Bewerten setzen
             if (classes[classId].sitzplan) {
@@ -3330,8 +3349,7 @@ async function saveEditedClass() {
         
         // Falls aktive Klasse, Titel in den Modul-Headern aktualisieren
         if (currentPage === 'class' && activeClassId === classToEditId) {
-            const newName = classes[classToEditId].name;
-            document.querySelectorAll('.js-class-title').forEach(el => { el.textContent = newName; });
+            setClassModuleTitles(classes[classToEditId].name);
         }
     }
     

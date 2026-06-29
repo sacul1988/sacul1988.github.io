@@ -111,6 +111,11 @@ body {
     letter-spacing: -0.02em;
 }
 
+/* Klassen-Header: "Klassenname · Tab" – auf Mobile nur Klassenname */
+@media (max-width: 599px) {
+    .js-class-title .ct-module { display: none; }
+}
+
 #noten-module .card-header > div {
     display: flex;
     gap: 8px;

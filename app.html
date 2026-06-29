@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=3.35">
+    <link rel="stylesheet" href="style.css?v=3.36">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -340,7 +340,7 @@
                     <div id="schueler-module" class="module">
                         <div class="card">
                             <div class="card-header">
-                                <h2 class="js-class-title">Schülerliste</h2>
+                                <h2 class="js-class-title" data-module-title="Schüler">Schülerliste</h2>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
                                         <button class="btn btn-secondary btn-icon" onclick="showExportStudentsModal()">
@@ -385,7 +385,7 @@
                     <div id="sitzplan-module" class="module" style="display: none;">
                         <div class="card">
                                 <div class="card-header">
-                                    <h2 class="js-class-title">Sitzplan</h2>
+                                    <h2 class="js-class-title" data-module-title="Sitzplan">Sitzplan</h2>
                                     <div class="card-header-actions">
                                         <div class="desktop-header-buttons">
                                             <button class="btn btn-secondary btn-icon" onclick="exportSitzplanAsJPEG()" title="Sitzplan exportieren">
@@ -429,7 +429,7 @@
                         <!-- Schülerliste Card first -->
                         <div class="card">
                             <div class="card-header">
-                                <h2 class="js-class-title">Schriftlich</h2>
+                                <h2 class="js-class-title" data-module-title="Noten">Schriftlich</h2>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
 <button class="btn btn-primary btn-icon" onclick="showAddProjectToAllModal()">
@@ -492,7 +492,7 @@
                     <div id="planung-module" class="module" style="display: none;">
                         <div class="card">
                             <div class="card-header">
-                                <h2 class="js-class-title">Planung</h2>
+                                <h2 class="js-class-title" data-module-title="Planung">Planung</h2>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
                                         <button class="btn btn-secondary btn-icon" id="planung-unterrichtstage-btn" style="display: none;" onclick="showModal('unterrichtstage-modal')">
@@ -525,7 +525,7 @@
                     <div id="zeugnis-module" class="module" style="display: none;">
                         <div class="card">
                             <div class="card-header">
-                                <h2 class="js-class-title">Zeugnis</h2>
+                                <h2 class="js-class-title" data-module-title="Zeugnis">Zeugnis</h2>
                                 <div class="card-header-actions">
                                     <div class="desktop-header-buttons">
                                         <button class="btn btn-primary btn-icon" id="zeugnis-sitzplan-toggle" onclick="toggleZeugnisSitzplanView()">
@@ -2193,7 +2193,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=3.35"></script>
+    <script src="script.js?v=3.36"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
