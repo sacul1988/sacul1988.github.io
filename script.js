@@ -9556,10 +9556,10 @@ function exportNotenliste() {
                 * { box-sizing: border-box; }
                 html, body { height: 100%; }
                 body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; margin: 0; }
-                h1 { font-size: 16px; margin: 0 0 8px; }
+                h1 { font-size: 18px; margin: 0 0 10px; }
                 table { width: 100%; border-collapse: collapse; }
-                th, td { text-align: left; padding: 4px 10px; border-bottom: 1px solid #cbd5e1; font-size: 13px; line-height: 1.2; }
-                th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; border-bottom: 2px solid #1f2937; padding-bottom: 5px; }
+                th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #cbd5e1; font-size: 15px; line-height: 1.25; }
+                th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; border-bottom: 2px solid #1f2937; padding-bottom: 6px; }
                 td.nr { width: 36px; color: #64748b; }
                 td.no { width: 80px; text-align: center; font-weight: 700; }
                 th.no { text-align: center; }
