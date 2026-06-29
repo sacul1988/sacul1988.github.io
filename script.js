@@ -11997,8 +11997,8 @@ function ztPlanungRenderInline() {
 function ztPlanungRenderHeaderSummary(total, done, open) {
     const summary = document.getElementById('zt-planung-header-summary');
     if (!summary) return;
-    const openLabel = total ? `${open} offen` : '0 offen';
-    summary.innerHTML = `<span class="zt-plan-inline-open">${openLabel}</span>`;
+    // "X offen"-Badge wird nicht mehr angezeigt
+    summary.innerHTML = '';
 }
 
 function ztPlanungPrintResponsibleList() {
