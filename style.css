@@ -4668,16 +4668,10 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     gap: 8px;
 }
 .topbar-title .separator { display: none; }
-.topbar-title:empty::before {
-    content: 'Startseite';
-}
 
 @media (max-width: 599px) {
     .topbar-title {
         font-size: 1.2rem;
-    }
-    .topbar-title:empty::before {
-        content: 'Start';
     }
 }
 
