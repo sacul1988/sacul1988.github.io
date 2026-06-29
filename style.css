@@ -4833,9 +4833,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 /* Reparentete Module/Panels: Anzeige wird per JS gesteuert */
 .tool-window-panel { display: none; }
 .tool-window-panel.active { display: block; }
-/* Überschrift im card-header ausblenden – steht bereits im Tool-Topbar */
-.tool-window-body .card-header h2 { display: none; }
-.tool-window-body .card-header { justify-content: flex-end; }
+/* Titel steht jetzt im card-header (Button-Zeile), nicht mehr oben in der Leiste */
 
 /* Kalender-Fenster-Kopf */
 .kalender-window-head {
