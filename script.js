@@ -11829,11 +11829,15 @@ function ztPlanungCounts() {
 }
 
 function ztPlanungUpdateBadge() {
-    const badge = document.getElementById('zt-planung-badge');
-    if (!badge) return;
     const { open } = ztPlanungCounts();
-    if (open > 0) { badge.textContent = open; badge.style.display = ''; }
-    else { badge.style.display = 'none'; }
+    const setBadge = (id) => {
+        const badge = document.getElementById(id);
+        if (!badge) return;
+        if (open > 0) { badge.textContent = open; badge.style.display = ''; }
+        else { badge.style.display = 'none'; }
+    };
+    setBadge('zt-planung-badge');        // Dashboard-Kachel
+    setBadge('zt-planung-open-badge');   // Planung-Button in der Toolbar
 }
 
 // Wird vom Cloud-Sync (app.html) aufgerufen, wenn die Planung von einem anderen Gerät aktualisiert wurde.
