@@ -1723,6 +1723,53 @@ html.login-active, body.login-active {
 .app-dialog-buttons .btn {
     min-width: 120px;
 }
+/* Export-Auswahl: zwei Optionskarten (Icon + Titel + Beschreibung) */
+.export-choice-dialog .app-dialog-buttons {
+    gap: 14px;
+    flex-wrap: nowrap;
+    margin-top: 4px;
+}
+.export-choice-dialog .app-dialog-buttons .export-opt {
+    flex: 1 1 0;
+    min-width: 0;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 20px 14px 18px;
+    background: #fff;
+    color: var(--dark-color);
+    border: 1.5px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: none;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.export-choice-dialog .app-dialog-buttons .export-opt:hover,
+.export-choice-dialog .app-dialog-buttons .export-opt:focus-visible {
+    border-color: var(--primary-color);
+    background: #f4f6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(67, 97, 238, 0.16);
+    outline: none;
+}
+.export-choice-dialog .app-dialog-buttons .export-opt i {
+    font-size: 1.7rem;
+    color: var(--primary-color);
+    margin-bottom: 2px;
+}
+.export-choice-dialog .export-opt-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+.export-choice-dialog .export-opt-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+}
 /* Klassen-Kachel: Aktions-Symbole ohne Rahmen/Hintergrund – nur das weiße Icon */
 .class-card[data-tile-key^="class:"] .tile-header-action {
     width: auto;

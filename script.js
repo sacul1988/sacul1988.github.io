@@ -9402,9 +9402,18 @@ async function exportAllStudentCards() {
     }
     const choice = await swal({
         title: 'Was möchtest du exportieren?',
+        dialogClass: 'export-choice-dialog',
         buttons: {
-            zeugnisse: { text: 'Zeugnisse', value: 'zeugnisse' },
-            notenliste: { text: 'Notenliste', value: 'notenliste' }
+            zeugnisse: {
+                value: 'zeugnisse',
+                className: 'export-opt',
+                html: '<i class="fas fa-file-lines"></i><span class="export-opt-title">Zeugnisse</span><span class="export-opt-desc">Vollständige Karten,<br>eine pro Seite</span>'
+            },
+            notenliste: {
+                value: 'notenliste',
+                className: 'export-opt',
+                html: '<i class="fas fa-list-ol"></i><span class="export-opt-title">Notenliste</span><span class="export-opt-desc">Namen mit Endnoten<br>als Übersicht</span>'
+            }
         }
     });
     if (choice === 'zeugnisse') exportZeugnisseCards();
