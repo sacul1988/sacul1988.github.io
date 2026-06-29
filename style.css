@@ -5466,11 +5466,14 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     font-size: 0.82rem;
     font-weight: 700;
 }
-.znq-questions { padding: 12px 20px; overflow-y: auto; }
+/* Feste Höhe, damit das Modal über alle 7 Schritte gleich groß bleibt.
+   Label bleibt oben, das Notizfeld unten; nur die Chip-Liste scrollt. */
+.znq-questions { padding: 12px 20px; height: 56vh; display: flex; flex-direction: column; overflow: hidden; }
 .znq-note {
     width: 100%;
     box-sizing: border-box;
     margin-top: 10px;
+    flex-shrink: 0;
     border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 9px 12px;
@@ -5479,7 +5482,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     resize: vertical;
 }
 .znq-note:focus { outline: none; border-color: var(--primary-color); }
-.znq-q { margin-bottom: 14px; }
+.znq-q { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
 .znq-q-label {
     font-size: 0.8rem;
     font-weight: 700;
@@ -5488,7 +5491,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     letter-spacing: 0.03em;
     margin-bottom: 6px;
 }
-.znq-chips { display: flex; flex-direction: column; gap: 8px; }
+.znq-chips { display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 2px; }
 .znq-chip {
     display: flex;
     align-items: center;
