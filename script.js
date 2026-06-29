@@ -6304,35 +6304,28 @@ function renderSitzplanModule() {
     const currentMode = cls.sitzplan.currentMode || 'evaluation';
     
     if (workspace) {
-        if (currentMode === 'edit') {
-            workspace.classList.remove('evaluation-mode');
-            workspace.classList.remove('oral-mode');
-            workspace.classList.remove('work-mode');
-        } else if (currentMode === 'evaluation') {
-            workspace.classList.add('evaluation-mode');
-            workspace.classList.remove('oral-mode');
-            workspace.classList.remove('work-mode');
-        } else if (currentMode === 'oral') {
-            workspace.classList.remove('evaluation-mode');
-            workspace.classList.add('oral-mode');
-            workspace.classList.remove('work-mode');
-        } else if (currentMode === 'work') {
-            workspace.classList.remove('evaluation-mode');
-            workspace.classList.remove('oral-mode');
-            workspace.classList.add('work-mode');
-        }
+        workspace.classList.remove('evaluation-mode', 'oral-mode', 'work-mode', 'note-mode');
+        if (currentMode === 'evaluation') workspace.classList.add('evaluation-mode');
+        else if (currentMode === 'oral') workspace.classList.add('oral-mode');
+        else if (currentMode === 'work') workspace.classList.add('work-mode');
+        else if (currentMode === 'note') workspace.classList.add('note-mode');
     }
-    
+
     if (editBtn) {
         editBtn.classList.toggle('active', currentMode === 'edit');
     }
-    
+
     if (evaluationBtn) {
         evaluationBtn.classList.toggle('active', currentMode === 'evaluation');
     }
-    
+
     if (workBtn) {
         workBtn.classList.toggle('active', currentMode === 'work');
+    }
+
+    const noteBtn = safeGetElement('note-mode-btn');
+    if (noteBtn) {
+        noteBtn.classList.toggle('active', currentMode === 'note');
     }
 }
 
@@ -6412,40 +6405,86 @@ function setMode(mode) {
     const workBtn = safeGetElement('work-mode-btn');
     
     if (workspace) {
-        if (mode === 'edit') {
-            workspace.classList.remove('evaluation-mode');
-            workspace.classList.remove('oral-mode');
-            workspace.classList.remove('work-mode');
-        } else if (mode === 'evaluation') {
-            workspace.classList.add('evaluation-mode');
-            workspace.classList.remove('oral-mode');
-            workspace.classList.remove('work-mode');
-        } else if (mode === 'oral') {
-            workspace.classList.remove('evaluation-mode');
-            workspace.classList.add('oral-mode');
-            workspace.classList.remove('work-mode');
-        } else if (mode === 'work') {
-            workspace.classList.remove('evaluation-mode');
-            workspace.classList.remove('oral-mode');
-            workspace.classList.add('work-mode');
-        }
+        workspace.classList.remove('evaluation-mode', 'oral-mode', 'work-mode', 'note-mode');
+        if (mode === 'evaluation') workspace.classList.add('evaluation-mode');
+        else if (mode === 'oral') workspace.classList.add('oral-mode');
+        else if (mode === 'work') workspace.classList.add('work-mode');
+        else if (mode === 'note') workspace.classList.add('note-mode');
     }
-    
+
     if (editBtn) {
         editBtn.classList.toggle('active', mode === 'edit');
     }
-    
+
     if (evaluationBtn) {
         evaluationBtn.classList.toggle('active', mode === 'evaluation');
     }
-    
+
     if (workBtn) {
         workBtn.classList.toggle('active', mode === 'work');
     }
-    
+
+    const noteBtn = safeGetElement('note-mode-btn');
+    if (noteBtn) {
+        noteBtn.classList.toggle('active', mode === 'note');
+    }
+
     // Tische neu rendern, um Punkte basierend auf Modus anzuzeigen
     renderSitzplanModule();
 }
+
+// Schnelle Notiz aus dem Sitzplan: wird als neuer Stichpunkt an das Beobachtungs-
+// feld des Schülers im Zeugnis-Tab angehängt.
+function openSitzplanNoteModal(studentIndex) {
+    const student = classes[activeClassId]?.students?.[studentIndex];
+    if (!student) return;
+
+    const existing = (student.zeugnisBegruendung || '').trim();
+    const existingBullets = existing
+        ? existing.split('\n').map(l => l.replace(/^•\s*/, '').trim()).filter(Boolean)
+        : [];
+    const existingHtml = existingBullets.length
+        ? '<ul class="sp-note-existing">' + existingBullets.map(b => `<li>${escapeHtml(b)}</li>`).join('') + '</ul>'
+        : '<div class="sp-note-empty">Noch keine Notizen.</div>';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'sp-note-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+    const box = document.createElement('div');
+    box.className = 'sp-note-box';
+    box.innerHTML = `
+        <div class="sp-note-head">
+            <span class="sp-note-title">Notiz für ${escapeHtml(student.name)}</span>
+            <button class="sp-note-close" title="Schließen"><i class="fas fa-times"></i></button>
+        </div>
+        ${existingHtml}
+        <textarea class="sp-note-input" rows="3" placeholder="Notiz eintippen…"></textarea>
+        <button class="btn btn-primary btn-block sp-note-save"><i class="fas fa-plus"></i> Als Stichpunkt hinzufügen</button>
+    `;
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    const input = box.querySelector('.sp-note-input');
+    const save = () => {
+        const note = (input.value || '').trim();
+        if (!note) { overlay.remove(); return; }
+        const prev = (student.zeugnisBegruendung || '').trim();
+        const bullet = '• ' + note;
+        student.zeugnisBegruendung = prev ? prev + '\n' + bullet : bullet;
+        saveData(studentIndex);
+        overlay.remove();
+        if (typeof showToast === 'function') showToast(`Notiz für ${student.name} gespeichert`);
+    };
+    box.querySelector('.sp-note-save').onclick = save;
+    box.querySelector('.sp-note-close').onclick = () => overlay.remove();
+    // Enter speichert, Shift+Enter macht eine neue Zeile
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save(); }
+    });
+    setTimeout(() => input.focus(), 30);
+}
+window.openSitzplanNoteModal = openSitzplanNoteModal;
 
 // Sitzplan-Vollbild (In-App-Overlay) – funktioniert auch auf iPhone/iPad,
 // wo echtes Element-Vollbild (Fullscreen-API) nicht unterstützt wird.
@@ -6736,10 +6775,20 @@ function renderDesk(desk) {
         }
     });
     
+    // Klick im Notiz-Modus → Notiz-Modal öffnen
+    deskElement.addEventListener('click', (e) => {
+        if (isDragging) return;
+        const currentMode = classes[activeClassId]?.sitzplan?.currentMode;
+        if (currentMode !== 'note') return;
+        if (desk.studentIndex !== null && desk.studentIndex !== undefined) {
+            openSitzplanNoteModal(desk.studentIndex);
+        }
+    });
+
     // Klick für Mündlich-Modus (nur +) oder Arbeitsphase (nur -)
     deskElement.addEventListener('click', (e) => {
         if (isDragging) return; // Verhindere Klick während Drag
-        
+
         const currentMode = classes[activeClassId]?.sitzplan?.currentMode;
         if (currentMode !== 'oral' && currentMode !== 'work') return;
         

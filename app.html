@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=3.50">
+    <link rel="stylesheet" href="style.css?v=3.51">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -407,6 +407,9 @@
                 </button>
                 <button class="btn btn-primary btn-icon" id="evaluation-mode-btn" onclick="setMode('evaluation')">
                     <i class="fas fa-paperclip"></i> <span class="btn-text">Material</span>
+                </button>
+                <button class="btn btn-primary btn-icon" id="note-mode-btn" onclick="setMode('note')">
+                    <i class="fas fa-note-sticky"></i> <span class="btn-text">Notiz</span>
                 </button>
             </div>                            <div class="sitzplan-container">
                                 <div class="main-content">
@@ -2194,7 +2197,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=3.50"></script>
+    <script src="script.js?v=3.51"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
