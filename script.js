@@ -7902,7 +7902,6 @@ function renderZeugnisModule() {
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 8px;">
                 <h3 style="margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(student.name)}</h3>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button class="btn-back-to-top-circle${notesActive ? ' notes-btn-active' : ''}" onclick="event.stopPropagation(); openNotesModal(${index})" title="Notizen"><i class="fas fa-pen"></i></button>
                     <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); jumpToStudentInSitzplan(${index})" title="Im Sitzplan zeigen"><i class="fas fa-chair"></i></button>
                     <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);" title="Nach oben"><i class="fas fa-arrow-up"></i></button>
                     <button class="btn-back-to-top-circle" onclick="event.stopPropagation(); openSearchModal('zeugnis')" title="Suchen"><i class="fas fa-search"></i></button>
