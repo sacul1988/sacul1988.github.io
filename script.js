@@ -10649,22 +10649,35 @@ function renderPlanungCalendar() {
                 // Termine sammeln (alle Termine des Tages, keine Ausblendung im Kalender)
                 const termine = AppState.termine || [];
                 const dayTermine = termine.filter(t => terminCoversDate(t, dateStr));
+                const multiTermine = dayTermine.filter(t => terminEndDate(t) !== t.date);
+                const singleTermine = dayTermine.filter(t => terminEndDate(t) === t.date);
 
-                // HTML für Termine (mehrtägige bekommen eine eigene Markierung)
-                let appointmentsHtml = '';
-                if (dayTermine.length > 0) {
-                    appointmentsHtml = `<div class="calendar-day-appointments">` +
-                        dayTermine.map(t => {
-                            const multi = terminEndDate(t) !== t.date;
-                            const cls = 'calendar-day-appointment-badge' + (multi ? ' calendar-day-appointment-badge-multi' : '');
-                            const titleAttr = multi ? `${escapeHtml(t.title || '')} (${formatTerminRange(t)})` : escapeHtml(t.title || '');
-                            return `<span class="${cls}" title="${titleAttr}">${escapeHtml(t.title || '')}</span>`;
-                        }).join('') +
-                        `</div>`;
+                // Mehrtägige Termine: ganzen Zeitraum orange einfärben (statt Name auf jedem Tag)
+                if (multiTermine.length > 0) {
+                    rowClasses.push('calendar-day-multi');
+                    if (dateStr === multiTermine[0].date) rowClasses.push('calendar-day-multi-start');
+                    if (multiTermine.some(t => dateStr === terminEndDate(t))) rowClasses.push('calendar-day-multi-end');
                 }
+
+                // Name nur am Starttag des mehrtägigen Termins; eintägige wie bisher
+                const badges = [];
+                multiTermine.forEach(t => {
+                    if (dateStr === t.date) {
+                        badges.push(`<span class="calendar-day-appointment-badge calendar-day-appointment-badge-multi" title="${escapeHtml(t.title || '')} (${formatTerminRange(t)})">${escapeHtml(t.title || '')}</span>`);
+                    }
+                });
+                singleTermine.forEach(t => {
+                    badges.push(`<span class="calendar-day-appointment-badge" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</span>`);
+                });
+                const appointmentsHtml = badges.length ? `<div class="calendar-day-appointments">${badges.join('')}</div>` : '';
+
+                // Tooltip auf der Zeile, damit man auch an Tagen ohne Namen sieht, was los ist
+                const rowTitle = multiTermine.length > 0
+                    ? ` title="${multiTermine.map(t => escapeHtml(t.title || '') + ' (' + formatTerminRange(t) + ')').join(', ')}"`
+                    : '';
                 
                 daysHtml += `
-                    <div class="calendar-day-row ${rowClasses.join(' ')}" onclick="event.stopPropagation(); openCalendarDayDetails('${dateStr}')">
+                    <div class="calendar-day-row ${rowClasses.join(' ')}"${rowTitle} onclick="event.stopPropagation(); openCalendarDayDetails('${dateStr}')">
                         <div class="calendar-day-label">
                             <span class="day-num">${d}</span>
                             <span class="day-dow">${weekdayInitials[dow]}</span>
