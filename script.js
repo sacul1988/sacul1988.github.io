@@ -724,17 +724,28 @@ function closeToolWindowOnBackdrop(event) {
 }
 
 // Kopfzeile: Archiv + Abmelden hinter dem "<"-Button ein-/ausklappen
-function toggleTopbarMore() {
+let _topbarMoreTimer = null;
+function setTopbarMore(open) {
     const more = document.getElementById('topbar-more');
     const toggle = document.getElementById('topbar-more-toggle');
     if (!more) return;
-    const open = more.classList.toggle('open');
+    more.classList.toggle('open', open);
     if (toggle) {
         const ic = toggle.querySelector('i');
         if (ic) ic.className = open ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
         toggle.setAttribute('aria-label', open ? 'Weniger anzeigen' : 'Mehr anzeigen');
         toggle.title = open ? 'Weniger anzeigen' : 'Mehr anzeigen';
     }
+    // Bei geöffnetem Bereich nach 20 s automatisch wieder einklappen
+    if (_topbarMoreTimer) { clearTimeout(_topbarMoreTimer); _topbarMoreTimer = null; }
+    if (open) {
+        _topbarMoreTimer = setTimeout(() => { setTopbarMore(false); }, 20000);
+    }
+}
+function toggleTopbarMore() {
+    const more = document.getElementById('topbar-more');
+    if (!more) return;
+    setTopbarMore(!more.classList.contains('open'));
 }
 window.toggleTopbarMore = toggleTopbarMore;
 
