@@ -10748,6 +10748,12 @@ function setEndDatePickerMin(minStr) {
     const fp = ensureEndDatePicker();
     if (fp) fp.set('minDate', minStr || null);
 }
+// Voreinstellung: aktuelles Datum, aber nie vor dem Starttag (sonst gesperrt).
+// Da "Enddatum <= Starttag" als eintägig gilt, löst das keinen mehrtägigen Termin aus.
+function endDatePickerDefaultValue() {
+    const start = AppState.activeCalendarDay || todayStr;
+    return todayStr >= start ? todayStr : start;
+}
 
 function openCalendarDayDetails(dateStr) {
     if (activeModule !== 'planung' && window._activeToolWindow !== 'kalender') return;
@@ -10771,7 +10777,7 @@ function openCalendarDayDetails(dateStr) {
     if (timeEndEl) timeEndEl.value = '';
     ensureEndDatePicker();
     setEndDatePickerMin(dateStr);
-    setEndDatePickerValue('');
+    setEndDatePickerValue(endDatePickerDefaultValue());
 
     AppState.timeRangeStage = 1;
 
@@ -10869,7 +10875,7 @@ function addCalendarDayTermin() {
     titleInput.value = '';
     if (timeStartInput) timeStartInput.value = '';
     if (timeEndInput) timeEndInput.value = '';
-    setEndDatePickerValue('');
+    setEndDatePickerValue(endDatePickerDefaultValue());
     
     AppState.timeRangeStage = 1;
     
@@ -11191,7 +11197,7 @@ function cancelEditCalendarDayTermin() {
     if (titleInput) titleInput.value = '';
     if (startInput) startInput.value = '';
     if (endInput) endInput.value = '';
-    setEndDatePickerValue('');
+    setEndDatePickerValue(endDatePickerDefaultValue());
 
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
