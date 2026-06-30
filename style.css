@@ -3330,24 +3330,24 @@ div.notes-textarea:empty::before {
 }
 /* Mehrtägiger Termin (z. B. Ferien): ganzer Zeitraum orange eingefärbt */
 .calendar-day-row.calendar-day-multi {
-    background: rgba(251, 191, 36, 0.12);
+    background: rgba(67, 97, 238, 0.10);
 }
 .calendar-day-row.calendar-day-multi-start {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
-    box-shadow: inset 0 3px 0 0 #f59e0b;
+    box-shadow: inset 0 3px 0 0 var(--primary-color);
 }
 .calendar-day-row.calendar-day-multi-end {
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
-    box-shadow: inset 0 -3px 0 0 #f59e0b;
+    box-shadow: inset 0 -3px 0 0 var(--primary-color);
 }
 .calendar-day-row.calendar-day-multi-start.calendar-day-multi-end {
-    box-shadow: inset 0 3px 0 0 #f59e0b, inset 0 -3px 0 0 #f59e0b;
+    box-shadow: inset 0 3px 0 0 var(--primary-color), inset 0 -3px 0 0 var(--primary-color);
 }
-/* Name des mehrtägigen Termins (nur am Starttag) in Orange */
+/* Name des mehrtägigen Termins (nur am Starttag) in Blau (Farbschema) */
 .calendar-day-appointment-badge-multi {
-    color: #b45309;
+    color: var(--primary-color);
     background: none;
     border: none;
     padding: 2px 0;
