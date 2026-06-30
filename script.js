@@ -11584,11 +11584,38 @@ async function ztCallAPI(messages) {
     return await window.callGenerateZeugnistext(ZtState.currentTyp, messages);
 }
 
+// Holt aus der KI-Antwort nur den eigentlichen Zeugnistext.
+// Falls (z. B. wegen fehlerhaftem Backend-Parsing) das rohe JSON
+// {"status":...,"abwaegung":...,"text":"..."} durchkommt, wird das
+// "text"-Feld herausgezogen – auch wenn das JSON nicht ganz valide ist.
+function ztExtractApiText(payload) {
+    if (payload == null) return '';
+    if (typeof payload === 'object') {
+        return typeof payload.text === 'string' ? ztExtractApiText(payload.text) : '';
+    }
+    let s = String(payload).trim();
+    // evtl. Code-Fences entfernen
+    s = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    if (s.startsWith('{') && /"text"\s*:/.test(s)) {
+        // 1) sauberes JSON
+        try {
+            const parsed = JSON.parse(s);
+            if (parsed && typeof parsed.text === 'string') return parsed.text;
+        } catch (_) { /* fällt unten auf Regex zurück */ }
+        // 2) Fallback: text-Feld bis zum abschließenden "} greifen (auch bei kaputtem JSON)
+        const m = s.match(/"text"\s*:\s*"([\s\S]*)"\s*\}?\s*$/);
+        if (m) {
+            return m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\').trim();
+        }
+    }
+    return s;
+}
+
 // Macht aus dem KI-Text einen durchgehenden Fließtext: Zeilenumbrüche und
 // Leerzeilen werden zu einem einzelnen Leerzeichen zusammengezogen.
 function ztNormalizeText(text) {
+    text = ztExtractApiText(text);
     if (!text) return '';
-    if (typeof text === 'object') text = text.text || '';
     return String(text).replace(/\s*\n\s*/g, ' ').replace(/[ \t]{2,}/g, ' ').trim();
 }
 
