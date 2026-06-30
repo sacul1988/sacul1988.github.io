@@ -720,6 +720,13 @@ function closeToolWindowOnBackdrop(event) {
     }
 }
 
+// Startseite-Button: führt IMMER zur Startseite (egal von wo, auch aus Tool-Fenstern)
+function goToStartseite() {
+    if (window._activeToolWindow) closeToolWindow({ resetScroll: false });
+    showPage('home');
+}
+window.goToStartseite = goToStartseite;
+
 function closeToolWindowBack() {
     // Wie der Browser-Zurück: denselben popstate-Pfad nehmen. Das schließt das
     // Overlay und stellt die Scroll-Position der darunterliegenden Seite

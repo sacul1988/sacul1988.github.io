@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=4.10">
+    <link rel="stylesheet" href="style.css?v=4.11">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -721,7 +721,7 @@
         <div id="tool-window-overlay" class="tool-window-overlay">
             <div class="tool-window">
                 <div class="tool-window-topbar">
-                    <button class="topbar-btn" type="button" title="Startseite" aria-label="Startseite" onclick="closeToolWindowBack();">
+                    <button class="topbar-btn" type="button" title="Startseite" aria-label="Startseite" onclick="goToStartseite();">
                         <i class="fas fa-home"></i>
                     </button>
                     <div class="tool-window-title" id="tool-window-title"></div>
@@ -2235,7 +2235,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=4.10"></script>
+    <script src="script.js?v=4.11"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
