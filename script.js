@@ -9637,10 +9637,34 @@ function loadTermine() {
         AppState.termine = [];
     }
 
+    pruneOldTermine();
+
     if (AppState.termine.length > 0 && !localStorage.getItem('extraDataLastUpdate')) {
         localStorage.setItem('extraDataLastUpdate', new Date().toISOString());
     }
 }
+
+// Entfernt abgelaufene Termine, die länger als KEEP_DAYS vorbei sind, damit der
+// Speicher nicht unbegrenzt wächst. Rein datumsbasiert -> jedes Gerät räumt
+// dieselben Termine auf, daher selbstheilend über die Cloud (keine Lösch-Liste nötig).
+function pruneOldTermine() {
+    if (!Array.isArray(AppState.termine) || AppState.termine.length === 0) return;
+    const KEEP_DAYS = 60; // ~2 Monate Puffer
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - KEEP_DAYS);
+    const cutoffStr = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`;
+    const before = AppState.termine.length;
+    // Bei mehrtägigen Terminen zählt das Enddatum
+    AppState.termine = AppState.termine.filter(t => !t.date || terminEndDate(t) >= cutoffStr);
+    if (AppState.termine.length !== before) {
+        localStorage.setItem('termine', JSON.stringify(AppState.termine));
+        // Cloud nachziehen, damit die alten Termine auch dort verschwinden
+        if (window.firebaseAuth && window.firebaseAuth.currentUser && typeof window.triggerCloudSyncDebounced === 'function') {
+            window.triggerCloudSyncDebounced(3000);
+        }
+    }
+}
+window.pruneOldTermine = pruneOldTermine;
 
 function saveTermine() {
     localStorage.setItem('termine', JSON.stringify(AppState.termine));

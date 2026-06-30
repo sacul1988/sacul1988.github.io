@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=4.08">
+    <link rel="stylesheet" href="style.css?v=4.09">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -1886,6 +1886,9 @@
 
                 localStorage.setItem('termine', JSON.stringify(merged));
                 if (window.AppState) window.AppState.termine = merged;
+                // Abgelaufene Termine (älter als ~2 Monate) gleich wieder ausräumen,
+                // damit sie nicht über die Cloud zurückkehren.
+                if (typeof window.pruneOldTermine === 'function') window.pruneOldTermine();
             }
 
             // planung_global_calendar_range per Timestamp-Vergleich (flaches Objekt,
@@ -2232,7 +2235,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=4.08"></script>
+    <script src="script.js?v=4.09"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
