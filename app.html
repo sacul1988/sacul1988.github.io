@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=4.03">
+    <link rel="stylesheet" href="style.css?v=4.04">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -1105,7 +1105,7 @@
                                 <input type="text" id="calendar-day-new-termin-title" class="form-control" placeholder="Terminbezeichnung" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addCalendarDayTermin(); }">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <label for="calendar-day-new-termin-enddate" style="font-size: 0.8rem; color: var(--grey-color); white-space: nowrap;">bis (mehrtägig, optional):</label>
-                                    <input type="date" id="calendar-day-new-termin-enddate" class="form-control" style="min-height: 36px; padding: 0.2rem 0.4rem;">
+                                    <input type="text" id="calendar-day-new-termin-enddate" class="form-control" placeholder="TT.MM.JJJJ" style="min-height: 36px; padding: 0.2rem 0.4rem;">
                                 </div>
                                 <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px;">
                                     <input type="time" id="calendar-day-new-termin-timestart" class="form-control" style="width: 80px; min-height: 36px; padding: 0.2rem 0.4rem; text-align: center;">
@@ -2232,7 +2232,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=4.03"></script>
+    <script src="script.js?v=4.04"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {

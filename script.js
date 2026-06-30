@@ -10711,6 +10711,44 @@ function formatTerminRange(t) {
     return fmt(t.date, false) + '–' + fmt(end, true);
 }
 
+// flatpickr für das "bis"-Enddatum (gleicher Kalender wie beim Zeitraum, größer als nativ)
+function ensureEndDatePicker() {
+    const el = document.getElementById('calendar-day-new-termin-enddate');
+    if (!el || typeof flatpickr === 'undefined') return null;
+    if (!el._flatpickr) {
+        const locale = (flatpickr.l10ns && flatpickr.l10ns.de) ? flatpickr.l10ns.de : 'de';
+        flatpickr(el, {
+            locale: locale,
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd.m.Y',
+            disableMobile: true,
+            // Popup mittig und über dem Modal anzeigen
+            onOpen: function(selectedDates, dateStr, instance) {
+                const cal = instance.calendarContainer;
+                cal.style.position = 'fixed';
+                cal.style.top = '50%';
+                cal.style.left = '50%';
+                cal.style.transform = 'translate(-50%, -50%)';
+                cal.style.zIndex = '2147483600';
+                cal.style.marginTop = '0';
+            }
+        });
+    }
+    return el._flatpickr;
+}
+// Enddatum-Wert setzen (über flatpickr, mit Fallback auf das Input-Feld)
+function setEndDatePickerValue(val) {
+    const fp = ensureEndDatePicker();
+    if (fp) { val ? fp.setDate(val, false) : fp.clear(); }
+    else { const el = document.getElementById('calendar-day-new-termin-enddate'); if (el) el.value = val || ''; }
+}
+// Frühestes wählbares Enddatum (= Startdatum des Termins)
+function setEndDatePickerMin(minStr) {
+    const fp = ensureEndDatePicker();
+    if (fp) fp.set('minDate', minStr || null);
+}
+
 function openCalendarDayDetails(dateStr) {
     if (activeModule !== 'planung' && window._activeToolWindow !== 'kalender') return;
     if (openCalendarDayDetails._busy) return;
@@ -10731,8 +10769,9 @@ function openCalendarDayDetails(dateStr) {
     const timeEndEl = document.getElementById('calendar-day-new-termin-timeend');
     if (timeStartEl) timeStartEl.value = '';
     if (timeEndEl) timeEndEl.value = '';
-    const endDateEl = document.getElementById('calendar-day-new-termin-enddate');
-    if (endDateEl) { endDateEl.value = ''; endDateEl.min = dateStr; }
+    ensureEndDatePicker();
+    setEndDatePickerMin(dateStr);
+    setEndDatePickerValue('');
 
     AppState.timeRangeStage = 1;
 
@@ -10830,7 +10869,7 @@ function addCalendarDayTermin() {
     titleInput.value = '';
     if (timeStartInput) timeStartInput.value = '';
     if (timeEndInput) timeEndInput.value = '';
-    if (endDateInput) endDateInput.value = '';
+    setEndDatePickerValue('');
     
     AppState.timeRangeStage = 1;
     
@@ -11112,11 +11151,9 @@ function editCalendarDayTermin(id) {
     if (titleInput) titleInput.value = termin.title || '';
     if (startInput) startInput.value = termin.timeStart || '';
     if (endInput) endInput.value = termin.timeEnd || '';
-    const endDateInput = document.getElementById('calendar-day-new-termin-enddate');
-    if (endDateInput) {
-        endDateInput.min = termin.date;
-        endDateInput.value = (terminEndDate(termin) !== termin.date) ? termin.endDate : '';
-    }
+    ensureEndDatePicker();
+    setEndDatePickerMin(termin.date);
+    setEndDatePickerValue((terminEndDate(termin) !== termin.date) ? termin.endDate : '');
 
     AppState.timeRangeStage = 1;
 
@@ -11154,8 +11191,7 @@ function cancelEditCalendarDayTermin() {
     if (titleInput) titleInput.value = '';
     if (startInput) startInput.value = '';
     if (endInput) endInput.value = '';
-    const endDateInput = document.getElementById('calendar-day-new-termin-enddate');
-    if (endDateInput) endDateInput.value = '';
+    setEndDatePickerValue('');
 
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
