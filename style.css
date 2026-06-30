@@ -4004,8 +4004,11 @@ html.modal-open, body.modal-open {
     .topbar-btn svg {
         font-size: 1.1rem;
     }
-    .topbar-tools { gap: 5px; transform: translateX(6px); }
+    .topbar-tools { gap: 5px; }
     .topbar-sep { margin: 0 4px; height: 26px; }
+    /* Kalender/Stundenplan/Adressbuch/Zeugnistexte/Sync näher an den "<"-Button rücken
+       (der "<" liegt im .topbar-more-wrap und bleibt stehen) */
+    .topbar-tools > .topbar-btn { position: relative; left: 8px; }
     .topbar-title { font-size: 1.2rem; }
 
     /* Tool-Window-Topbar: gleiche Abstände wie die App-Kopfzeile auf Mobile */
