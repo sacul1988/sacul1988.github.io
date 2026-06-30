@@ -1839,6 +1839,14 @@ html.login-active, body.login-active {
     .app-dialog-buttons .btn {
         width: 100%;
     }
+    /* Export-Auswahl: Karten sauber untereinander, Höhe nach Inhalt */
+    .export-choice-dialog .app-dialog-buttons {
+        flex-direction: column;
+    }
+    .export-choice-dialog .app-dialog-buttons .export-opt {
+        flex: 0 0 auto;
+        width: 100%;
+    }
     .zt-responsible-dialog .app-dialog-buttons {
         flex-direction: row;
     }
