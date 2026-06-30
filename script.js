@@ -3651,9 +3651,88 @@ document.addEventListener('DOMContentLoaded', function() {
 // ===== SCHÜLERLISTE MODUL =====
 
 // Schüler Modul rendern
+// ===== Schüler-Tab: Modus "Zählen" (temporär, lokal, nicht synchronisiert) =====
+let _schuelerMode = 'list';
+let _schuelerCount = {};            // index -> 'present' | 'absent'
+let _schuelerCountClassId = null;
+
+function setSchuelerMode(mode) {
+    _schuelerMode = mode;
+    const isCount = mode === 'count';
+    const listBtn = document.getElementById('schueler-list-mode-btn');
+    const countBtn = document.getElementById('schueler-count-mode-btn');
+    const listContainer = document.querySelector('#schueler-module .student-list-container');
+    const importCard = document.getElementById('schueler-import-card');
+    const countView = document.getElementById('schueler-count-view');
+    if (listBtn) listBtn.classList.toggle('active', !isCount);
+    if (countBtn) countBtn.classList.toggle('active', isCount);
+    if (listContainer) listContainer.style.display = isCount ? 'none' : '';
+    if (importCard) importCard.style.display = isCount ? 'none' : '';
+    if (countView) countView.style.display = isCount ? 'block' : 'none';
+    if (isCount) renderSchuelerCount();
+}
+window.setSchuelerMode = setSchuelerMode;
+
+function resetSchuelerCount() {
+    _schuelerCount = {};
+    renderSchuelerCount();
+}
+window.resetSchuelerCount = resetSchuelerCount;
+
+// Klick auf den Namen: anwesend an/aus (hebt ggf. "abwesend" auf)
+function toggleSchuelerPresent(index) {
+    _schuelerCount[index] = (_schuelerCount[index] === 'present') ? undefined : 'present';
+    if (!_schuelerCount[index]) delete _schuelerCount[index];
+    renderSchuelerCount();
+}
+window.toggleSchuelerPresent = toggleSchuelerPresent;
+
+// Kleiner Button rechts: abwesend an/aus (hebt ggf. "anwesend" auf)
+function toggleSchuelerAbsent(index, ev) {
+    if (ev) ev.stopPropagation();
+    _schuelerCount[index] = (_schuelerCount[index] === 'absent') ? undefined : 'absent';
+    if (!_schuelerCount[index]) delete _schuelerCount[index];
+    renderSchuelerCount();
+}
+window.toggleSchuelerAbsent = toggleSchuelerAbsent;
+
+function renderSchuelerCount() {
+    const listEl = document.getElementById('schueler-count-list');
+    const summaryEl = document.getElementById('schueler-count-summary');
+    if (!listEl) return;
+    const cls = classes[activeClassId];
+    const students = (cls && cls.students) ? cls.students : [];
+    let present = 0, absent = 0;
+    listEl.innerHTML = students.map((s, i) => {
+        const state = _schuelerCount[i];
+        if (state === 'present') present++;
+        if (state === 'absent') absent++;
+        const rowCls = 'schueler-count-row' + (state === 'present' ? ' present' : '') + (state === 'absent' ? ' absent' : '');
+        return `<div class="${rowCls}" onclick="toggleSchuelerPresent(${i})">
+            <span class="scr-num">${i + 1}</span>
+            <span class="scr-name">${escapeHtml(s.name)}</span>
+            <button class="scr-absent-btn${state === 'absent' ? ' active' : ''}" onclick="toggleSchuelerAbsent(${i}, event)" title="Als abwesend markieren">
+                <i class="fas fa-user-xmark"></i>
+            </button>
+        </div>`;
+    }).join('');
+    if (summaryEl) {
+        const denom = students.length - absent;
+        summaryEl.textContent = `Anwesend: ${present} / ${denom}` + (absent > 0 ? `  ·  Abwesend: ${absent}` : '');
+    }
+}
+
 function renderStudentsModule() {
     const studentsTable = safeGetElement('students-list-table');
     if (!studentsTable) return;
+
+    // Bei Klassenwechsel: Zähl-Status verwerfen, zurück in den Listen-Modus
+    if (_schuelerCountClassId !== activeClassId) {
+        _schuelerCount = {};
+        _schuelerMode = 'list';
+        _schuelerCountClassId = activeClassId;
+    }
+    setSchuelerMode(_schuelerMode);
     
     // Temporäres Fragment für flackerfreies Update
     const fragment = document.createDocumentFragment();

@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=4.11">
+    <link rel="stylesheet" href="style.css?v=4.12">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -351,7 +351,17 @@
 
                                 </div>
                             </div>
-                            
+
+                            <!-- Modus-Umschalter: Liste / Zählen -->
+                            <div class="schueler-controls">
+                                <button class="btn btn-primary btn-icon active" id="schueler-list-mode-btn" onclick="setSchuelerMode('list')">
+                                    <i class="fas fa-list"></i> <span class="btn-text">Liste</span>
+                                </button>
+                                <button class="btn btn-primary btn-icon" id="schueler-count-mode-btn" onclick="setSchuelerMode('count')">
+                                    <i class="fas fa-user-check"></i> <span class="btn-text">Zählen</span>
+                                </button>
+                            </div>
+
                             <div class="student-list-container">
                                 <table class="student-list-table">
                                     <thead>
@@ -368,9 +378,20 @@
                                     </tbody>
                                 </table>
                             </div>
-                            
+
+                            <!-- Zähl-Ansicht (anwesend/abwesend), nur im Modus "Zählen" sichtbar -->
+                            <div id="schueler-count-view" style="display: none;">
+                                <div class="schueler-count-bar">
+                                    <div class="schueler-count-summary" id="schueler-count-summary">Anwesend: 0 / 0</div>
+                                    <button class="btn btn-secondary btn-icon" onclick="resetSchuelerCount()">
+                                        <i class="fas fa-rotate-left"></i> <span class="btn-text">Zurücksetzen</span>
+                                    </button>
+                                </div>
+                                <div class="schueler-count-list" id="schueler-count-list"></div>
+                            </div>
+
                             <!-- Massenimport -->
-                            <div class="card" style="margin-top: 20px;">
+                            <div class="card" id="schueler-import-card" style="margin-top: 20px;">
                                 <div class="card-header">
                                     <h2>Schüler hinzufügen</h2>
                                 </div>
@@ -2235,7 +2256,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=4.11"></script>
+    <script src="script.js?v=4.12"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
