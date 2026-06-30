@@ -424,6 +424,9 @@ function showModule(module, shouldPushState = true) {
     // Sitzplan-Vollbild beim Tab-Wechsel sicher verlassen
     exitSitzplanFullscreen();
 
+    // Schüler-Tab immer im Listen-Modus öffnen (Standard)
+    if (module === 'schueler') _schuelerMode = 'list';
+
     // Beim Verlassen des Noten-Tabs alle Schüler einklappen
     if (activeModule === 'noten' && module !== 'noten') {
         collapseAllStudents();
