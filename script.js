@@ -7322,7 +7322,20 @@ function exportSitzplanAsJPEG() {
     // Ursprüngliche Größe des Workspace speichern
     const originalWidth = workspace.style.width;
     const originalHeight = workspace.style.height;
-    
+
+    // Gitter-Hintergrund, Rahmen und Clipping für den Export entfernen
+    const originalBgImage = workspace.style.backgroundImage;
+    const originalBorder = workspace.style.border;
+    const originalOverflow = workspace.style.overflow;
+    workspace.style.backgroundImage = 'none';
+    workspace.style.border = 'none';
+    workspace.style.overflow = 'visible';
+    const restoreWorkspaceChrome = () => {
+        workspace.style.backgroundImage = originalBgImage;
+        workspace.style.border = originalBorder;
+        workspace.style.overflow = originalOverflow;
+    };
+
     // Berechne die Bounding Box aller Tische
     const desks = workspace.querySelectorAll('.desk');
     
@@ -7392,6 +7405,7 @@ function exportSitzplanAsJPEG() {
                 });
             });
             
+            restoreWorkspaceChrome();
             // Button zurücksetzen
             if (exportBtn) exportBtn.innerHTML = originalText;
             if (exportBtn) exportBtn.disabled = false;
@@ -7413,6 +7427,7 @@ function exportSitzplanAsJPEG() {
                     }
                 });
             });
+            restoreWorkspaceChrome();
             if (exportBtn) exportBtn.innerHTML = originalText;
             if (exportBtn) exportBtn.disabled = false;
             swal("Export fehlgeschlagen", "Beim Exportieren ist ein Fehler aufgetreten", "error");
@@ -7434,8 +7449,8 @@ function exportSitzplanAsJPEG() {
         maxY = Math.max(maxY, y + height);
     });
     
-    // Füge etwas Padding hinzu
-    const padding = 20;
+    // Füge etwas Padding hinzu (großzügig, damit nichts abgeschnitten wird)
+    const padding = 30;
     const totalWidth = maxX - minX + padding * 2;
     const totalHeight = maxY - minY + padding * 2;
     
@@ -7489,9 +7504,10 @@ function exportSitzplanAsJPEG() {
             item.element.style.top = item.top;
         });
         
-        // Workspace-Größe zurücksetzen
+        // Workspace-Größe und Gitter/Rahmen zurücksetzen
         workspace.style.width = originalWidth;
         workspace.style.height = originalHeight;
+        restoreWorkspaceChrome();
         
         // Hintergrundfarben wiederherstellen
         originalBackgrounds.forEach(item => {
@@ -7523,9 +7539,10 @@ function exportSitzplanAsJPEG() {
             item.element.style.top = item.top;
         });
         
-        // Workspace-Größe zurücksetzen
+        // Workspace-Größe und Gitter/Rahmen zurücksetzen
         workspace.style.width = originalWidth;
         workspace.style.height = originalHeight;
+        restoreWorkspaceChrome();
         
         // Hintergrundfarben wiederherstellen
         originalBackgrounds.forEach(item => {
