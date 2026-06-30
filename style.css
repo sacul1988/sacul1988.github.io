@@ -2029,8 +2029,28 @@ html.login-active, body.login-active {
 /* Mobil: nur der Zurücksetzen-Button braucht eine Sonderregel (Text aus, reines Symbol).
    Die Modus-Buttons nutzen das Standard-Header-Styling wie der Export-Button. */
 @media (max-width: 599px) {
+    #schueler-reset-btn,
+    #schueler-reset-btn:hover,
+    #schueler-reset-btn:active,
+    #schueler-reset-btn:focus {
+        background: transparent !important;
+        background-color: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        transform: none !important;
+        transition: none !important;
+        color: var(--primary-color) !important;
+        padding: 0 !important;
+        min-width: 42px;
+    }
+    #schueler-reset-btn i,
+    #schueler-reset-btn:hover i,
+    #schueler-reset-btn:active i,
+    #schueler-reset-btn:focus i {
+        color: var(--primary-color) !important;
+        margin: 0 !important;
+    }
     #schueler-reset-btn .btn-text { display: none !important; }
-    #schueler-reset-btn { padding: 0 !important; min-width: 42px; }
 }
 
 /* Schüler-Tab: Zähl-Ansicht */
