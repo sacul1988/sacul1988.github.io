@@ -5044,31 +5044,45 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 .topbar-sep {
     display: none;
 }
-/* Kopfzeile: Archiv + Abmelden hinter dem "<"-Button – als Dropdown rechtsbündig,
-   damit auf schmalen Bildschirmen (iPhone) nichts über den Rand geschoben wird. */
+/* Kopfzeile: Archiv + Abmelden hinter dem "<"-Button.
+   Desktop: seitliches Ausfahren. Mobil: Dropdown rechtsbündig (kein Überlaufen am iPhone-Rand). */
 .topbar-tools { position: relative; }
 .topbar-more {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 6px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+    overflow: hidden;
+    max-width: 0;
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateX(8px);
     pointer-events: none;
-    transition: opacity 0.18s ease, transform 0.18s ease;
-    z-index: 1000;
+    transition: max-width 0.25s ease, opacity 0.2s ease, transform 0.25s ease;
 }
 .topbar-more.open {
+    max-width: 200px;
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
     pointer-events: auto;
+}
+
+@media (max-width: 599px) {
+    .topbar-more {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        max-width: none;
+        overflow: visible;
+        transform: translateY(-6px);
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 6px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+        z-index: 1000;
+    }
+    .topbar-more.open {
+        transform: translateY(0);
+    }
 }
 
 /* Sync-Status-Button: Symbol/Farbe spiegelt den Live-Zustand */
