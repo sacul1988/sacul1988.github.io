@@ -10751,8 +10751,10 @@ function setEndDatePickerMin(minStr) {
 // Voreinstellung: aktuelles Datum, aber nie vor dem Starttag (sonst gesperrt).
 // Da "Enddatum <= Starttag" als eintägig gilt, löst das keinen mehrtägigen Termin aus.
 function endDatePickerDefaultValue() {
-    const start = AppState.activeCalendarDay || todayStr;
-    return todayStr >= start ? todayStr : start;
+    const t = new Date();
+    const today = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+    const start = AppState.activeCalendarDay || today;
+    return today >= start ? today : start;
 }
 
 function openCalendarDayDetails(dateStr) {
