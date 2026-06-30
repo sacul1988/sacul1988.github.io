@@ -5044,22 +5044,30 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
 .topbar-sep {
     display: none;
 }
-/* Kopfzeile: Archiv + Abmelden hinter dem "<"-Button ausklappbar */
+/* Kopfzeile: Archiv + Abmelden hinter dem "<"-Button – als Dropdown rechtsbündig,
+   damit auf schmalen Bildschirmen (iPhone) nichts über den Rand geschoben wird. */
+.topbar-tools { position: relative; }
 .topbar-more {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
     display: flex;
     align-items: center;
     gap: 8px;
-    overflow: hidden;
-    max-width: 0;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
     opacity: 0;
-    transform: translateX(8px);
+    transform: translateY(-6px);
     pointer-events: none;
-    transition: max-width 0.25s ease, opacity 0.2s ease, transform 0.25s ease;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 1000;
 }
 .topbar-more.open {
-    max-width: 200px;
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
     pointer-events: auto;
 }
 
