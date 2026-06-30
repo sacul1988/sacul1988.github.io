@@ -7765,96 +7765,68 @@ function showExportStudentsModal() {
     showModal('export-students-modal');
 }
 
-// Schülerliste exportieren
+// Schülerliste exportieren – scharfe A4-Druckausgabe (druckbar / als PDF speicherbar)
 function exportStudentsList() {
-    const numColumns = parseInt(document.getElementById('num-columns').value);
-    
-    if (!classes[activeClassId] || !classes[activeClassId].students) {
-        alert('Keine Schüler vorhanden');
+    const numColumns = parseInt(document.getElementById('num-columns').value) || 0;
+
+    if (!classes[activeClassId] || !classes[activeClassId].students || classes[activeClassId].students.length === 0) {
+        swal('Hinweis', 'Keine Schüler vorhanden.', 'info');
         return;
     }
-    
+
     const students = classes[activeClassId].students;
-    const className = classes[activeClassId].name;
-    const exportTitle = document.getElementById('export-title').value.trim() || className;
-    const numStudents = students.length;
-    
-    // Dynamische Anpassung der Schriftgröße und Abstände, um die ganze Seite auszunutzen (optimiert für ~31 Schüler)
-    const fontSize = Math.max(12, Math.min(24, 500 / (numStudents + 5)));
-    const padding = Math.max(5, Math.min(15, 100 / (numStudents + 5)));
-    
-    // Erstelle Tabelle
-    let tableHtml = '<table border="1" style="border-collapse: collapse; width: auto;">';
-    
-    // Header
-    tableHtml += '<thead><tr>';
-    for (let i = 1; i <= numColumns + 1; i++) {
-        const header = i === 1 ? 'Name' : '';
-        tableHtml += `<th style="width: 150px; padding: ${padding}px; text-align: left;">${header}</th>`;
-    }
-    tableHtml += '</tr></thead>';
-    
-    // Body
-    tableHtml += '<tbody>';
-    students.forEach(student => {
-        tableHtml += '<tr>';
-        for (let i = 1; i <= numColumns + 1; i++) {
-            let value = '';
-            if (i === 1) {
-                value = student.name;
-            } else {
-                // Leere Spalten für zusätzliche Daten
-                value = '';
-            }
-            tableHtml += `<td style="width: 150px; padding: ${padding}px;">${value}</td>`;
-        }
-        tableHtml += '</tr>';
-    });
-    tableHtml += '</tbody></table>';
-    
-    // HTML für Export
-    const exportHtml = `
-        <div style="font-family: Arial, sans-serif; margin: 0; font-size: ${fontSize}px; padding: 20px;">
-            <h1>${exportTitle}</h1>
-            ${tableHtml}
-        </div>
+    const className = classes[activeClassId].name || '';
+    const exportTitle = (document.getElementById('export-title').value || '').trim() || className;
+    // Bei vielen Leerspalten automatisch Querformat, damit die Namen nicht gequetscht werden
+    const landscape = numColumns >= 4;
+
+    let headBlank = '';
+    let bodyBlank = '';
+    for (let i = 0; i < numColumns; i++) { headBlank += '<th class="blank"></th>'; bodyBlank += '<td class="blank"></td>'; }
+
+    const rows = students.map((s, i) =>
+        `<tr><td class="nr">${i + 1}</td><td class="nm">${escapeHtml(s.name)}</td>${bodyBlank}</tr>`
+    ).join('');
+
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>${escapeHtml(exportTitle)}</title>
+            <style>
+                @page { size: A4 ${landscape ? 'landscape' : 'portrait'}; margin: 1cm 1.2cm; }
+                * { box-sizing: border-box; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; margin: 0; }
+                h1 { font-size: 18px; margin: 0 0 10px; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #94a3b8; padding: 6px 10px; font-size: 14px; line-height: 1.25;
+                         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                th { background: #e2e8f0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #475569; text-align: left; }
+                td.nr, th.nr { width: 34px; text-align: center; color: #64748b; }
+                td.nm { font-weight: 600; white-space: nowrap; }
+                td.blank, th.blank { width: ${landscape ? 60 : 40}px; }
+                tbody tr:nth-child(even) td { background: #f1f5f9; }
+                tr { page-break-inside: avoid; }
+            </style>
+        </head>
+        <body>
+            <h1>${escapeHtml(exportTitle)}</h1>
+            <table>
+                <thead><tr><th class="nr">Nr.</th><th class="nm">Name</th>${headBlank}</tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </body>
+        </html>
     `;
-    
-    // Temporäres Element erstellen
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = exportHtml;
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.top = '-9999px';
-    document.body.appendChild(tempDiv);
-    
-    // Verwende html2canvas, um das Element als Bild zu rendern
-    html2canvas(tempDiv, {
-        scale: 2, // Höhere Auflösung für besseres JPEG
-        useCORS: true,
-        allowTaint: false
-    }).then(canvas => {
-        // Canvas in JPEG konvertieren
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        
-        // Download-Link erstellen
-        const link = document.createElement('a');
-        link.href = imgData;
-        link.download = `${exportTitle.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Temporäres Element entfernen
-        document.body.removeChild(tempDiv);
-        
-        hideModal();
-    }).catch(error => {
-        console.error('Fehler beim Exportieren:', error);
-        alert('Fehler beim Exportieren der Tabelle als JPEG.');
-        document.body.removeChild(tempDiv);
-        hideModal();
-    });
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) { swal('Hinweis', 'Bitte Popup-Blocker deaktivieren um zu exportieren.', 'info'); return; }
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    hideModal();
 }
 
 // ===== NOTEN EXPORT =====
