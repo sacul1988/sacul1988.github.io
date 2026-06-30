@@ -5045,8 +5045,13 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     display: none;
 }
 /* Kopfzeile: Archiv + Abmelden hinter dem "<"-Button.
-   Desktop: seitliches Ausfahren. Mobil: Dropdown rechtsbündig (kein Überlaufen am iPhone-Rand). */
-.topbar-tools { position: relative; }
+   Desktop: seitliches Ausfahren. Mobil: Dropdown rechtsbündig (kein Überlaufen am iPhone-Rand).
+   Toggle + Bereich liegen in einem Wrapper -> der absolute Dropdown reserviert keine Flex-Lücke. */
+.topbar-more-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
 .topbar-more {
     display: flex;
     align-items: center;
@@ -5062,6 +5067,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     max-width: 200px;
     opacity: 1;
     transform: translateX(0);
+    margin-left: 8px;
     pointer-events: auto;
 }
 
@@ -5072,6 +5078,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
         right: 0;
         max-width: none;
         overflow: visible;
+        margin-left: 0;
         transform: translateY(-6px);
         background: #fff;
         border: 1px solid var(--border-color);
@@ -5082,6 +5089,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     }
     .topbar-more.open {
         transform: translateY(0);
+        margin-left: 0;
     }
 }
 

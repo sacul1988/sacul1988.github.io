@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=4.33">
+    <link rel="stylesheet" href="style.css?v=4.34">
     
     <!-- PWA (WebApp) iOS & Android Support -->
     <link rel="icon" href="favicon.ico">
@@ -252,17 +252,19 @@
                 <button class="topbar-btn sync-btn" type="button" id="sync-status-circle" data-state="synced" title="Synchronisierung" aria-label="Synchronisierung" onclick="openSyncModal()">
                     <span id="sync-status-icon"><i class="fas fa-circle-check"></i></span>
                 </button>
-                <button class="topbar-btn topbar-more-toggle" type="button" id="topbar-more-toggle" title="Mehr anzeigen" aria-label="Mehr anzeigen" onclick="toggleTopbarMore()">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <div class="topbar-more" id="topbar-more">
-                    <button class="topbar-btn" type="button" title="Halbjahr archivieren oder altes Archiv ansehen" aria-label="Halbjahr-Archiv" onclick="openHalbjahrArchive()">
-                        <i class="fas fa-box-archive"></i>
+                <span class="topbar-more-wrap">
+                    <button class="topbar-btn topbar-more-toggle" type="button" id="topbar-more-toggle" title="Mehr anzeigen" aria-label="Mehr anzeigen" onclick="toggleTopbarMore()">
+                        <i class="fas fa-chevron-left"></i>
                     </button>
-                    <button class="topbar-btn logout-btn" type="button" title="Abmelden" aria-label="Abmelden" onclick="confirmLogout()">
-                        <i class="fas fa-right-from-bracket"></i>
-                    </button>
-                </div>
+                    <div class="topbar-more" id="topbar-more">
+                        <button class="topbar-btn" type="button" title="Halbjahr archivieren oder altes Archiv ansehen" aria-label="Halbjahr-Archiv" onclick="openHalbjahrArchive()">
+                            <i class="fas fa-box-archive"></i>
+                        </button>
+                        <button class="topbar-btn logout-btn" type="button" title="Abmelden" aria-label="Abmelden" onclick="confirmLogout()">
+                            <i class="fas fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                </span>
             </div>
             <script>
                 // Zeigt die globalen Werkzeug-Buttons sofort an, wenn der Nutzer angemeldet ist
@@ -2257,7 +2259,7 @@
     <div id="time-minutes-popover" class="time-minutes-popover" style="display: none; position: absolute; z-index: 10005;"></div>
 
     <script src="grades.js"></script>
-    <script src="script.js?v=4.33"></script>
+    <script src="script.js?v=4.34"></script>
     <script>
         if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
