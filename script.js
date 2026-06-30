@@ -3673,8 +3673,11 @@ function setSchuelerMode(mode) {
 }
 window.setSchuelerMode = setSchuelerMode;
 
+// Nur Anwesende zurücksetzen; als abwesend markierte Schüler bleiben unberührt
 function resetSchuelerCount() {
-    _schuelerCount = {};
+    Object.keys(_schuelerCount).forEach(k => {
+        if (_schuelerCount[k] === 'present') delete _schuelerCount[k];
+    });
     renderSchuelerCount();
 }
 window.resetSchuelerCount = resetSchuelerCount;
