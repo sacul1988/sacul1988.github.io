@@ -5042,12 +5042,7 @@ textarea.zt-refine-input { resize: vertical; min-height: 48px; }
     flex-shrink: 0;
 }
 .topbar-sep {
-    width: 2px;
-    height: 30px;
-    background: #94a3b8;
-    border-radius: 1px;
-    margin: 0 8px;
-    flex-shrink: 0;
+    display: none;
 }
 
 /* Sync-Status-Button: Symbol/Farbe spiegelt den Live-Zustand */
