@@ -243,7 +243,13 @@ Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt (ohne \`\`\`json Markierung, ohn
         }
       }
     } catch (e) {
-      console.error("JSON parsing failed, falling back to raw text:", e);
+      console.error("JSON parsing failed, trying text-field extraction:", e);
+      // Fallback bei kaputtem JSON (z. B. unescapte Anführungszeichen im Text):
+      // nur das "text"-Feld herausziehen statt das rohe JSON zurückzugeben.
+      const m = rawText.match(/"text"\s*:\s*"([\s\S]*)"\s*\}?\s*$/);
+      if (m) {
+        result = { text: m[1].replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\\\/g, "\\").trim() };
+      }
     }
 
     // Backend-Wortzahl-Prüfung: zu kurze Texte automatisch verlängern
