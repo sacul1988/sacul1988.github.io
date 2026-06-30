@@ -4004,7 +4004,7 @@ html.modal-open, body.modal-open {
     .topbar-btn svg {
         font-size: 1.1rem;
     }
-    .topbar-tools { gap: 5px; }
+    .topbar-tools { gap: 5px; transform: translateX(6px); }
     .topbar-sep { margin: 0 4px; height: 26px; }
     .topbar-title { font-size: 1.2rem; }
 
