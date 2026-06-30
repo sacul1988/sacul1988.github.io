@@ -3714,9 +3714,9 @@ function renderSchuelerCount() {
         if (state === 'present') present++;
         if (state === 'absent') absent++;
         const rowCls = 'schueler-count-row' + (state === 'present' ? ' present' : '') + (state === 'absent' ? ' absent' : '');
-        return `<div class="${rowCls}" onclick="toggleSchuelerPresent(${i})">
+        return `<div class="${rowCls}">
             <span class="scr-num">${i + 1}</span>
-            <span class="scr-name">${escapeHtml(s.name)}</span>
+            <span class="scr-name" onclick="toggleSchuelerPresent(${i})">${escapeHtml(s.name)}</span>
             <button class="scr-absent-btn${state === 'absent' ? ' active' : ''}" onclick="toggleSchuelerAbsent(${i}, event)" title="Als abwesend markieren">
                 <i class="fas fa-user-xmark"></i>
             </button>

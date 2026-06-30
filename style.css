@@ -2063,12 +2063,16 @@ html.login-active, body.login-active {
 .schueler-count-row {
     display: flex; align-items: center; gap: 12px;
     padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 10px;
-    background: #fff; cursor: pointer; user-select: none;
+    background: #fff; user-select: none;
     transition: background 0.12s ease, border-color 0.12s ease;
 }
-.schueler-count-row:hover { border-color: var(--primary-color); }
 .schueler-count-row .scr-num { color: var(--grey-color); font-size: 0.85rem; min-width: 22px; }
-.schueler-count-row .scr-name { flex: 1; font-weight: 600; color: var(--dark-color); }
+/* Nur der Name ist klickbar (damit man beim Scrollen niemanden versehentlich antippt) */
+.schueler-count-row .scr-name {
+    flex: 0 1 auto; margin-right: auto; font-weight: 600; color: var(--dark-color);
+    cursor: pointer; padding: 4px 2px;
+}
+.schueler-count-row .scr-name:hover { color: var(--primary-color); }
 .schueler-count-row.present { background: rgba(67, 97, 238, 0.12); border-color: var(--primary-color); }
 .schueler-count-row.absent { background: #f1f5f9; opacity: 0.65; }
 .schueler-count-row.absent .scr-name { text-decoration: line-through; color: var(--grey-color); }
