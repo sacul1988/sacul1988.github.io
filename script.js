@@ -7799,13 +7799,14 @@ function exportStudentsList() {
                 * { box-sizing: border-box; }
                 body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; margin: 0; }
                 h1 { font-size: 18px; margin: 0 0 10px; }
-                table { width: 100%; border-collapse: collapse; }
+                table { width: ${numColumns > 0 ? '100%' : 'auto'}; border-collapse: collapse; }
                 th, td { border: 1px solid #94a3b8; padding: 6px 10px; font-size: 14px; line-height: 1.25;
                          -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                 th { background: #e2e8f0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #475569; text-align: left; }
                 td.nr, th.nr { width: 34px; text-align: center; color: #64748b; }
-                td.nm { font-weight: 600; white-space: nowrap; }
-                td.blank, th.blank { width: ${landscape ? 60 : 40}px; }
+                /* Name nur so breit wie der Inhalt; die Leerspalten teilen sich den Rest */
+                td.nm, th.nm { white-space: nowrap; width: 1%; }
+                td.nm { font-weight: 600; }
                 tbody tr:nth-child(even) td { background: #f1f5f9; }
                 tr { page-break-inside: avoid; }
             </style>
