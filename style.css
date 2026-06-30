@@ -2003,6 +2003,7 @@ html.login-active, body.login-active {
 #schueler-list-mode-btn:not(.active):hover,
 #schueler-count-mode-btn:not(.active):hover {
     background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
     color: #fff !important;
 }
 #schueler-list-mode-btn:not(.active):hover i,
