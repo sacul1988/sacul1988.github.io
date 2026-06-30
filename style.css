@@ -2151,7 +2151,7 @@ html.login-active, body.login-active {
 
 #sitzplan-module .evaluation-mode .desk {
     cursor: pointer;
-    background-color: rgba(148, 163, 184, 0.18); /* Dezentes Grau für Material */
+    background-color: rgba(67, 97, 238, 0.12); /* Dezentes Blau für Material */
 }
 
 #sitzplan-module .desk.selected {
@@ -2379,7 +2379,7 @@ html.login-active, body.login-active {
 /* Notiz-Modus */
 #sitzplan-module .note-mode .desk {
     cursor: pointer;
-    background-color: rgba(67, 97, 238, 0.12); /* Dezentes Blau */
+    background-color: rgba(250, 204, 21, 0.20); /* Dezentes Gelb für Notiz */
 }
 #sitzplan-module .note-mode .desk:hover {
     transform: scale(1.02);
@@ -2388,7 +2388,7 @@ html.login-active, body.login-active {
 
 /* Bearbeiten-Modus */
 #sitzplan-module .edit-mode .desk {
-    background-color: rgba(250, 204, 21, 0.20); /* Dezentes Gelb zum Bearbeiten */
+    background-color: rgba(255, 255, 255, 0.6); /* Transparentes Weiß zum Bearbeiten */
 }
 
 /* Notiz-Modal (Sitzplan → Notiz-Modus) */
