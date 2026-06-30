@@ -723,6 +723,21 @@ function closeToolWindowOnBackdrop(event) {
     }
 }
 
+// Kopfzeile: Archiv + Abmelden hinter dem "<"-Button ein-/ausklappen
+function toggleTopbarMore() {
+    const more = document.getElementById('topbar-more');
+    const toggle = document.getElementById('topbar-more-toggle');
+    if (!more) return;
+    const open = more.classList.toggle('open');
+    if (toggle) {
+        const ic = toggle.querySelector('i');
+        if (ic) ic.className = open ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+        toggle.setAttribute('aria-label', open ? 'Weniger anzeigen' : 'Mehr anzeigen');
+        toggle.title = open ? 'Weniger anzeigen' : 'Mehr anzeigen';
+    }
+}
+window.toggleTopbarMore = toggleTopbarMore;
+
 // Startseite-Button: führt IMMER zur Startseite (egal von wo, auch aus Tool-Fenstern)
 function goToStartseite() {
     if (window._activeToolWindow) closeToolWindow({ resetScroll: false });
