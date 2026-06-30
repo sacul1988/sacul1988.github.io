@@ -7853,80 +7853,60 @@ function exportGrades() {
         }
     });
     const projectNames = Array.from(allProjects).sort();
-    
-    const numStudents = students.length;
-    
-    // Dynamische Anpassung der Schriftgröße und Abstände, um die ganze Seite auszunutzen (optimiert für ~31 Schüler)
-    const fontSize = Math.max(10, Math.min(16, 400 / (numStudents + 5)));
-    const padding = Math.max(4, Math.min(8, 60 / (numStudents + 5)));
-    
-    // Erstelle Tabelle
-    let tableHtml = '<table border="1" style="border-collapse: collapse; width: auto;">';
-    
-    // Header
-    tableHtml += '<thead><tr>';
-    tableHtml += `<th style="width: 200px; padding: ${padding}px; text-align: left; background-color: #f2f2f2;">Schüler</th>`;
-    projectNames.forEach(name => {
-        tableHtml += `<th style="width: 120px; padding: ${padding}px; text-align: center; background-color: #f2f2f2;">${name}</th>`;
-    });
-    tableHtml += '</tr></thead>';
-    
-    // Body
-    tableHtml += '<tbody>';
-    students.forEach(student => {
-        tableHtml += '<tr>';
-        tableHtml += `<td style="width: 200px; padding: ${padding}px;">${escapeHtml(student.name)}</td>`;
-        
-        projectNames.forEach(projectName => {
+
+    // Bei vielen Projektspalten automatisch Querformat
+    const landscape = projectNames.length >= 4;
+
+    const headProjects = projectNames.map(n => `<th class="pj">${escapeHtml(n)}</th>`).join('');
+    const rows = students.map((student, i) => {
+        const cells = projectNames.map(projectName => {
             const project = student.projects ? student.projects.find(p => p.name && p.name.trim() === projectName) : null;
-            const grade = project && project.grade ? project.grade : '';
-            tableHtml += `<td style="width: 120px; padding: ${padding}px; text-align: center;">${grade}</td>`;
-        });
-        
-        tableHtml += '</tr>';
-    });
-    tableHtml += '</tbody></table>';
-    
-    // HTML für Export
-    const exportHtml = `
-        <div style="font-family: Arial, sans-serif; margin: 0; font-size: ${fontSize}px; padding: 20px;">
-            <h1 style="font-size: ${fontSize + 4}px; margin-bottom: 10px;">Noten - ${className}</h1>
-            ${tableHtml}
-        </div>
+            const grade = (project && project.grade) ? project.grade : '';
+            return `<td class="pj">${escapeHtml(grade)}</td>`;
+        }).join('');
+        return `<tr><td class="nr">${i + 1}</td><td class="nm">${escapeHtml(student.name)}</td>${cells}</tr>`;
+    }).join('');
+
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Noten – ${escapeHtml(className)}</title>
+            <style>
+                @page { size: A4 ${landscape ? 'landscape' : 'portrait'}; margin: 1cm 1.2cm; }
+                * { box-sizing: border-box; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; margin: 0; }
+                h1 { font-size: 18px; margin: 0 0 10px; }
+                table { width: ${projectNames.length > 0 ? '100%' : 'auto'}; border-collapse: collapse; }
+                th, td { border: 1px solid #94a3b8; padding: 6px 10px; font-size: 14px; line-height: 1.25;
+                         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                th { background: #e2e8f0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #475569; text-align: left; }
+                td.nr, th.nr { width: 34px; text-align: center; color: #64748b; }
+                td.nm, th.nm { white-space: nowrap; width: 1%; }
+                td.nm { font-weight: 600; }
+                td.pj, th.pj { text-align: center; }
+                td.pj { font-weight: 600; }
+                tbody tr:nth-child(even) td { background: #f1f5f9; }
+                tr { page-break-inside: avoid; }
+            </style>
+        </head>
+        <body>
+            <h1>Noten – ${escapeHtml(className)}</h1>
+            <table>
+                <thead><tr><th class="nr">Nr.</th><th class="nm">Name</th>${headProjects}</tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </body>
+        </html>
     `;
-    
-    // Temporäres Element erstellen
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = exportHtml;
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.top = '-9999px';
-    document.body.appendChild(tempDiv);
-    
-    // Verwende html2canvas, um das Element als Bild zu rendern
-    html2canvas(tempDiv, {
-        scale: 2, // Höhere Auflösung für besseres JPEG
-        useCORS: true,
-        allowTaint: false
-    }).then(canvas => {
-        // Canvas in JPEG konvertieren
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        
-        // Download-Link erstellen
-        const link = document.createElement('a');
-        link.href = imgData;
-        link.download = `Noten_${className.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Temporäres Element entfernen
-        document.body.removeChild(tempDiv);
-    }).catch(error => {
-        console.error('Fehler beim Exportieren:', error);
-        alert('Fehler beim Exportieren der Noten als JPEG.');
-        document.body.removeChild(tempDiv);
-    });
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) { swal('Hinweis', 'Bitte Popup-Blocker deaktivieren um zu exportieren.', 'info'); return; }
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
 }
 
 // ===== ZEUGNIS MODUL =====
