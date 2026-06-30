@@ -10648,13 +10648,18 @@ function renderPlanungCalendar() {
                 if (isToday) rowClasses.push('today');
                 // Termine sammeln (alle Termine des Tages, keine Ausblendung im Kalender)
                 const termine = AppState.termine || [];
-                const dayTermine = termine.filter(t => t.date === dateStr);
-                
-                // HTML für Termine
+                const dayTermine = termine.filter(t => terminCoversDate(t, dateStr));
+
+                // HTML für Termine (mehrtägige bekommen eine eigene Markierung)
                 let appointmentsHtml = '';
                 if (dayTermine.length > 0) {
-                    appointmentsHtml = `<div class="calendar-day-appointments">` + 
-                        dayTermine.map(t => `<span class="calendar-day-appointment-badge" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</span>`).join('') + 
+                    appointmentsHtml = `<div class="calendar-day-appointments">` +
+                        dayTermine.map(t => {
+                            const multi = terminEndDate(t) !== t.date;
+                            const cls = 'calendar-day-appointment-badge' + (multi ? ' calendar-day-appointment-badge-multi' : '');
+                            const titleAttr = multi ? `${escapeHtml(t.title || '')} (${formatTerminRange(t)})` : escapeHtml(t.title || '');
+                            return `<span class="${cls}" title="${titleAttr}">${escapeHtml(t.title || '')}</span>`;
+                        }).join('') +
                         `</div>`;
                 }
                 
@@ -10689,6 +10694,23 @@ function renderPlanungCalendar() {
     `;
 }
 
+// Enddatum eines (ggf. mehrtägigen) Termins; ohne endDate = eintägig.
+function terminEndDate(t) {
+    return (t.endDate && t.endDate > t.date) ? t.endDate : t.date;
+}
+// Deckt der Termin den angegebenen Tag ab (Start..Ende inklusive)?
+function terminCoversDate(t, dateStr) {
+    return dateStr >= t.date && dateStr <= terminEndDate(t);
+}
+// Anzeige eines Datumsbereichs als TT.MM.–TT.MM.JJJJ
+function formatTerminRange(t) {
+    const fmt = (ds, withYear) => new Date(ds + 'T00:00:00').toLocaleDateString('de-DE',
+        withYear ? { day: '2-digit', month: '2-digit', year: 'numeric' } : { day: '2-digit', month: '2-digit' });
+    const end = terminEndDate(t);
+    if (end === t.date) return fmt(t.date, true);
+    return fmt(t.date, false) + '–' + fmt(end, true);
+}
+
 function openCalendarDayDetails(dateStr) {
     if (activeModule !== 'planung' && window._activeToolWindow !== 'kalender') return;
     if (openCalendarDayDetails._busy) return;
@@ -10709,6 +10731,8 @@ function openCalendarDayDetails(dateStr) {
     const timeEndEl = document.getElementById('calendar-day-new-termin-timeend');
     if (timeStartEl) timeStartEl.value = '';
     if (timeEndEl) timeEndEl.value = '';
+    const endDateEl = document.getElementById('calendar-day-new-termin-enddate');
+    if (endDateEl) { endDateEl.value = ''; endDateEl.min = dateStr; }
 
     AppState.timeRangeStage = 1;
 
@@ -10724,18 +10748,19 @@ function renderCalendarDayTermineList(dateStr) {
     const listContainer = document.getElementById('calendar-day-termine-list');
     if (!listContainer) return;
     
-    const dayTermine = (AppState.termine || []).filter(t => t.date === dateStr);
-    
+    const dayTermine = (AppState.termine || []).filter(t => terminCoversDate(t, dateStr));
+
     if (dayTermine.length === 0) {
         listContainer.innerHTML = '<p style="color: var(--grey-color); font-size: 0.88rem; margin: 0; padding: 4px 0;">Keine Termine für diesen Tag.</p>';
     } else {
         listContainer.innerHTML = dayTermine.map(t => {
             const timeDisplay = t.timeStart ? ` <span style="font-weight: 500; font-size: 0.85rem; color: #64748b; margin-right: 6px;">(${t.timeStart}${t.timeEnd ? ' - ' + t.timeEnd : ''})</span>` : '';
+            const rangeDisplay = (terminEndDate(t) !== t.date) ? ` <span style="font-weight: 500; font-size: 0.8rem; color: #2563eb; margin-left: 6px;">📅 ${formatTerminRange(t)}</span>` : '';
             const isEditing = AppState.editingCalendarDayTerminId === t.id;
             const itemStyle = isEditing ? 'background: #eff6ff; border-color: #3b82f6;' : '';
             return `
                 <div class="calendar-modal-termin-item" style="${itemStyle}">
-                    <span>${timeDisplay}${escapeHtml(t.title || '')}</span>
+                    <span>${timeDisplay}${escapeHtml(t.title || '')}${rangeDisplay}</span>
                     <div style="display: flex; gap: 4px;">
                         <button class="btn btn-sm btn-primary btn-circle" onclick="editCalendarDayTermin('${t.id}')" title="Diesen Termin bearbeiten">
                             <i class="fas fa-edit"></i>
@@ -10761,33 +10786,51 @@ function addCalendarDayTermin() {
     const timeEndInput = document.getElementById('calendar-day-new-termin-timeend');
     const timeStart = timeStartInput ? timeStartInput.value : '';
     const timeEnd = timeEndInput ? timeEndInput.value : '';
-    
+
+    const endDateInput = document.getElementById('calendar-day-new-termin-enddate');
+    const endDateRaw = endDateInput ? endDateInput.value : '';
+
     if (!title) {
         swal('Fehler', 'Bitte eine Bezeichnung eingeben', 'error');
         return;
     }
-    
+
     if (!AppState.termine) AppState.termine = [];
-    
+
     if (AppState.editingCalendarDayTerminId) {
         // Bestehenden Termin bearbeiten
         const idx = AppState.termine.findIndex(t => t.id === AppState.editingCalendarDayTerminId);
         if (idx !== -1) {
+            const startDate = AppState.termine[idx].date;
+            // Enddatum nur übernehmen, wenn es NACH dem Startdatum liegt; sonst eintägig
+            if (endDateRaw && endDateRaw < startDate) {
+                swal('Fehler', 'Das Enddatum darf nicht vor dem Startdatum liegen.', 'error');
+                return;
+            }
             AppState.termine[idx].title = title;
             AppState.termine[idx].timeStart = timeStart;
             AppState.termine[idx].timeEnd = timeEnd;
+            if (endDateRaw && endDateRaw > startDate) AppState.termine[idx].endDate = endDateRaw;
+            else delete AppState.termine[idx].endDate;
         }
         AppState.editingCalendarDayTerminId = null;
     } else {
-        // Neuen Termin hinzufügen
+        // Neuen Termin hinzufügen (ggf. mehrtägig)
+        if (endDateRaw && endDateRaw < dateStr) {
+            swal('Fehler', 'Das Enddatum darf nicht vor dem Startdatum liegen.', 'error');
+            return;
+        }
         const newId = Date.now().toString();
-        AppState.termine.push({ id: newId, title: title, date: dateStr, timeStart: timeStart, timeEnd: timeEnd });
+        const termin = { id: newId, title: title, date: dateStr, timeStart: timeStart, timeEnd: timeEnd };
+        if (endDateRaw && endDateRaw > dateStr) termin.endDate = endDateRaw;
+        AppState.termine.push(termin);
     }
-    
+
     saveTermine();
     titleInput.value = '';
     if (timeStartInput) timeStartInput.value = '';
     if (timeEndInput) timeEndInput.value = '';
+    if (endDateInput) endDateInput.value = '';
     
     AppState.timeRangeStage = 1;
     
@@ -11069,6 +11112,11 @@ function editCalendarDayTermin(id) {
     if (titleInput) titleInput.value = termin.title || '';
     if (startInput) startInput.value = termin.timeStart || '';
     if (endInput) endInput.value = termin.timeEnd || '';
+    const endDateInput = document.getElementById('calendar-day-new-termin-enddate');
+    if (endDateInput) {
+        endDateInput.min = termin.date;
+        endDateInput.value = (terminEndDate(termin) !== termin.date) ? termin.endDate : '';
+    }
 
     AppState.timeRangeStage = 1;
 
@@ -11106,6 +11154,8 @@ function cancelEditCalendarDayTermin() {
     if (titleInput) titleInput.value = '';
     if (startInput) startInput.value = '';
     if (endInput) endInput.value = '';
+    const endDateInput = document.getElementById('calendar-day-new-termin-enddate');
+    if (endDateInput) endDateInput.value = '';
 
     renderCalendarDayTermineList(AppState.activeCalendarDay);
     updateCalendarDayFormUI();
