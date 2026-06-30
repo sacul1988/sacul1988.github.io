@@ -7330,10 +7330,16 @@ function exportSitzplanAsJPEG() {
     workspace.style.backgroundImage = 'none';
     workspace.style.border = 'none';
     workspace.style.overflow = 'visible';
+    // Pan-Versatz (verschiebbarer Sitzplan) für den Export auf 0 setzen, sonst
+    // sind die Tische verschoben und werden am Rand abgeschnitten.
+    const panEl = document.getElementById('workspace-pan');
+    const originalPanTransform = panEl ? panEl.style.transform : '';
+    if (panEl) panEl.style.transform = 'translate(0px, 0px)';
     const restoreWorkspaceChrome = () => {
         workspace.style.backgroundImage = originalBgImage;
         workspace.style.border = originalBorder;
         workspace.style.overflow = originalOverflow;
+        if (panEl) panEl.style.transform = originalPanTransform;
     };
 
     // Berechne die Bounding Box aller Tische
