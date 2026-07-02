@@ -3680,10 +3680,29 @@ document.addEventListener('DOMContentLoaded', function() {
 // ===== SCHÜLERLISTE MODUL =====
 
 // Schüler Modul rendern
-// ===== Schüler-Tab: Modus "Zählen" (temporär, lokal, nicht synchronisiert) =====
+// ===== Schüler-Tab: Modus "Zählen" (lokal im localStorage, pro Klasse, nicht synchronisiert) =====
 let _schuelerMode = 'list';
 let _schuelerCount = {};            // index -> 'present' | 'absent'
 let _schuelerCountClassId = null;
+
+// Zähl-Status pro Klasse lokal speichern/laden (kein Cloud-Sync)
+function _schuelerCountLoad() {
+    try {
+        const all = JSON.parse(localStorage.getItem('schuelerCount') || '{}');
+        return all[activeClassId] || {};
+    } catch (e) { return {}; }
+}
+function _schuelerCountSave() {
+    try {
+        const all = JSON.parse(localStorage.getItem('schuelerCount') || '{}');
+        if (_schuelerCount && Object.keys(_schuelerCount).length > 0) {
+            all[activeClassId] = _schuelerCount;
+        } else {
+            delete all[activeClassId];
+        }
+        localStorage.setItem('schuelerCount', JSON.stringify(all));
+    } catch (e) {}
+}
 
 function setSchuelerMode(mode) {
     _schuelerMode = mode;
@@ -3707,6 +3726,7 @@ function resetSchuelerCount() {
     Object.keys(_schuelerCount).forEach(k => {
         if (_schuelerCount[k] === 'present') delete _schuelerCount[k];
     });
+    _schuelerCountSave();
     renderSchuelerCount();
 }
 window.resetSchuelerCount = resetSchuelerCount;
@@ -3715,6 +3735,7 @@ window.resetSchuelerCount = resetSchuelerCount;
 function toggleSchuelerPresent(index) {
     _schuelerCount[index] = (_schuelerCount[index] === 'present') ? undefined : 'present';
     if (!_schuelerCount[index]) delete _schuelerCount[index];
+    _schuelerCountSave();
     renderSchuelerCount();
 }
 window.toggleSchuelerPresent = toggleSchuelerPresent;
@@ -3724,6 +3745,7 @@ function toggleSchuelerAbsent(index, ev) {
     if (ev) ev.stopPropagation();
     _schuelerCount[index] = (_schuelerCount[index] === 'absent') ? undefined : 'absent';
     if (!_schuelerCount[index]) delete _schuelerCount[index];
+    _schuelerCountSave();
     renderSchuelerCount();
 }
 window.toggleSchuelerAbsent = toggleSchuelerAbsent;
@@ -3758,12 +3780,12 @@ function renderStudentsModule() {
     const studentsTable = safeGetElement('students-list-table');
     if (!studentsTable) return;
 
-    // Bei Klassenwechsel: Zähl-Status verwerfen, zurück in den Listen-Modus
+    // Bei Klassenwechsel zurück in den Listen-Modus; Zähl-Status pro Klasse aus dem localStorage laden
     if (_schuelerCountClassId !== activeClassId) {
-        _schuelerCount = {};
         _schuelerMode = 'list';
         _schuelerCountClassId = activeClassId;
     }
+    _schuelerCount = _schuelerCountLoad();
     setSchuelerMode(_schuelerMode);
     
     // Temporäres Fragment für flackerfreies Update
